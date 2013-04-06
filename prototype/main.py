@@ -9,10 +9,7 @@ from random import random, choice
 
 class Game:
     def __init__(self):
-        self.width = 1080 #540
-        self.height = 840 #420
-
-        self.display = pygame.display.set_mode((self.width, self.height))
+        self.display = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Prototype")
 
         self.font = pygame.font.Font(None, 20)
