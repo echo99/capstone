@@ -26,7 +26,6 @@ class Graph:
     def _init_graph(self):
         mx = int(WIDTH / 54)
         my = int(HEIGHT / 42)
-        print(mx, my)
         self.planets = [
             Planet(37*mx, 3*my, self._get_resources(), self._get_rate()),
             Planet(20*mx, 4*my, self._get_resources(), self._get_rate()),

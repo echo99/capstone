@@ -5,7 +5,7 @@ from math import sqrt
 from constants import *
 
 class GUI:
-    NONE, MOVE_PROBES, MOVE_COLONY, MOVE_DEFENSE, MOVE_ATTACK = range(5)
+    NONE, MOVE_PROBES, MOVE_COLONY, MOVE_DEFENSE, MOVE_ATTACK, PATH = range(6)
     def __init__(self, game):
         self.game = game
         self.graph = game.graph
@@ -19,6 +19,7 @@ class GUI:
         self.display = game.display
         self.state = self.NONE
         self.adjacent = []
+        self.selection_path = []
 
     def reset_moves(self):
         self.probes_move = 1
@@ -40,7 +41,26 @@ class GUI:
                                    (this.x, this.y), PLANET_RADIUS*2, 1)
                 if mouse_press:
                     self.game.mouse_press = False
-                    if this == self.selected:
+                    if self.state == self.PATH:
+                        if (this not in self.selected.resource_path and
+                            this != self.selected):
+                            if len(self.selection_path) > 0:
+                                last = self.selection_path[-1]
+                            else:
+                                last = self.selected
+                            if this in self.graph.get_neighbors_by_planet(last):
+                                self.selected.sending = True
+                                self.selection_path.append(this)
+                                self.selected.resource_path.append(this)
+                                self.selected.resources_on_path.append(0)
+                                if this.station or this.outpost:
+                                    self.state = self.NONE
+                                    self.selection_path = []
+                        elif len(self.selection_path) > 0 and this == self.selection_path[-1]:
+                            self.selection_path.pop()
+                            self.selected.resource_path.pop()
+                            self.selected.resources_on_path.pop()
+                    elif this == self.selected:
                         self.selected = None
                         self.state = self.NONE
                     elif self.state == self.MOVE_PROBES and this in self.adjacent:
@@ -124,6 +144,34 @@ class GUI:
                 f = self.font.render("Attack Ships: ", True, TEXT_COLOR)
                 self.display.blit(f, (x, y))
                 self.attack_buttons((x + self.font.size("Attack Ships: ")[0], y))
+
+            if self.selected.station or self.selected.outpost:
+                if len(self.selected.resource_path) > 0:
+                    label = "Sending to %d" % self.graph.get_planet_number(self.selected.resource_path[-1])
+                    f = self.font.render(label, True, TEXT_COLOR)
+                    pos = (WIDTH - self.font.size(label)[0] - 20, self.location[1])
+                    self.display.blit(f, (pos[0]+5, pos[1]+5))
+                else:
+                    label = "Send Resources"
+                    pos = (WIDTH - self.font.size(label)[0] - 20, self.location[1])
+                    if self.button(pos, label, 5):
+                        self.state = self.PATH
+                        pass
+
+            if self.selected.station or self.selected.outpost and len(self.selected.resource_path) > 0:
+                label = "Stop Sending"
+                pos = (WIDTH - self.font.size(label)[0] - 20, self.location[1]+40)
+                if self.button(pos, label, 5):
+                    self.selected.sending = False
+                    pass
+
+            if self.selection_path:
+                first = (self.selected.x, self.selected.y)
+                p = self.selection_path
+                for i in range(len(p)):
+                    second = (p[i].x, p[i].y)
+                    pygame.draw.line(self.display, PATH_COLOR, first, second, 3)
+                    first = second
 
     def update_adjacent(self):
         self.adjacent = self.graph.get_neighbors_by_planet(self.selected)

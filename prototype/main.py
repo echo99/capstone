@@ -13,6 +13,7 @@ class Game:
         pygame.display.set_caption("Prototype")
 
         self.font = pygame.font.Font(None, 20)
+        self.win_font = pygame.font.Font(None, 50)
         self.clock = pygame.time.Clock()
 
         self.graph = Graph()
@@ -28,9 +29,16 @@ class Game:
         p.add_station()
         p.add_probes(1)
 
+        ##
+        a = self.graph.get_planet_by_number(7)
+        a.add_outpost()
+        a.add_probes(1)
+        ##
+
         self.update()
 
         self.show_all = False
+        self.win = False
 
     def get_input(self):
         for event in pygame.event.get():
@@ -40,12 +48,9 @@ class Game:
                 if event.key == K_ESCAPE:
                     self.running = False
                 elif event.key == K_s:
-                    self.show_all = True
+                    self.show_all = not self.show_all
                 elif event.key == K_SPACE:
                     self.update()
-            elif event.type == KEYUP:
-                if event.key == K_s:
-                    self.show_all = False
             elif event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.mouse_press = True
@@ -76,12 +81,22 @@ class Game:
                 take.last_seen_fungus = True
 
     def update(self):
+        if self.gui.state == self.gui.PATH: return
         self.turn += 1
+        for i in range(self.graph.size):
+            self.graph.get_planet_by_number(i).update_moved()
+
+        num_fungus = 0
         for i in range(self.graph.size):
             this = self.graph.get_planet_by_number(i)
             if this.fungus:
+                num_fungus += 1
                 self.advance_fungus(i)
             this.update(self.neighbor_has_probe(i))
+
+        if num_fungus == 0:
+            self.win = True
+            
         # destroy things on fungus-owned planets or take with attack ships
         for i in range(self.graph.size):
             neighbors = self.graph.get_neighbors_by_number(i)
@@ -96,12 +111,17 @@ class Game:
                     this.last_seen_fungus = False
                 else:
                     this.clear()
+            this.update_moved()
 
     def draw(self):
         self.display.fill((255,255,255))
         self.draw_graph()
         self.draw_turn_button()
         self.gui.update_and_draw();
+        if self.win:
+            f = self.win_font.render("You Win!", True, STATION_COLOR)
+            s = self.win_font.size("You Win!")
+            self.display.blit(f, (int(WIDTH/2.0-s[0]/2.0), int(HEIGHT/2.0-s[1]/2.0)))
         pygame.display.flip()
 
     def draw_graph(self):
@@ -114,14 +134,6 @@ class Game:
                         pygame.draw.line(self.display, VISIBLE_LINE_COLOR,
                                          (this.x, this.y), (n.x, n.y))
             self.draw_planet(this)
-            
-##            x = this.x + 15
-##            y1 = this.y - 10
-##            y2 = this.y + 10
-##            t = self.font.render("rsrc: %d" %(this.resources), True, TEXT_COLOR)
-##            self.display.blit(t, (x, y1))
-##            t = self.font.render("rate: %d" %(this.rate), True, TEXT_COLOR)
-##            self.display.blit(t, (x, y2))
 
     def draw_planet(self, planet):
         if not self.show_all and not planet.visible and not planet.seen: return
@@ -180,7 +192,40 @@ class Game:
             y = sin(t/1000.0+600) * 40 + planet.y
             f = self.font.render("A:%d" %(planet.attack_ships), True, ATTACK_COLOR)
             s = self.font.size("A")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0))) 
+            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+        if planet.moved_probes > 0:
+            f = self.font.render("P:%d" %(planet.moved_probes), True, CANT_MOVE_COLOR)
+            s = self.font.size("P")
+            x = int(cos(t/1000.0+700) * 30 + planet.x - s[0] / 2.0)
+            y = int(sin(t/1000.0+700) * 30 + planet.y - s[1] / 2.0)
+            self.display.blit(f, (x, y))
+        if planet.moved_colony_ships > 0:
+            x = cos(t/1000.0+800) * 30 + planet.x
+            y = sin(t/1000.0+800) * 30 + planet.y
+            f = self.font.render("C:%d" %(planet.moved_colony_ships), True, CANT_MOVE_COLOR)
+            s = self.font.size("C")
+            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+        if planet.moved_defense_ships > 0:
+            x = cos(t/1000.0+1100) * 40 + planet.x
+            y = sin(t/1000.0+1100) * 40 + planet.y
+            f = self.font.render("D:%d" %(planet.moved_defense_ships), True, CANT_MOVE_COLOR)
+            s = self.font.size("D")
+            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+        if planet.moved_attack_ships > 0:
+            x = cos(t/1000.0+1200) * 40 + planet.x
+            y = sin(t/1000.0+1200) * 40 + planet.y
+            f = self.font.render("A:%d" %(planet.moved_attack_ships), True, CANT_MOVE_COLOR)
+            s = self.font.size("A")
+            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+
+        if planet.resource_path:
+            first = (planet.x, planet.y)
+            p = planet.resource_path
+            for i in range(len(p)):
+                second = (p[i].x, p[i].y)
+                if planet.resources_on_path[i] == 1:
+                    pygame.draw.line(self.display, PATH_COLOR, first, second, 3)
+                first = second
 
     def draw_turn_button(self):
         pad = 10

@@ -19,6 +19,15 @@ class Planet:
         self.defense_ships = 0
         self.warp_gate = False
 
+        self.moved_probes = 0
+        self.moved_colony_ships = 0
+        self.moved_attack_ships = 0
+        self.moved_defense_ships = 0
+
+        self.resource_path = []
+        self.resources_on_path = []
+        self.sending = False
+
         self.visible = False
         self.seen = False
         self.last_seen_fungus = False
@@ -59,28 +68,28 @@ class Planet:
         self.outpost = False
 
     def add_probes(self, n):
-        self.probes += n
+        self.moved_probes += n
 
     def remove_probes(self, n):
         if self.probes >= n:
             self.probes -= n
 
     def add_colony_ships(self, n):
-        self.colony_ships += n
+        self.moved_colony_ships += n
 
     def remove_colony_ships(self, n):
         if self.colony_ships >= n:
             self.colony_ships -= n
 
     def add_attack_ships(self, n):
-        self.attack_ships += n
+        self.moved_attack_ships += n
 
     def remove_attack_ships(self, n):
         if self.attack_ships >= n:
             self.attack_ships -= n
 
     def add_defense_ships(self, n):
-        self.defense_ships += n
+        self.moved_defense_ships += n
 
     def remove_defense_ships(self, n):
         if self.defense_ships >= n:
@@ -123,14 +132,33 @@ class Planet:
             self.building = "Attack Ship"
             self.build_turns_left = ATTACKSHIP_TIME
 
+    def update_sending(self):
+        if not self.resources_on_path: return
+        
+        if self.resources_on_path[-1] == 1:
+                self.resource_path[-1].collected += 1
+        for i in range(len(self.resources_on_path)-1, 0, -1):
+            self.resources_on_path[i] = self.resources_on_path[i-1]
+        if self.sending and self.resources >= 1:
+            self.resources_on_path[0] = 1
+        else:
+            self.resources_on_path[0] = 0
+            if not 1 in self.resources_on_path:
+                self.resources_on_path = []
+                self.resource_path = []
+
     def update(self, probe_neighbor):
         if self.station or self.outpost:
+            compensate = 1
+            if not self.sending:
+                compensate = 0
             if self.resources >= self.rate:
-                self.collected += self.rate
+                self.collected += self.rate - compensate
                 self.resources -= self.rate
             elif self.resources > 0:
-                self.collected += self.resources
+                self.collected += self.resources - compensate
                 self.resources -= self.resources
+            self.update_sending()
                 
         if self.building != "":
             self.build_turns_left -= 1
@@ -160,3 +188,13 @@ class Planet:
             self.seen = True
             if self.fungus:
                 self.last_seen_fungus = True
+
+    def update_moved(self):
+        self.probes += self.moved_probes
+        self.moved_probes = 0
+        self.colony_ships += self.moved_colony_ships
+        self.moved_colony_ships = 0
+        self.attack_ships += self.moved_attack_ships
+        self.moved_attack_ships = 0
+        self.defense_ships += self.moved_defense_ships
+        self.moved_defense_ships = 0
