@@ -22,10 +22,10 @@ class GUI:
         self.selection_path = []
 
     def reset_moves(self):
-        self.probes_move = 1
-        self.colony_move = 1
-        self.defense_move = 1
-        self.attack_move = 1
+        self.probes_move = self.selected.probes
+        self.colony_move = self.selected.colony_ships
+        self.defense_move = self.selected.defense_ships
+        self.attack_move = self.selected.attack_ships
 
     def update_and_draw(self):
         mouse_pos = self.game.mouse_pos
@@ -158,7 +158,7 @@ class GUI:
                         self.state = self.PATH
                         pass
 
-            if self.selected.station or self.selected.outpost and len(self.selected.resource_path) > 0:
+            if len(self.selected.resource_path) > 0 and (self.selected.station or self.selected.outpost):
                 label = "Stop Sending"
                 pos = (WIDTH - self.font.size(label)[0] - 20, self.location[1]+40)
                 if self.button(pos, label, 5):
