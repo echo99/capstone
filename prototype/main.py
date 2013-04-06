@@ -29,12 +29,6 @@ class Game:
         p.add_station()
         p.add_probes(1)
 
-        ##
-        a = self.graph.get_planet_by_number(7)
-        a.add_outpost()
-        a.add_probes(1)
-        ##
-
         self.update()
 
         self.show_all = False
@@ -152,80 +146,159 @@ class Game:
             
         pygame.draw.circle(self.display, color,(planet.x, planet.y), PLANET_RADIUS)
 
-        t = pygame.time.get_ticks()
-        if planet.station:
-            x = cos(t/1000.0) * 20 + planet.x
-            y = sin(t/1000.0) * 20 + planet.y
-            f = self.font.render("S:%d" %(planet.collected), True, STATION_COLOR)
-            s = self.font.size("S")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.probes > 0:
-            f = self.font.render("P:%d" %(planet.probes), True, PROBE_COLOR)
-            s = self.font.size("P")
-            x = int(cos(t/1000.0+100) * 30 + planet.x - s[0] / 2.0)
-            y = int(sin(t/1000.0+100) * 30 + planet.y - s[1] / 2.0)
-            self.display.blit(f, (x, y))
-            f = self.font.render("res: %d" %(planet.resources), True, PROBE_COLOR)
-            self.display.blit(f, (x, y+s[1]))
-            f = self.font.render("rate: %d" %(planet.rate), True, PROBE_COLOR)
-            self.display.blit(f, (x, y+s[1]*2))
-        if planet.colony_ships > 0:
-            x = cos(t/1000.0+200) * 30 + planet.x
-            y = sin(t/1000.0+200) * 30 + planet.y
-            f = self.font.render("C:%d" %(planet.colony_ships), True, COLONYSHIP_COLOR)
-            s = self.font.size("C")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.outpost:
-            x = cos(t/1000.0+300) * 20 + planet.x
-            y = sin(t/1000.0+300) * 20 + planet.y
-            f = self.font.render("O:%d" %(planet.collected), True, OUTPOST_COLOR)
-            s = self.font.size("O")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.defense_ships > 0:
-            x = cos(t/1000.0+500) * 40 + planet.x
-            y = sin(t/1000.0+500) * 40 + planet.y
-            f = self.font.render("D:%d" %(planet.defense_ships), True, DEFENSE_COLOR)
-            s = self.font.size("D")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.attack_ships > 0:
-            x = cos(t/1000.0+600) * 40 + planet.x
-            y = sin(t/1000.0+600) * 40 + planet.y
-            f = self.font.render("A:%d" %(planet.attack_ships), True, ATTACK_COLOR)
-            s = self.font.size("A")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.moved_probes > 0:
-            f = self.font.render("P:%d" %(planet.moved_probes), True, CANT_MOVE_COLOR)
-            s = self.font.size("P")
-            x = int(cos(t/1000.0+700) * 30 + planet.x - s[0] / 2.0)
-            y = int(sin(t/1000.0+700) * 30 + planet.y - s[1] / 2.0)
-            self.display.blit(f, (x, y))
-        if planet.moved_colony_ships > 0:
-            x = cos(t/1000.0+800) * 30 + planet.x
-            y = sin(t/1000.0+800) * 30 + planet.y
-            f = self.font.render("C:%d" %(planet.moved_colony_ships), True, CANT_MOVE_COLOR)
-            s = self.font.size("C")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.moved_defense_ships > 0:
-            x = cos(t/1000.0+1100) * 40 + planet.x
-            y = sin(t/1000.0+1100) * 40 + planet.y
-            f = self.font.render("D:%d" %(planet.moved_defense_ships), True, CANT_MOVE_COLOR)
-            s = self.font.size("D")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
-        if planet.moved_attack_ships > 0:
-            x = cos(t/1000.0+1200) * 40 + planet.x
-            y = sin(t/1000.0+1200) * 40 + planet.y
-            f = self.font.render("A:%d" %(planet.moved_attack_ships), True, CANT_MOVE_COLOR)
-            s = self.font.size("A")
-            self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+        if ANIMATION:
+            t = pygame.time.get_ticks()
+            if planet.station:
+                x = cos(t/1000.0) * 20 + planet.x
+                y = sin(t/1000.0) * 20 + planet.y
+                f = self.font.render("S:%d" %(planet.collected), True, STATION_COLOR)
+                s = self.font.size("S")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.probes > 0:
+                label = "P:%d" %(planet.probes)
+                f = self.font.render(label, True, PROBE_COLOR)
+                s = self.font.size("P")
+                x = int(cos(t/1000.0+100) * 30 + planet.x - s[0] / 2.0)
+                y = int(sin(t/1000.0+100) * 30 + planet.y - s[1] / 2.0)
+                self.display.blit(f, (x, y))
+                f = self.font.render("res: %d" %(planet.resources), True, PROBE_COLOR)
+                self.display.blit(f, (x, y+s[1]))
+                f = self.font.render("rate: %d" %(planet.rate), True, PROBE_COLOR)
+                self.display.blit(f, (x, y+s[1]*2))
+            if planet.colony_ships > 0:
+                x = cos(t/1000.0+200) * 30 + planet.x
+                y = sin(t/1000.0+200) * 30 + planet.y
+                f = self.font.render("C:%d" %(planet.colony_ships), True, COLONYSHIP_COLOR)
+                s = self.font.size("C")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.outpost:
+                x = cos(t/1000.0+300) * 20 + planet.x
+                y = sin(t/1000.0+300) * 20 + planet.y
+                f = self.font.render("O:%d" %(planet.collected), True, OUTPOST_COLOR)
+                s = self.font.size("O")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.defense_ships > 0:
+                x = cos(t/1000.0+500) * 40 + planet.x
+                y = sin(t/1000.0+500) * 40 + planet.y
+                f = self.font.render("D:%d" %(planet.defense_ships), True, DEFENSE_COLOR)
+                s = self.font.size("D")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.attack_ships > 0:
+                x = cos(t/1000.0+600) * 40 + planet.x
+                y = sin(t/1000.0+600) * 40 + planet.y
+                f = self.font.render("A:%d" %(planet.attack_ships), True, ATTACK_COLOR)
+                s = self.font.size("A")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.moved_probes > 0:
+                f = self.font.render("P:%d" %(planet.moved_probes), True, CANT_MOVE_COLOR)
+                s = self.font.size("P")
+                x = int(cos(t/1000.0+700) * 30 + planet.x - s[0] / 2.0)
+                y = int(sin(t/1000.0+700) * 30 + planet.y - s[1] / 2.0)
+                self.display.blit(f, (x, y))
+            if planet.moved_colony_ships > 0:
+                x = cos(t/1000.0+800) * 30 + planet.x
+                y = sin(t/1000.0+800) * 30 + planet.y
+                f = self.font.render("C:%d" %(planet.moved_colony_ships), True, CANT_MOVE_COLOR)
+                s = self.font.size("C")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.moved_defense_ships > 0:
+                x = cos(t/1000.0+1100) * 40 + planet.x
+                y = sin(t/1000.0+1100) * 40 + planet.y
+                f = self.font.render("D:%d" %(planet.moved_defense_ships), True, CANT_MOVE_COLOR)
+                s = self.font.size("D")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+            if planet.moved_attack_ships > 0:
+                x = cos(t/1000.0+1200) * 40 + planet.x
+                y = sin(t/1000.0+1200) * 40 + planet.y
+                f = self.font.render("A:%d" %(planet.moved_attack_ships), True, CANT_MOVE_COLOR)
+                s = self.font.size("A")
+                self.display.blit(f, (int(x-s[0]/2.0), int(y-s[1]/2.0)))
+        else:
+            if planet.station:
+                x = planet.x - 10
+                y = planet.y - 25
+                f = self.font.render("S:%d" %(planet.collected), True, STATION_COLOR)
+                s = self.font.size("S")
+                self.display.blit(f, (x, y))
+            if planet.outpost:
+                x = planet.x - 10
+                y = planet.y - 25
+                f = self.font.render("O:%d" %(planet.collected), True, OUTPOST_COLOR)
+                s = self.font.size("O")
+                self.display.blit(f, (x, y))
+            if planet.probes > 0 or planet.moved_probes > 0:
+                s = (0,0)
+                x = planet.x + 15
+                y = planet.y - 10
+                if planet.probes > 0:
+                    label = "P:%d" %(planet.probes)
+                    f = self.font.render(label, True, PROBE_COLOR)
+                    s = self.font.size(label)
+                    self.display.blit(f, (x, y))
+                    f = self.font.render("res: %d" %(planet.resources), True, PROBE_COLOR)
+                    self.display.blit(f, (x, y+s[1]))
+                    f = self.font.render("rate: %d" %(planet.rate), True, PROBE_COLOR)
+                    self.display.blit(f, (x, y+s[1]*2))
+                if planet.moved_probes > 0:
+                    label = ":%d" %(planet.moved_probes)
+                    if planet.probes == 0:
+                        label = "P" + label
+                    f = self.font.render(label, True, CANT_MOVE_COLOR)
+                    self.display.blit(f, (x+s[0], y))
+            if planet.colony_ships > 0 or planet.moved_colony_ships > 0:
+                s = (0,0)
+                x = planet.x - 20
+                y = planet.y + 15
+                if planet.colony_ships > 0:
+                    label = "C:%d" %(planet.colony_ships)
+                    f = self.font.render(label, True, COLONYSHIP_COLOR)
+                    s = self.font.size(label)
+                    self.display.blit(f, (x, y))
+                if planet.moved_colony_ships > 0:
+                    label = ":%d" %(planet.moved_colony_ships)
+                    if planet.colony_ships == 0:
+                        label = "C" + label
+                    f = self.font.render(label, True, CANT_MOVE_COLOR)
+                    self.display.blit(f, (x+s[0], y))
+            if planet.defense_ships > 0 or planet.moved_defense_ships > 0:
+                s = (0,0)
+                x = planet.x - 40
+                y = planet.y + 2
+                if planet.defense_ships > 0:
+                    label = "D:%d" %(planet.defense_ships)
+                    f = self.font.render(label, True, DEFENSE_COLOR)
+                    s = self.font.size(label)
+                    self.display.blit(f, (x, y))
+                if planet.moved_defense_ships > 0:
+                    label = ":%d" %(planet.moved_defense_ships)
+                    if planet.defense_ships == 0:
+                        label = "D" + label
+                    f = self.font.render(label, True, CANT_MOVE_COLOR)
+                    self.display.blit(f, (x+s[0], y))
+            if planet.attack_ships > 0 or planet.moved_attack_ships > 0:
+                s = (0,0)
+                x = planet.x - 40
+                y = planet.y - 12
+                if planet.attack_ships > 0:
+                    label = "A:%d" %(planet.attack_ships)
+                    f = self.font.render(label, True, ATTACK_COLOR)
+                    s = self.font.size(label)
+                    self.display.blit(f, (x, y))
+                if planet.moved_attack_ships > 0:
+                    label = ":%d" %(planet.moved_attack_ships)
+                    if planet.attack_ships == 0:
+                        label = "A" + label
+                    f = self.font.render(label, True, CANT_MOVE_COLOR)
+                    self.display.blit(f, (x+s[0], y))
 
-        if planet.resource_path:
-            first = (planet.x, planet.y)
-            p = planet.resource_path
-            for i in range(len(p)):
-                second = (p[i].x, p[i].y)
-                if planet.resources_on_path[i] == 1:
-                    pygame.draw.line(self.display, PATH_COLOR, first, second, 3)
-                first = second
+            if planet.resource_path:
+                first = (planet.x, planet.y)
+                p = planet.resource_path
+                for i in range(len(p)):
+                    second = (p[i].x, p[i].y)
+                    if planet.resources_on_path[i] == 1:
+                        pygame.draw.line(self.display, PATH_COLOR, first, second, 3)
+                    first = second
 
     def draw_turn_button(self):
         pad = 10
