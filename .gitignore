@@ -1,3 +1,7 @@
+# Compiled files
+public/app.js
+public/vendor.js
+
 # Python
 *.pyc
 
