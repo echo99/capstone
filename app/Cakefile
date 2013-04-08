@@ -42,8 +42,12 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   # from_files = "--compile #{files.join ' '}"
   # args = ['-cw', '--join', '../public/app.js']
   # Array::push.apply args, files
+
+  cmd = 'coffee'
+  if process.platform == 'win32'
+    cmd = 'coffee.cmd'
   args = ['-wp', 'src']
-  coffee = spawn 'coffee', args
+  coffee = spawn cmd, args
 
   #coffee = spawn 'coffee', ['-cw', '--join', '../public/app.js', 'src']
   coffee.stdout.on 'data', (data) -> 
