@@ -1,14 +1,61 @@
 # Rehab can be installed via npm using: 'npm install -g rehab' or 'npm install rehab'
-{exec} = require 'child_process'
+fs = require 'fs'
+{spawn, exec} = require 'child_process'
 Rehab = require 'rehab'
 
 task 'build', 'Build coffee2js using Rehab', sbuild = ->
-  console.log "Building project from src/*.coffee to lib/app.js"
+  console.log "Building project from src/*.coffee to ../public/app.js"
 
   files = new Rehab().process './src'
 
-  to_single_file = "--join lib/app.js"
+  to_single_file = "--join ../public/app.js"
   from_files = "--compile #{files.join ' '}"
 
   exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
     throw err if err
+
+task 'vendcomp', 'Combine vendor scripts into one file', ->
+  # exec 'echo "hi"'
+  scripts = ''
+  dir = '../vendor/scripts'
+  files = fs.readdirSync dir
+  for file in files
+    contents = fs.readFileSync (dir+'/'+file), 'utf8'
+    scripts += contents
+    #name = file.replace /\..*/, '' # remove extension
+    #templateJs += "window.#{name} = '#{contents}';"
+  try
+    fs.writeFile '../public/vendor.js', scripts
+  catch err
+    console.log err
+  # exec 'echo "hi2"'
+  #exec "echo #{scripts} > ../public/vendor.js"
+
+task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
+  console.log "Watching files src/*.coffee"
+  # console.log "Note: This will only watch existing files"
+  # console.log "      You will have to rerun the command if you add any files"
+
+  #to_single_file = "--join ../public/app.js"
+  
+  # files = new Rehab().process './src'
+  # from_files = "--compile #{files.join ' '}"
+  # args = ['-cw', '--join', '../public/app.js']
+  # Array::push.apply args, files
+  args = ['-wp', 'src']
+  coffee = spawn 'coffee', args
+
+  #coffee = spawn 'coffee', ['-cw', '--join', '../public/app.js', 'src']
+  coffee.stdout.on 'data', (data) -> 
+    # files = new Rehab().process './src'
+    # from_files = "--compile #{files.join ' '}"
+    # args = ['-cw', '--join', '../public/app.js', 'src']
+    console.log "Recompiling files"
+    invoke 'build'
+  coffee.stderr.on 'data', (data) ->
+    console.log data.toString().trim()
+    #console.log data.toString().trim()
+
+task 'integrate', 'Compile and combine all files', sbuild = ->
+  invoke 'build'
+  invoke 'vendcomp'
