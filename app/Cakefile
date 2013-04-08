@@ -3,12 +3,15 @@ fs = require 'fs'
 {spawn, exec} = require 'child_process'
 Rehab = require 'rehab'
 
+APP_JS = '../public/app.js'
+VENDOR_JS = '../public/vendor.js'
+
 task 'build', 'Build coffee2js using Rehab', sbuild = ->
-  console.log "Building project from src/*.coffee to ../public/app.js"
+  console.log "Building project from src/*.coffee to #{APP_JS}"
 
   files = new Rehab().process './src'
 
-  to_single_file = "--join ../public/app.js"
+  to_single_file = "--join #{APP_JS}"
   from_files = "--compile #{files.join ' '}"
 
   exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
@@ -25,7 +28,7 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
     #name = file.replace /\..*/, '' # remove extension
     #templateJs += "window.#{name} = '#{contents}';"
   try
-    fs.writeFile '../public/vendor.js', scripts
+    fs.writeFile VENDOR_JS, scripts
   catch err
     console.log err
   # exec 'echo "hi2"'
@@ -63,3 +66,26 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
 task 'integrate', 'Compile and combine all files', sbuild = ->
   invoke 'build'
   invoke 'vendcomp'
+
+task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
+  console.log 'Minifying app.js and vendor.js'
+  missingUglify = (error) ->
+    console.error(error.toString().trim())
+    console.error('UglifyJS may not be installed correctly')
+    console.error('Please install using "npm install -g uglify-js"')
+    process.exit(error.code)
+  exec "uglifyjs test.js -o #{APP_JS}", (err, stdout, stderr) ->
+    if err
+      if process.platform == 'win32'
+        # Handle Windows errors
+        if err.code == 1
+          # 1 = "ERROR_INVALID_FUNCTION"
+          missingUglify(err)
+      else if err.code == 127
+        # 127 = "illegal command"
+        missingUglify(err)
+      else
+        throw err # Unknown error
+  exec "uglifyjs #{VENDOR_JS} -o #{VENDOR_JS}", (err, stdout, stderr) ->
+    if err
+      throw err
