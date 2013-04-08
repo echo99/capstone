@@ -158,12 +158,15 @@ class GUI:
                         self.state = self.PATH
                         pass
 
-            if len(self.selected.resource_path) > 0 and (self.selected.station or self.selected.outpost):
+            if self.state == self.PATH and (self.selected.station or self.selected.outpost):
                 label = "Stop Sending"
                 pos = (WIDTH - self.font.size(label)[0] - 20, self.location[1]+40)
                 if self.button(pos, label, 5):
+                    self.state = self.NONE
                     self.selected.sending = False
-                    pass
+                    self.selection_path = []
+                    self.selected.resource_path = []
+                    self.selected.resources_on_path = []
 
             if self.selection_path:
                 first = (self.selected.x, self.selected.y)
