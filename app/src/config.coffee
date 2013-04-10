@@ -29,3 +29,7 @@ window.config =
       cost: 10
       turns: 3
       defense: 5
+    warpGate:
+      cost: 7
+      turns: 4
+      defense: 1
