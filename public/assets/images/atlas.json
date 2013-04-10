@@ -1,218 +1,230 @@
 {"frames": {
 
+"attack_ship.png" :
+{
+	"frame": {"x":70,"y":610,"w":32,"h":32},
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
 "blank_button_hover.png" :
 {
-	"frame": {"x":0","y":984,"w":64,"h":32},
+	"frame": {"x":0,"y":686,"w":64,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
 	"sourceSize": {"w":64,"h":32}
 },
 "blank_button_idle.png" :
 {
-	"frame": {"x":0","y":950,"w":64,"h":32},
+	"frame": {"x":0,"y":984,"w":64,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
 	"sourceSize": {"w":64,"h":32}
 },
 "building_attack_ship.png" :
 {
-	"frame": {"x":132","y":788,"w":11,"h":12},
+	"frame": {"x":132,"y":856,"w":11,"h":12},
 	"spriteSourceSize": {"x":96,"y":18,"w":11,"h":12},
 	"sourceSize": {"w":128,"h":12}
 },
 "building_colony_ship.png" :
 {
-	"frame": {"x":132","y":802,"w":10,"h":12},
+	"frame": {"x":132,"y":870,"w":10,"h":12},
 	"spriteSourceSize": {"x":96,"y":19,"w":10,"h":12},
 	"sourceSize": {"w":128,"h":12}
 },
 "building_defense_ship.png" :
 {
-	"frame": {"x":132","y":816,"w":10,"h":12},
+	"frame": {"x":144,"y":870,"w":10,"h":12},
 	"spriteSourceSize": {"x":97,"y":19,"w":10,"h":12},
 	"sourceSize": {"w":128,"h":12}
 },
 "building_outpost.png" :
 {
-	"frame": {"x":132","y":727,"w":19,"h":25},
+	"frame": {"x":132,"y":815,"w":19,"h":25},
 	"spriteSourceSize": {"x":23,"y":1,"w":19,"h":25},
 	"sourceSize": {"w":64,"h":25}
 },
 "building_probe.png" :
 {
-	"frame": {"x":132","y":830,"w":9,"h":12},
+	"frame": {"x":145,"y":856,"w":9,"h":12},
 	"spriteSourceSize": {"x":97,"y":18,"w":9,"h":12},
 	"sourceSize": {"w":128,"h":12}
 },
 "building_warp_gate.png" :
 {
-	"frame": {"x":132","y":774,"w":15,"h":12},
+	"frame": {"x":132,"y":842,"w":15,"h":12},
 	"spriteSourceSize": {"x":94,"y":19,"w":15,"h":12},
 	"sourceSize": {"w":128,"h":12}
 },
 "colony_ship.png" :
 {
-	"frame": {"x":66","y":918,"w":54,"h":32},
+	"frame": {"x":66,"y":918,"w":54,"h":32},
 	"spriteSourceSize": {"x":10,"y":0,"w":54,"h":32},
 	"sourceSize": {"w":64,"h":32}
 },
 "colony_ship_ready.png" :
 {
-	"frame": {"x":66","y":884,"w":54,"h":32},
+	"frame": {"x":66,"y":884,"w":54,"h":32},
 	"spriteSourceSize": {"x":10,"y":0,"w":54,"h":32},
 	"sourceSize": {"w":64,"h":32}
 },
+"defense_ship.png" :
+{
+	"frame": {"x":132,"y":712,"w":26,"h":32},
+	"spriteSourceSize": {"x":3,"y":0,"w":26,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
 "outpost_normal.png" :
 {
-	"frame": {"x":132","y":754,"w":19,"h":18},
+	"frame": {"x":132,"y":774,"w":19,"h":18},
 	"spriteSourceSize": {"x":23,"y":10,"w":19,"h":18},
 	"sourceSize": {"w":64,"h":18}
 },
 "outpost_upgrade.png" :
 {
-	"frame": {"x":132","y":706,"w":19,"h":19},
+	"frame": {"x":132,"y":794,"w":19,"h":19},
 	"spriteSourceSize": {"x":23,"y":9,"w":19,"h":19},
 	"sourceSize": {"w":64,"h":19}
 },
 "planet_blue_1.png" :
 {
-	"frame": {"x":104","y":610,"w":32,"h":32},
+	"frame": {"x":104,"y":610,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_blue_2.png" :
 {
-	"frame": {"x":104","y":576,"w":32,"h":32},
+	"frame": {"x":104,"y":576,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_brown_1.png" :
 {
-	"frame": {"x":100","y":986,"w":32,"h":32},
+	"frame": {"x":100,"y":986,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_dark_blue.png" :
 {
-	"frame": {"x":122","y":918,"w":32,"h":32},
+	"frame": {"x":100,"y":952,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_gray_1.png" :
 {
-	"frame": {"x":104","y":644,"w":32,"h":32},
+	"frame": {"x":104,"y":644,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_green.png" :
 {
-	"frame": {"x":70","y":610,"w":32,"h":32},
+	"frame": {"x":132,"y":678,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_green_fungus.png" :
 {
-	"frame": {"x":0","y":686,"w":64,"h":64},
+	"frame": {"x":66,"y":818,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "planet_invisible.png" :
 {
-	"frame": {"x":122","y":884,"w":32,"h":32},
+	"frame": {"x":122,"y":918,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_invisible_fungus.png" :
 {
-	"frame": {"x":0","y":818,"w":64,"h":64},
+	"frame": {"x":0,"y":918,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "planet_light_blue.png" :
 {
-	"frame": {"x":66","y":952,"w":32,"h":32},
+	"frame": {"x":70,"y":644,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_light_blue_fungus.png" :
 {
-	"frame": {"x":66","y":686,"w":64,"h":64},
+	"frame": {"x":0,"y":786,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "planet_orange.png" :
 {
-	"frame": {"x":70","y":644,"w":32,"h":32},
+	"frame": {"x":66,"y":952,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_orange_fungus.png" :
 {
-	"frame": {"x":66","y":752,"w":64,"h":64},
+	"frame": {"x":66,"y":752,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "planet_pink.png" :
 {
-	"frame": {"x":70","y":576,"w":32,"h":32},
+	"frame": {"x":70,"y":576,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_pink_fungus.png" :
 {
-	"frame": {"x":66","y":818,"w":64,"h":64},
+	"frame": {"x":66,"y":686,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "planet_purple.png" :
 {
-	"frame": {"x":100","y":952,"w":32,"h":32},
+	"frame": {"x":66,"y":986,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_purple_fungus.png" :
 {
-	"frame": {"x":0","y":884,"w":64,"h":64},
+	"frame": {"x":0,"y":852,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "planet_yellow.png" :
 {
-	"frame": {"x":66","y":986,"w":32,"h":32},
+	"frame": {"x":122,"y":884,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "planet_yellow_fungus.png" :
 {
-	"frame": {"x":0","y":752,"w":64,"h":64},
+	"frame": {"x":0,"y":720,"w":64,"h":64},
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 	"sourceSize": {"w":64,"h":64}
 },
 "probe.png" :
 {
-	"frame": {"x":132","y":678,"w":21,"h":26},
+	"frame": {"x":132,"y":746,"w":21,"h":26},
 	"spriteSourceSize": {"x":6,"y":2,"w":21,"h":26},
 	"sourceSize": {"w":32,"h":26}
 },
 "starry_background.png" :
 {
-	"frame": {"x":0","y":0,"w":512,"h":512},
+	"frame": {"x":0,"y":0,"w":512,"h":512},
 	"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
 	"sourceSize": {"w":512,"h":512}
 },
 "station_gathering.png" :
 {
-	"frame": {"x":0","y":576,"w":68,"h":53},
+	"frame": {"x":0,"y":576,"w":68,"h":53},
 	"spriteSourceSize": {"x":57,"y":2,"w":68,"h":53},
 	"sourceSize": {"w":128,"h":53}
 },
 "station_not_gathering.png" :
 {
-	"frame": {"x":0","y":631,"w":68,"h":53},
+	"frame": {"x":0,"y":631,"w":68,"h":53},
 	"spriteSourceSize": {"x":57,"y":2,"w":68,"h":53},
 	"sourceSize": {"w":128,"h":53}
 },
 "title.png" :
 {
-	"frame": {"x":0","y":514,"w":434,"h":60},
+	"frame": {"x":0,"y":514,"w":434,"h":60},
 	"spriteSourceSize": {"x":0,"y":0,"w":434,"h":60},
 	"sourceSize": {"w":434,"h":60}
 },
