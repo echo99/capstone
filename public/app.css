@@ -1,3 +1,21 @@
 body {
   background-color: #333;
 }
+
+#frame {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+#canvas-bg {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+#canvas-fg {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
