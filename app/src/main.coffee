@@ -34,15 +34,18 @@ $ ->
     #   box.x = 0
     # save the context
     ctx.save()
-    # translate it to the boxes x and boxes y, basically your taking the canvas and moving it to each box.
-    ctx.translate(box.x, box.y);
-    #ctx.scale(2,2);
+    # translate it to the boxes x and boxes y, basically your taking the canvas
+    # and moving it to each box.
+    ctx.translate(box.x, box.y)
+    #ctx.scale(2,2)
     # now rotate it
-    ctx.rotate(box.angle);
-    # -5 is half of the box width and height 0,0 is the boxes location, im drawing it at half the width and height to set the rotation origin to the center of the box.
-    ctx.fillRect(-box.halfwidth,-box.halfheight, box.w, box.h); 
+    ctx.rotate(box.angle)
+    # -5 is half of the box width and height 0,0 is the boxes location,
+    # im drawing it at half the width and height to set the rotation origin to
+    # the center of the box.
+    ctx.fillRect(-box.halfwidth,-box.halfheight, box.w, box.h)
     # now restore
-    ctx.restore();
+    ctx.restore()
 
   # Animate box
   setInterval draw, 30
@@ -78,10 +81,11 @@ $ ->
       ctx.fillRect(0,0,canvas.width,canvas.height)
       # ctx.fillStyle = "rgb(255,0,0)"
       # ctx.fillRect(20,20,30,30)
-      # ctx.fillRect(100,100,30,30)  
-  #document.addEventListener('webkitfullscreenchange mozfullscreenchange fullscreenchange', unfullscreen)
+      # ctx.fillRect(100,100,30,30)
+  #document.addEventListener('webkitfullscreenchange mozfullscreenchange '
+  #  +'fullscreenchange', unfullscreen)
   document.addEventListener('mozfullscreenchange', redrawfullscreenchange)
-  canvasclick = -> 
+  canvasclick = ->
     # eheight: 619 -> 774 (diff of 155)
     if document.mozFullScreenElement
       # Already at full screen!
@@ -103,6 +107,7 @@ $ ->
         canvas.webkitRequestFullscreen()
       # maxWidth = window.outerWidth
       # maxHeight = window.outerHeight
-      # console.log(window.screen.availWidth + ' x ' + window.screen.availHeight)
+      # console.log(window.screen.availWidth + ' x '
+      #   + window.screen.availHeight)
   canvas.addEventListener('mousedown', canvasclick)
   

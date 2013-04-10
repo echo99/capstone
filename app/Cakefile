@@ -5,17 +5,28 @@ Rehab = require 'rehab'
 
 APP_JS = '../public/app.js'
 VENDOR_JS = '../public/vendor.js'
+SRC_DIR = 'src'
 
 task 'build', 'Build coffee2js using Rehab', sbuild = ->
-  console.log "Building project from src/*.coffee to #{APP_JS}"
+  console.log "Building project from #{SRC_DIR}/*.coffee to #{APP_JS}"
 
-  files = new Rehab().process './src'
+  # Try to compile all files individually first, to get a better
+  # error message, then if it succeeds, compile them all to one file
 
-  to_single_file = "--join #{APP_JS}"
-  from_files = "--compile #{files.join ' '}"
+  callback = (passed) ->
+    if passed
+      files = new Rehab().process './'+SRC_DIR
 
-  exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
-    throw err if err
+      to_single_file = "--join #{APP_JS}"
+      from_files = "--compile #{files.join ' '}"  
+
+      exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
+        if err
+          # Should probably figure out way to handle this error
+          console.error err.toString().trim()
+          #throw err
+
+  checkSyntax(callback)
 
 task 'vendcomp', 'Combine vendor scripts into one file', ->
   console.log "Combining vendor scripts to #{VENDOR_JS}"
@@ -35,7 +46,7 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   #exec "echo #{scripts} > ../public/vendor.js"
 
 task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
-  console.log "Watching files src/*.coffee"
+  console.log "Watching files #{SRC_DIR}/*.coffee"
   # console.log "Note: This will only watch existing files"
   # console.log "      You will have to rerun the command if you add any files"
 
@@ -49,7 +60,7 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   cmd = 'coffee'
   if process.platform == 'win32'
     cmd = 'coffee.cmd'
-  args = ['-wp', 'src']
+  args = ['-wp', SRC_DIR]
   coffee = spawn cmd, args
 
   #coffee = spawn 'coffee', ['-cw', '--join', '../public/app.js', 'src']
@@ -59,8 +70,9 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
     # args = ['-cw', '--join', '../public/app.js', 'src']
     console.log "Recompiling files"
     invoke 'build'
-  coffee.stderr.on 'data', (data) ->
-    console.log data.toString().trim()
+  # Don't think we need to print out stderr stuff
+  # coffee.stderr.on 'data', (data) ->
+  #   console.log data.toString().trim()
     #console.log data.toString().trim()
 
 task 'integrate', 'Compile and combine all files', sbuild = ->
@@ -92,3 +104,25 @@ task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
   exec "uglifyjs #{VENDOR_JS} -o #{VENDOR_JS}", (err, stdout, stderr) ->
     if err
       throw err
+
+checkSyntax = (callback) ->
+  nulDir = if process.platform == 'win32' then 'nul' else '/dev/null'
+
+  exec "coffee -p -c src > #{nulDir}", (err, stdout, stderr) ->
+    if err
+      console.error err.toString().trim()
+      callback(false)
+    else
+      callback(true)
+
+task 'check', 'Temporarily compiles coffee files to check syntax', ->
+  passFunc = (passed) ->
+    if passed
+      console.log("No errors found")
+  checkSyntax(passFunc)
+
+# task 'lint', 'Run files through lint', ->
+#   exec "coffee -l #{SRC_DIR}", (err, stdout, stderr) ->
+#     if err
+#       console.log err
+#       throw err
