@@ -56,46 +56,6 @@ $ ->
   # ctx.fillRect(20,20,30,30)
   # ctx.fillRect(100,100,30,30)
 
-  box =
-    x: canvas.width/2
-    y: canvas.height/2
-    w: 40
-    h: 40
-    halfwidth: 20
-    halfheight: 20
-    radius: Math.ceil(20*1.5)
-    diameter: Math.ceil(40*1.5)
-    angle: 2
-
-  draw = ->
-    # ctx.fillStyle = "rgb(0,0,0)"
-    # ctx.fillRect(box.x-box.radius,box.y-box.radius,box.diameter,box.diameter)
-    ctx.clearRect(box.x-box.radius,box.y-box.radius,box.diameter,box.diameter)
-    # ctx.fillRect(0,0,canvas.width,canvas.height)
-    ctx.fillStyle = "rgb(255,0,0)"
-    box.angle+=0.2
-    # box.x++
-    # if box.x > 256
-    #   box.x = 0
-    # save the context
-    ctx.save()
-    # translate it to the boxes x and boxes y, basically your taking the canvas
-    # and moving it to each box.
-    ctx.translate(box.x, box.y)
-    #ctx.scale(2,2)
-    # now rotate it
-    ctx.rotate(box.angle)
-    # -5 is half of the box width and height 0,0 is the boxes location,
-    # im drawing it at half the width and height to set the rotation origin to
-    # the center of the box.
-    ctx.fillRect(-box.halfwidth,-box.halfheight, box.w, box.h)
-    # now restore
-    ctx.restore()
-
-  # Animate box
-  ctx.fillStyle = "rgb(255,0,0)"
-  setInterval draw, 30
-
   # onGetJson = (data) ->
   #   alert(data)
   #   jsonData = JSON.parse(data.response)
@@ -116,6 +76,7 @@ $ ->
       halfCanHeight = Math.floor(canvas.height/2);
 
       drawBackground(bgCtx, sheet, 'starry_background.png')
+
 
       # sheet.drawSprite('starry_background.png', canvas.width/2, canvas.height/2, bgCtx)
 
@@ -147,59 +108,7 @@ $ ->
   # Some fun messing around with fullscreen
   maxWidth = 0
   maxHeight = 0
-  updatedSize = false
-  # redrawfullscreenchange = ->
-  #   # if document.mozFullScreenElement or document.webkitFullScreenElement
-  #   #   #console.log('yeah!')
-  #   #   # canvas.width = window.innerWidth
-  #   #   # canvas.height = window.innerHeight + 155
-  #   #   # canvas.width = window.screen.availWidth
-  #   #   # canvas.height = window.screen.availHeight
-  #   #   # frame.width = screen.width
-  #   #   # frame.height = screen.height
-  #   #   # canvas.width = screen.width
-  #   #   # canvas.height = screen.height
-  #   #   bgCanvas.width = screen.width
-  #   #   bgCanvas.height = screen.height
 
-  #   #   drawBackground(bgCtx, sheet, 'starry_background.png')
-
-  #   #   # box.x = canvas.width/2
-  #   #   # box.y = canvas.height/2
-  #   #   # ctx.fillStyle = "rgb(0,0,0)"
-  #   #   # ctx.fillRect(0,0,canvas.width,canvas.height)
-  #   #   # ctx.fillRect(20,20,30,30)
-  #   #   # ctx.fillRect(100,100,30,30)
-  #   #   # ctx.fillRect(canvas.width-50,canvas.height-50,30,30)
-  #   # else
-  #   #   #console.log('no!')
-  #   #   # canvas.width = WIDTH
-  #   #   # canvas.height = HEIGHT
-
-  #   #   #console.log("#{window.innerWidth} x #{window.innerHeight}")
-
-  #   #   # This is kind of buggy. Sometimes does not properly reset dimensions to
-  #   #   # browser viewport
-  #   #   frame.width = window.innerWidth
-  #   #   frame.height = window.innerHeight
-  #   #   canvas.width = window.innerWidth
-  #   #   canvas.height = window.innerHeight
-  #   #   # bgCanvas.width = window.innerWidth
-  #   #   # bgCanvas.height = window.innerHeight
-
-  #   #   # drawBackground(bgCtx, sheet, 'starry_background.png')
-
-
-  #   #   box.x = canvas.width/2
-  #   #   box.y = canvas.height/2
-  #   #   # ctx.fillStyle = "rgb(0,0,0)"
-  #   #   # ctx.fillRect(0,0,canvas.width,canvas.height)
-  #   #   # ctx.fillStyle = "rgb(255,0,0)"
-  #   #   # ctx.fillRect(20,20,30,30)
-  #   #   # ctx.fillRect(100,100,30,30)
-  # #document.addEventListener('webkitfullscreenchange mozfullscreenchange '
-  # #  +'fullscreenchange', unfullscreen)
-  # document.addEventListener('mozfullscreenchange', redrawfullscreenchange)
   canvasclick = ->
     # eheight: 619 -> 774 (diff of 155)
     if document.mozFullScreenElement or document.webkitFullScreenElement
@@ -239,3 +148,85 @@ $ ->
     bgCanvas.style.top = Math.floor((canvas.height - bgCanvas.height)/2) + "px"
 
     console.log("New bg pos: #{bgCanvas.left} x #{bgCanvas.top}")
+
+  box =
+    x: canvas.width/2
+    y: canvas.height/2
+    w: 40
+    h: 40
+    halfwidth: 20
+    halfheight: 20
+    radius: Math.ceil(20*1.5)
+    diameter: Math.ceil(40*1.5)
+    angle: 2
+
+  ships = [
+      orbitRadius: 200
+      angularVelocity: Math.PI / 150
+      sptName: 'colony_ship.png'
+      angle: 0
+      orientation: 'right'
+    ,
+      orbitRadius: 120
+      angularVelocity: Math.PI / 90
+      sptName: 'attack_ship.png'
+      angle: Math.PI
+      orientation: 'up'
+    ,
+      orbitRadius: 100
+      angularVelocity: Math.PI / 90
+      sptName: 'defense_ship.png'
+      angle: 0
+      orientation: 'up'
+    ,
+      orbitRadius: 300
+      angularVelocity: Math.PI / 300
+      sptName: 'probe.png'
+      angle: 0
+      orientation: 'right'
+  ]
+
+  draw = ->
+    # ctx.fillStyle = "rgb(0,0,0)"
+    # ctx.fillRect(box.x-box.radius,box.y-box.radius,box.diameter,box.diameter)
+    # ctx.clearRect(box.x-box.radius,box.y-box.radius,box.diameter,box.diameter)
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+    # ctx.fillRect(0,0,canvas.width,canvas.height)
+    # ctx.fillStyle = "rgb(255,0,0)"
+    # box.angle+=0.2
+    # # box.x++
+    # # if box.x > 256
+    # #   box.x = 0
+    # # save the context
+    # ctx.save()
+    # # translate it to the boxes x and boxes y, basically your taking the canvas
+    # # and moving it to each box.
+    # ctx.translate(box.x, box.y)
+    # #ctx.scale(2,2)
+    # # now rotate it
+    # ctx.rotate(box.angle)
+    # # -5 is half of the box width and height 0,0 is the boxes location,
+    # # im drawing it at half the width and height to set the rotation origin to
+    # # the center of the box.
+    # ctx.fillRect(-box.halfwidth,-box.halfheight, box.w, box.h)
+    # # now restore
+    # ctx.restore()
+
+    if sheet != null
+      ctx.save()
+      ctx.translate(box.x, box.y)
+      sheet.drawSprite('planet_blue_2.png', 0, 0, ctx, 2)
+      lastAngle = 0
+      for ship in ships
+        ship.angle += ship.angularVelocity
+        ctx.rotate(ship.angle-lastAngle)
+        if ship.orientation == 'up'
+          sheet.drawSprite(ship.sptName, -ship.orbitRadius, 0, ctx)
+        else
+          sheet.drawSprite(ship.sptName, 0, -ship.orbitRadius, ctx)
+        lastAngle = ship.angle
+      ctx.restore()
+      sheet.drawSprite('title.png', box.x, 100, ctx)
+
+  # Animate
+  setInterval draw, 30
