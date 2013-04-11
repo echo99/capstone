@@ -1,21 +1,24 @@
 body {
   background-color: #333;
+  overflow: hidden;
 }
 
 #frame {
   position: absolute;
   top: 0px;
   left: 0px;
+  overflow: hidden;
 }
 
 #canvas-bg {
   position: absolute;
   top: 0px;
   left: 0px;
+  z-index: -1;
 }
 
 #canvas-fg {
-  position: absolute;
+/*  position: absolute;
   top: 0px;
-  left: 0px;
+  left: 0px;*/
 }

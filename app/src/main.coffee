@@ -41,10 +41,12 @@ $ ->
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
   bgCanvas = document.getElementById('canvas-bg')
+  frame.width = window.innerWidth
+  frame.height = window.innerWidth
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
-  bgCanvas.width = window.innerWidth
-  bgCanvas.height = window.innerHeight
+  bgCanvas.width = screen.width
+  bgCanvas.height = screen.height
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   
@@ -146,58 +148,58 @@ $ ->
   maxWidth = 0
   maxHeight = 0
   updatedSize = false
-  redrawfullscreenchange = ->
-    if document.mozFullScreenElement or document.webkitFullScreenElement
-      #console.log('yeah!')
-      # canvas.width = window.innerWidth
-      # canvas.height = window.innerHeight + 155
-      # canvas.width = window.screen.availWidth
-      # canvas.height = window.screen.availHeight
-      frame.width = screen.width
-      frame.height = screen.height
-      canvas.width = screen.width
-      canvas.height = screen.height
-      bgCanvas.width = screen.width
-      bgCanvas.height = screen.height
+  # redrawfullscreenchange = ->
+  #   # if document.mozFullScreenElement or document.webkitFullScreenElement
+  #   #   #console.log('yeah!')
+  #   #   # canvas.width = window.innerWidth
+  #   #   # canvas.height = window.innerHeight + 155
+  #   #   # canvas.width = window.screen.availWidth
+  #   #   # canvas.height = window.screen.availHeight
+  #   #   # frame.width = screen.width
+  #   #   # frame.height = screen.height
+  #   #   # canvas.width = screen.width
+  #   #   # canvas.height = screen.height
+  #   #   bgCanvas.width = screen.width
+  #   #   bgCanvas.height = screen.height
 
-      drawBackground(bgCtx, sheet, 'starry_background.png')
+  #   #   drawBackground(bgCtx, sheet, 'starry_background.png')
 
-      box.x = canvas.width/2
-      box.y = canvas.height/2
-      # ctx.fillStyle = "rgb(0,0,0)"
-      # ctx.fillRect(0,0,canvas.width,canvas.height)
-      # ctx.fillRect(20,20,30,30)
-      # ctx.fillRect(100,100,30,30)
-      # ctx.fillRect(canvas.width-50,canvas.height-50,30,30)
-    else
-      #console.log('no!')
-      # canvas.width = WIDTH
-      # canvas.height = HEIGHT
+  #   #   # box.x = canvas.width/2
+  #   #   # box.y = canvas.height/2
+  #   #   # ctx.fillStyle = "rgb(0,0,0)"
+  #   #   # ctx.fillRect(0,0,canvas.width,canvas.height)
+  #   #   # ctx.fillRect(20,20,30,30)
+  #   #   # ctx.fillRect(100,100,30,30)
+  #   #   # ctx.fillRect(canvas.width-50,canvas.height-50,30,30)
+  #   # else
+  #   #   #console.log('no!')
+  #   #   # canvas.width = WIDTH
+  #   #   # canvas.height = HEIGHT
 
-      #console.log("#{window.innerWidth} x #{window.innerHeight}")
+  #   #   #console.log("#{window.innerWidth} x #{window.innerHeight}")
 
-      # This is kind of buggy. Sometimes does not properly reset dimensions to
-      # browser viewport
-      frame.width = window.innerWidth
-      frame.height = window.innerHeight
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      bgCanvas.width = window.innerWidth
-      bgCanvas.height = window.innerHeight
+  #   #   # This is kind of buggy. Sometimes does not properly reset dimensions to
+  #   #   # browser viewport
+  #   #   frame.width = window.innerWidth
+  #   #   frame.height = window.innerHeight
+  #   #   canvas.width = window.innerWidth
+  #   #   canvas.height = window.innerHeight
+  #   #   # bgCanvas.width = window.innerWidth
+  #   #   # bgCanvas.height = window.innerHeight
 
-      drawBackground(bgCtx, sheet, 'starry_background.png')
+  #   #   # drawBackground(bgCtx, sheet, 'starry_background.png')
 
 
-      box.x = canvas.width/2
-      box.y = canvas.height/2
-      # ctx.fillStyle = "rgb(0,0,0)"
-      # ctx.fillRect(0,0,canvas.width,canvas.height)
-      # ctx.fillStyle = "rgb(255,0,0)"
-      # ctx.fillRect(20,20,30,30)
-      # ctx.fillRect(100,100,30,30)
-  #document.addEventListener('webkitfullscreenchange mozfullscreenchange '
-  #  +'fullscreenchange', unfullscreen)
-  document.addEventListener('mozfullscreenchange', redrawfullscreenchange)
+  #   #   box.x = canvas.width/2
+  #   #   box.y = canvas.height/2
+  #   #   # ctx.fillStyle = "rgb(0,0,0)"
+  #   #   # ctx.fillRect(0,0,canvas.width,canvas.height)
+  #   #   # ctx.fillStyle = "rgb(255,0,0)"
+  #   #   # ctx.fillRect(20,20,30,30)
+  #   #   # ctx.fillRect(100,100,30,30)
+  # #document.addEventListener('webkitfullscreenchange mozfullscreenchange '
+  # #  +'fullscreenchange', unfullscreen)
+  # document.addEventListener('mozfullscreenchange', redrawfullscreenchange)
   canvasclick = ->
     # eheight: 619 -> 774 (diff of 155)
     if document.mozFullScreenElement or document.webkitFullScreenElement
@@ -223,3 +225,17 @@ $ ->
       # console.log(window.screen.availWidth + ' x '
       #   + window.screen.availHeight)
   frame.addEventListener('mousedown', canvasclick)
+
+  window.onresize = ->
+    console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
+    frame.width = window.innerWidth
+    frame.height = window.innerHeight
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    box.x = canvas.width/2
+    box.y = canvas.height/2
+
+    bgCanvas.style.left = Math.floor((canvas.width - bgCanvas.width)/2) + "px"
+    bgCanvas.style.top = Math.floor((canvas.height - bgCanvas.height)/2) + "px"
+
+    console.log("New bg pos: #{bgCanvas.left} x #{bgCanvas.top}")
