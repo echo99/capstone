@@ -23,6 +23,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
       exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
         if err
           # Should probably figure out way to handle this error
+          # However, if it got to this point, there should be no problems
           console.error err.toString().trim()
           #throw err
 
@@ -47,15 +48,10 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
 
 task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   console.log "Watching files #{SRC_DIR}/*.coffee"
-  # console.log "Note: This will only watch existing files"
-  # console.log "      You will have to rerun the command if you add any files"
 
-  #to_single_file = "--join ../public/app.js"
-  
-  # files = new Rehab().process './src'
-  # from_files = "--compile #{files.join ' '}"
-  # args = ['-cw', '--join', '../public/app.js']
-  # Array::push.apply args, files
+  # Get total number of files
+  files = new Rehab().process './src'
+  filesToProcess = files.length
 
   cmd = 'coffee'
   if process.platform == 'win32'
@@ -63,17 +59,14 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   args = ['-wp', SRC_DIR]
   coffee = spawn cmd, args
 
-  #coffee = spawn 'coffee', ['-cw', '--join', '../public/app.js', 'src']
   coffee.stdout.on 'data', (data) -> 
-    # files = new Rehab().process './src'
-    # from_files = "--compile #{files.join ' '}"
-    # args = ['-cw', '--join', '../public/app.js', 'src']
-    console.log "Recompiling files"
-    invoke 'build'
-  # Don't think we need to print out stderr stuff
-  # coffee.stderr.on 'data', (data) ->
-  #   console.log data.toString().trim()
-    #console.log data.toString().trim()
+    # Only compile the last time iterating throught all the files
+    if filesToProcess > 1
+      filesToProcess--
+      # console.log(filesToProcess + " files left")
+    else
+      console.log "Recompiling files"
+      invoke 'build'
 
 task 'integrate', 'Compile and combine all files', sbuild = ->
   invoke 'build'
