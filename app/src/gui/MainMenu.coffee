@@ -3,13 +3,13 @@ class MainMenu
 
   class PrivateMainMenu
     universeSize:
-      width: 400
+      width: 500
       height: 400
 
     planets: [
-      ['home', 200, 150, true],
+      ['home', 250, 150, true],
       ['missions', 50, 300, false],
-      ['quick play', 350, 300, false]
+      ['quick play', 450, 300, false]
     ]
 
     probe:

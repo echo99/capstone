@@ -45,6 +45,8 @@ SpriteNames =
   PROBE: 'probe.png'
   PLANETS: ['planet_blue.png']
   TITLE: 'title.png'
+  FULL_SCREEN: 'activate_full_screen_button.png'
+  UNFULL_SCREEN: 'deactivate_full_screen_button.png'
 
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas
@@ -69,18 +71,35 @@ drawBackground = (ctx, spritesheet, name) ->
     for yPos in yCoords
       spritesheet.drawSprite(name, xPos, yPos, ctx)
 
+updateCanvases = (frame, canvases...) ->
+  frameWidth = window.innerWidth
+  frameHeight = window.innerHeight
+  frame.width = frameWidth
+  frame.height = frameHeight
+  for canvas in canvases
+    canvas.width = frameWidth
+    canvas.height = frameHeight
+
 main = ->
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
   bgCanvas = document.getElementById('canvas-bg')
-  frame.width = window.innerWidth
-  frame.height = window.innerWidth
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
+  hudCanvas = document.getElementById('canvas-hud')
+  # frame.width = window.innerWidth
+  # frame.height = window.innerWidth
+  # canvas.width = window.innerWidth
+  # canvas.height = window.innerHeight
+  # hudCanvas.width = canvas.width
+  # hudCanvas.height = canvas.height
+  updateCanvases(frame, canvas, hudCanvas)
   bgCanvas.width = screen.width
   bgCanvas.height = screen.height
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
+  hudCtx = hudCanvas.getContext('2d')
+
+  fsCanvas = document.getElementById('fs-button')
+  fsCtx = fsCanvas.getContext('2d')
 
   sheet = SHEET
   if sheet == null
@@ -89,6 +108,8 @@ main = ->
   else
     console.log("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
+
+  sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
 
   # xhr = new XMLHttpRequest()
   # xhr.open('GET', 'assets/images/atlas.json', false)
@@ -110,6 +131,13 @@ main = ->
     if document.mozFullScreenElement or document.webkitFullScreenElement
       # Already at full screen!
       console.log "Already full screen!"
+      if document.cancelFullScreen
+        document.cancelFullScreen()
+      else if document.mozCancelFullScreen
+        document.mozCancelFullScreen()
+      else if document.webkitCancelFullScreen
+        document.webkitCancelFullScreen()
+      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
       # if not updatedSize
       #   unfullscreen()
       # updateSize = true
@@ -125,18 +153,21 @@ main = ->
         frame.mozRequestFullScreen()
       else if frame.webkitRequestFullscreen
         frame.webkitRequestFullscreen()
+      sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx)
       # maxWidth = window.outerWidth
       # maxHeight = window.outerHeight
       # console.log(window.screen.availWidth + ' x '
       #   + window.screen.availHeight)
-  frame.addEventListener('mousedown', canvasclick)
+  # frame.addEventListener('mousedown', canvasclick)
+  fsCanvas.addEventListener('mousedown', canvasclick)
 
   window.onresize = ->
     console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    frame.width = window.innerWidth
-    frame.height = window.innerHeight
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    # frame.width = window.innerWidth
+    # frame.height = window.innerHeight
+    # canvas.width = window.innerWidth
+    # canvas.height = window.innerHeight
+    updateCanvases(frame, canvas, hudCanvas)
     box.x = canvas.width/2
     box.y = canvas.height/2
 
@@ -144,6 +175,8 @@ main = ->
       bgCanvas.height = screen.height
       bgCanvas.width = screen.width
       drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
+    if not document.mozFullScreenElement and not document.webkitFullScreenElement
+      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
 
     bgCanvas.style.left = Math.floor((canvas.width - bgCanvas.width)/2) + "px"
     bgCanvas.style.top = Math.floor((canvas.height - bgCanvas.height)/2) + "px"

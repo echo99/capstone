@@ -22,3 +22,22 @@ body {
   top: 0px;
   left: 0px;*/
 }
+
+#canvas-hud {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+#hud {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+#fs-button {
+  position:absolute;
+  right:5px;
+  bottom:5px;
+  cursor:pointer;
+}
