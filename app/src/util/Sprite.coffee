@@ -1,6 +1,6 @@
 class Sprite
   ###
-  A simple sprite class for keeping track of a sprite's properties
+  # A simple sprite class for keeping track of a sprite's properties
   ###
   constructor: (@name, @x, @y, @w, @h, @cx, @cy) ->
     ###
@@ -15,21 +15,14 @@ class Sprite
     @param double cy - Center y-offset
     ###
 
-  draw: (img, x, y, ctx) -> 
-    ctx.drawImage(img, @x, @y, @w, @h, x + @cx, y + @cy, @w, @h)
-
-
-class AnimatedSprite extends Sprite
-  frames: []
+class AnimatedSprite
+  @drawCounter: 0
   currentFrame: 0
 
-  draw: (img, x, y, ctx) ->
-    curSprite = frames[currentFrame]
-    curSprite.draw(img, x, y, ctx)
-    currentFrame++
-    if currentFrame >= frames.length
-      currentFrame = 0
-
+  constructor: (@sprites, @interval = 1) ->
+   
   getCurrentFrame: ->
-    return currentFrame
+    if AnimatedSprite.drawCounter % @interval == 0
+      @currentFrame = (@currentFrame + 1) % @sprites.length
+    return @sprites[@currentFrame]
 

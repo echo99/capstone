@@ -113,9 +113,9 @@ class MainMenu
             ctx.restore()
 
           if planet[4]
-            sheet.drawSprite(SpriteNames.PLANETS[0], planet[1], planet[2], ctx, 0.5)
+            sheet.drawSprite(SpriteNames.PLANET_BLUE, planet[1], planet[2], ctx, 0.5)
           else
-            sheet.drawSprite(SpriteNames.PLANETS[1], planet[1], planet[2], ctx, 0.5)
+            sheet.drawSprite(SpriteNames.PLANET_INVISIBLE, planet[1], planet[2], ctx, 0.5)
 
           if planet[3]
             # @ctx.restore()
@@ -140,6 +140,8 @@ class MainMenu
           planetId++
         ctx.restore()
         sheet.drawSprite(SpriteNames.TITLE, canvas.width/2, 75, ctx)
+
+        AnimatedSprite.drawCounter++
 
       setInterval draw, 30
 

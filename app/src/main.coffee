@@ -44,15 +44,16 @@ Orientation =
   RIGHT: 4
 
 SpriteNames = 
-  BACKGROUND: 'starry_background.png'
-  ATTACK_SHIP: 'attack_ship.png'
-  DEFENSE_SHIP: 'defense_ship.png'
-  COLONY_SHIP: 'colony_ship.png'
-  PROBE: 'probe.png'
-  PLANETS: ['planet_blue.png', 'planet_invisible.png']
-  TITLE: 'title.png'
-  FULL_SCREEN: 'activate_full_screen_button.png'
-  UNFULL_SCREEN: 'deactivate_full_screen_button.png'
+  BACKGROUND: new AnimatedSprite(['starry_background.png'])
+  ATTACK_SHIP: new AnimatedSprite(['attack_ship.png'])
+  DEFENSE_SHIP: new AnimatedSprite(['defense_ship.png'])
+  COLONY_SHIP: new AnimatedSprite(['colony_ship.png'])
+  PROBE: new AnimatedSprite(['probe.png', 'attack_ship.png'], 15)
+  PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
+  PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
+  TITLE: new AnimatedSprite(['title.png'])
+  FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
+  UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
 
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas

@@ -43,25 +43,27 @@ class SpriteSheet
       console.warn("Overwritting existing sprite: #{name}")
     @sprites[name] = sprite
 
-  getSprite: (name) ->
+  getSprite: (animName) ->
     ###
     Returns the sprite with the given name from the sprite sheet if it exists
 
-    @param string name - Name of sprite
+    @param AnimatedSprite animName - Name of sprite
     @return Sprite object, if found, else null
     ###
+    name = animName.getCurrentFrame()
     return if name of @sprites then @sprites[name] else null
 
-  drawSprite: (name, x, y, ctx, scale = 1) ->
+  drawSprite: (animName, x, y, ctx, scale = 1) ->
     ###
     Draws the specified sprite to the canvas context
 
-    @param string name - Name of sprite
+    @param AnimatedSprite animName - Name of sprite
     @param int x - x-position to draw sprite
     @param int y - y-position to draw sprite
     @param CanvasRenderingContext2D ctx - Context to draw on
     @param double scale - (Optional) Scale to draw sprite at
     ###
+    name = animName.getCurrentFrame()
     if name of @sprites
       sprite = @sprites[name]
       # ctx.drawImage(@img, sprite.x, sprite.y, sprite.w, sprite.h,
