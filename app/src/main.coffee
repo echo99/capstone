@@ -31,6 +31,12 @@ $ ->
 WIDTH = 600
 HEIGHT = 400
 
+KeyCodes =
+  LEFT: 37
+  UP: 38
+  RIGHT: 39
+  DOWN: 40
+
 Orientation = 
   UP: 1
   DOWN: 2
@@ -43,7 +49,7 @@ SpriteNames =
   DEFENSE_SHIP: 'defense_ship.png'
   COLONY_SHIP: 'colony_ship.png'
   PROBE: 'probe.png'
-  PLANETS: ['planet_blue.png']
+  PLANETS: ['planet_blue.png', 'planet_invisible.png']
   TITLE: 'title.png'
   FULL_SCREEN: 'activate_full_screen_button.png'
   UNFULL_SCREEN: 'deactivate_full_screen_button.png'
@@ -147,12 +153,13 @@ main = ->
     else
       console.log "Not at full screen"
       # updatedSize = false
-      if frame.requestFullScreen
-        frame.requestFullScreen()
-      else if frame.mozRequestFullScreen
-        frame.mozRequestFullScreen()
-      else if frame.webkitRequestFullscreen
-        frame.webkitRequestFullscreen()
+      body = document.body
+      if body.requestFullScreen
+        body.requestFullScreen()
+      else if body.mozRequestFullScreen
+        body.mozRequestFullScreen()
+      else if body.webkitRequestFullscreen
+        body.webkitRequestFullscreen()
       sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx)
       # maxWidth = window.outerWidth
       # maxHeight = window.outerHeight
@@ -196,6 +203,18 @@ main = ->
 
   mm = MainMenu.get(ctx, sheet)
   mm.startAnim()
+
+  document.body.addEventListener('keydown', (e) ->
+    if e.keyCode == KeyCodes.LEFT
+      mm.moveLeft()
+    else if e.keyCode == KeyCodes.RIGHT
+      mm.moveRight())
+
+  document.body.addEventListener('mousemove', (e) ->
+    mm.mouseMove(e.clientX, e.clientY))
+
+  document.body.addEventListener('click', (e) ->
+    mm.click(e.clientX, e.clientY))
   # ships = [
   #     orbitRadius: 200
   #     angularVelocity: Math.PI / 150
