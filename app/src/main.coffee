@@ -48,12 +48,14 @@ SpriteNames =
   ATTACK_SHIP: new AnimatedSprite(['attack_ship.png'])
   DEFENSE_SHIP: new AnimatedSprite(['defense_ship.png'])
   COLONY_SHIP: new AnimatedSprite(['colony_ship.png'])
-  PROBE: new AnimatedSprite(['probe.png', 'attack_ship.png'], 15)
+  PROBE: new AnimatedSprite(['probe.png'])
   PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
   PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
   TITLE: new AnimatedSprite(['title.png'])
   FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
   UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
+  OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
+  'outpost_buildings_gathering_2.png'], 30)
 
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas
