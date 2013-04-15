@@ -55,7 +55,9 @@ SpriteNames =
   FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
   UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
   OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
-  'outpost_buildings_gathering_2.png'], 30)
+    'outpost_buildings_gathering_2.png'], 30)
+  WARP_GATE: new AnimatedSprite(['warp_gate_1.png', 'warp_gate_2.png',
+    'warp_gate_3.png', 'warp_gate_4.png'], 3)
 
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas

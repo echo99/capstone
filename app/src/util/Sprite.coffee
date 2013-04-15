@@ -17,12 +17,14 @@ class Sprite
 
 class AnimatedSprite
   @drawCounter: 0
+  prevCounter: -1
   currentFrame: 0
 
   constructor: (@sprites, @interval = 1) ->
    
   getCurrentFrame: ->
-    if AnimatedSprite.drawCounter % @interval == 0
-      @currentFrame = (@currentFrame + 1) % @sprites.length
+    if @prevCounter != AnimatedSprite.drawCounter
+      @prevCounter = AnimatedSprite.drawCounter
+      if AnimatedSprite.drawCounter % @interval == 0
+        @currentFrame = (@currentFrame + 1) % @sprites.length
     return @sprites[@currentFrame]
-

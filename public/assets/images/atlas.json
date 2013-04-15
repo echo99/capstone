@@ -2,19 +2,19 @@
 
 "activate_full_screen_button.png" :
 {
-	"frame": {"x":36,"y":2023,"w":16,"h":16},
+	"frame": {"x":0,"y":2023,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "attack_ship.png" :
 {
-	"frame": {"x":67,"y":1729,"w":32,"h":30},
+	"frame": {"x":67,"y":1833,"w":32,"h":30},
 	"spriteSourceSize": {"x":0,"y":1,"w":32,"h":30},
 	"sourceSize": {"w":32,"h":32}
 },
 "attack_ship_construction.png" :
 {
-	"frame": {"x":67,"y":1697,"w":32,"h":30},
+	"frame": {"x":67,"y":1865,"w":32,"h":30},
 	"spriteSourceSize": {"x":192,"y":28,"w":32,"h":30},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -50,37 +50,37 @@
 },
 "defense_ship.png" :
 {
-	"frame": {"x":67,"y":1795,"w":30,"h":32},
+	"frame": {"x":67,"y":1897,"w":30,"h":32},
 	"spriteSourceSize": {"x":1,"y":0,"w":30,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "defense_ship_construction.png" :
 {
-	"frame": {"x":67,"y":1829,"w":30,"h":32},
+	"frame": {"x":67,"y":1931,"w":30,"h":32},
 	"spriteSourceSize": {"x":193,"y":28,"w":30,"h":32},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_buildings_gathering_1.png" :
 {
-	"frame": {"x":0,"y":1862,"w":65,"h":57},
+	"frame": {"x":0,"y":1588,"w":65,"h":57},
 	"spriteSourceSize": {"x":99,"y":45,"w":65,"h":57},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_buildings_gathering_2.png" :
 {
-	"frame": {"x":0,"y":1803,"w":65,"h":57},
+	"frame": {"x":0,"y":1706,"w":65,"h":57},
 	"spriteSourceSize": {"x":99,"y":45,"w":65,"h":57},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_buildings_not_gathering.png" :
 {
-	"frame": {"x":0,"y":1640,"w":65,"h":57},
+	"frame": {"x":0,"y":1647,"w":65,"h":57},
 	"spriteSourceSize": {"x":99,"y":45,"w":65,"h":57},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_construction.png" :
 {
-	"frame": {"x":0,"y":1921,"w":65,"h":66},
+	"frame": {"x":0,"y":1817,"w":65,"h":66},
 	"spriteSourceSize": {"x":99,"y":36,"w":65,"h":66},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -92,7 +92,7 @@
 },
 "planet_blue_fungus.png" :
 {
-	"frame": {"x":0,"y":576,"w":256,"h":256},
+	"frame": {"x":0,"y":834,"w":256,"h":256},
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -104,31 +104,31 @@
 },
 "planet_invisible_fungus.png" :
 {
-	"frame": {"x":0,"y":834,"w":256,"h":256},
+	"frame": {"x":0,"y":576,"w":256,"h":256},
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
 "probe.png" :
 {
-	"frame": {"x":67,"y":1863,"w":26,"h":32},
+	"frame": {"x":99,"y":1897,"w":26,"h":32},
 	"spriteSourceSize": {"x":3,"y":0,"w":26,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "probe_construction.png" :
 {
-	"frame": {"x":0,"y":2023,"w":16,"h":16},
-	"spriteSourceSize": {"x":200,"y":36,"w":16,"h":16},
+	"frame": {"x":36,"y":2023,"w":8,"h":16},
+	"spriteSourceSize": {"x":204,"y":36,"w":8,"h":16},
 	"sourceSize": {"w":256,"h":256}
 },
 "send_resources_button_hover.png" :
 {
-	"frame": {"x":0,"y":1544,"w":125,"h":20},
+	"frame": {"x":0,"y":1566,"w":125,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":20},
 	"sourceSize": {"w":125,"h":20}
 },
 "send_resources_button_idle.png" :
 {
-	"frame": {"x":0,"y":1566,"w":125,"h":20},
+	"frame": {"x":0,"y":1544,"w":125,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":20},
 	"sourceSize": {"w":125,"h":20}
 },
@@ -140,19 +140,19 @@
 },
 "station_buildings_gathering_1.png" :
 {
-	"frame": {"x":0,"y":1588,"w":65,"h":50},
+	"frame": {"x":0,"y":1937,"w":65,"h":50},
 	"spriteSourceSize": {"x":99,"y":52,"w":65,"h":50},
 	"sourceSize": {"w":256,"h":256}
 },
 "station_buildings_gathering_2.png" :
 {
-	"frame": {"x":0,"y":1699,"w":65,"h":50},
+	"frame": {"x":0,"y":1885,"w":65,"h":50},
 	"spriteSourceSize": {"x":99,"y":52,"w":65,"h":50},
 	"sourceSize": {"w":256,"h":256}
 },
 "station_buildings_not_gathering.png" :
 {
-	"frame": {"x":0,"y":1751,"w":65,"h":50},
+	"frame": {"x":0,"y":1765,"w":65,"h":50},
 	"spriteSourceSize": {"x":99,"y":52,"w":65,"h":50},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -180,9 +180,27 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":434,"h":60},
 	"sourceSize": {"w":434,"h":60}
 },
-"warp_gate.png" :
+"warp_gate_1.png" :
 {
-	"frame": {"x":67,"y":1761,"w":32,"h":32},
+	"frame": {"x":67,"y":1697,"w":32,"h":32},
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"warp_gate_2.png" :
+{
+	"frame": {"x":67,"y":1799,"w":32,"h":32},
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"warp_gate_3.png" :
+{
+	"frame": {"x":67,"y":1731,"w":32,"h":32},
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"warp_gate_4.png" :
+{
+	"frame": {"x":67,"y":1765,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 }
