@@ -64,8 +64,8 @@ class MainMenu
         # xPos = (canvas.width/2) - (univSize.width/2)
         # yPos = (canvas.height/2) - (univSize.height/2)
 
-        xPos = (canvas.width/2) - (planets[that.selPlanet][1])
-        yPos = (canvas.height/2) - (planets[that.selPlanet][2])
+        xPos = Math.floor((canvas.width/2) - (planets[that.selPlanet][1]))
+        yPos = Math.floor((canvas.height/2) - (planets[that.selPlanet][2]))
         that.offsetX = xPos
         that.offsetY = yPos
 
@@ -90,6 +90,7 @@ class MainMenu
         ctx.strokeStyle = 'rgba(255,255,255,0.5)'
 
         planetId = 0
+        selPlan = null
         for planet in planets
           dx = mx - planet[1]
           dy = my - planet[2]
@@ -134,11 +135,20 @@ class MainMenu
             ctx.restore()
             ctx.strokeStyle = 'white'
             ctx.strokeText(planet[0], planet[1], planet[2] - 45);
+            selPlan = planet
             # @ctx.translate(xPos, yPos)
           else
             ctx.strokeStyle = 'rgba(255,255,255,0.5)'
             ctx.strokeText(planet[0], planet[1], planet[2] - 45);
           planetId++
+        
+        # grd = ctx.createRadialGradient(selPlan[1], selPlan[2], 256,
+        #   selPlan[1], selPlan[2], 512)
+        # grd.addColorStop(0, 'rgba(8,8,8,0)')
+        # grd.addColorStop(1, 'rgba(8,8,8,0.5)')
+        # ctx.fillStyle = grd
+        # ctx.fillRect(-xPos, -yPos, canvas.width, canvas.height)
+        
         ctx.restore()
         sheet.drawSprite(SpriteNames.TITLE, canvas.width/2, 75, ctx)
 

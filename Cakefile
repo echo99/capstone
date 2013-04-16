@@ -244,5 +244,3 @@ task 'lint', 'Check CoffeeScript for lint', ->
           console.error "   #{level}  Line #{res.lineNumber}: #{res.message}"
       else
         console.log "#{pass}  #{shortPath}".green
-
-task 'doc', 
