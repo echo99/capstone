@@ -1,3 +1,8 @@
+###
+# NOTE: This file is now depricated. Please use the Cakefile located at the
+# root of the repo.
+###
+
 fs = require 'fs'
 path = require 'path'
 {spawn, exec} = require 'child_process'
@@ -194,7 +199,7 @@ task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
     console.error('Please install using "npm install -g uglify-js"')
     process.exit(error.code)
 
-  exec "uglifyjs test.js -o #{APP_JS}", (err, stdout, stderr) ->
+  exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
     if err
       if process.platform == 'win32'
         # Handle Windows errors
