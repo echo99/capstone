@@ -3,6 +3,7 @@
 #_require util/SpriteSheet
 #_require util/AtlasParser
 #_require gui/MainMenu
+#_require missions/Menu
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -26,11 +27,6 @@ $ ->
   if IMAGE_LOADED
     main()
 
-# WIDTH = 720
-# HEIGHT = 500
-WIDTH = 600
-HEIGHT = 400
-
 KeyCodes =
   LEFT: 37
   UP: 38
@@ -43,21 +39,9 @@ Orientation =
   LEFT: 3
   RIGHT: 4
 
-SpriteNames = 
-  BACKGROUND: new AnimatedSprite(['starry_background.png'])
-  ATTACK_SHIP: new AnimatedSprite(['attack_ship.png'])
-  DEFENSE_SHIP: new AnimatedSprite(['defense_ship.png'])
-  COLONY_SHIP: new AnimatedSprite(['colony_ship.png'])
-  PROBE: new AnimatedSprite(['probe.png'])
-  PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
-  PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
-  TITLE: new AnimatedSprite(['title.png'])
-  FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
-  UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
-  OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
-    'outpost_buildings_gathering_2.png'], 30)
-  WARP_GATE: new AnimatedSprite(['warp_gate_1.png', 'warp_gate_2.png',
-    'warp_gate_3.png', 'warp_gate_4.png'], 3)
+SpriteNames = window.config.spriteNames
+
+CurrentMission = new Menu()
 
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas
@@ -81,6 +65,26 @@ drawBackground = (ctx, spritesheet, name) ->
   for xPos in xCoords
     for yPos in yCoords
       spritesheet.drawSprite(name, xPos, yPos, ctx)
+
+drawHUD = (ctx, spritesheet) ->
+  winStyle = window.config.windowStyle
+  ctx.fillStyle = winStyle.fill #"rgba(0, 37, 255, 0.5)"
+  ctx.strokeStyle = winStyle.stroke #"rgba(0, 37, 255, 1)"
+  ctx.lineJoin = winStyle.lineJoin #"bevel"
+  ctx.lineWidth = winStyle.lineWidth #5
+  ctx.font = winStyle.title.font #"15px Arial"
+  ctx.fillRect(50, 50, 105, 100)
+  ctx.strokeRect(50, 50, 105, 100)
+  ctx.beginPath()
+  ctx.moveTo(50, 73)
+  ctx.lineTo(155, 73)
+  ctx.stroke()
+  ctx.fillStyle = winStyle.title.color #"rgba(255, 255, 255, 1)"
+  ctx.fillText("Selected Units", 57, 67)
+  ctx.fillStyle = winStyle.value.color #"rgba(255, 255, 0, 1)"
+  ctx.fillText("1", 110, 105)
+
+  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
 
 updateCanvases = (frame, canvases...) ->
   frameWidth = window.innerWidth
