@@ -3,6 +3,7 @@
 #_require util/SpriteSheet
 #_require util/AtlasParser
 #_require gui/MainMenu
+#_require backend/Planet
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
