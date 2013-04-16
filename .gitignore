@@ -1,6 +1,10 @@
 # Compiled files
 public/app.js
 public/vendor.js
+docs
+
+# Node modules
+node_modules
 
 # Python
 *.pyc

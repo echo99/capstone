@@ -14,6 +14,8 @@ requireOrExit = (moduleName) ->
     return null
 
 # Dependencies
+coffeelint = null
+Rehab = null
 getDependencies = ->
   colors = requireOrExit('colors')
   coffeelint = requireOrExit('coffeelint')
@@ -21,10 +23,10 @@ getDependencies = ->
 getDependencies()
 
 # Constants
-APP_JS = '../public/app.js'
-VENDOR_JS = '../public/vendor.js'
-SRC_DIR = 'src'
-VENDOR_DIR = '../vendor/scripts'
+APP_JS = 'public/app.js'
+VENDOR_JS = 'public/vendor.js'
+SRC_DIR = 'app/src'
+VENDOR_DIR = 'vendor/scripts'
 
 coffeeLintConfig =
   no_tabs:
@@ -242,3 +244,5 @@ task 'lint', 'Check CoffeeScript for lint', ->
           console.error "   #{level}  Line #{res.lineNumber}: #{res.message}"
       else
         console.log "#{pass}  #{shortPath}".green
+
+task 'doc', 
