@@ -7,6 +7,14 @@ fs = require 'fs'
 path = require 'path'
 {spawn, exec} = require 'child_process'
 
+try
+  colors = require 'colors'
+  console.warn('WARNING: YOU ARE CURRENTLY USING A DEPRECATED CAKEFILE!'.bold.yellow)
+  console.warn('PLEASE USE THE CAKEFILE LOCATED IN THE ROOT DIRECTORY.'.bold.yellow)
+catch error
+  console.warn('WARNING: YOU ARE CURRENTLY USING A DEPRECATED CAKEFILE!')
+  console.warn('PLEASE USE THE CAKEFILE LOCATED IN THE ROOT DIRECTORY.')
+
 # Add to list any modules that cannot be found
 missingModules = []
 requireOrExit = (moduleName) ->
