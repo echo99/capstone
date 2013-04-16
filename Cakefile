@@ -27,6 +27,11 @@ APP_JS = 'public/app.js'
 VENDOR_JS = 'public/vendor.js'
 SRC_DIR = 'app/src'
 VENDOR_DIR = 'vendor/scripts'
+if process.platform == 'win32'
+  APP_JS = 'public\\app.js'
+  VENDOR_JS = 'public\\vendor.js'
+  SRC_DIR = 'app\\src'
+  VENDOR_DIR = 'vendor\\scripts'
 
 coffeeLintConfig =
   no_tabs:
