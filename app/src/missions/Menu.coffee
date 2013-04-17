@@ -4,7 +4,7 @@ class Menu extends Mission
   reset: ->
     # Load user progress
     #   Add fungus to locked mission planets
-    # 
+    #
     # Create plants:
     #   Home -> Missions, Open, Credits
     #   Missions -> Mission 1, etc.

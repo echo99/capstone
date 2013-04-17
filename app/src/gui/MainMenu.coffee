@@ -40,7 +40,8 @@ class MainMenu
       # yPos = (canvas.height/2) - (@universeSize.height/2)
       # ctx.translate(xPos, yPos)
       # for planet in @planets
-      #   sheet.drawSprite(SpriteNames.PLANETS[0], planet[1], planet[2], ctx, 0.5)
+      #   sheet.drawSprite(SpriteNames.PLANETS[0], planet[1], planet[2], ctx,
+      #                    0.5)
       # ctx.restore()
       ctx.font = '15px sans-serif'
       ctx.textAlign = 'center'
@@ -75,15 +76,15 @@ class MainMenu
 
         ctx.translate(xPos, yPos)
 
-        ctx.save();
-        ctx.strokeStyle = 'rgba(200,200,200,0.3)';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(planets[1][1], planets[1][2]);
-        ctx.lineTo(planets[0][1], planets[0][2]);
-        ctx.lineTo(planets[2][1], planets[2][2]);
-        ctx.stroke();
-        ctx.restore();
+        ctx.save()
+        ctx.strokeStyle = 'rgba(200,200,200,0.3)'
+        ctx.lineWidth = 6
+        ctx.beginPath()
+        ctx.moveTo(planets[1][1], planets[1][2])
+        ctx.lineTo(planets[0][1], planets[0][2])
+        ctx.lineTo(planets[2][1], planets[2][2])
+        ctx.stroke()
+        ctx.restore()
 
         ctx.font = '15px sans-serif'
         ctx.textAlign = 'center'
@@ -103,8 +104,8 @@ class MainMenu
             # ctx.fill();
             # create radial gradient (x1, y1, r1, x2, y2, r2)
             ctx.save()
-            ctx.beginPath();
-            ctx.arc(planet[1], planet[2], 50, 0, 2 * Math.PI, false);
+            ctx.beginPath()
+            ctx.arc(planet[1], planet[2], 50, 0, 2 * Math.PI, false)
             grd = ctx.createRadialGradient(planet[1], planet[2], 20,
               planet[1], planet[2], 50)
             grd.addColorStop(0, 'white')
@@ -114,10 +115,13 @@ class MainMenu
             ctx.restore()
 
           if planet[4]
-            sheet.drawSprite(SpriteNames.PLANET_BLUE, planet[1], planet[2], ctx, 0.5)
-            sheet.drawSprite(SpriteNames.WARP_GATE, planet[1], planet[2], ctx, 1)
+            sheet.drawSprite(SpriteNames.PLANET_BLUE, planet[1], planet[2],
+                             ctx, 0.5)
+            sheet.drawSprite(SpriteNames.WARP_GATE, planet[1], planet[2],
+                             ctx, 1)
           else
-            sheet.drawSprite(SpriteNames.PLANET_INVISIBLE, planet[1], planet[2], ctx, 0.5)
+            sheet.drawSprite(SpriteNames.PLANET_INVISIBLE, planet[1], planet[2],
+                             ctx, 0.5)
 
           if planet[3]
             # @ctx.restore()
@@ -125,21 +129,21 @@ class MainMenu
             # @ctx.translate(xPos + planet[1], yPos + planet[2])
             ctx.translate(planet[1], planet[2])
             ctx.beginPath()
-            ctx.arc(0, 0, probe.orbitRadius, 0, 2*Math.PI, false);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(200,200,100,0.3)';
-            ctx.stroke();
+            ctx.arc(0, 0, probe.orbitRadius, 0, 2*Math.PI, false)
+            ctx.lineWidth = 2
+            ctx.strokeStyle = 'rgba(200,200,100,0.3)'
+            ctx.stroke()
             ctx.rotate(probe.angle)
             probe.angle += probe.angularVelocity
             sheet.drawSprite(SpriteNames.PROBE, 0, -probe.orbitRadius, ctx)
             ctx.restore()
             ctx.strokeStyle = 'white'
-            ctx.strokeText(planet[0], planet[1], planet[2] - 45);
+            ctx.strokeText(planet[0], planet[1], planet[2] - 45)
             selPlan = planet
             # @ctx.translate(xPos, yPos)
           else
             ctx.strokeStyle = 'rgba(255,255,255,0.5)'
-            ctx.strokeText(planet[0], planet[1], planet[2] - 45);
+            ctx.strokeText(planet[0], planet[1], planet[2] - 45)
           planetId++
         
         # grd = ctx.createRadialGradient(selPlan[1], selPlan[2], 256,

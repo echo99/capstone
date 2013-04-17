@@ -34,7 +34,7 @@ KeyCodes =
   RIGHT: 39
   DOWN: 40
 
-Orientation = 
+Orientation =
   UP: 1
   DOWN: 2
   LEFT: 3
@@ -192,7 +192,8 @@ main = ->
       bgCanvas.height = screen.height
       bgCanvas.width = screen.width
       drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
-    if not document.mozFullScreenElement and not document.webkitFullScreenElement
+    if not document.mozFullScreenElement and
+        not document.webkitFullScreenElement
       sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
 
     bgCanvas.style.left = Math.floor((canvas.width - bgCanvas.width)/2) + "px"

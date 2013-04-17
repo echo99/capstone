@@ -58,7 +58,7 @@ coffeeLintConfig =
     level: 'warn'
   line_endings:
     value: 'unix'
-    level: 'warn'
+    level: 'ignore'
 
 ###############################################################################
 # Helper functions
@@ -146,6 +146,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
           else
             console.log('Build successful!'.green)
             console.log()
+          invoke 'lint'
       # else
       #   console.log('Build failed!'.red)
       #   console.log()
@@ -254,7 +255,6 @@ task 'lint', 'Check CoffeeScript for lint', ->
           console.error "#{level}  #{shortPath}".red
           for res in result
             level = if res.level is 'error' then fail else warn
-            console.error("   #{level}  Line #{res.lineNumber}: "
-              + res.message)
+            console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
         else
           console.log("#{pass}  #{shortPath}".green)
