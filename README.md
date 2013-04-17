@@ -98,14 +98,14 @@ IDEs and Plugins
 
 
 ### NetBeans
-[NetBeans](https://netbeans.org/)
+[NetBeans](https://netbeans.org/)  
 [NetBeans CoffeeScript Plugin](http://plugins.netbeans.org/plugin/39007)
 
 ### Sublime Text 2
 [Sublime Text 2](http://www.sublimetext.com/2)  
-[Sublime Better CoffeeScript](https://github.com/aponxi/sublime-better-coffeescript)
-  - CoffeeScript syntax highlighting and more
-[CoffeeComplete Plus](https://github.com/justinmahar/SublimeCSAutocompletePlus#customizing-autocomplete-trigger)
-  - CoffeeScript autocompletion
-[SublimeLinter](https://github.com/slang800/SublimeLinter)
-  - Sublime Text linter with CoffeeScript support
+[Sublime Better CoffeeScript](https://github.com/aponxi/sublime-better-coffeescript) -
+  CoffeeScript syntax highlighting and more  
+[CoffeeComplete Plus](https://github.com/justinmahar/SublimeCSAutocompletePlus#customizing-autocomplete-trigger) -
+  CoffeeScript autocompletion  
+[SublimeLinter](https://github.com/slang800/SublimeLinter) -
+  Sublime Text linter with CoffeeScript support
