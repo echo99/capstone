@@ -3,8 +3,9 @@
 #_require util/SpriteSheet
 #_require util/AtlasParser
 #_require gui/MainMenu
-#_require backend/Planet
 #_require missions/Menu
+#_require gui/UserInterface
+#_require util/Camera
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -41,6 +42,9 @@ Orientation =
   RIGHT: 4
 
 SpriteNames = window.config.spriteNames
+
+UI = new UserInterface()
+camera = new Camera(0, 0, 0, 0,)
 
 CurrentMission = new Menu()
 

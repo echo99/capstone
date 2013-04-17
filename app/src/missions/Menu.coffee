@@ -29,7 +29,7 @@ class Menu extends Mission
     # if drawing a prompt
     #   check mouse position against the button positions
 
-  onMouseClick: ->
+  onMouseClick: (x, y) ->
     # if the probe has been set to move to a new planet
     #   advance the turn
     # NOTE: this assumes that the game handle the mouse click first,

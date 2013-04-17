@@ -10,6 +10,6 @@ class Mission
 
   onMouseMove: (x, y) ->
 
-  onMouseClick: ->
+  onMouseClick: (x, y) ->
 
   onEndTurn: ->
