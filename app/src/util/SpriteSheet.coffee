@@ -5,24 +5,25 @@
 class SpriteSheet
   img: null
   sprites: {}
-  
+
   # Create a new SpriteSheet
   #
-  # @param [String] path - Path to sprite sheet image
+  # @param [String] path Path to sprite sheet image
   #
   constructor: (@path) ->
-  
+
   # Load the image from path, executing the callback function when done
   #
-  # @param [Function] callback - Function to call once image is loaded
+  # @param [Function] callback Function to call once image is loaded
   #
   loadImage: (callback) ->
     @_loadAtlasImage(callback)
 
-  # (Private) Do the actual image loading (is this abstraction even needed?)
+  # Do the actual image loading (is this abstraction even needed?)
   #
-  # @param [Function] callback - Function to call once image is loaded
+  # @param [Function] callback Function to call once image is loaded
   #
+  # @private
   _loadAtlasImage: (callback) ->
     @img = new Image()
     @img.onload = callback
@@ -30,7 +31,7 @@ class SpriteSheet
 
   # Add a sprite definition to the sprite sheet
   #
-  # @param [Sprite] sprite - Sprite object to add
+  # @param [Sprite] sprite Sprite object to add
   #
   addSprite: (sprite) ->
     name = sprite.name
@@ -40,7 +41,7 @@ class SpriteSheet
 
   # Returns the sprite with the given name from the sprite sheet if it exists
   #
-  # @param [AnimatedSprite] animName - Name of sprite
+  # @param [AnimatedSprite] animName Name of sprite
   # @return [Sprite] sprite, if found, else null
   #
   getSprite: (animName) ->
@@ -49,11 +50,11 @@ class SpriteSheet
 
   # Draws the specified sprite to the canvas context
   #
-  # @param [AnimatedSprite] animName - Name of sprite
-  # @param [Number] x - x-position to draw sprite
-  # @param [Number] y - y-position to draw sprite
+  # @param [AnimatedSprite] animName Name of sprite
+  # @param [Number] x x-position to draw sprite
+  # @param [Number] y y-position to draw sprite
   # @param [CanvasRenderingContext2D] ctx - Context to draw on
-  # @param [Double] scale - (Optional) Scale to draw sprite at
+  # @param [Number] scale (Optional) Scale to draw sprite at
   #
   drawSprite: (animName, x, y, ctx, scale = 1) ->
     name = animName.getCurrentFrame()

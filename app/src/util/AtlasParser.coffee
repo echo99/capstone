@@ -1,26 +1,23 @@
 #_require Sprite
 #_require SpriteSheet
 
+# A utility class that parses atlas data in JSON format and adds the data into
+# the corresponding sprite sheet.
+#
 class AtlasParser
-  ###
-  A utility class that parses atlas data in JSON format and adds the data into
-  the corresponding sprite sheet.
-  ###
 
+  # Create a new AtlasParser
+  #
+  # @param [SpriteSheet] spritesheet The SpriteSheet object asoociated with the
+  #     atlas data
+  # @param [JSONObject] jsonData The atlas data in JSON format
+  #
   constructor: (@spritesheet, @jsonData) ->
-    ###
-    Create a new AtlasParser
 
-    @param SpriteSheet spritesheet - The SpriteSheet object asoociated with the
-      atlas data
-    @param JSONObject jsonData - The atlas data in JSON format
-    ###
-
+  # Parse the atlas data attached to this AtlasParser and send it to the
+  # attached spritesheet
+  #
   parseDataToSheet: ->
-    ###
-    Parse the atlas data attached to this AtlasParser and send it to the
-    attached spritesheet
-    ###
     sheet = @spritesheet
     frames = @jsonData.frames
     for spriteName, spriteData of frames
