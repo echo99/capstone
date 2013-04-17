@@ -5,15 +5,15 @@ body {
 
 #frame {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   overflow: hidden;
 }
 
 #canvas-bg {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   z-index: -1;
 }
 
@@ -25,19 +25,19 @@ body {
 
 #canvas-hud {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
 }
 
 #hud {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
 }
 
 #fs-button {
   position:absolute;
-  right:5px;
-  bottom:5px;
+  right: 5px;
+  bottom: 5px;
   cursor:pointer;
 }

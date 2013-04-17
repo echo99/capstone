@@ -1,19 +1,6 @@
-###
-# NOTE: This file is now depricated. Please use the Cakefile located at the
-# root of the repo.
-###
-
 fs = require 'fs'
 path = require 'path'
 {spawn, exec} = require 'child_process'
-
-try
-  colors = require 'colors'
-  console.warn('WARNING: YOU ARE CURRENTLY USING A DEPRECATED CAKEFILE!'.bold.yellow)
-  console.warn('PLEASE USE THE CAKEFILE LOCATED IN THE ROOT DIRECTORY.'.bold.yellow)
-catch error
-  console.warn('WARNING: YOU ARE CURRENTLY USING A DEPRECATED CAKEFILE!')
-  console.warn('PLEASE USE THE CAKEFILE LOCATED IN THE ROOT DIRECTORY.')
 
 # Add to list any modules that cannot be found
 missingModules = []
@@ -36,10 +23,10 @@ getDependencies = ->
 getDependencies()
 
 # Constants
-APP_JS = '../public/app.js'
-VENDOR_JS = '../public/vendor.js'
-SRC_DIR = 'src'
-VENDOR_DIR = '../vendor/scripts'
+APP_JS = 'public/app.js'
+VENDOR_JS = 'public/vendor.js'
+SRC_DIR = 'app/src'
+VENDOR_DIR = 'vendor/scripts'
 
 coffeeLintConfig =
   no_tabs:
@@ -114,7 +101,7 @@ checkSyntax = (callback) ->
 
   exec "coffee -p -c #{SRC_DIR} > #{nulDir}", (err, stdout, stderr) ->
     if err
-      console.error err.toString().trim()
+      console.error(err.toString().trim().red)
       callback(false)
     else
       callback(true)
@@ -136,7 +123,7 @@ getSourceFilePaths = (dirPath = SRC_DIR) ->
 
 task 'build', 'Build coffee2js using Rehab', sbuild = ->
   checkDep ->
-    console.log "Building project from #{SRC_DIR}/*.coffee to #{APP_JS}"
+    console.log("Building project from #{SRC_DIR}/*.coffee to #{APP_JS}...".yellow)
     # Try to compile all files individually first, to get a better
     # error message, then if it succeeds, compile them all to one file
     callback = (passed) ->
@@ -150,12 +137,18 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
           if err
             # Should probably figure out way to handle this error
             # However, if it got to this point, there should be no problems
-            console.error err.toString().trim()
-            #throw err
+            console.error(err.toString().trim().red)
+          else
+            console.log('Build successful!'.green)
+            console.log()
+      # else
+      #   console.log('Build failed!'.red)
+      #   console.log()
+
     checkSyntax(callback)
 
 task 'vendcomp', 'Combine vendor scripts into one file', ->
-  console.log "Combining vendor scripts to #{VENDOR_JS}"
+  console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
   scripts = ''
   dir = VENDOR_DIR
   files = fs.readdirSync dir
@@ -167,13 +160,13 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   try
     fs.writeFile VENDOR_JS, scripts
   catch err
-    console.log err
+    console.log(err)
   # exec 'echo "hi2"'
   #exec "echo #{scripts} > ../public/vendor.js"
 
 task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   checkDep ->
-    console.log "Watching files #{SRC_DIR}/*.coffee"
+    console.log("Watching files #{SRC_DIR}/*.coffee".yellow)
 
     # Get total number of files
     files = new Rehab().process './'+SRC_DIR
@@ -191,7 +184,7 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
         filesToProcess--
         # console.log(filesToProcess + " files left")
       else
-        console.log "Recompiling files"
+        #console.log('Recompiling files...'.yellow)
         invoke 'build'
 
 task 'integrate', 'Compile and combine all files', sbuild = ->
@@ -225,35 +218,38 @@ task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
       throw err
 
 task 'check', 'Temporarily compiles coffee files to check syntax', ->
-  passFunc = (passed) ->
-    if passed
-      console.log("No errors found")
-  checkSyntax(passFunc)
-
-task 'print', 'Do stuff', ->
   checkDep ->
-    console.log('hello!')
-    console.log()
-    console.log('hello!'.green)
+    passFunc = (passed) ->
+      if passed
+        console.log("No errors found".green)
+    checkSyntax(passFunc)
+
+# task 'print', 'Do stuff', ->
+#   checkDep ->
+#     console.log('hello!')
+#     console.log()
+#     console.log('hello!'.green)
 
 task 'install-dep', 'Install all necessary node modules', ->
   installDep()
 
 task 'lint', 'Check CoffeeScript for lint', ->
-  console.log "Checking *.coffee for lint".yellow
-  pass = "✔".green
-  warn = "⚠".yellow
-  fail = "✖".red
-  getSourceFilePaths().forEach (filepath) ->
-    fs.readFile filepath, (err, data) ->
-      shortPath = filepath.substr SRC_DIR.length + 1
-      result = coffeelint.lint data.toString(), coffeeLintConfig
-      if result.length
-        hasError = result.some (res) -> res.level is 'error'
-        level = if hasError then fail else warn
-        console.error "#{level}  #{shortPath}".red
-        for res in result
-          level = if res.level is 'error' then fail else warn
-          console.error "   #{level}  Line #{res.lineNumber}: #{res.message}"
-      else
-        console.log "#{pass}  #{shortPath}".green
+  checkDep ->
+    console.log("Checking #{SRC_DIR}/*.coffee for lint".yellow)
+    pass = "✔".green
+    warn = "⚠".yellow
+    fail = "✖".red
+    getSourceFilePaths().forEach (filepath) ->
+      fs.readFile filepath, (err, data) ->
+        shortPath = filepath.substr SRC_DIR.length + 1
+        result = coffeelint.lint data.toString(), coffeeLintConfig
+        if result.length
+          hasError = result.some (res) -> res.level is 'error'
+          level = if hasError then fail else warn
+          console.error "#{level}  #{shortPath}".red
+          for res in result
+            level = if res.level is 'error' then fail else warn
+            console.error("   #{level}  Line #{res.lineNumber}: "
+              + res.message)
+        else
+          console.log("#{pass}  #{shortPath}".green)
