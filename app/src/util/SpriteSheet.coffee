@@ -1,68 +1,61 @@
 #_require Sprite
 
+# A class for handling atlases and sprite sheets
+#
 class SpriteSheet
-  ###
-  A class for handling atlases and sprite sheets
-  ###
   img: null
   sprites: {}
-
-  constructor: (@path) ->
-    ###
-    Create a new SpriteSheet
-
-    @param string path - Path to sprite sheet image
-    ###
   
+  # Create a new SpriteSheet
+  #
+  # @param [String] path - Path to sprite sheet image
+  #
+  constructor: (@path) ->
+  
+  # Load the image from path, executing the callback function when done
+  #
+  # @param [Function] callback - Function to call once image is loaded
+  #
   loadImage: (callback) ->
-    ###
-    Load the image from path, executing the callback function when done
-
-    @param function callback - Function to call once image is loaded
-    ###
     @_loadAtlasImage(callback)
 
+  # (Private) Do the actual image loading (is this abstraction even needed?)
+  #
+  # @param [Function] callback - Function to call once image is loaded
+  #
   _loadAtlasImage: (callback) ->
-    ###
-    (Private) Do the actual image loading (is this abstraction even needed?)
-
-    @param function callback - Function to call once image is loaded
-    ###
     @img = new Image()
     @img.onload = callback
     @img.src = @path
 
+  # Add a sprite definition to the sprite sheet
+  #
+  # @param [Sprite] sprite - Sprite object to add
+  #
   addSprite: (sprite) ->
-    ###
-    Add a sprite definition to the sprite sheet
-
-    @param Sprite sprite - Sprite object to add
-    ###
     name = sprite.name
     if name of @sprites
       console.warn("Overwritting existing sprite: #{name}")
     @sprites[name] = sprite
 
+  # Returns the sprite with the given name from the sprite sheet if it exists
+  #
+  # @param [AnimatedSprite] animName - Name of sprite
+  # @return [Sprite] sprite, if found, else null
+  # 
   getSprite: (animName) ->
-    ###
-    Returns the sprite with the given name from the sprite sheet if it exists
-
-    @param AnimatedSprite animName - Name of sprite
-    @return Sprite object, if found, else null
-    ###
     name = animName.getCurrentFrame()
     return if name of @sprites then @sprites[name] else null
 
+  # Draws the specified sprite to the canvas context
+  #
+  # @param [AnimatedSprite] animName - Name of sprite
+  # @param [Number] x - x-position to draw sprite
+  # @param [Number] y - y-position to draw sprite
+  # @param [CanvasRenderingContext2D] ctx - Context to draw on
+  # @param [Double] scale - (Optional) Scale to draw sprite at
+  #
   drawSprite: (animName, x, y, ctx, scale = 1) ->
-    ###
-    Draws the specified sprite to the canvas context
-
-    @param AnimatedSprite animName - Name of sprite
-    @param int x - x-position to draw sprite
-    @param int y - y-position to draw sprite
-    @param CanvasRenderingContext2D ctx - Context to draw on
-    @param double scale - (Optional) Scale to draw sprite at
-    ###
     name = animName.getCurrentFrame()
     if name of @sprites
       sprite = @sprites[name]
