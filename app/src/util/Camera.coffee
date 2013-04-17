@@ -1,9 +1,9 @@
 class Camera
   currentX: 0
   currentY: 0
-  MINZOOM: 0.01
+  MINZOOM: 0.1
 
-  contructor: (@targetX, @targetY, @width, @height, @zoom=1) ->
+  constructor: (@targetX, @targetY, @width, @height, @zoom=1.0) ->
 
   # Sets the width and height of the camera
   #
@@ -37,9 +37,12 @@ class Camera
   #
   # @param [Number] z the desired zoom
   setZoom: (z) ->
-    if z > 1 then @zoom = 1
-    else if z < @MINZOOM then @zoom = @MINZOOM
-    else @zoom = z
+    if z > 1.0
+      @zoom = 1.0
+    else if z < @MINZOOM
+      @zoom = @MINZOOM
+    else
+      @zoom = z
 
   # Gets the current zoom
   #

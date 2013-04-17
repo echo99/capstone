@@ -29,22 +29,16 @@ $ ->
   if IMAGE_LOADED
     main()
 
-KeyCodes =
-  LEFT: 37
-  UP: 38
-  RIGHT: 39
-  DOWN: 40
-
-Orientation =
-  UP: 1
-  DOWN: 2
-  LEFT: 3
-  RIGHT: 4
+#KeyCodes =
+#  LEFT: 37
+#  UP: 38
+#  RIGHT: 39
+#  DOWN: 40
 
 SpriteNames = window.config.spriteNames
 
 UI = new UserInterface()
-camera = new Camera(0, 0, 0, 0,)
+camera = new Camera(0, 0, 0, 0)
 
 CurrentMission = new Menu()
 
@@ -71,25 +65,25 @@ drawBackground = (ctx, spritesheet, name) ->
     for yPos in yCoords
       spritesheet.drawSprite(name, xPos, yPos, ctx)
 
-drawHUD = (ctx, spritesheet) ->
-  winStyle = window.config.windowStyle
-  ctx.fillStyle = winStyle.fill #"rgba(0, 37, 255, 0.5)"
-  ctx.strokeStyle = winStyle.stroke #"rgba(0, 37, 255, 1)"
-  ctx.lineJoin = winStyle.lineJoin #"bevel"
-  ctx.lineWidth = winStyle.lineWidth #5
-  ctx.font = winStyle.title.font #"15px Arial"
-  ctx.fillRect(50, 50, 105, 100)
-  ctx.strokeRect(50, 50, 105, 100)
-  ctx.beginPath()
-  ctx.moveTo(50, 73)
-  ctx.lineTo(155, 73)
-  ctx.stroke()
-  ctx.fillStyle = winStyle.title.color #"rgba(255, 255, 255, 1)"
-  ctx.fillText("Selected Units", 57, 67)
-  ctx.fillStyle = winStyle.value.color #"rgba(255, 255, 0, 1)"
-  ctx.fillText("1", 110, 105)
+#drawHUD = (ctx, spritesheet) ->
+#  winStyle = window.config.windowStyle
+#  ctx.fillStyle = winStyle.fill #"rgba(0, 37, 255, 0.5)"
+#  ctx.strokeStyle = winStyle.stroke #"rgba(0, 37, 255, 1)"
+#  ctx.lineJoin = winStyle.lineJoin #"bevel"
+#  ctx.lineWidth = winStyle.lineWidth #5
+#  ctx.font = winStyle.title.font #"15px Arial"
+#  ctx.fillRect(50, 50, 105, 100)
+#  ctx.strokeRect(50, 50, 105, 100)
+#  ctx.beginPath()
+#  ctx.moveTo(50, 73)
+#  ctx.lineTo(155, 73)
+#  ctx.stroke()
+#  ctx.fillStyle = winStyle.title.color #"rgba(255, 255, 255, 1)"
+#  ctx.fillText("Selected Units", 57, 67)
+#  ctx.fillStyle = winStyle.value.color #"rgba(255, 255, 0, 1)"
+#  ctx.fillText("1", 110, 105)
 
-  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
+#  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
 
 updateCanvases = (frame, canvases...) ->
   frameWidth = window.innerWidth
@@ -99,18 +93,13 @@ updateCanvases = (frame, canvases...) ->
   for canvas in canvases
     canvas.width = frameWidth
     canvas.height = frameHeight
+  camera.setSize(window.innerWidth, window.innerHeight)
 
 main = ->
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
   bgCanvas = document.getElementById('canvas-bg')
   hudCanvas = document.getElementById('canvas-hud')
-  # frame.width = window.innerWidth
-  # frame.height = window.innerWidth
-  # canvas.width = window.innerWidth
-  # canvas.height = window.innerHeight
-  # hudCanvas.width = canvas.width
-  # hudCanvas.height = canvas.height
   updateCanvases(frame, canvas, hudCanvas)
   bgCanvas.width = screen.width
   bgCanvas.height = screen.height
@@ -131,17 +120,6 @@ main = ->
 
   sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
 
-  # xhr = new XMLHttpRequest()
-  # xhr.open('GET', 'assets/images/atlas.json', false)
-  # xhr.onload = (data) ->
-  #   jsonData = JSON.parse(data.response)
-  #   alert(jsonData)
-  #   sheet = new SpriteSheet('assets/images/atlas.png')
-  #   as = new AtlasParser(sheet, jsonData)
-  #   as.parseDataToSheet
-  #   sheet.drawSprite('starry_background.png', 0, 0, ctx)
-  # xhr.send()
-
   # Some fun messing around with fullscreen
   maxWidth = 0
   maxHeight = 0
@@ -149,7 +127,6 @@ main = ->
   canvasclick = ->
     # eheight: 619 -> 774 (diff of 155)
     if document.mozFullScreenElement or document.webkitFullScreenElement
-      # Already at full screen!
       console.log "Already full screen!"
       if document.cancelFullScreen
         document.cancelFullScreen()
@@ -158,15 +135,8 @@ main = ->
       else if document.webkitCancelFullScreen
         document.webkitCancelFullScreen()
       sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
-      # if not updatedSize
-      #   unfullscreen()
-      # updateSize = true
-      # maxWidth = window.innerWidth
-      # maxHeight = window.innerHeight
-      # console.log(maxWidth + ' x ' + maxHeight)
     else
       console.log "Not at full screen"
-      # updatedSize = false
       body = document.body
       if body.requestFullScreen
         body.requestFullScreen()
@@ -175,22 +145,13 @@ main = ->
       else if body.webkitRequestFullscreen
         body.webkitRequestFullscreen()
       sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx)
-      # maxWidth = window.outerWidth
-      # maxHeight = window.outerHeight
-      # console.log(window.screen.availWidth + ' x '
-      #   + window.screen.availHeight)
-  # frame.addEventListener('mousedown', canvasclick)
   fsCanvas.addEventListener('mousedown', canvasclick)
 
   window.onresize = ->
     console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    # frame.width = window.innerWidth
-    # frame.height = window.innerHeight
-    # canvas.width = window.innerWidth
-    # canvas.height = window.innerHeight
     updateCanvases(frame, canvas, hudCanvas)
-    box.x = canvas.width/2
-    box.y = canvas.height/2
+    #box.x = canvas.width/2
+    #box.y = canvas.height/2
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
@@ -205,60 +166,72 @@ main = ->
 
     console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
-  box =
-    x: canvas.width/2
-    y: canvas.height/2
-    w: 40
-    h: 40
-    halfwidth: 20
-    halfheight: 20
-    radius: Math.ceil(20*1.5)
-    diameter: Math.ceil(40*1.5)
-    angle: 2
+#  box =
+#    x: canvas.width/2
+#    y: canvas.height/2
+#    w: 40
+#    h: 40
+#    halfwidth: 20
+#    halfheight: 20
+#    radius: Math.ceil(20*1.5)
+#    diameter: Math.ceil(40*1.5)
+#    angle: 2
 
-  mm = MainMenu.get(ctx, sheet)
-  mm.startAnim()
+#  mm = MainMenu.get(ctx, sheet)
+#  mm.startAnim()
 
-  document.body.addEventListener('keydown', (e) ->
-    if e.keyCode == KeyCodes.LEFT
-      mm.moveLeft()
-    else if e.keyCode == KeyCodes.RIGHT
-      mm.moveRight())
-
+#  document.body.addEventListener('keydown', (e) ->
+#    if e.keyCode == KeyCodes.LEFT
+#      mm.moveLeft()
+#    else if e.keyCode == KeyCodes.RIGHT
+#      mm.moveRight())
+  prevPos = {x: 0, y: 0}
+  drag = false
   document.body.addEventListener('mousemove', (e) ->
-    mm.mouseMove(e.clientX, e.clientY))
+    x = e.clientX
+    y = e.clientY
+    UI.onMouseMove(x, y)
+    if drag
+      difx = x - prevPos.x
+      dify = y - prevPos.y
+      cPos = camera.getPosition()
+      newX = cPos.x + difx
+      newY = cPos.y + dify
+      camera.setPosition(newX, newY)
+      prevPos = {x: x, y: y})
 
   document.body.addEventListener('click', (e) ->
-    mm.click(e.clientX, e.clientY))
-  # ships = [
-  #     orbitRadius: 200
-  #     angularVelocity: Math.PI / 150
-  #     sptName: SpriteNames.COLONY_SHIP
-  #     angle: 0
-  #     orientation: Orientation.RIGHT
-  #   ,
-  #     orbitRadius: 120
-  #     angularVelocity: Math.PI / 90
-  #     sptName: SpriteNames.ATTACK_SHIP
-  #     angle: Math.PI
-  #     orientation: Orientation.UP
-  #   ,
-  #     orbitRadius: 100
-  #     angularVelocity: Math.PI / 90
-  #     sptName: SpriteNames.DEFENSE_SHIP
-  #     angle: 0
-  #     orientation: Orientation.UP
-  #   ,
-  #     orbitRadius: 300
-  #     angularVelocity: Math.PI / 300
-  #     sptName: SpriteNames.PROBE
-  #     angle: 0
-  #     orientation: Orientation.RIGHT
-  # ]
+    UI.onMouseClick(e.clientX, e.clientY))
 
-  # draw = ->
-  #   ctx.clearRect(0,0,canvas.width,canvas.height)
+  document.body.addEventListener('mousedown', (e) ->
+    drag = true
+    prevPos = {x: e.clientX, y: e.clientY})
 
+  document.body.addEventListener('mouseup', (e) ->
+    drag = false)
+
+#  mouseWheelHandler: (e) ->
+#    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
+#    console.log(delta)
+#    z = camera.getZoom()
+#    camera.setZoom(z + delta * 0.01)
+
+  document.body.addEventListener('DOMMouseScroll', (e) ->
+    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
+    z = camera.getZoom()
+    nz = z + delta * 0.01
+    camera.setZoom(nz))
+
+  document.body.addEventListener('mousewheel', (e) ->
+    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
+    z = camera.getZoom()
+    nz = z + delta * 0.01
+    camera.setZoom(nz))
+
+  draw = ->
+    ctx.clearRect(0, 0, camera.width, camera.height)
+    UI.draw(ctx)
+    CurrentMission.draw(ctx)
   #   if sheet != null
   #     ctx.save()
   #     ctx.translate(box.x, box.y)
@@ -275,5 +248,4 @@ main = ->
   #     ctx.restore()
   #     sheet.drawSprite(SpriteNames.TITLE, box.x, 100, ctx)
 
-  # # Animate
-  # setInterval draw, 30
+  setInterval draw, 30

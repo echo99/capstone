@@ -19,6 +19,7 @@ class Menu extends Mission
 
   draw: (ctx) ->
     # Draw title
+    SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx)
     # for each planet
     #   if the planet is visible and the probe is not on it
     #     draw the planet's label
