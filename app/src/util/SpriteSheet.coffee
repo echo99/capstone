@@ -42,7 +42,7 @@ class SpriteSheet
   #
   # @param [AnimatedSprite] animName - Name of sprite
   # @return [Sprite] sprite, if found, else null
-  # 
+  #
   getSprite: (animName) ->
     name = animName.getCurrentFrame()
     return if name of @sprites then @sprites[name] else null
