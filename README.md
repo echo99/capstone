@@ -51,3 +51,61 @@ If you want to see all the available cake tasks and their descriptions, simply
 run:
 
     cake
+
+
+Conventions
+-----------
+Basically, just check for lint problems as you are working on your files. The
+Cakefile has been set up so that it will check for problems each time your code
+passes the syntax checker. Other than that, document your code as well as you
+can so that others can understand how to use your APIs or what you are doing.
+
+### Indentation
+We are using two spaces to indent. *DO NOT USE TABS!!!*
+
+### Line Width
+80 characters max per line. This helps keep code readable especially on small
+screens, or for putting code side-by-side.
+
+### Documentation
+We are using [Codo](https://github.com/netzpirat/codo) format to document our
+code. Using this allows us to generate nice documentation files. You can
+install it using `npm install -g codo`. The following is an example class
+documented in codo:
+
+```CoffeeScript
+# The base animal class
+#
+class Animal
+
+  # Construct a new animal
+  #
+  # @param [String] name The name of the animal
+  #
+  constructor: (@name) ->
+
+  # Get the animal's name
+  #
+  # @return [String] Name of animal
+  #
+  getName: ->
+    return @name
+```
+
+IDEs and Plugins
+----------------
+### Emacs
+
+
+### NetBeans
+[NetBeans](https://netbeans.org/)
+[NetBeans CoffeeScript Plugin](http://plugins.netbeans.org/plugin/39007)
+
+### Sublime Text 2
+[Sublime Text 2](http://www.sublimetext.com/2)  
+[Sublime Better CoffeeScript](https://github.com/aponxi/sublime-better-coffeescript)
+  - CoffeeScript syntax highlighting and more
+[CoffeeComplete Plus](https://github.com/justinmahar/SublimeCSAutocompletePlus#customizing-autocomplete-trigger)
+  - CoffeeScript autocompletion
+[SublimeLinter](https://github.com/slang800/SublimeLinter)
+  - Sublime Text linter with CoffeeScript support
