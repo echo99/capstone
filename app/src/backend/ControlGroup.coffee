@@ -1,10 +1,9 @@
-class ControlGroup:
-	
-	getType: ->
-		return null
+class ControlGroup
+  getType: ->
+    return null
 
-	getNumber: ->
-		return null
+  getNumber: ->
+    return null
 
-	getPath: ->
-		return []
+  getPath: ->
+    return []

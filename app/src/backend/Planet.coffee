@@ -1,57 +1,57 @@
 #Defines a class to represent planets
 
 class Planet
-	constructor: (@_x, @_y, @_resources = 0, @_rate = 0) ->
-		@_adjacentPlanets = []
-	    @_fungusStrength = 0
-		@_attackShips = 0
-		@_defenseShips = 0
-		@_probes = 0
-		@_colonys = 0
-		@_outpost = false
-		@_station = false
-		@_controlGroups = []
-		@_unitConstructing = null
-		@_turnsToComplete = 0
+  constructor: (@_x, @_y, @_resources = 0, @_rate = 0) ->
+    @_adjacentPlanets = []
+    @_fungusStrength = 0
+    @_attackShips = 0
+    @_defenseShips = 0
+    @_probes = 0
+    @_colonys = 0
+    @_outpost = false
+    @_station = false
+    @_controlGroups = []
+    @_unitConstructing = null
+    @_turnsToComplete = 0
 
-	numShips: (type) ->
-		return null
+  numShips: (type) ->
+    return null
 
-	fungusStrength: ->
-		return null
+  fungusStrength: ->
+    return null
 
-	hasOutpost: ->
-		return null
+  hasOutpost: ->
+    return null
 
-	hasStation: ->
-		return null
+  hasStation: ->
+    return null
 
-	getAdjacentPlanets: ->
-		return []
+  getAdjacentPlanets: ->
+    return []
 
-	getControlGroups: ->
-		return []
+  getControlGroups: ->
+    return []
 
-	buildStatus: ->
-		return null
+  buildStatus: ->
+    return null
 
-	buildUnit: ->
-		return null
+  buildUnit: ->
+    return null
 
-	grow: ->
-		null
+  grow: ->
+    null
 
-	isBuilding: ->
-		if turnstocomplete is 0
-			return false
-		else
-			return true
+  isBuilding: ->
+    if turnstocomplete is 0
+      return false
+    else
+      return true
 
-	resolveCombat: ->
-		null
+  resolveCombat: ->
+    null
 
-	build: (name) ->
-		null
+  build: (name) ->
+    null
 
 
 
