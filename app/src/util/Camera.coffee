@@ -1,10 +1,27 @@
+# The Camera class has an x and y position and a width and a height. It uses
+# these attributes to transform world coordinates into screen coordinates. It
+# also provids funcionality for smooth movement to a new location.
 class Camera
+  # The current x position of the camera
   x: 0
+  # The current y position of the camera
   y: 0
+
+  # The minimum allowed zoom
   MINZOOM: 0.1
+
+  # A factor for controlling the movement speed when approaching the target
   MOVEFACTOR: 10
 
+  # Creates a new camera
+  #
+  # @param [Number] targetX The initial target x coordinate
+  # @param [Number] targetY The initial target y coordinate
+  # @param [Number] width The initial width
+  # @param [Number] height The initial height
+  # @param [Number] zoom The initial zoom
   constructor: (@targetX, @targetY, @width, @height, @zoom=1.0) ->
+    @setZoom(@zoom)
 
   # Sets the width and height of the camera
   #
@@ -26,13 +43,6 @@ class Camera
     @targetX = @x = x
     @targetY = @y = y
 
-  # Gets the actual current position of the camera
-  #
-  # @return [Object] {x, y} Where x is the current x position and
-  #                         y is the current y position
-#  getPosition: ->
-#   return {x: @currentX, y: @currentY}
-
   # Sets the zoom to the given value. The zoom will always be between
   # 1 and MINZOOM
   #
@@ -52,12 +62,12 @@ class Camera
   getZoom: ->
     return @zoom
 
-  # Takes the given coords and returns a new set represting where the given
-  # ones actually appear given the camera position and zoom.
+  # Takes the given world coords and returns a new set represting where the
+  # given ones appear on the screen
   #
   # @param [Object] {x, y} Where x and y are the coordinates to modify
   # @return [Object] {x, y} The modified coordinates
-  getModifiedCoordinates: (coords) ->
+  getScreenCoordinates: (coords) ->
     difX = (@x - coords.x) * @zoom
     difY = (@y - coords.y) * @zoom
     return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}

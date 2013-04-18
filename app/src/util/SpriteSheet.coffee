@@ -54,6 +54,7 @@ class SpriteSheet
   # @param [Number] x x-position to draw sprite
   # @param [Number] y y-position to draw sprite
   # @param [CanvasRenderingContext2D] ctx - Context to draw on
+  # @param [Boolean] useCamera Whether to transform the sprite by the camera
   # @param [Number] scale (Optional) Scale to draw sprite at
   #
   drawSprite: (animName, x, y, ctx, useCamera=true, scale=1) ->
@@ -69,7 +70,7 @@ class SpriteSheet
 
       # sprite.draw(@img, x, y, ctx)
       if useCamera
-        trans = camera.getModifiedCoordinates({x: x, y: y})
+        trans = camera.getScreenCoordinates({x: x, y: y})
         x = (0.5 + trans.x) << 0
         y = (0.5 + trans.y) << 0
         scale = camera.zoom
