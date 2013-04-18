@@ -8,9 +8,20 @@ class UserInterface
     # for each planet
     #   draw planet
     SHEET.drawSprite(SpriteNames.PLANET_BLUE, 0, 0, ctx)
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 200, 0, ctx)
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, -200, 0, ctx)
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 0, 200, ctx)
+    SHEET.drawSprite(SpriteNames.WARP_GATE, 0, 0, ctx)
+    SHEET.drawSprite(SpriteNames.PROBE, 100, -50, ctx)
+    SHEET.drawSprite(SpriteNames.ATTACK_SHIP, 100, 0, ctx)
+
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 200, 300, ctx)
+    SHEET.drawSprite(SpriteNames.OUTPOST_GATHERING, 200, 300, ctx)
+
+
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, -200, 400, ctx)
+    SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, -200, 400, ctx)
+    SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, -200, 400, ctx)
+    SHEET.drawSprite(SpriteNames.STATION_BUILDINGS_GATHERING, -200, 400, ctx)
+
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 600, -200, ctx)
     #   if structure
     #     draw structure
     #   if units

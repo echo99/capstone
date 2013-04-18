@@ -33,7 +33,15 @@ window.config =
     FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
     UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
     OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
-      'outpost_buildings_gathering_2.png'], 30)
+      'outpost_buildings_gathering_2.png'], 20)
+    STATION_BUILDINGS_GATHERING: new AnimatedSprite(
+      ['station_buildings_gathering_1.png',
+       'station_buildings_gathering_2.png'], 20)
+    STATION_CONSTRUCTING: new AnimatedSprite(
+      ['station_constructing.png'])
+    STATION_NOT_CONSTRUCTING: new AnimatedSprite(
+      ['station_not_constructing.png'])
+    PROBE_CONSTRUCTION: new AnimatedSprite(['probe_construction.png'])
     WARP_GATE: new AnimatedSprite(['warp_gate_1.png', 'warp_gate_2.png',
       'warp_gate_3.png', 'warp_gate_4.png'], 3)
   units:

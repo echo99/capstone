@@ -73,8 +73,8 @@ class Camera
   #                        to modify
   # @return [Object] The modified coordinates
   getScreenCoordinates: (coords) ->
-    difX = (@x - coords.x) * @zoom
-    difY = (@y - coords.y) * @zoom
+    difX = (@x + coords.x) * @zoom
+    difY = (@y + coords.y) * @zoom
     return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
 
   # Moves the camera's current position toward its target position

@@ -168,6 +168,16 @@ main = ->
     if e.keyCode == KeyCodes.HOME
       camera.setTarget(0, 0))
 
+  # Catch accidental leaving
+  window.onbeforeunload = (e) ->
+    if (not e)
+      e = window.event
+    e.cancelBuble = true
+    e.returnValue = "You sure you want to leave?"
+    if (e.stopPropagation)
+      e.stopPropagation()
+      e.preventDefault()
+
   prevPos = {x: 0, y: 0}
   drag = false
   hudCanvas.addEventListener('mousemove', (e) ->
@@ -220,5 +230,8 @@ main = ->
     bgCanvas.style.top = Math.floor(camera.y /
       window.config.BG_PAN_SPEED_FACTOR - camera.height/2) + "px"
     camera.update()
+
+    # Don't forget to update the animation
+    AnimatedSprite.drawCounter++
 
   setInterval draw, 30
