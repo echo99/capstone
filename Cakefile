@@ -268,7 +268,8 @@ missingGlobalModule = (moduleName, modulePkg) ->
 task 'doc', 'Document the source code using Codo', ->
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
-    exec "codo SRC_DIR", (err, stdout, stderr) ->
+    exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
+      console.log(stdout)
       if err
         if process.platform == 'win32'
           # Handle Windows errors
