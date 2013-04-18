@@ -37,7 +37,9 @@ class Elements.UIElement
 
   # Draw the element to the canvas
   #
-  # @TODO finish doc
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Number] x
+  # @param [Number] y
   draw: (ctx, x, y) ->
 
 
@@ -68,6 +70,7 @@ class Elements.RadialElement extends Elements.UIElement
   # @param [Number] x x-position of center of element relative to parent
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] r Radius of element
+  #
   constructor: (@x, @y, @r) ->
     super()
     @r2 = @r*@r
@@ -86,9 +89,20 @@ class Elements.MessageBox extends Elements.BoxElement
     Warn: 2
 
   # Create a new message box
+  #
+  # @param [Number] x The x-coordinate of the left edge of the box
+  # @param [Number] y The y-coordinate of the top edge of the box
+  # @param [Number] w The width of the box
+  # @param [Number] h The height of the box
+  # @param [String] message The message to display in the box
+  #
   constructor: (@x, @y, @w, @h, @message) ->
+    super(@x, @y, @w, @h)
 
-  # @param [CanvasRenderingContext2D] ctx
+  # Draw this message box to the canvas context
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
   draw: (ctx) ->
     ctx.strokeStyle = config.windowStyle.stroke
     ctx.fillStyle = config.windowStyle.fill
@@ -100,3 +114,27 @@ class Elements.MessageBox extends Elements.BoxElement
     cx = Math.round( @w/2 + @x)
     cy = Math.round( @h/2 + @y)
     ctx.fillText(@message, cx, cy)
+
+
+# Button class for handling user interactions
+#
+class Elements.Button extends Elements.BoxElement
+
+  # Create a new button
+  #
+  # @param [Number] x The x-coordinate of the left edge of the box
+  # @param [Number] y The y-coordinate of the top edge of the box
+  # @param [Number] w The width of the box
+  # @param [Number] h The height of the box
+  # @param [Function] callback The function to call when this button is clicked
+  constructor: (@x, @y, @w, @h, @callback) ->
+    super(@x, @y, @w, @h)
+
+  # Call the attached callback function when the button is clicked
+  #
+  onClick: ->
+    @callback()
+
+  # Do something when the user hovers over the button
+  #
+  hover: ->
