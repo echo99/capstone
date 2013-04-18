@@ -29,6 +29,8 @@ class Elements.UIElement
 
   # Check if the given point is within the boundaries of the UI element
   #
+  # @abstract Depends on shape
+  #
   # @param [Number] x
   # @param [Number] y
   # @return [Boolean] whether or not the point lies inside the element
@@ -37,10 +39,36 @@ class Elements.UIElement
 
   # Draw the element to the canvas
   #
+  # @abstract Each element will have its own draw function
+  #
   # @param [CanvasRenderingContext2D] ctx
   # @param [Number] x
   # @param [Number] y
+  #
   draw: (ctx, x, y) ->
+
+  # Call to element when it is clicked
+  click: (x, y) ->
+    console.log("clicked (#{x}, #{y})")
+    @_onClick()
+    relLoc = @getRelativeLocation(x, y)
+    for child in @_children
+      if child.containsPoint(relLoc.x, relLoc.y)
+        child.click(relLoc.x, relLoc.y)
+
+  # @private Action to perform when element is clicked
+  # @abstract
+  #
+  _onClick: ->
+
+  # Gets the relative location of the point to this element
+  #
+  # @param [Number] x
+  # @param [Number] y
+  # @return [Object] {'x': x, 'y': y}
+  getRelativeLocation: (x, y) ->
+    return {'x': x, 'y': y}
+
 
 
 # A box UI element
@@ -59,7 +87,10 @@ class Elements.BoxElement extends Elements.UIElement
 
   containsPoint: (x, y) ->
     # return not (@x < x or x > @x + width or @y < y or y > @y + width)
-    return @x <= x <= @x + width and @y < y <= @y + width
+    return @x <= x <= @x + @w and @y < y <= @y + @h
+
+  getRelativeLocation: (x, y) ->
+    return {'x': x-@x, 'y': y-@y}
 
 # A radial UI element
 #
@@ -98,22 +129,48 @@ class Elements.MessageBox extends Elements.BoxElement
   #
   constructor: (@x, @y, @w, @h, @message) ->
     super(@x, @y, @w, @h)
+    @visible = true
+    test = ->
+      alert(@visible)
+      @visible = false
+      alert(@visible)
+    @closeBtn = new Elements.Button(5, 5, 16, 16, @)
+    @addChild(@closeBtn)
+
+  callback: () ->
+    @visible = false
+    if @updCallback
+      @updCallback()
+
+  addUpdateCallback: (callback) ->
+    @updCallback = callback
 
   # Draw this message box to the canvas context
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   draw: (ctx) ->
-    ctx.strokeStyle = config.windowStyle.stroke
-    ctx.fillStyle = config.windowStyle.fill
-    ctx.strokeRect(@x, @y, @w, @h)
-    ctx.fillRect(@x, @y, @w, @h)
-    ctx.font = config.windowStyle.label.font
-    ctx.fillStyle = config.windowStyle.label.color
-    ctx.textAlign = 'center'
-    cx = Math.round( @w/2 + @x)
-    cy = Math.round( @h/2 + @y)
-    ctx.fillText(@message, cx, cy)
+    if @visible
+      ctx.strokeStyle = config.windowStyle.stroke
+      ctx.fillStyle = config.windowStyle.fill
+      ctx.strokeRect(@x, @y, @w, @h)
+      ctx.fillRect(@x, @y, @w, @h)
+      ctx.font = config.windowStyle.label.font
+      ctx.fillStyle = config.windowStyle.label.color
+      ctx.textAlign = 'center'
+      cx = Math.round(@w/2 + @x)
+      cy = Math.round(@h/2 + @y)
+      ctx.fillText(@message, cx, cy)
+
+      btnOffsetX = @x + @closeBtn.x
+      btnOffsetY = @y + @closeBtn.y
+      cx = Math.round(@closeBtn.w/2 + btnOffsetX)
+      cy = Math.round(@closeBtn.h/2 + btnOffsetY) + 4
+      ctx.fillStyle = 'rgb(0,0,0)'
+      ctx.fillRect(btnOffsetX, btnOffsetY, @closeBtn.w, @closeBtn.h)
+      ctx.fillStyle = 'rgb(255,255,255)'
+      ctx.font = '12pt Arial'
+      ctx.fillText('x', cx, cy)
 
 
 # Button class for handling user interactions
@@ -132,8 +189,8 @@ class Elements.Button extends Elements.BoxElement
 
   # Call the attached callback function when the button is clicked
   #
-  onClick: ->
-    @callback()
+  _onClick: ->
+    @callback.callback()
 
   # Do something when the user hovers over the button
   #

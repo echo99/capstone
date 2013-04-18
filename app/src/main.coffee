@@ -113,6 +113,9 @@ main = ->
 
   msgBox = new Elements.MessageBox(10, 10, 100, 100, "test")
   msgBox.draw(hudCtx)
+  msgBox.addUpdateCallback ->
+    hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
+    msgBox.draw(hudCtx)
 
   sheet = SHEET
   if sheet == null
@@ -195,7 +198,10 @@ main = ->
       prevPos = {x: x, y: y})
 
   hudCanvas.addEventListener('click', (e) ->
-    UI.onMouseClick(e.clientX, e.clientY))
+    UI.onMouseClick(e.clientX, e.clientY)
+    if msgBox.containsPoint(e.clientX, e.clientY)
+      msgBox.click(e.clientX, e.clientY)
+  )
 
   hudCanvas.addEventListener('mousedown', (e) ->
     drag = true
