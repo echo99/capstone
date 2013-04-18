@@ -32,6 +32,8 @@ if process.platform == 'win32'
   VENDOR_JS = 'public\\vendor.js'
   SRC_DIR = 'app\\src'
   VENDOR_DIR = 'vendor\\scripts'
+# Flag to make sure we aren't calling build multiple times at once
+BUILDING = false
 
 coffeeLintConfig =
   no_tabs:
@@ -127,31 +129,34 @@ getSourceFilePaths = (dirPath = SRC_DIR) ->
 # Tasks
 
 task 'build', 'Build coffee2js using Rehab', sbuild = ->
-  checkDep ->
-    console.log("Building project from #{SRC_DIR}/*.coffee to #{APP_JS}...".yellow)
-    # Try to compile all files individually first, to get a better
-    # error message, then if it succeeds, compile them all to one file
-    callback = (passed) ->
-      if passed
-        files = new Rehab().process './'+SRC_DIR
+  if not BUILDING
+    BUILDING = true
+    checkDep ->
+      console.log("Building project from #{SRC_DIR}/*.coffee to #{APP_JS}...".yellow)
+      # Try to compile all files individually first, to get a better
+      # error message, then if it succeeds, compile them all to one file
+      callback = (passed) ->
+        if passed
+          files = new Rehab().process './'+SRC_DIR
 
-        to_single_file = "--join #{APP_JS}"
-        from_files = "--compile #{files.join ' '}"
+          to_single_file = "--join #{APP_JS}"
+          from_files = "--compile #{files.join ' '}"
 
-        exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
-          if err
-            # Should probably figure out way to handle this error
-            # However, if it got to this point, there should be no problems
-            console.error(err.toString().trim().red)
-          else
-            console.log('Build successful!'.green)
-            console.log()
-          invoke 'lint'
-      # else
-      #   console.log('Build failed!'.red)
-      #   console.log()
+          exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
+            if err
+              # Should probably figure out way to handle this error
+              # However, if it got to this point, there should be no problems
+              console.error(err.toString().trim().red)
+            else
+              console.log('Build successful!'.green)
+              console.log()
+            invoke 'lint'
+        BUILDING = false
+        # else
+        #   console.log('Build failed!'.red)
+        #   console.log()
 
-    checkSyntax(callback)
+      checkSyntax(callback)
 
 task 'vendcomp', 'Combine vendor scripts into one file', ->
   console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
@@ -170,6 +175,19 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   # exec 'echo "hi2"'
   #exec "echo #{scripts} > ../public/vendor.js"
 
+# task 'test', 'Task for testing cake stuff', ->
+#   filesToProcess = 0
+#   exec "coffee -p #{SRC_DIR}", (err, stdout, stderr) ->
+#     filesToProcess++
+#     console.log("Finished!".green)
+#     # console.log(err)
+#     # console.log(stdout)
+#     # parts = stdout.split(/^\}\)\.call\(this\);$/)
+#     parts = stdout.split("(function() {\n\n\n}).call(this);")
+#     console.log("Num files :  #{parts.length}")
+#     # console.log(stderr)
+
+
 task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   checkDep ->
     console.log("Watching files #{SRC_DIR}/*.coffee".yellow)
@@ -178,6 +196,13 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
     files = new Rehab().process './'+SRC_DIR
     filesToProcess = files.length
 
+    # # Get number of empty files
+    # emptyFiles = 0
+    # exec "coffee -p #{SRC_DIR}", (err, stdout, stderr) ->
+    #   parts = stdout.split("(function() {\n\n\n}).call(this);")
+    #   emptyFiles = parts.length
+    #   filesToProcess -= emptyFiles
+
     cmd = 'coffee'
     if process.platform == 'win32'
       cmd = 'coffee.cmd'
@@ -185,13 +210,18 @@ task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
     coffee = spawn cmd, args
 
     coffee.stdout.on 'data', (data) ->
-      # Only compile the last time iterating throught all the files
-      if filesToProcess > 1
-        filesToProcess--
-        # console.log(filesToProcess + " files left")
-      else
-        #console.log('Recompiling files...'.yellow)
-        invoke 'build'
+      # # Only compile the last time iterating throught all the files
+      # if filesToProcess > 1
+      #   filesToProcess--
+      #   console.log(filesToProcess + " files left")
+      # else
+      #   #console.log('Recompiling files...'.yellow)
+      #   invoke 'build'
+
+      # This will execute each time the script picks up something from stdout,
+      # including multiple outputs the first time printing everything, but
+      # I haven't yet come up with a way around it.
+      invoke 'build'
 
 task 'integrate', 'Compile and combine all files', sbuild = ->
   invoke 'build'
