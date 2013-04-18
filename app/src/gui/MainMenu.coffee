@@ -1,3 +1,4 @@
+###
 class MainMenu
   instance = null
 
@@ -205,3 +206,4 @@ class MainMenu
 
   @get: (ctx, sheet) ->
     instance ?= new PrivateMainMenu(ctx, sheet)
+###

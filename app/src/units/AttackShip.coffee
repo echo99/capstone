@@ -1,3 +1,4 @@
+###
 #_require Unit
 
 class AttackShip extends Unit
@@ -5,3 +6,4 @@ class AttackShip extends Unit
     cfg = config.units.attackShip
     console.log("Building an attack ship!")
     super(cfg.cost, cfg.turns, cfg.attack, cfg.defense)
+###

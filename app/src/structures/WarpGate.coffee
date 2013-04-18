@@ -1,3 +1,4 @@
+###
 #_require Structure
 
 class WarpGate extends Structure
@@ -5,3 +6,4 @@ class WarpGate extends Structure
     cfg = config.structures.warpGate
     console.log("Building an outpost!")
     super(cfg.cost, cfg.turns, cfg.defense, planet)
+###

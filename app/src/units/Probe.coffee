@@ -1,3 +1,4 @@
+###
 #_require Unit
 
 class Probe extends Unit
@@ -5,3 +6,4 @@ class Probe extends Unit
     cfg = config.units.probe
     console.log("Building a probe!")
     super(cfg.cost, cfg.turns, cfg.attack, cfg.defense)
+###

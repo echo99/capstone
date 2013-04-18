@@ -1,4 +1,5 @@
 #_require Mission
+#_require ../backend/Planet
 
 class Menu extends Mission
   reset: ->
@@ -7,6 +8,13 @@ class Menu extends Mission
     #
     # Create planets:
     #   Home -> Missions, Open, Credits
+    p = [new Planet(0, 0), new Planet(0, -500)]
+    p[0]._probes = 1
+    @Planets =
+      Home: p[0]
+      Missions: p[1]
+    @Ps = [[[p[0]._x, p[0]._y], "Home"], [[p[1]._x, p[1]._y], "Missions"]]
+    game.setGraph(p)
     #   Missions -> Mission 1, etc.
     #   Open -> Small, Medium, Large
     #   Credits -> ??
@@ -21,7 +29,15 @@ class Menu extends Mission
     # Draw title
     SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
     # for each planet
+    ctx.font = window.config.windowStyle.title.font
+    ctx.fillStyle = window.config.windowStyle.title.color
+    ctx.textAlign = 'center'
+    for p in @Ps
     #   if the planet is visible and the probe is not on it
+      if @Planets[p[1]]._probes == 0
+        coords = {x: p[0][0], y: p[0][1] - 100}
+        coords = camera.getScreenCoordinates(coords)
+        ctx.fillText(p[1], coords.x, coords.y)
     #     draw the planet's label
     # if the probe is on a planet of interest
     #   draw prompt to make sure the player wants to play the mission

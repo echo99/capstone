@@ -6,6 +6,7 @@
 #_require gui/UserInterface
 #_require util/Camera
 #_require gui/uielements
+#_require backend/Game
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -37,6 +38,7 @@ SpriteNames = window.config.spriteNames
 
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
+game = new Game(0, 0)
 
 CurrentMission = new Menu()
 

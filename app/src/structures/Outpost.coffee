@@ -1,3 +1,4 @@
+###
 #_require Structure
 
 class Outpost extends Structure
@@ -5,3 +6,4 @@ class Outpost extends Structure
     cfg = config.structures.outpost
     console.log("Building an outpost!")
     super(cfg.cost, cfg.turns, cfg.defense, planet)
+###

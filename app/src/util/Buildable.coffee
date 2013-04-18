@@ -1,3 +1,4 @@
+###
 Buildable =
   cost: 0
   turns: 0
@@ -7,3 +8,4 @@ Buildable =
 
   isReady: ->
     return cost <= 0
+###

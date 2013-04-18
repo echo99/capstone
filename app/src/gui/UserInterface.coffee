@@ -6,7 +6,12 @@ class UserInterface
     #       of which draw tool tips if they are
     # visited planets = set
     # for each planet
+    for p in game._planets
     #   draw planet
+      SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
+      if p._probes > 0
+        SHEET.drawSprite(SpriteNames.PROBE, p._x+100, p._y-50, ctx)
+    ###
     SHEET.drawSprite(SpriteNames.PLANET_BLUE, 0, 0, ctx)
     SHEET.drawSprite(SpriteNames.WARP_GATE, 0, 0, ctx)
     SHEET.drawSprite(SpriteNames.PROBE, 100, -50, ctx)
@@ -22,6 +27,7 @@ class UserInterface
     SHEET.drawSprite(SpriteNames.STATION_BUILDINGS_GATHERING, -200, 400, ctx)
 
     SHEET.drawSprite(SpriteNames.PLANET_BLUE, 600, -200, ctx)
+    ###
     #   if structure
     #     draw structure
     #   if units

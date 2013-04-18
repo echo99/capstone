@@ -1,3 +1,4 @@
+###
 #_require Structure
 
 class Station extends Structure
@@ -5,3 +6,4 @@ class Station extends Structure
     cfg = config.structures.station
     console.log("Building a station!")
     super(cfg.cost, cfg.turns, cfg.defense, planet)
+###
