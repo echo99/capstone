@@ -1,7 +1,14 @@
+# This class is resposible for drawing the game state and handling user
+# input related to the game directly.
 class UserInterface
+  # Creates a new UserInterface
   constructor: () ->
 
-  draw: (ctx) ->
+  # Draws the game and HUD
+  #
+  # @param [CanvasRenderingContext2D] ctx The game context
+  # @param [CanvasRenderingContext2D] hudCtx The hud context
+  draw: (ctx, hudCtx) ->
     # Note: there are alot of things that need to check for hovering and many
     #       of which draw tool tips if they are
     # visited planets = set
@@ -55,12 +62,20 @@ class UserInterface
     #     else
     #       draw regular image
 
+  # The UI expects this to be called when the mouse moves
+  #
+  # @param [Number] x The x position of the mouse
+  # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
     # for each button
     #   set button to not hover
     #   if (x, y) on button
     #     set button to hover
 
+  # The UI expects this to be called when the mouse clicks
+  #
+  # @param [Number] x The x position of the mouse
+  # @param [Number] y The y position of the mouse
   onMouseClick: (x, y) ->
     # for each button
     #   if button is hovered over

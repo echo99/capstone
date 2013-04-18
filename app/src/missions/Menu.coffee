@@ -38,7 +38,7 @@ class Menu extends Mission
     # Add probe to Home planet
 
   # @see Mission#draw
-  draw: (ctx) ->
+  draw: (ctx, hudCtx) ->
     # Draw title
     SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
     # for each planet

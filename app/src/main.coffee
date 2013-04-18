@@ -224,8 +224,8 @@ main = ->
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
-    UI.draw(ctx)
-    CurrentMission.draw(ctx)
+    UI.draw(ctx, hudCtx)
+    CurrentMission.draw(ctx, hudCtx)
     bgCanvas.style.left = Math.floor(camera.x /
       window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
     bgCanvas.style.top = Math.floor(camera.y /
