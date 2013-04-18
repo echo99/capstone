@@ -1,7 +1,9 @@
 #_require Mission
 #_require ../backend/Planet
 
+# This mission acts as our games main menu
 class Menu extends Mission
+  # @see Mission#reset
   reset: ->
     # Load user progress
     #   Add fungus to locked mission planets
@@ -35,6 +37,7 @@ class Menu extends Mission
     #
     # Add probe to Home planet
 
+  # @see Mission#draw
   draw: (ctx) ->
     # Draw title
     SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
@@ -53,10 +56,12 @@ class Menu extends Mission
     # if the probe is on a planet of interest
     #   draw prompt to make sure the player wants to play the mission
 
+  # @see Mission#onMouseMove
   onMouseMove: (x, y) ->
     # if drawing a prompt
     #   check mouse position against the button positions
 
+  # @see Mission#onMouseClick
   onMouseClick: (x, y) ->
     # if the probe has been set to move to a new planet
     #   advance the turn
@@ -70,6 +75,7 @@ class Menu extends Mission
     #   else
     #     (other buttons?)
 
+  # @see Mission#onEndTurn
   onEndTurn: ->
     # if there is no probe
     #   create one on the last planet it was on
