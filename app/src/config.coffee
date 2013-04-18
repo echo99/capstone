@@ -1,6 +1,9 @@
 #_require util/Sprite
 
 window.config =
+  ZOOM_SPEED: 0.02
+  PAN_SPEED_FACTOR: 3
+  BG_PAN_SPEED_FACTOR: 50
   windowStyle:
     fill: "rgba(0, 37, 255, 0.5)"
     stroke: "rgba(0, 37, 255, 1)"

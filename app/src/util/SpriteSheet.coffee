@@ -56,7 +56,7 @@ class SpriteSheet
   # @param [CanvasRenderingContext2D] ctx - Context to draw on
   # @param [Number] scale (Optional) Scale to draw sprite at
   #
-  drawSprite: (animName, x, y, ctx, scale = 1) ->
+  drawSprite: (animName, x, y, ctx, useCamera=true, scale=1) ->
     name = animName.getCurrentFrame()
     if name of @sprites
       sprite = @sprites[name]
@@ -68,13 +68,20 @@ class SpriteSheet
       # console.log("        #{sprite.cx}, #{sprite.cy}")
 
       # sprite.draw(@img, x, y, ctx)
-
-      if scale != 1
+      if useCamera
+        trans = camera.getModifiedCoordinates({x: x, y: y})
+        x = trans.x
+        y = trans.y
+        scale = camera.zoom
+        # TODO: change bound check so it checks for sprite collision with
+        #       the camera rectangle, not whether the center collides
+        if 0 < trans.x < camera.width and 0 < trans.y < camera.height
+          ctx.drawImage(@img, sprite.x, sprite.y, sprite.w, sprite.h,
+              x + sprite.cx*scale, y + sprite.cy*scale, sprite.w*scale,
+              sprite.h*scale)
+      else
         ctx.drawImage(@img, sprite.x, sprite.y, sprite.w, sprite.h,
             x + sprite.cx*scale, y + sprite.cy*scale, sprite.w*scale,
             sprite.h*scale)
-      else
-        ctx.drawImage(@img, sprite.x, sprite.y, sprite.w, sprite.h,
-            x + sprite.cx, y + sprite.cy, sprite.w, sprite.h)
     else
       console.error("No sprite by name of #{name}")

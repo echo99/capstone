@@ -95,7 +95,7 @@ class MainMenu
         for planet in planets
           dx = mx - planet[1]
           dy = my - planet[2]
-          
+
           if planetId in instance.allowedPlanets and dx*dx + dy*dy < 1000
             # ctx.fillRect(planet[1], planet[2], 100, 100)
             # ctx.beginPath();
@@ -145,14 +145,14 @@ class MainMenu
             ctx.strokeStyle = 'rgba(255,255,255,0.5)'
             ctx.strokeText(planet[0], planet[1], planet[2] - 45)
           planetId++
-        
+
         # grd = ctx.createRadialGradient(selPlan[1], selPlan[2], 256,
         #   selPlan[1], selPlan[2], 512)
         # grd.addColorStop(0, 'rgba(8,8,8,0)')
         # grd.addColorStop(1, 'rgba(8,8,8,0.5)')
         # ctx.fillStyle = grd
         # ctx.fillRect(-xPos, -yPos, canvas.width, canvas.height)
-        
+
         ctx.restore()
         sheet.drawSprite(SpriteNames.TITLE, canvas.width/2, 75, ctx)
 

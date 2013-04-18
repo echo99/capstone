@@ -7,12 +7,10 @@ class UserInterface
     # visited planets = set
     # for each planet
     #   draw planet
-    cPos = camera.getPosition()
-    cZ = camera.getZoom()
-    transX = 100+cPos.x
-    transY = 100+cPos.y
-    if 0 < transX < camera.width and 0 < transY < camera.height
-      SHEET.drawSprite(SpriteNames.PLANET_BLUE, transX, transY, ctx, cZ)
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 0, 0, ctx)
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 200, 0, ctx)
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, -200, 0, ctx)
+    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 0, 200, ctx)
     #   if structure
     #     draw structure
     #   if units

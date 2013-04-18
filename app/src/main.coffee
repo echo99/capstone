@@ -29,8 +29,8 @@ $ ->
   if IMAGE_LOADED
     main()
 
-#KeyCodes =
-#  LEFT: 37
+KeyCodes =
+  SPACE: 32
 #  UP: 38
 #  RIGHT: 39
 #  DOWN: 40
@@ -63,7 +63,7 @@ drawBackground = (ctx, spritesheet, name) ->
     yCoords.push(yStart)
   for xPos in xCoords
     for yPos in yCoords
-      spritesheet.drawSprite(name, xPos, yPos, ctx)
+      spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 #drawHUD = (ctx, spritesheet) ->
 #  winStyle = window.config.windowStyle
@@ -101,8 +101,9 @@ main = ->
   bgCanvas = document.getElementById('canvas-bg')
   hudCanvas = document.getElementById('canvas-hud')
   updateCanvases(frame, canvas, hudCanvas)
-  bgCanvas.width = screen.width
-  bgCanvas.height = screen.height
+  # we should just make the bg larger than we'll ever need it to be
+  bgCanvas.width = screen.width * 2
+  bgCanvas.height = screen.height * 2
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
@@ -118,7 +119,7 @@ main = ->
     console.log("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
 
-  sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
+  sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
 
   # Some fun messing around with fullscreen
   maxWidth = 0
@@ -134,7 +135,7 @@ main = ->
         document.mozCancelFullScreen()
       else if document.webkitCancelFullScreen
         document.webkitCancelFullScreen()
-      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
+      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
     else
       console.log "Not at full screen"
       body = document.body
@@ -144,7 +145,7 @@ main = ->
         body.mozRequestFullScreen()
       else if body.webkitRequestFullscreen
         body.webkitRequestFullscreen()
-      sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx)
+      sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
   fsCanvas.addEventListener('mousedown', canvasclick)
 
   window.onresize = ->
@@ -159,7 +160,7 @@ main = ->
       drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
     if not document.mozFullScreenElement and
         not document.webkitFullScreenElement
-      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx)
+      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
 
     bgCanvas.style.left = Math.floor((canvas.width - bgCanvas.width)/2) + "px"
     bgCanvas.style.top = Math.floor((canvas.height - bgCanvas.height)/2) + "px"
@@ -180,11 +181,10 @@ main = ->
 #  mm = MainMenu.get(ctx, sheet)
 #  mm.startAnim()
 
-#  document.body.addEventListener('keydown', (e) ->
-#    if e.keyCode == KeyCodes.LEFT
-#      mm.moveLeft()
-#    else if e.keyCode == KeyCodes.RIGHT
-#      mm.moveRight())
+  document.body.addEventListener('keydown', (e) ->
+    if e.keyCode == KeyCodes.SPACE
+      camera.setTarget(0, 0))
+
   prevPos = {x: 0, y: 0}
   drag = false
   document.body.addEventListener('mousemove', (e) ->
@@ -194,9 +194,8 @@ main = ->
     if drag
       difx = x - prevPos.x
       dify = y - prevPos.y
-      cPos = camera.getPosition()
-      newX = cPos.x + difx
-      newY = cPos.y + dify
+      newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
+      newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
       camera.setPosition(newX, newY)
       prevPos = {x: x, y: y})
 
@@ -218,20 +217,23 @@ main = ->
 
   document.body.addEventListener('DOMMouseScroll', (e) ->
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-    z = camera.getZoom()
-    nz = z + delta * 0.01
+    nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz))
 
   document.body.addEventListener('mousewheel', (e) ->
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-    z = camera.getZoom()
-    nz = z + delta * 0.01
+    nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz))
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
     UI.draw(ctx)
     CurrentMission.draw(ctx)
+    bgCanvas.style.left = Math.floor(camera.x /
+      window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
+    bgCanvas.style.top = Math.floor(camera.y /
+      window.config.BG_PAN_SPEED_FACTOR - camera.height/2) + "px"
+    camera.update()
   #   if sheet != null
   #     ctx.save()
   #     ctx.translate(box.x, box.y)
