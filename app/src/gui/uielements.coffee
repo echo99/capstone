@@ -1,6 +1,9 @@
+# Elements namespace
+Elements = Elements or {}
+
 # The base class for UI elements
 #
-class UIElement
+class Elements.UIElement
   # @private @property [Array<UIElement>]
   _children: []
 
@@ -34,13 +37,15 @@ class UIElement
 
   # Draw the element to the canvas
   #
-  # @TODO finish doc
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Number] x
+  # @param [Number] y
   draw: (ctx, x, y) ->
 
 
 # A box UI element
 #
-class BoxElement extends UIElement
+class Elements.BoxElement extends Elements.UIElement
 
   # Create a new box element
   #
@@ -58,13 +63,14 @@ class BoxElement extends UIElement
 
 # A radial UI element
 #
-class RadialElement extends UIElement
+class Elements.RadialElement extends Elements.UIElement
 
   # Create a new radial element
   #
   # @param [Number] x x-position of center of element relative to parent
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] r Radius of element
+  #
   constructor: (@x, @y, @r) ->
     super()
     @r2 = @r*@r
@@ -76,16 +82,27 @@ class RadialElement extends UIElement
 
 # Message box class for displaying messages in the user interface
 #
-class MessageBox extends BoxElement
+class Elements.MessageBox extends Elements.BoxElement
   # Various types of messages
   TYPES =
     Info: 1
     Warn: 2
 
   # Create a new message box
+  #
+  # @param [Number] x The x-coordinate of the left edge of the box
+  # @param [Number] y The y-coordinate of the top edge of the box
+  # @param [Number] w The width of the box
+  # @param [Number] h The height of the box
+  # @param [String] message The message to display in the box
+  #
   constructor: (@x, @y, @w, @h, @message) ->
+    super(@x, @y, @w, @h)
 
-  # @param [CanvasRenderingContext2D] ctx
+  # Draw this message box to the canvas context
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
   draw: (ctx) ->
     ctx.strokeStyle = config.windowStyle.stroke
     ctx.fillStyle = config.windowStyle.fill
@@ -99,3 +116,25 @@ class MessageBox extends BoxElement
     ctx.fillText(@message, cx, cy)
 
 
+# Button class for handling user interactions
+#
+class Elements.Button extends Elements.BoxElement
+
+  # Create a new button
+  #
+  # @param [Number] x The x-coordinate of the left edge of the box
+  # @param [Number] y The y-coordinate of the top edge of the box
+  # @param [Number] w The width of the box
+  # @param [Number] h The height of the box
+  # @param [Function] callback The function to call when this button is clicked
+  constructor: (@x, @y, @w, @h, @callback) ->
+    super(@x, @y, @w, @h)
+
+  # Call the attached callback function when the button is clicked
+  #
+  onClick: ->
+    @callback()
+
+  # Do something when the user hovers over the button
+  #
+  hover: ->
