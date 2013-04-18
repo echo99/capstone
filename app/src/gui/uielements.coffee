@@ -85,10 +85,12 @@ class Elements.BoxElement extends Elements.UIElement
   constructor: (@x, @y, @w, @h) ->
     super()
 
+  # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
     # return not (@x < x or x > @x + width or @y < y or y > @y + width)
     return @x <= x <= @x + @w and @y < y <= @y + @h
 
+  # @see Elements.UIElement#getRelativeLocation
   getRelativeLocation: (x, y) ->
     return {'x': x-@x, 'y': y-@y}
 
@@ -106,6 +108,7 @@ class Elements.RadialElement extends Elements.UIElement
     super()
     @r2 = @r*@r
 
+  # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
     dx = Math.abs(@x - x)
     dy = Math.abs(@y - y)
@@ -137,11 +140,13 @@ class Elements.MessageBox extends Elements.BoxElement
     @closeBtn = new Elements.Button(5, 5, 16, 16, @)
     @addChild(@closeBtn)
 
+  # Temporary callback function
   callback: () ->
     @visible = false
     if @updCallback
       @updCallback()
 
+  # Add a callback to call when the message box updates
   addUpdateCallback: (callback) ->
     @updCallback = callback
 

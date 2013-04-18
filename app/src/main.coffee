@@ -42,6 +42,7 @@ game = new Game(0, 0)
 
 CurrentMission = new Menu()
 
+# Draw the background
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas
   width = canvas.width
@@ -85,6 +86,7 @@ drawBackground = (ctx, spritesheet, name) ->
 #  ctx.fillText("1", 110, 105)
 #  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
 
+# Update the size of the frame and the canvases when the window size changes
 updateCanvases = (frame, canvases...) ->
   frameWidth = window.innerWidth
   frameHeight = window.innerHeight
@@ -95,6 +97,7 @@ updateCanvases = (frame, canvases...) ->
     canvas.height = frameHeight
   camera.setSize(window.innerWidth, window.innerHeight)
 
+# The main method
 main = ->
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
