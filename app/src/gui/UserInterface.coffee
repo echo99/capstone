@@ -25,6 +25,10 @@ class UserInterface
     #       draw connection to the neighbor
     #   add this planet to visited planets
     #
+    # If all planets are off screen
+    #   draw text in middle of screen that says something like:
+    #   "Pres HOME to return to map"
+    #
     # draw HUD
     #
     # for each button

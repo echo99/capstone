@@ -29,7 +29,7 @@ $ ->
     main()
 
 KeyCodes =
-  HOME: 36  # for reposition the camera
+  HOME: 36  # for repositioning the camera
   SPACE: 32 # for advancing the turn
 
 SpriteNames = window.config.spriteNames
