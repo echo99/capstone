@@ -239,7 +239,7 @@ task 'check', 'Temporarily compiles coffee files to check syntax', ->
 task 'install-dep', 'Install all necessary node modules', ->
   installDep()
 
-task 'lint', 'Check CoffeeScript for lint', ->
+task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
   checkDep ->
     console.log("Checking #{SRC_DIR}/*.coffee for lint".yellow)
     pass = "✔".green
@@ -258,3 +258,25 @@ task 'lint', 'Check CoffeeScript for lint', ->
             console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
         else
           console.log("#{pass}  #{shortPath}".green)
+
+missingGlobalModule = (moduleName, modulePkg) ->
+  console.error(error.toString().trim().red)
+  console.error(moduleName + ' may not be installed correctly'.red)
+  console.error('Please install using "npm install -g ' + modulePkg + '"'.red)
+  process.exit(error.code)
+
+task 'doc', 'Document the source code using Codo', ->
+  checkDep ->
+    console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
+    exec "codo SRC_DIR", (err, stdout, stderr) ->
+      if err
+        if process.platform == 'win32'
+          # Handle Windows errors
+          if err.code == 1
+            # 1 = "ERROR_INVALID_FUNCTION"
+            missingGlobalModule('Codo', 'codo')
+        else if err.code == 127
+          # 127 = "illegal command"
+          missingGlobalModule('Codo', 'codo')
+        else
+          throw err # Unknown error
