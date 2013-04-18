@@ -9,13 +9,16 @@ window.config =
     stroke: "rgba(0, 37, 255, 1)"
     lineJoin: "bevel"
     lineWidth: 5
-    title:
+    defaultText:
       font: "15px Arial"
       color: "rgba(255, 255, 255, 1)"
-    label:
+    titleText:
+      font: "15px Arial"
+      color: "rgba(255, 255, 255, 1)"
+    labelText:
       font: "20pt Arial"
       color: "rgba(255, 255, 255, 1)"
-    value:
+    valueText:
       font: "15px Arial"
       color: "rgba(255, 255, 0, 1)"
   toolTipStyle:

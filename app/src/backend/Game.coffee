@@ -3,7 +3,7 @@
 class Game
   constructor: (@_height, @_width) ->
     @_planets = []
-	
+
   setup: (@_numplanets = 0, planets) ->
     if planets isnt null
       @_planets = planets
