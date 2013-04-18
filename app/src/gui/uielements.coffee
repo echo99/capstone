@@ -155,8 +155,8 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.fillStyle = config.windowStyle.fill
       ctx.strokeRect(@x, @y, @w, @h)
       ctx.fillRect(@x, @y, @w, @h)
-      ctx.font = config.windowStyle.label.font
-      ctx.fillStyle = config.windowStyle.label.color
+      ctx.font = config.windowStyle.labelText.font
+      ctx.fillStyle = config.windowStyle.labelText.color
       ctx.textAlign = 'center'
       cx = Math.round(@w/2 + @x)
       cy = Math.round(@h/2 + @y)
