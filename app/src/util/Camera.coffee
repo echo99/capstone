@@ -77,6 +77,14 @@ class Camera
     difY = (@y + coords.y) * @zoom
     return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
 
+  # Takes screen coordinates and returns true if it is a point within view
+  # of the camera
+  #
+  # @param [Object] coords Where coords.x and cords.y are the coordinates
+  # @return [Boolean] true if coords is within view, false otherwise
+  onScreen: (coords) ->
+    return 0 < coords.x < @width and 0 < coords.y < @height
+
   # Moves the camera's current position toward its target position
   # Call once per draw
   update: ->

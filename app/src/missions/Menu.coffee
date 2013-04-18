@@ -9,33 +9,43 @@ class Menu extends Mission
     #   Add fungus to locked mission planets
     #
     # Create planets:
-    #   Home -> Missions, Open, Credits
     p = [new Planet(0, 0), new Planet(0, -500), new Planet(500, 0),
-         new Planet(0, 500)]
-    p[0]._probes = 1
+         new Planet(0, 500),]
+
     @Planets =
       Home: p[0]
       Missions: p[1]
-      Open: p[2]
+      Extermination: p[2]
       Credits: p[3]
+
     @Ps = [[[p[0]._x, p[0]._y], "Home"], [[p[1]._x, p[1]._y], "Missions"],
-           [[p[2]._x, p[2]._y], "Open"], [[p[3]._x, p[3]._y], "Credits"]]
-    game.setGraph(p)
+           [[p[2]._x, p[2]._y], "Extermination"],
+           [[p[3]._x, p[3]._y], "Credits"]]
+
+    # Create connections
     connections = [
       [@Planets.Home, @Planets.Missons],
-      [@Planets.Home, @Planets.Open],
+      [@Planets.Home, @Planets.Extermination],
       [@Planets.Home, @Planets.Credits]
     ]
-    #   Missions -> Mission 1, etc.
-    #   Open -> Small, Medium, Large
-    #   Credits -> ??
-    #
+
     # Add planets and connections to game
+    # **** This is not right ****
+    game.setGraph(p)
+    @Planets.Home._adjacentPlanets = [@Planets.Missions,
+                                      @Planets.Extermination,
+                                      @Planets.Credits]
+    @Planets.Missions._adjacentPlanets = [@Planets.Home]
+    @Planets.Extermination._adjacentPlanets = [@Planets.Home]
+    @Planets.Credits._adjacentPlanets = [@Planets.Home]
+    # ****
+
     # Planets that leave the menu:
     #   Mission 1, etc
     #   Small, Medium, Large
     #
     # Add probe to Home planet
+    p[0]._probes = 1
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -51,7 +61,8 @@ class Menu extends Mission
       if @Planets[p[1]]._probes == 0
         coords = {x: p[0][0], y: p[0][1] - 100}
         coords = camera.getScreenCoordinates(coords)
-        ctx.fillText(p[1], coords.x, coords.y)
+        if camera.onScreen(coords)
+          ctx.fillText(p[1], coords.x, coords.y)
     #     draw the planet's label
     # if the probe is on a planet of interest
     #   draw prompt to make sure the player wants to play the mission

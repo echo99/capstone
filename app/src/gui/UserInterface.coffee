@@ -12,42 +12,41 @@ class UserInterface
     # Note: there are alot of things that need to check for hovering and many
     #       of which draw tool tips if they are
     # visited planets = set
+    visited = []
+    # for each planet
+    for p in game._planets
+    #   for each neighbor
+      pos = camera.getScreenCoordinates({x: p._x, y: p._y})
+      ctx.strokeStyle = window.config.connectionStyle.normal.stroke
+      ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
+    #   add this planet to visited planets
+      visited.push(p)
+      for neighbor in p._adjacentPlanets
+    #     if neighbor is not in visited planets
+        if neighbor not in visited
+    #       draw connection to the neighbor
+          nPos = camera.getScreenCoordinates(
+            {x: neighbor._x, y: neighbor._y})
+          ctx.beginPath()
+          ctx.moveTo(pos.x, pos.y)
+          ctx.lineTo(nPos.x, nPos.y)
+          ctx.stroke()
+
     # for each planet
     for p in game._planets
     #   draw planet
       SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
-      if p._probes > 0
-        SHEET.drawSprite(SpriteNames.PROBE, p._x+100, p._y-50, ctx)
-    ###
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 0, 0, ctx)
-    SHEET.drawSprite(SpriteNames.WARP_GATE, 0, 0, ctx)
-    SHEET.drawSprite(SpriteNames.PROBE, 100, -50, ctx)
-    SHEET.drawSprite(SpriteNames.ATTACK_SHIP, 100, 0, ctx)
-
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 200, 300, ctx)
-    SHEET.drawSprite(SpriteNames.OUTPOST_GATHERING, 200, 300, ctx)
-
-
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, -200, 400, ctx)
-    SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, -200, 400, ctx)
-    SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, -200, 400, ctx)
-    SHEET.drawSprite(SpriteNames.STATION_BUILDINGS_GATHERING, -200, 400, ctx)
-
-    SHEET.drawSprite(SpriteNames.PLANET_BLUE, 600, -200, ctx)
-    ###
     #   if structure
     #     draw structure
     #   if units
+      if p._probes > 0
     #     draw units
+        SHEET.drawSprite(SpriteNames.PROBE, p._x+100, p._y-50, ctx)
     #   for each control group
     #     if control group is hovered over
     #       draw expanded view
     #     else
     #       draw unexpanded view
-    #   for each neighbor
-    #     if neighbor is not in visited planets
-    #       draw connection to the neighbor
-    #   add this planet to visited planets
     #
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
