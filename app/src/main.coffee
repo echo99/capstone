@@ -213,21 +213,14 @@ main = ->
   hudCanvas.addEventListener('mouseout', (e) ->
     drag = false)
 
-# Why can't I figure out how to pass this to the two mouse wheel events?
-#  mouseWheelHandler: (e) ->
-#    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-#    nz = camera.zoom + delta * window.config.ZOOM_SPEED
-#    camera.setZoom(nz)
-
-  document.body.addEventListener('DOMMouseScroll', (e) ->
+  mouseWheelHandler = (e) ->
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
-    camera.setZoom(nz))
+    camera.setZoom(nz)
 
-  document.body.addEventListener('mousewheel', (e) ->
-    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-    nz = camera.zoom + delta * window.config.ZOOM_SPEED
-    camera.setZoom(nz))
+  document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
+
+  document.body.addEventListener('mousewheel', mouseWheelHandler)
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
