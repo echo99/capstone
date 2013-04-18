@@ -2,7 +2,6 @@
 
 #_require util/SpriteSheet
 #_require util/AtlasParser
-#_require gui/MainMenu
 #_require missions/Menu
 #_require gui/UserInterface
 #_require util/Camera
@@ -30,10 +29,8 @@ $ ->
     main()
 
 KeyCodes =
-  SPACE: 32
-#  UP: 38
-#  RIGHT: 39
-#  DOWN: 40
+  HOME: 36  # for reposition the camera
+  SPACE: 32 # for advancing the turn
 
 SpriteNames = window.config.spriteNames
 
@@ -65,6 +62,7 @@ drawBackground = (ctx, spritesheet, name) ->
     for yPos in yCoords
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
+# Keeping this here for reference, delete when no longer useful
 #drawHUD = (ctx, spritesheet) ->
 #  winStyle = window.config.windowStyle
 #  ctx.fillStyle = winStyle.fill #"rgba(0, 37, 255, 0.5)"
@@ -82,7 +80,6 @@ drawBackground = (ctx, spritesheet, name) ->
 #  ctx.fillText("Selected Units", 57, 67)
 #  ctx.fillStyle = winStyle.value.color #"rgba(255, 255, 0, 1)"
 #  ctx.fillText("1", 110, 105)
-
 #  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
 
 updateCanvases = (frame, canvases...) ->
@@ -121,10 +118,6 @@ main = ->
 
   sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
 
-  # Some fun messing around with fullscreen
-  maxWidth = 0
-  maxHeight = 0
-
   canvasclick = ->
     # eheight: 619 -> 774 (diff of 155)
     if document.mozFullScreenElement or document.webkitFullScreenElement
@@ -151,8 +144,6 @@ main = ->
   window.onresize = ->
     console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
     updateCanvases(frame, canvas, hudCanvas)
-    #box.x = canvas.width/2
-    #box.y = canvas.height/2
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
@@ -167,22 +158,8 @@ main = ->
 
     console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
-#  box =
-#    x: canvas.width/2
-#    y: canvas.height/2
-#    w: 40
-#    h: 40
-#    halfwidth: 20
-#    halfheight: 20
-#    radius: Math.ceil(20*1.5)
-#    diameter: Math.ceil(40*1.5)
-#    angle: 2
-
-#  mm = MainMenu.get(ctx, sheet)
-#  mm.startAnim()
-
   document.body.addEventListener('keydown', (e) ->
-    if e.keyCode == KeyCodes.SPACE
+    if e.keyCode == KeyCodes.HOME
       camera.setTarget(0, 0))
 
   prevPos = {x: 0, y: 0}
@@ -212,11 +189,11 @@ main = ->
   hudCanvas.addEventListener('mouseout', (e) ->
     drag = false)
 
+# Why can't I figure out how to pass this to the two mouse wheel events?
 #  mouseWheelHandler: (e) ->
 #    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-#    console.log(delta)
-#    z = camera.getZoom()
-#    camera.setZoom(z + delta * 0.01)
+#    nz = camera.zoom + delta * window.config.ZOOM_SPEED
+#    camera.setZoom(nz)
 
   document.body.addEventListener('DOMMouseScroll', (e) ->
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
@@ -237,20 +214,5 @@ main = ->
     bgCanvas.style.top = Math.floor(camera.y /
       window.config.BG_PAN_SPEED_FACTOR - camera.height/2) + "px"
     camera.update()
-  #   if sheet != null
-  #     ctx.save()
-  #     ctx.translate(box.x, box.y)
-  #     sheet.drawSprite(SpriteNames.PLANETS[0], 0, 0, ctx)
-  #     lastAngle = 0
-  #     for ship in ships
-  #       ship.angle += ship.angularVelocity
-  #       ctx.rotate(ship.angle-lastAngle)
-  #       if ship.orientation == Orientation.UP
-  #         sheet.drawSprite(ship.sptName, -ship.orbitRadius, 0, ctx)
-  #       else
-  #         sheet.drawSprite(ship.sptName, 0, -ship.orbitRadius, ctx)
-  #       lastAngle = ship.angle
-  #     ctx.restore()
-  #     sheet.drawSprite(SpriteNames.TITLE, box.x, 100, ctx)
 
   setInterval draw, 30
