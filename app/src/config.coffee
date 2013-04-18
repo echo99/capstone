@@ -13,7 +13,7 @@ window.config =
       font: "15px Arial"
       color: "rgba(255, 255, 255, 1)"
     label:
-      font: "15px Arial"
+      font: "20pt Arial"
       color: "rgba(255, 255, 255, 1)"
     value:
       font: "15px Arial"
