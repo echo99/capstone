@@ -15,6 +15,7 @@ class Sprite
   constructor: (@name, @x, @y, @w, @h, @cx, @cy) ->
 
 
+# A class that holds an array of images and displays them at specified interval
 class AnimatedSprite
   @drawCounter: 0
   prevCounter: -1
