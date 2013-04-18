@@ -63,10 +63,9 @@ class Camera
     return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
 
   # Moves the camera's current position toward its target position
+  # Call once per draw
   update: ->
-    # call once per draw
-    # move current x/y toward target x/y
     difx = @targetX - @x
     dify = @targetY - @y
-    @x = Math.floor(@x + difx / @MOVEFACTOR)
-    @y = Math.floor(@y + dify / @MOVEFACTOR)
+    @x = @x + difx / @MOVEFACTOR
+    @y = @y + dify / @MOVEFACTOR

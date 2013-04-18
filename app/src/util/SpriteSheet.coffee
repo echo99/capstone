@@ -70,8 +70,8 @@ class SpriteSheet
       # sprite.draw(@img, x, y, ctx)
       if useCamera
         trans = camera.getModifiedCoordinates({x: x, y: y})
-        x = trans.x
-        y = trans.y
+        x = (0.5 + trans.x) << 0
+        y = (0.5 + trans.y) << 0
         scale = camera.zoom
         # TODO: change bound check so it checks for sprite collision with
         #       the camera rectangle, not whether the center collides

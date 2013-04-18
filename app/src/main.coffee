@@ -162,8 +162,8 @@ main = ->
         not document.webkitFullScreenElement
       sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
 
-    bgCanvas.style.left = Math.floor((canvas.width - bgCanvas.width)/2) + "px"
-    bgCanvas.style.top = Math.floor((canvas.height - bgCanvas.height)/2) + "px"
+    bgCanvas.style.left = (0.5+(canvas.width - bgCanvas.width)/2) << 0 + "px"
+    bgCanvas.style.top = (0.5+(canvas.height - bgCanvas.height)/2) << 0 + "px"
 
     console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
@@ -187,7 +187,7 @@ main = ->
 
   prevPos = {x: 0, y: 0}
   drag = false
-  document.body.addEventListener('mousemove', (e) ->
+  hudCanvas.addEventListener('mousemove', (e) ->
     x = e.clientX
     y = e.clientY
     UI.onMouseMove(x, y)
@@ -199,14 +199,17 @@ main = ->
       camera.setPosition(newX, newY)
       prevPos = {x: x, y: y})
 
-  document.body.addEventListener('click', (e) ->
+  hudCanvas.addEventListener('click', (e) ->
     UI.onMouseClick(e.clientX, e.clientY))
 
-  document.body.addEventListener('mousedown', (e) ->
+  hudCanvas.addEventListener('mousedown', (e) ->
     drag = true
     prevPos = {x: e.clientX, y: e.clientY})
 
-  document.body.addEventListener('mouseup', (e) ->
+  hudCanvas.addEventListener('mouseup', (e) ->
+    drag = false)
+
+  hudCanvas.addEventListener('mouseout', (e) ->
     drag = false)
 
 #  mouseWheelHandler: (e) ->
