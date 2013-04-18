@@ -2,10 +2,14 @@
 # these attributes to transform world coordinates into screen coordinates. It
 # also provids funcionality for smooth movement to a new location.
 class Camera
-  # The current x position of the camera
+  # @property The current x position of the camera
   x: 0
-  # The current y position of the camera
+  # @property The current y position of the camera
   y: 0
+  # @property The current width of the camera
+  width: 0
+  # @property The current height of the camera
+  height: 0
 
   # The minimum allowed zoom
   MINZOOM: 0.1
@@ -46,7 +50,7 @@ class Camera
   # Sets the zoom to the given value. The zoom will always be between
   # 1 and MINZOOM
   #
-  # @param [Number] z the desired zoom
+  # @param [Number] z The desired zoom
   setZoom: (z) ->
     prev = @zoom
     if z > 1.0
@@ -58,15 +62,16 @@ class Camera
 
   # Gets the current zoom
   #
-  # @return [Number] the current zoom
+  # @return [Number] The current zoom
   getZoom: ->
     return @zoom
 
   # Takes the given world coords and returns a new set represting where the
   # given ones appear on the screen
   #
-  # @param [Object] {x, y} Where x and y are the coordinates to modify
-  # @return [Object] {x, y} The modified coordinates
+  # @param [Object] coords Where coords.x and cords.y are the coordinates
+  #                        to modify
+  # @return [Object] The modified coordinates
   getScreenCoordinates: (coords) ->
     difX = (@x - coords.x) * @zoom
     difY = (@y - coords.y) * @zoom
