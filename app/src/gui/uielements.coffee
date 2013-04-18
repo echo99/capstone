@@ -1,6 +1,9 @@
+# Elements namespace
+Elements = Elements or {}
+
 # The base class for UI elements
 #
-class UIElement
+class Elements.UIElement
   # @private @property [Array<UIElement>]
   _children: []
 
@@ -40,7 +43,7 @@ class UIElement
 
 # A box UI element
 #
-class BoxElement extends UIElement
+class Elements.BoxElement extends Elements.UIElement
 
   # Create a new box element
   #
@@ -58,7 +61,7 @@ class BoxElement extends UIElement
 
 # A radial UI element
 #
-class RadialElement extends UIElement
+class Elements.RadialElement extends Elements.UIElement
 
   # Create a new radial element
   #
@@ -76,7 +79,7 @@ class RadialElement extends UIElement
 
 # Message box class for displaying messages in the user interface
 #
-class MessageBox extends BoxElement
+class Elements.MessageBox extends Elements.BoxElement
   # Various types of messages
   TYPES =
     Info: 1
@@ -97,5 +100,3 @@ class MessageBox extends BoxElement
     cx = Math.round( @w/2 + @x)
     cy = Math.round( @h/2 + @y)
     ctx.fillText(@message, cx, cy)
-
-

@@ -109,7 +109,7 @@ main = ->
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
-  msgBox = new MessageBox(10, 10, 100, 100, "test")
+  msgBox = new Elements.MessageBox(10, 10, 100, 100, "test")
   msgBox.draw(hudCtx)
 
   sheet = SHEET
