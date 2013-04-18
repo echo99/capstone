@@ -8,17 +8,27 @@ class Menu extends Mission
     #
     # Create planets:
     #   Home -> Missions, Open, Credits
-    p = [new Planet(0, 0), new Planet(0, -500)]
+    p = [new Planet(0, 0), new Planet(0, -500), new Planet(500, 0),
+         new Planet(0, 500)]
     p[0]._probes = 1
     @Planets =
       Home: p[0]
       Missions: p[1]
-    @Ps = [[[p[0]._x, p[0]._y], "Home"], [[p[1]._x, p[1]._y], "Missions"]]
+      Open: p[2]
+      Credits: p[3]
+    @Ps = [[[p[0]._x, p[0]._y], "Home"], [[p[1]._x, p[1]._y], "Missions"],
+           [[p[2]._x, p[2]._y], "Open"], [[p[3]._x, p[3]._y], "Credits"]]
     game.setGraph(p)
+    connections = [
+      [@Planets.Home, @Planets.Missons],
+      [@Planets.Home, @Planets.Open],
+      [@Planets.Home, @Planets.Credits]
+    ]
     #   Missions -> Mission 1, etc.
     #   Open -> Small, Medium, Large
     #   Credits -> ??
     #
+    # Add planets and connections to game
     # Planets that leave the menu:
     #   Mission 1, etc
     #   Small, Medium, Large
@@ -29,8 +39,9 @@ class Menu extends Mission
     # Draw title
     SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
     # for each planet
-    ctx.font = window.config.windowStyle.title.font
-    ctx.fillStyle = window.config.windowStyle.title.color
+    winStyle = window.config.windowStyle
+    ctx.font = winStyle.defaultText.font
+    ctx.fillStyle = winStyle.defaultText.color
     ctx.textAlign = 'center'
     for p in @Ps
     #   if the planet is visible and the probe is not on it
