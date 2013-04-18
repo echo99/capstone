@@ -5,6 +5,7 @@
 #_require missions/Menu
 #_require gui/UserInterface
 #_require util/Camera
+#_require gui/uielements
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -108,6 +109,9 @@ main = ->
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
+  msgBox = new MessageBox(10, 10, 100, 100, "test")
+  msgBox.draw(hudCtx)
+
   sheet = SHEET
   if sheet == null
     # Should never get here
@@ -155,6 +159,8 @@ main = ->
 
     bgCanvas.style.left = (0.5+(canvas.width - bgCanvas.width)/2) << 0 + "px"
     bgCanvas.style.top = (0.5+(canvas.height - bgCanvas.height)/2) << 0 + "px"
+
+    msgBox.draw(hudCtx)
 
     console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
