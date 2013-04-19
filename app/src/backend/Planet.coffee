@@ -14,6 +14,11 @@ class Planet
     @_unitConstructing = null
     @_turnsToComplete = 0
 
+  # GETTERS #
+
+  location: ->
+    return {x: @_x, y: @_y}
+
   numShips: (type) ->
     return null
 
@@ -38,20 +43,33 @@ class Planet
   buildUnit: ->
     return null
 
-  grow: ->
-    null
-
   isBuilding: ->
     if turnstocomplete is 0
       return false
     else
       return true
 
+  # UPKEEP #
+
+  grow: ->
+    null
+
   resolveCombat: ->
     null
 
+  # INGAME COMMANDS #
+
   build: (name) ->
     null
+
+  move: (dest) ->
+    null
+
+  # SETTERS FOR USE BY GAME CLASS #
+  
+  addNeighbor: (otherplanet) ->
+    
+    
 
 
 
