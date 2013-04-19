@@ -42,6 +42,7 @@ game = new Game(0, 0)
 
 CurrentMission = new Menu()
 
+# Draw the background
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas
   width = canvas.width
@@ -85,6 +86,7 @@ drawBackground = (ctx, spritesheet, name) ->
 #  ctx.fillText("1", 110, 105)
 #  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
 
+# Update the size of the frame and the canvases when the window size changes
 updateCanvases = (frame, canvases...) ->
   frameWidth = window.innerWidth
   frameHeight = window.innerHeight
@@ -95,6 +97,7 @@ updateCanvases = (frame, canvases...) ->
     canvas.height = frameHeight
   camera.setSize(window.innerWidth, window.innerHeight)
 
+# The main method
 main = ->
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
@@ -111,8 +114,11 @@ main = ->
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
-  msgBox = new Elements.MessageBox(10, 10, 100, 100, "test")
+  msgBox = new Elements.MessageBox(10, 10, 100, 100, "test", hudCtx)
   msgBox.draw(hudCtx)
+  # msgBox.addUpdateCallback ->
+  #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
+  #   msgBox.draw(hudCtx)
 
   sheet = SHEET
   if sheet == null
@@ -195,7 +201,10 @@ main = ->
       prevPos = {x: x, y: y})
 
   hudCanvas.addEventListener('click', (e) ->
-    UI.onMouseClick(e.clientX, e.clientY))
+    UI.onMouseClick(e.clientX, e.clientY)
+    # if msgBox.containsPoint(e.clientX, e.clientY)
+    msgBox.click(e.clientX, e.clientY)
+  )
 
   hudCanvas.addEventListener('mousedown', (e) ->
     drag = true
@@ -207,26 +216,19 @@ main = ->
   hudCanvas.addEventListener('mouseout', (e) ->
     drag = false)
 
-# Why can't I figure out how to pass this to the two mouse wheel events?
-#  mouseWheelHandler: (e) ->
-#    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-#    nz = camera.zoom + delta * window.config.ZOOM_SPEED
-#    camera.setZoom(nz)
-
-  document.body.addEventListener('DOMMouseScroll', (e) ->
+  mouseWheelHandler = (e) ->
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
-    camera.setZoom(nz))
+    camera.setZoom(nz)
 
-  document.body.addEventListener('mousewheel', (e) ->
-    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-    nz = camera.zoom + delta * window.config.ZOOM_SPEED
-    camera.setZoom(nz))
+  document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
+
+  document.body.addEventListener('mousewheel', mouseWheelHandler)
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
-    UI.draw(ctx)
-    CurrentMission.draw(ctx)
+    UI.draw(ctx, hudCtx)
+    CurrentMission.draw(ctx, hudCtx)
     bgCanvas.style.left = Math.floor(camera.x /
       window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
     bgCanvas.style.top = Math.floor(camera.y /

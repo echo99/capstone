@@ -121,8 +121,8 @@ class MainMenu
             sheet.drawSprite(SpriteNames.WARP_GATE, planet[1], planet[2],
                              ctx, 1)
           else
-            sheet.drawSprite(SpriteNames.PLANET_INVISIBLE, planet[1], planet[2],
-                             ctx, 0.5)
+            sheet.drawSprite(SpriteNames.PLANET_INVISIBLE, planet[1],
+                            planet[2], ctx, 0.5)
 
           if planet[3]
             # @ctx.restore()

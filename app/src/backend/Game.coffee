@@ -5,6 +5,7 @@ class Game
     @_planets = []
 
   # GAME MANIPULATION #
+
   setup: (@_numplanets = 0, planets) ->
     if planets isnt null
       @_planets = planets

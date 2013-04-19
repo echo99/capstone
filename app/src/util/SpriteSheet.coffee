@@ -76,7 +76,7 @@ class SpriteSheet
         scale = camera.zoom
         # TODO: change bound check so it checks for sprite collision with
         #       the camera rectangle, not whether the center collides
-        if 0 < trans.x < camera.width and 0 < trans.y < camera.height
+        if camera.onScreen(trans)
           ctx.drawImage(@img, sprite.x, sprite.y, sprite.w, sprite.h,
               x + sprite.cx*scale, y + sprite.cy*scale, sprite.w*scale,
               sprite.h*scale)

@@ -9,18 +9,31 @@ window.config =
     stroke: "rgba(0, 37, 255, 1)"
     lineJoin: "bevel"
     lineWidth: 5
-    title:
+    defaultText:
       font: "15px Arial"
       color: "rgba(255, 255, 255, 1)"
-    label:
+    titleText:
+      font: "15px Arial"
+      color: "rgba(255, 255, 255, 1)"
+    labelText:
       font: "20pt Arial"
       color: "rgba(255, 255, 255, 1)"
-    value:
+    valueText:
       font: "15px Arial"
       color: "rgba(255, 255, 0, 1)"
   toolTipStyle:
     font: "15px Arial"
     color: "rgba(255, 255, 255, 1)"
+  connectionStyle:
+    normal:
+      stroke: "rgba(128, 128, 128, 0.5)"
+      lineWidth: 2
+    path:
+      stroke: "rgba(255, 255, 0, 0.8)"
+      lineWidth: 2
+    resourcePath:
+      stroke: "rgba(0, 255, 255, 0.5)"
+      lineWidth: 2
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
     ATTACK_SHIP: new AnimatedSprite(['attack_ship.png'])
