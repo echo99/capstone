@@ -1,15 +1,25 @@
 # Elements namespace
 Elements = Elements or {}
 
+CURSOR_TYPES =
+  DEFAULT: 'auto'
+  POINTER: 'pointer'
+  WAIT: 'wait'
+  MOVE: 'move'
+
+
 # The base class for UI elements
 #
 class Elements.UIElement
-  # @private @property [Array<UIElement>]
-  _children: []
+  # @property [Boolean] Flag for if element is visible
+  visible: true
 
   # Create a new UI element
   #
   constructor: ->
+    # @private @property [Array<UIElement>]
+    @_children = []
+    @name = 'UIElement'
 
   # Add a child element to this element
   #
@@ -47,25 +57,46 @@ class Elements.UIElement
   #
   draw: (ctx, x, y) ->
 
-  # Call to element when it is clicked
-  click: (x, y) ->
-    console.log("clicked (#{x}, #{y})")
-    @_onClick()
-    relLoc = @getRelativeLocation(x, y)
-    for child in @_children
-      if child.containsPoint(relLoc.x, relLoc.y)
-        child.click(relLoc.x, relLoc.y)
+  # Call to element to check if it is clicked
+  #
+  # @param [Number] x
+  # @param [Number] y
+  #
+  click: (x, y) =>
+    if @containsPoint(x, y) and @visible
+      console.log("clicked #{@name} at (#{x}, #{y})")
+      @_onClick()
+      relLoc = @getRelativeLocation(x, y)
+      console.log("In loop")
+      console.log("Children of #{@name} : #{@_children}")
+      for child in @_children
+        if child.visible
+          console.log("Checking #{child.name}")
+          child.click(relLoc.x, relLoc.y)
+      console.log("Out of loop")
 
   # @private Action to perform when element is clicked
   # @abstract
   #
   _onClick: ->
 
+  mouseMove: (x, y) ->
+    if @containsPoint(x, y)
+      @_onHover()
+      relLoc = @getRelativeLocation(x, y)
+      for child in @_children
+        child.mouseMove(relLoc.x, relLoc.y)
+
+  # @private Action to perform when element is hovered over
+  # @abstract
+  #
+  _onHover: ->
+
   # Gets the relative location of the point to this element
   #
   # @param [Number] x
   # @param [Number] y
-  # @return [Object] {'x': x, 'y': y}
+  # @return [Object] The coordinates `{'x': x, 'y': y}`
   getRelativeLocation: (x, y) ->
     return {'x': x, 'y': y}
 
@@ -84,6 +115,7 @@ class Elements.BoxElement extends Elements.UIElement
   #
   constructor: (@x, @y, @w, @h) ->
     super()
+    @name = 'BoxElement'
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
@@ -129,22 +161,36 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] w The width of the box
   # @param [Number] h The height of the box
   # @param [String] message The message to display in the box
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
-  constructor: (@x, @y, @w, @h, @message) ->
+  constructor: (@x, @y, @w, @h, @message, @ctx) ->
     super(@x, @y, @w, @h)
-    @visible = true
-    test = ->
-      alert(@visible)
-      @visible = false
-      alert(@visible)
-    @closeBtn = new Elements.Button(5, 5, 16, 16, @)
+    @name = 'MessageBox'
+    # test = ->
+    #   alert(@visible)
+    #   @visible = false
+    #   alert(@visible)
+    # @closeBtn = new Elements.Button(5, 5, 16, 16, @)
+    @closeBtn = new Elements.Button(5, 5, 16, 16,
+      ((obj) ->
+        return -> obj.close())(this))
     @addChild(@closeBtn)
+    console.log("My children: #{@_children}")
+    console.log("Button's children: #{@closeBtn._children}")
 
-  # Temporary callback function
-  callback: () ->
+  # # Temporary callback function
+  # callback: () ->
+  #   @visible = false
+  #   if @updCallback
+  #     @updCallback()
+
+  # Close this message box
+  close: ->
     @visible = false
-    if @updCallback
-      @updCallback()
+    lw = config.windowStyle.lineWidth
+    lw2 = lw + lw
+    @ctx.clearRect(@x-lw, @y-lw, @w + lw2, @h + lw2)
+
 
   # Add a callback to call when the message box updates
   addUpdateCallback: (callback) ->
@@ -191,12 +237,14 @@ class Elements.Button extends Elements.BoxElement
   # @param [Function] callback The function to call when this button is clicked
   constructor: (@x, @y, @w, @h, @callback) ->
     super(@x, @y, @w, @h)
+    @name = 'Button'
 
   # Call the attached callback function when the button is clicked
   #
   _onClick: ->
-    @callback.callback()
+    # @callback.callback()
+    @callback()
 
   # Do something when the user hovers over the button
   #
-  hover: ->
+  _onHover: ->
