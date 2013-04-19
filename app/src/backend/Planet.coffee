@@ -1,7 +1,10 @@
 #Defines a class to represent planets
 
+#_require ControlGroup
+
 class Planet
   constructor: (@_x, @_y, @_resources = 0, @_rate = 0) ->
+    @_availableResources = 0
     @_adjacentPlanets = []
     @_fungusStrength = 0
     @_fungusMaximumStrength = 0
@@ -21,6 +24,12 @@ class Planet
 
   location: ->
     return {x: @_x, y: @_y}
+
+  resources: ->
+    return resources
+
+  availableResources: ->
+    return availableResources
 
   numShips: (type) ->
     return null
@@ -47,7 +56,7 @@ class Planet
     return null
 
   isBuilding: ->
-    if turnstocomplete is 0
+    if @_turnstocomplete is 0
       return false
     else
       return true
@@ -76,18 +85,22 @@ class Planet
   resolveCombat: ->
     null
 
+  buildUpkeep: ->
+    null
+
   # INGAME COMMANDS #
 
   build: (name) ->
     null
 
   move: (dest) ->
-    null
+    controlGroup = null
 
   # SETTERS FOR USE BY GAME CLASS #
-  
+
   addNeighbor: (otherplanet) ->
-    
+    @_adjacentPlanets.push(otherplanet)
+    otherplanet._adjacentPlanets.push(@)
     
 
 
