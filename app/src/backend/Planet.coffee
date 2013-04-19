@@ -46,6 +46,14 @@ class Planet
   buildUnit: ->
     return null
 
+  isBuilding: ->
+    if turnstocomplete is 0
+      return false
+    else
+      return true
+
+  # UPKEEP #
+
   growPass1: ->
     if @_fungusStrength >= @_fungusMaximumStrength
       # Spore
@@ -64,17 +72,6 @@ class Planet
     @_fungusLeaving = 0
     @_fungusStrength += @_fungusArriving
     @_fungusArriving = 0
-
-  isBuilding: ->
-    if turnstocomplete is 0
-      return false
-    else
-      return true
-
-  # UPKEEP #
-
-  grow: ->
-    null
 
   resolveCombat: ->
     null
