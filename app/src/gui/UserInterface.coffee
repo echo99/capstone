@@ -14,9 +14,9 @@ class UserInterface
     # visited planets = set
     visited = []
     # for each planet
-    for p in game._planets
+    for p in game.getPlanets()
     #   for each neighbor
-      pos = camera.getScreenCoordinates({x: p._x, y: p._y})
+      pos = camera.getScreenCoordinates(p.location())
       ctx.strokeStyle = window.config.connectionStyle.normal.stroke
       ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     #   add this planet to visited planets
@@ -25,8 +25,7 @@ class UserInterface
     #     if neighbor is not in visited planets
         if neighbor not in visited
     #       draw connection to the neighbor
-          nPos = camera.getScreenCoordinates(
-            {x: neighbor._x, y: neighbor._y})
+          nPos = camera.getScreenCoordinates(neighbor.location())
           ctx.beginPath()
           ctx.moveTo(pos.x, pos.y)
           ctx.lineTo(nPos.x, nPos.y)
