@@ -275,6 +275,10 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
     pass = "✔".green
     warn = "⚠".yellow
     fail = "✖".red
+    if process.platform == 'win32'
+      pass = "√".green
+      warn = "!".yellow
+      fail = "x".red
     getSourceFilePaths().forEach (filepath) ->
       fs.readFile filepath, (err, data) ->
         shortPath = filepath.substr SRC_DIR.length + 1
@@ -311,3 +315,43 @@ task 'doc', 'Document the source code using Codo', ->
           missingGlobalModule('Codo', 'codo')
         else
           throw err # Unknown error
+
+# REPORTER = "min"
+
+# task "test", "run tests", ->
+#   exec "NODE_ENV=test 
+#     ./node_modules/.bin/mocha 
+#     --compilers coffee:coffee-script
+#     --reporter #{REPORTER}
+#     --require coffee-script 
+#     --require test/test_helper.coffee
+#     --colors
+#   ", (err, output) ->
+#     throw err if err
+#     console.log output
+
+task "test", "Run tests", ->
+  requireOrExit('mocha')
+  requireOrExit('chai')
+  requireOrExit('coffee-script')
+  checkDep ->
+    cmd = './node_modules/.bin/mocha'
+    if process.platform == 'win32'
+      cmd = '.\\node_modules\\.bin\\mocha'
+    exec cmd + " --compilers coffee:coffee-script -u tdd --reporter dot --require coffee-script --require test/helpers/test_helper.coffee --colors", (err, output, stderr) ->
+      console.log(output) if output
+      console.log(stderr) if stderr
+      throw err if err
+  # exec "mocha --compilers coffee:coffee-script -u tdd --reporter spec --require coffee-script --require test/helpers/test_helper.coffee --colors", (err, output, stderr) ->
+  #     # throw err if err
+  #   console.log output
+  # mocha = spawn '.\\node_modules\\.bin\\mocha.cmd', ['--compilers', 'coffee:coffee-script', '-u', 'tdd', '--reporter', 'spec', '--require', 'coffee-script', '--require', 'test/helpers/test_helper.coffee', '--colors']
+  # mocha.stdout.pipe(process.stdout, end: false)
+  # mocha.stderr.pipe(process.stderr)
+  # # mocha.stdout.on 'data', (data) ->
+  # #   console.log(data.toString())
+  # mocha.on 'exit', (status) ->
+  #   console.log ("DONE!" + status)
+  # # coffee = spawn cmd, args
+
+  # #   coffee.stdout.on 'data', (data) ->

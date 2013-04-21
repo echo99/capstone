@@ -1,5 +1,8 @@
 # Elements namespace
-Elements = Elements or {}
+root = exports ? window
+root.Elements ?= {}
+# Elements = Elements or {}
+Elements = root.Elements
 
 CURSOR_TYPES =
   DEFAULT: 'auto'
@@ -120,7 +123,7 @@ class Elements.BoxElement extends Elements.UIElement
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
     # return not (@x < x or x > @x + width or @y < y or y > @y + width)
-    return @x <= x <= @x + @w and @y < y <= @y + @h
+    return @x <= x <= @x + @w and @y <= y <= @y + @h
 
   # @see Elements.UIElement#getRelativeLocation
   getRelativeLocation: (x, y) ->
