@@ -148,6 +148,21 @@ notify = (message, msgLvl) ->
     # spawn cmd, (err, stdout, stderr) ->
     #   throw err if err
     spawn notifu, ['/p', 'Cake Status', '/m', message, '/t', msgLvl]
+  else if process.platform == 'linux'
+    cmd = 'notify-send'
+    icon = ''
+    time = 5000
+    switch msgLvl
+      when MessageLevel.INFO
+        icon += 'dialog-information'
+        time = 3000
+      when MessageLevel.WARN
+        icon += 'dialog-warning'
+        time = 5000
+      when MessageLevel.ERROR
+        icon += 'dialog-error'
+        time = 10000
+    spawn cmd, ['-i', icon, '-t', time, 'Cake Status', message]
 
 
 ###############################################################################
@@ -329,12 +344,16 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
           # console.log("#{pass}  #{shortPath}".green)
         if filesToLint == 0
           # console.log("#{failCount} lint failures")
-          if failCount > 0 
+          if failCount > 0
             notify("Build succeeded, but #{failCount} lint errors were " +
               "found! Please check the terminal for more details.",
               MessageLevel.ERROR) if WATCHING
-            console.error("\n#{failCount} lint error(s) found in #{fileFailCount} file(s)!".red)
-          else 
+            console.error("\n#{failCount} lint error(s) found in #{fileFailCount} file(s)!".red.bold)
+            console.error("As a reminder:".grey.underline)
+            console.error("- Indentation is two spaces. No tabs allowed".grey)
+            console.error("- Maximum line width is 80 characters".grey)
+            console.error("") if WATCHING
+          else
             notify("Build succeeded. All files passed lint.",
               MessageLevel.INFO) if WATCHING
             console.log('No lint errors found!'.green)
@@ -366,11 +385,11 @@ task 'doc', 'Document the source code using Codo', ->
 # REPORTER = "min"
 
 # task "test", "run tests", ->
-#   exec "NODE_ENV=test 
-#     ./node_modules/.bin/mocha 
+#   exec "NODE_ENV=test
+#     ./node_modules/.bin/mocha
 #     --compilers coffee:coffee-script
 #     --reporter #{REPORTER}
-#     --require coffee-script 
+#     --require coffee-script
 #     --require test/test_helper.coffee
 #     --colors
 #   ", (err, output) ->
