@@ -34,6 +34,7 @@ if process.platform == 'win32'
   VENDOR_DIR = 'vendor\\scripts'
 # Flag to make sure we aren't calling build multiple times at once
 BUILDING = false
+WATCHING = false
 
 coffeeLintConfig =
   no_tabs:
@@ -61,6 +62,11 @@ coffeeLintConfig =
   line_endings:
     value: 'unix'
     level: 'ignore'
+
+MessageLevel =
+  INFO: 'info'
+  WARN: 'warn'
+  ERROR: 'error'
 
 ###############################################################################
 # Helper functions
@@ -109,6 +115,7 @@ checkSyntax = (callback) ->
   exec "coffee -p -c #{SRC_DIR} > #{nulDir}", (err, stdout, stderr) ->
     if err
       console.error(err.toString().trim().red)
+      notify("Build failed! Please check the terminal for details.", MessageLevel.ERROR) if WATCHING
       callback(false)
     else
       callback(true)
@@ -124,6 +131,24 @@ getSourceFilePaths = (dirPath = SRC_DIR) ->
     else if /\.coffee$/.test file
       files.push filepath
   files
+
+# Sends a system notification
+notify = (message, msgLvl) ->
+  if process.platform == 'win32'
+    notifu = '.\\vendor\\tools\\notifu'
+    time = 5000
+    switch msgLvl
+      when MessageLevel.INFO
+        time = 3000
+      when MessageLevel.WARN
+        time = 5000
+      when MessageLevel.ERROR
+        time = 10000
+    # cmd = "#{notifu} /p Cake /m \"#{message}\" /t #{msgLvl} /d {time}"
+    # spawn cmd, (err, stdout, stderr) ->
+    #   throw err if err
+    spawn notifu, ['/p', 'Cake Status', '/m', message, '/t', msgLvl]
+
 
 ###############################################################################
 # Tasks
@@ -148,6 +173,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
               # However, if it got to this point, there should be no problems
               console.error(err.toString().trim().red)
             else
+              # notify("Build successful!", MessageLevel.INFO) if WATCHING
               console.log('Build successful!'.green)
               console.log()
             invoke 'lint'
@@ -189,6 +215,7 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
 
 
 task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
+  WATCHING = true
   checkDep ->
     console.log("Watching files #{SRC_DIR}/*.coffee".yellow)
 
@@ -279,19 +306,39 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
       pass = "√".green
       warn = "!".yellow
       fail = "x".red
-    getSourceFilePaths().forEach (filepath) ->
+    failCount = 0
+    fileFailCount = 0
+    files = getSourceFilePaths()
+    filesToLint = files.length
+    files.forEach (filepath) ->
+    # getSourceFilePaths().forEach (filepath) ->
       fs.readFile filepath, (err, data) ->
+        filesToLint--
         shortPath = filepath.substr SRC_DIR.length + 1
         result = coffeelint.lint data.toString(), coffeeLintConfig
         if result.length
+          fileFailCount++
           hasError = result.some (res) -> res.level is 'error'
           level = if hasError then fail else warn
           console.error "#{level}  #{shortPath}".red
           for res in result
+            failCount++
             level = if res.level is 'error' then fail else warn
             console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
         else
-          console.log("#{pass}  #{shortPath}".green)
+          # console.log("#{pass}  #{shortPath}".green)
+        if filesToLint == 0
+          # console.log("#{failCount} lint failures")
+          if failCount > 0 
+            notify("Build succeeded, but #{failCount} lint errors were " +
+              "found! Please check the terminal for more details.",
+              MessageLevel.ERROR) if WATCHING
+            console.error("\n#{failCount} lint error(s) found in #{fileFailCount} file(s)!".red)
+          else 
+            notify("Build succeeded. All files passed lint.",
+              MessageLevel.INFO) if WATCHING
+            console.log('No lint errors found!'.green)
+
 
 missingGlobalModule = (moduleName, modulePkg) ->
   console.error(error.toString().trim().red)
