@@ -22,7 +22,6 @@ class Elements.UIElement
   constructor: ->
     # @private @property [Array<UIElement>]
     @_children = []
-    @name = 'UIElement'
 
   # Add a child element to this element
   #
@@ -50,6 +49,15 @@ class Elements.UIElement
   #
   containsPoint: (x, y) ->
 
+  # Check if the given coordinates are within the boundaries of the UI element
+  #
+  # @param [Object] coords Where coords.x and cords.y are the coordinates
+  #                        to modify
+  # @return [Boolean] whether or not the coordinates lie inside the element
+  #
+  containsCoords: (coords) ->
+    return @containsPoint(coords.x, coords.y)
+
   # Draw the element to the canvas
   #
   # @abstract Each element will have its own draw function
@@ -67,7 +75,7 @@ class Elements.UIElement
   #
   click: (x, y) =>
     if @containsPoint(x, y) and @visible
-      console.log("clicked #{@name} at (#{x}, #{y})")
+      console.log("clicked #{@constructor.name} at (#{x}, #{y})")
       @_onClick()
       relLoc = @getRelativeLocation(x, y)
       console.log("In loop")
@@ -118,7 +126,6 @@ class Elements.BoxElement extends Elements.UIElement
   #
   constructor: (@x, @y, @w, @h) ->
     super()
-    @name = 'BoxElement'
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
@@ -168,7 +175,6 @@ class Elements.MessageBox extends Elements.BoxElement
   #
   constructor: (@x, @y, @w, @h, @message, @ctx) ->
     super(@x, @y, @w, @h)
-    @name = 'MessageBox'
     # test = ->
     #   alert(@visible)
     #   @visible = false
@@ -240,7 +246,6 @@ class Elements.Button extends Elements.BoxElement
   # @param [Function] callback The function to call when this button is clicked
   constructor: (@x, @y, @w, @h, @callback) ->
     super(@x, @y, @w, @h)
-    @name = 'Button'
 
   # Call the attached callback function when the button is clicked
   #
