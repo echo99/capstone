@@ -195,6 +195,11 @@ main = ->
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
+    pointer = msgBox.mouseMove(x, y)
+    if pointer
+      hudCanvas.style.cursor = pointer
+    else
+      hudCanvas.style.cursor = 'auto'
     if drag
       difx = x - prevPos.x
       dify = y - prevPos.y

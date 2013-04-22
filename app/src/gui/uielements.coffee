@@ -93,16 +93,22 @@ class Elements.UIElement
   _onClick: ->
 
   mouseMove: (x, y) ->
-    if @containsPoint(x, y)
-      @_onHover()
+    pointerType = null
+    if @containsPoint(x, y) and @visible
+      pointerType = @_onHover()
       relLoc = @getRelativeLocation(x, y)
+      # console.log("relative location: #{@constructor.name} #{relLoc.x},
+      #   #{relLoc.y} | #{pointerType}")
       for child in @_children
-        child.mouseMove(relLoc.x, relLoc.y)
+        pointer = child.mouseMove(relLoc.x, relLoc.y)
+        pointerType = pointer if pointer
+    return pointerType
 
   # @private Action to perform when element is hovered over
   # @abstract
   #
   _onHover: ->
+    return null
 
   # Gets the relative location of the point to this element
   #
@@ -203,6 +209,7 @@ class Elements.MessageBox extends Elements.BoxElement
     lw = config.windowStyle.lineWidth
     lw2 = lw + lw
     @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
+    @ctx.canvas.style.cursor = CURSOR_TYPES.DEFAULT
 
 
   # Add a callback to call when the message box updates
@@ -263,6 +270,7 @@ class Elements.Button extends Elements.BoxElement
   # Do something when the user hovers over the button
   #
   _onHover: ->
+    return CURSOR_TYPES.POINTER
 
 class Elements.RadialButton extends Elements.RadialElement
 
@@ -284,3 +292,4 @@ class Elements.RadialButton extends Elements.RadialElement
   # Do something when the user hovers over the button
   #
   _onHover: ->
+    return CURSOR_TYPES.POINTER
