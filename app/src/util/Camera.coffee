@@ -77,6 +77,19 @@ class Camera
     difY = (@y + coords.y) * @zoom
     return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
 
+  # Takes the given screen coords and returns a new set represting where the
+  # given ones appear in the world
+  #
+  # @param [Object] coords Where coords.x and cords.y are the coordinates
+  #                        to modify
+  # @return [Object] The modified coordinates
+  getWorldCoordinates: (coords) ->
+    difX = coords.x - @x - (@width / 2)
+    difY = coords.y - @y - (@height / 2)
+    posX = (difX / @zoom) - @x
+    posY = (difY / @zoom) - @y
+    return {x: posX, y: posY}
+
   # Takes screen coordinates and returns true if it is a point within view
   # of the camera
   #
