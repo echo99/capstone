@@ -78,13 +78,14 @@ class Elements.UIElement
       console.log("clicked #{@constructor.name} at (#{x}, #{y})")
       @_onClick()
       relLoc = @getRelativeLocation(x, y)
-      console.log("In loop")
-      console.log("Children of #{@name} : #{@_children}")
+      console.log("relative location: #{relLoc.x}, #{relLoc.y}")
+      # console.log("In loop")
+      # console.log("Children of #{@name} : #{@_children}")
       for child in @_children
         if child.visible
-          console.log("Checking #{child.name}")
+          # console.log("Checking #{child.name}")
           child.click(relLoc.x, relLoc.y)
-      console.log("Out of loop")
+      # console.log("Out of loop")
 
   # @private Action to perform when element is clicked
   # @abstract
@@ -119,22 +120,25 @@ class Elements.BoxElement extends Elements.UIElement
 
   # Create a new box element
   #
-  # @param [Number] x x-position of left edge of element relative to parent
-  # @param [Number] y y-position of top edge of element relative to parent
+  # @param [Number] x x-position of center of element relative to parent
+  # @param [Number] y y-position of center of element relative to parent
   # @param [Number] w Width of element
   # @param [Number] h Height of element
   #
   constructor: (@x, @y, @w, @h) ->
     super()
+    @cx = -Math.round(@w/2)
+    @cy = -Math.round(@h/2)
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
     # return not (@x < x or x > @x + width or @y < y or y > @y + width)
-    return @x <= x <= @x + @w and @y <= y <= @y + @h
+    # return @x <= x <= @x + @w and @y <= y <= @y + @h
+    return @x + @cx <= x <= @x - @cx and @y + @cy <= y <= @y - @cy
 
   # @see Elements.UIElement#getRelativeLocation
   getRelativeLocation: (x, y) ->
-    return {'x': x-@x, 'y': y-@y}
+    return {'x': x-@x-@cx, 'y': y-@y-@cy}
 
 # A radial UI element
 #
@@ -166,8 +170,8 @@ class Elements.MessageBox extends Elements.BoxElement
 
   # Create a new message box
   #
-  # @param [Number] x The x-coordinate of the left edge of the box
-  # @param [Number] y The y-coordinate of the top edge of the box
+  # @param [Number] x The x-coordinate of the center of the box
+  # @param [Number] y The y-coordinate of the center of the box
   # @param [Number] w The width of the box
   # @param [Number] h The height of the box
   # @param [String] message The message to display in the box
@@ -180,7 +184,7 @@ class Elements.MessageBox extends Elements.BoxElement
     #   @visible = false
     #   alert(@visible)
     # @closeBtn = new Elements.Button(5, 5, 16, 16, @)
-    @closeBtn = new Elements.Button(5, 5, 16, 16,
+    @closeBtn = new Elements.Button(8, 8, 16, 16,
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
@@ -198,7 +202,7 @@ class Elements.MessageBox extends Elements.BoxElement
     @visible = false
     lw = config.windowStyle.lineWidth
     lw2 = lw + lw
-    @ctx.clearRect(@x-lw, @y-lw, @w + lw2, @h + lw2)
+    @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
 
 
   # Add a callback to call when the message box updates
@@ -213,17 +217,20 @@ class Elements.MessageBox extends Elements.BoxElement
     if @visible
       ctx.strokeStyle = config.windowStyle.stroke
       ctx.fillStyle = config.windowStyle.fill
-      ctx.strokeRect(@x, @y, @w, @h)
-      ctx.fillRect(@x, @y, @w, @h)
+      # ctx.strokeRect(@x, @y, @w, @h)
+      # ctx.fillRect(@x, @y, @w, @h)
+      ctx.strokeRect(@x+@cx, @y+@cy, @w, @h)
+      ctx.fillRect(@x+@cx, @y+@cy, @w, @h)
       ctx.font = config.windowStyle.labelText.font
       ctx.fillStyle = config.windowStyle.labelText.color
       ctx.textAlign = 'center'
-      cx = Math.round(@w/2 + @x)
-      cy = Math.round(@h/2 + @y)
+      # cx = Math.round(@w/2 + @x)
+      # cy = Math.round(@h/2 + @y)
       ctx.fillText(@message, cx, cy)
+      ctx.fillText(@message, @x, @y)
 
-      btnOffsetX = @x + @closeBtn.x
-      btnOffsetY = @y + @closeBtn.y
+      btnOffsetX = @x + @cx + @closeBtn.x + @closeBtn.cx
+      btnOffsetY = @y + @cy + @closeBtn.y + @closeBtn.cy
       cx = Math.round(@closeBtn.w/2 + btnOffsetX)
       cy = Math.round(@closeBtn.h/2 + btnOffsetY) + 4
       ctx.fillStyle = 'rgb(0,0,0)'
@@ -239,13 +246,34 @@ class Elements.Button extends Elements.BoxElement
 
   # Create a new button
   #
-  # @param [Number] x The x-coordinate of the left edge of the box
-  # @param [Number] y The y-coordinate of the top edge of the box
+  # @param [Number] x The x-coordinate of the center of the button
+  # @param [Number] y The y-coordinate of the center of the button
   # @param [Number] w The width of the box
   # @param [Number] h The height of the box
   # @param [Function] callback The function to call when this button is clicked
   constructor: (@x, @y, @w, @h, @callback) ->
     super(@x, @y, @w, @h)
+
+  # Call the attached callback function when the button is clicked
+  #
+  _onClick: ->
+    # @callback.callback()
+    @callback()
+
+  # Do something when the user hovers over the button
+  #
+  _onHover: ->
+
+class Elements.RadialButton extends Elements.RadialElement
+
+  # Create a new radial button
+  #
+  # @param [Number] x x-position of center of element relative to parent
+  # @param [Number] y y-position of center of element relative to parent
+  # @param [Number] r Radius of element
+  # @param [Function] callback The function to call when this button is clicked
+  constructor: (@x, @y, @w, @h, @callback) ->
+    super(@x, @y, @r)
 
   # Call the attached callback function when the button is clicked
   #
