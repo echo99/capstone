@@ -194,6 +194,7 @@ main = ->
     x = e.clientX
     y = e.clientY
     UI.onMouseMove(x, y)
+    CurrentMission.onMouseMove(x, y)
     if drag
       difx = x - prevPos.x
       dify = y - prevPos.y
@@ -204,6 +205,7 @@ main = ->
 
   hudCanvas.addEventListener('click', (e) ->
     UI.onMouseClick(e.clientX, e.clientY)
+    CurrentMission.onMouseMove(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
     msgBox.click(e.clientX, e.clientY)
   )

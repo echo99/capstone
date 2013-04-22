@@ -1,8 +1,19 @@
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
 class UserInterface
+  @planetButtons: []
+  @hoveredButton: null
+  @lastMousePos: {x: 0, y: 0}
+
   # Creates a new UserInterface
   constructor: () ->
+
+  initialize: () ->
+    @planetButtons = []
+    for p in game.getPlanets()
+      pos = p.location()
+      @planetButtons.push(new Elements.RadialElement(pos.x, pos.y,
+        window.config.planetRadius))
 
   # Draws the game and HUD
   #
@@ -14,10 +25,10 @@ class UserInterface
     # visited planets = set
     visited = []
     # for each planet
+    ctx.strokeStyle = window.config.connectionStyle.normal.stroke
+    ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     for p in game.getPlanets()
       pos = camera.getScreenCoordinates(p.location())
-      ctx.strokeStyle = window.config.connectionStyle.normal.stroke
-      ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     #   add this planet to visited planets
       visited.push(p)
     #   for each neighbor
@@ -59,16 +70,39 @@ class UserInterface
     #       draw hover image
     #     else
     #       draw regular image
+    if @hoveredButton
+    # if the button is a planet
+      ctx.strokeStyle = window.config.selectionStyle.stroke
+      ctx.lineWidth = window.config.selectionStyle.lineWidth
+      x = @hoveredButton.x
+      y = @hoveredButton.y
+      r = window.config.planetRadius + window.config.selectionStyle.radius
+      ctx.beginPath()
+      ctx.arc(x, y, r, 0, 2*Math.PI)
+      ctx.stroke()
+    # if there are selected units
+      ctx.textAlign = "left"
+      ctx.font = window.config.toolTipStyle.font
+      ctx.fillStyle = window.config.toolTipStyle.color
+      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+      ctx.fillText("Move selected units", x, y)
 
   # The UI expects this to be called when the mouse moves
   #
   # @param [Number] x The x position of the mouse
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
+    @lastMousePos = {x: x, y: y}
     # for each button
+    for b in @planetButtons
     #   set button to not hover
     #   if (x, y) on button
+      if b.containsPoint(x, y)
+        @hoveredButton = b
+        return
     #     set button to hover
+    @hoveredButton = null
 
   # The UI expects this to be called when the mouse clicks
   #
@@ -78,3 +112,5 @@ class UserInterface
     # for each button
     #   if button is hovered over
     #     perform button action
+    if @hoveredButton != null and @hoveredButton.containsPoint(x, y)
+      console.log("clicked planet")

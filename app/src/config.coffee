@@ -24,6 +24,8 @@ window.config =
   toolTipStyle:
     font: "15px Arial"
     color: "rgba(255, 255, 255, 1)"
+    xOffset: 15
+    yOffset: 30
   connectionStyle:
     normal:
       stroke: "rgba(128, 128, 128, 0.5)"
@@ -34,6 +36,11 @@ window.config =
     resourcePath:
       stroke: "rgba(0, 255, 255, 0.5)"
       lineWidth: 2
+  selectionStyle:
+    stroke: "rgba(255, 255, 0, 1)"
+    lineWidth: 2
+    radius: 20
+  planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
     ATTACK_SHIP: new AnimatedSprite(['attack_ship.png'])

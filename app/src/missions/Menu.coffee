@@ -34,6 +34,8 @@ class Menu extends Mission
     # Add probe to Home planet
     @Planets.Home._probes = 1
 
+    UI.initialize()
+
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
     # Draw title
