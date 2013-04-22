@@ -114,7 +114,7 @@ main = ->
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
-  msgBox = new Elements.MessageBox(10, 10, 100, 100, "test", hudCtx)
+  msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
   msgBox.draw(hudCtx)
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
