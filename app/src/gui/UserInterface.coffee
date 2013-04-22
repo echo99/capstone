@@ -2,7 +2,7 @@
 # input related to the game directly.
 class UserInterface
   @planetButtons: []
-  @hoveredButton: null
+  @hoveredPlanetButton: null
   @lastMousePos: {x: 0, y: 0}
 
   # Creates a new UserInterface
@@ -12,8 +12,14 @@ class UserInterface
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
-      @planetButtons.push(new Elements.RadialElement(pos.x, pos.y,
-        window.config.planetRadius))
+      r = window.config.planetRadius
+      el = new Elements.RadialElement(pos.x, pos.y, r)
+      #b = new Elements.Button(-r, -r, r*2, r*2, @planetButtonCallback)
+      #el.addChild(b)
+      @planetButtons.push(el)
+
+  planetButtonCallback: () ->
+    console.log('click')
 
   # Draws the game and HUD
   #
@@ -70,15 +76,17 @@ class UserInterface
     #       draw hover image
     #     else
     #       draw regular image
-    if @hoveredButton
+    if @hoveredPlanetButton
     # if the button is a planet
       ctx.strokeStyle = window.config.selectionStyle.stroke
       ctx.lineWidth = window.config.selectionStyle.lineWidth
-      x = @hoveredButton.x
-      y = @hoveredButton.y
-      r = window.config.planetRadius + window.config.selectionStyle.radius
+      x = @hoveredPlanetButton.x
+      y = @hoveredPlanetButton.y
+      pos = camera.getScreenCoordinates({x: x, y: y})
+      r = (window.config.planetRadius + window.config.selectionStyle.radius) *
+          camera.getZoom()
       ctx.beginPath()
-      ctx.arc(x, y, r, 0, 2*Math.PI)
+      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
     # if there are selected units
       ctx.textAlign = "left"
@@ -98,11 +106,12 @@ class UserInterface
     for b in @planetButtons
     #   set button to not hover
     #   if (x, y) on button
-      if b.containsPoint(x, y)
-        @hoveredButton = b
+      pos = camera.getWorldCoordinates({x: x, y: y})
+      if b.containsPoint(pos.x, pos.y)
+        @hoveredPlanetButton = b
         return
     #     set button to hover
-    @hoveredButton = null
+    @hoveredPlanetButton = null
 
   # The UI expects this to be called when the mouse clicks
   #
@@ -112,5 +121,7 @@ class UserInterface
     # for each button
     #   if button is hovered over
     #     perform button action
-    if @hoveredButton != null and @hoveredButton.containsPoint(x, y)
+    pos = camera.getWorldCoordinates({x: x, y: y})
+    if @hoveredPlanetButton and
+       @hoveredPlanetButton.containsPoint(pos.x, pos.y)
       console.log("clicked planet")

@@ -182,7 +182,7 @@ main = ->
     if (not CurrentMission instanceof Menu)
       if (not e)
         e = window.event
-      e.cancelBuble = true
+      e.cancelBubble = true
       e.returnValue = "Progress my be lost, are you sure you want to leave?"
       if (e.stopPropagation)
         e.stopPropagation()
