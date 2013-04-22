@@ -178,13 +178,15 @@ main = ->
 
   # Catch accidental leaving
   window.onbeforeunload = (e) ->
-    if (not e)
-      e = window.event
-    e.cancelBuble = true
-    e.returnValue = "You sure you want to leave?"
-    if (e.stopPropagation)
-      e.stopPropagation()
-      e.preventDefault()
+    # No progress can be lost in the menu
+    if (not CurrentMission instanceof Menu)
+      if (not e)
+        e = window.event
+      e.cancelBuble = true
+      e.returnValue = "Progress my be lost, are you sure you want to leave?"
+      if (e.stopPropagation)
+        e.stopPropagation()
+        e.preventDefault()
 
   prevPos = {x: 0, y: 0}
   drag = false

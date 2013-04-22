@@ -15,12 +15,12 @@ class UserInterface
     visited = []
     # for each planet
     for p in game.getPlanets()
-    #   for each neighbor
       pos = camera.getScreenCoordinates(p.location())
       ctx.strokeStyle = window.config.connectionStyle.normal.stroke
       ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     #   add this planet to visited planets
       visited.push(p)
+    #   for each neighbor
       for neighbor in p._adjacentPlanets
     #     if neighbor is not in visited planets
         if neighbor not in visited
