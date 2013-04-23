@@ -52,7 +52,8 @@ root.config =
     radius: 20
     location: {x: 5, y: 5}
     width: 105
-    height: 100
+    height: 200
+    probeHeight: 80
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
