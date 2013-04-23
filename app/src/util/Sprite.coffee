@@ -23,14 +23,15 @@ class AnimatedSprite
 
   # Create a new animated sprite
   #
-  # @param [Array<Sprite>] sprites
+  # @param [Array<String>] sprites List of sprite names
   # @param [Number] interval (Optional)
   #
   constructor: (@sprites, @interval = 1) ->
 
-  # Returns the sprite of the current frame while also incrementing it
+  # Returns the name of the sprite of the current frame while also incrementing
+  # it
   #
-  # @return [Sprite]
+  # @return [String]
   #
   getCurrentFrame: ->
     if @prevCounter != AnimatedSprite.drawCounter
