@@ -50,6 +50,9 @@ root.config =
     stroke: "rgba(255, 255, 0, 1)"
     lineWidth: 2
     radius: 20
+    location: {x: 5, y: 5}
+    width: 105
+    height: 100
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])

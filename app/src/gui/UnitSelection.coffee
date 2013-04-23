@@ -49,6 +49,26 @@ class UnitSelection
   draw: (ctx) ->
     for p in game._planets
       @_drawPlanetUnits(ctx, p)
+    winStyle = window.config.windowStyle
+    loc = window.config.selectionStyle.location
+    w = window.config.selectionStyle.width
+    h = window.config.selectionStyle.height
+    ctx.fillStyle = winStyle.fill
+    ctx.strokeStyle = winStyle.stroke
+    ctx.lineJoin = winStyle.lineJoin
+    ctx.lineWidth = winStyle.lineWidth
+    ctx.font = winStyle.titleText.font
+    ctx.fillRect(loc.x, loc.y, w, h)
+    ctx.strokeRect(loc.x, loc.y, w, h)
+    ctx.beginPath()
+    ctx.moveTo(loc.x, loc.y+23)
+    ctx.lineTo(loc.x+w, loc.y+23)
+    ctx.stroke()
+    ctx.fillStyle = winStyle.titleText.color
+    ctx.fillText("Selected Units", loc.x+7, loc.y+17)
+    ctx.fillStyle = winStyle.value.color
+    ctx.fillText("1", 110, 105)
+    spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
 
 
   # Draws the one typ of ship
