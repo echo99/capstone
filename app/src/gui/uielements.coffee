@@ -309,7 +309,7 @@ class Elements.RadialButton extends Elements.RadialElement
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] r Radius of element
   # @param [Function] callback The function to call when this button is clicked
-  constructor: (@x, @y, @w, @h, @callback) ->
+  constructor: (@x, @y, @r, @callback) ->
     super(@x, @y, @r)
 
   # Call the attached callback function when the button is clicked

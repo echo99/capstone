@@ -1,12 +1,16 @@
+#_require UnitSelection
+
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
 class UserInterface
   @planetButtons: []
   @hoveredPlanetButton: null
   @lastMousePos: {x: 0, y: 0}
+  @unitSelection: null
 
   # Creates a new UserInterface
   constructor: () ->
+    @unitSelection = new UnitSelection()
 
   initialize: () ->
     @planetButtons = []
@@ -14,9 +18,10 @@ class UserInterface
       pos = p.location()
       r = window.config.planetRadius
       el = new Elements.RadialElement(pos.x, pos.y, r)
-      #b = new Elements.Button(-r, -r, r*2, r*2, @planetButtonCallback)
-      #el.addChild(b)
+      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback)
+      el.addChild(b)
       @planetButtons.push(el)
+    @unitSelection.initialize()
 
   planetButtonCallback: () ->
     console.log('click')
@@ -52,18 +57,10 @@ class UserInterface
     for p in game._planets
     #   draw planet
       SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
-    #   if structure
-    #     draw structure
-    #   if units
-      if p._probes > 0
-    #     draw units
-        SHEET.drawSprite(SpriteNames.PROBE, p._x+100, p._y-50, ctx)
-    #   for each control group
-    #     if control group is hovered over
-    #       draw expanded view
-    #     else
-    #       draw unexpanded view
-    #
+    #  @drawPlanetStructure(ctx, p)
+    #  @drawPlanetUnits(ctx, p)
+    @unitSelection.draw(ctx)
+
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
     #   "Pres HOME to return to map"
@@ -102,16 +99,17 @@ class UserInterface
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
     @lastMousePos = {x: x, y: y}
+    #   set button to not hover
+    @hoveredPlanetButton = null
     # for each button
     for b in @planetButtons
-    #   set button to not hover
     #   if (x, y) on button
       pos = camera.getWorldCoordinates({x: x, y: y})
       if b.containsPoint(pos.x, pos.y)
         @hoveredPlanetButton = b
         return
     #     set button to hover
-    @hoveredPlanetButton = null
+    @unitSelection.onMouseMove(x, y)
 
   # The UI expects this to be called when the mouse clicks
   #
@@ -125,3 +123,4 @@ class UserInterface
     if @hoveredPlanetButton and
        @hoveredPlanetButton.containsPoint(pos.x, pos.y)
       console.log("clicked planet")
+    @unitSelection.onMouseClick(x, y)
