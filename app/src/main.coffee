@@ -125,6 +125,9 @@ main = ->
   frameElement.addChild(msgBox)
   frameElement.drawChildren()
 
+  msgBox2 = new Elements.MessageBox(0, 0, 100, 100, "test", ctx)
+  gameFrame.addChild(msgBox2)
+
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)

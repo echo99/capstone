@@ -62,6 +62,9 @@ class UserInterface
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx)
 
+    # Draw stuff attached to the game frame
+    gameFrame.drawChildren()
+
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
     #   "Pres HOME to return to map"

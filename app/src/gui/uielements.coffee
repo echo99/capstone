@@ -153,6 +153,7 @@ class Elements.BoxElement extends Elements.UIElement
   getRelativeLocation: (x, y) ->
     return {'x': x-@x-@cx, 'y': y-@y-@cy}
 
+
 # A radial UI element
 #
 class Elements.RadialElement extends Elements.UIElement
@@ -199,6 +200,7 @@ class Elements.Frame extends Elements.BoxElement
     for child in @_children
       child.draw()
 
+
 # Frame for holding all elements in the game
 class Elements.GameFrame extends Elements.UIElement
 
@@ -206,6 +208,7 @@ class Elements.GameFrame extends Elements.UIElement
   #
   # @param [Camera] camera The camera object
   constructor: (@camera) ->
+    super()
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
@@ -214,6 +217,13 @@ class Elements.GameFrame extends Elements.UIElement
   # @see Elements.UIElement#getRelativeLocation
   getRelativeLocation: (x, y) ->
     return @camera.getWorldCoordinates({x: x, y: y})
+
+  # Draw the frame's children if they are on the screen
+  drawChildren: ->
+    for child in @_children
+      coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
+      if @camera.onScreen(coords)
+        child.draw(coords)
 
 
 # Message box class for displaying messages in the user interface
@@ -270,25 +280,33 @@ class Elements.MessageBox extends Elements.BoxElement
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
-  draw: ->
+  draw: (coords = null) ->
     if @visible
+      if coords
+        x = coords.x
+        y = coords.y
+      else
+        x = @x
+        y = @y
       ctx = @ctx
       ctx.strokeStyle = config.windowStyle.stroke
       ctx.fillStyle = config.windowStyle.fill
+      ctx.lineWidth = config.windowStyle.lineWidth
       # ctx.strokeRect(@x, @y, @w, @h)
       # ctx.fillRect(@x, @y, @w, @h)
-      ctx.strokeRect(@x+@cx, @y+@cy, @w, @h)
-      ctx.fillRect(@x+@cx, @y+@cy, @w, @h)
+      console.log("Stroke style: " + ctx.strokeStyle)
+      ctx.strokeRect(x+@cx, y+@cy, @w, @h)
+      ctx.fillRect(x+@cx, y+@cy, @w, @h)
       ctx.font = config.windowStyle.labelText.font
       ctx.fillStyle = config.windowStyle.labelText.color
       ctx.textAlign = 'center'
       # cx = Math.round(@w/2 + @x)
       # cy = Math.round(@h/2 + @y)
       ctx.fillText(@message, cx, cy)
-      ctx.fillText(@message, @x, @y)
+      ctx.fillText(@message, x, y)
 
-      btnOffsetX = @x + @cx + @closeBtn.x + @closeBtn.cx
-      btnOffsetY = @y + @cy + @closeBtn.y + @closeBtn.cy
+      btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
+      btnOffsetY = y + @cy + @closeBtn.y + @closeBtn.cy
       cx = Math.round(@closeBtn.w/2 + btnOffsetX)
       cy = Math.round(@closeBtn.h/2 + btnOffsetY) + 4
       ctx.fillStyle = 'rgb(0,0,0)'
