@@ -17,15 +17,16 @@ class UserInterface
     for p in game.getPlanets()
       pos = p.location()
       r = window.config.planetRadius
-      el = new Elements.RadialElement(pos.x, pos.y, r)
       b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback)
-      el.addChild(b)
-      #frameElement.addChild(el)
-      @planetButtons.push(el)
+      gameFrame.addChild(b)
+      @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
 
-  planetButtonCallback: () ->
-    console.log('click')
+  planetButtonCallback: () =>
+    if @unitSelection.total > 0
+      console.log("moving units")
+    else
+      console.log("not moving units")
 
   # Draws the game and HUD
   #
@@ -89,13 +90,13 @@ class UserInterface
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
-    # if there are selected units
-      ctx.textAlign = "left"
-      ctx.font = window.config.toolTipStyle.font
-      ctx.fillStyle = window.config.toolTipStyle.color
-      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
-      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
-      ctx.fillText("Move selected units", x, y)
+      if @unitSelection.total > 0
+        ctx.textAlign = "left"
+        ctx.font = window.config.toolTipStyle.font
+        ctx.fillStyle = window.config.toolTipStyle.color
+        x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+        y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+        ctx.fillText("Move selected units", x, y)
 
   # The UI expects this to be called when the mouse moves
   #
@@ -122,8 +123,7 @@ class UserInterface
     # for each button
     #   if button is hovered over
     #     perform button action
-    pos = camera.getWorldCoordinates({x: x, y: y})
-    if @hoveredPlanetButton and
-       @hoveredPlanetButton.containsPoint(pos.x, pos.y)
-      console.log("clicked planet")
+#    pos = camera.getWorldCoordinates({x: x, y: y})
+#    if @hoveredPlanetButton and
+#       @hoveredPlanetButton.containsPoint(pos.x, pos.y)
     @unitSelection.onMouseClick(x, y)

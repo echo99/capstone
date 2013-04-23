@@ -1,6 +1,7 @@
 
 # Keeps track of and updates the which units are selected
 class UnitSelection
+  total: 0
   totalProbes: 0
   totalColony: 0
   totalAttack: 0
@@ -37,6 +38,12 @@ class UnitSelection
   # @param [Number] x The x position of the mouse
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
+    #for p in game.getPalnets()
+    #  units = p.unitSelection
+     # _checkUnitHover(units.probes)
+     # _checkUnitHover(units.colony)
+     # _checkUnitHover(units.attack)
+     # _checkUnitHover(units.defense)
 
   # This expects to be called when the mouse clicks
   #
@@ -86,6 +93,11 @@ class UnitSelection
       SHEET.drawSprite(SpriteNames.DEFENSE_SHIP,
                        loc.x+20, loc.y+170, ctx, false)
       ctx.fillText(@totalColony, loc.x+60, loc.y+175)
+
+  #_checkUnitHover: (stacks) ->
+  #  for row in stacks
+  #    for stack in row
+  #      if
 
   # Draws the one typ of ship
   #
@@ -243,3 +255,13 @@ class Stack
   # Toggles whether this stack is selected
   toggleSelection: () ->
     @selected = not @selected
+
+  # Test if this stack is hovered over
+  #
+  # @return [Boolean] true if the stack is hovered over
+  isHovered: () ->
+    return @hovered
+
+  # Toggles whether this stack is hovered over
+  toggleHover: () ->
+    @hovered = not @hovered
