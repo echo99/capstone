@@ -116,6 +116,7 @@ main = ->
 
   msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
   msgBox.draw(hudCtx)
+
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
@@ -152,6 +153,9 @@ main = ->
         body.webkitRequestFullscreen()
       sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
   fsCanvas.addEventListener('mousedown', canvasclick)
+
+  muteBtn = new Elements.DOMButton(config.spriteNames.UNMUTED, SHEET)
+    .setRight(5).setBottom(26)
 
   window.onresize = ->
     console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")

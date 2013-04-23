@@ -68,7 +68,8 @@ class Elements.UIElement
   #
   draw: (ctx, x, y) ->
 
-  # Call to element to check if it is clicked
+  # Call to element to check if it is clicked and executes click handlers if it
+  # is
   #
   # @param [Number] x
   # @param [Number] y
@@ -92,6 +93,12 @@ class Elements.UIElement
   #
   _onClick: ->
 
+  # Call to element to check if it is being hovered over as the mouse moves and
+  # executes hover handlers if it is
+  #
+  # @param [Number] x
+  # @param [Number] y
+  #
   mouseMove: (x, y) ->
     pointerType = null
     if @containsPoint(x, y) and @visible
@@ -272,6 +279,9 @@ class Elements.Button extends Elements.BoxElement
   _onHover: ->
     return CURSOR_TYPES.POINTER
 
+
+# Button class for circular buttons
+#
 class Elements.RadialButton extends Elements.RadialElement
 
   # Create a new radial button
@@ -293,3 +303,73 @@ class Elements.RadialButton extends Elements.RadialElement
   #
   _onHover: ->
     return CURSOR_TYPES.POINTER
+
+
+# Class for handling DOM (Document Object Model) buttons. These buttons are
+# inserted into the DOM rather than drawn onto one of the existing canvases.
+#
+class Elements.DOMButton
+
+  # Create a new DOM button
+  #
+  # @param [AnimatedSprite] sprite The sprite to use for the button
+  # @param [SpriteSheet] sheet The sprite sheet the sprite belongs to
+  #
+  constructor: (@sprite, @sheet) ->
+    spt = @sheet.getSprite(@sprite)
+    @w = spt.w
+    @h = spt.h
+    @canvas = document.createElement('canvas')
+    @canvas.width = @w
+    @canvas.height = @h
+    @canvas.style.cursor = 'pointer'
+    @canvas.style.position = 'absolute'
+    document.body.appendChild(@canvas)
+    ctx = @canvas.getContext('2d')
+    @sheet.drawSprite(@sprite, Math.round(@w/2), Math.round(@h/2), ctx, false)
+    return this
+
+  # Set the top offset of the button. Overrides bottom offset.
+  #
+  # @param [Number] offsetTop Top offset in pixels
+  # @return [Elements.DOMButton] this button
+  #
+  setTop: (@offsetTop) ->
+    @canvas.style.top = @offsetTop + 'px'
+    return this
+
+  # Set the bottom offset of the button. Overrides top offset.
+  #
+  # @param [Number] offsetBottom Bottom offset in pixels
+  # @return [Elements.DOMButton] this button
+  #
+  setBottom: (@offsetBottom) ->
+    @canvas.style.bottom = @offsetBottom + 'px'
+    return this
+
+  # Set the left offset of the button. Overrides right offset.
+  #
+  # @param [Number] offsetLeft Left offset in pixels
+  # @return [Elements.DOMButton] this button
+  #
+  setLeft: (@offsetLeft) ->
+    @canvas.style.left = @offsetLeft + 'px'
+    return this
+
+  # Set the right offset of the button. Overrides left offset.
+  #
+  # @param [Number] offsetTop Right offset in pixels
+  # @return [Elements.DOMButton] this button
+  #
+  setRight: (@offsetRight) ->
+    @canvas.style.right = @offsetRight + 'px'
+    return this
+
+  # Set the function to call when the button is clicked.
+  #
+  # @param [Function] callback Function to call when button is clicked
+  # @return [Elements.DOMButton] this button
+  #
+  setClickHandler: (@callback) ->
+    @canvas.addEventListener('mousedown', @callback)
+    return this
