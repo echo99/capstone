@@ -1,6 +1,8 @@
 #_require util/Sprite
 
-window.config =
+root = exports ? window
+
+root.config =
   ZOOM_SPEED: 0.02
   PAN_SPEED_FACTOR: 3
   BG_PAN_SPEED_FACTOR: 50
