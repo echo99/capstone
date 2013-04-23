@@ -173,6 +173,25 @@ class Elements.RadialElement extends Elements.UIElement
     dy = Math.abs(@y - y)
     return dx*dx + dy*dy <= @r2
 
+class Elements.Frame extends Elements.BoxElement
+
+  # Create a new frame
+  #
+  # @param [Canvas] frame The frame canvas
+  #
+  constructor: (@frame) ->
+    cw = Math.round(@frame.width/2)
+    ch = Math.round(@frame.height/2)
+    super(cw, ch, @frame.width, @frame.height)
+
+  resize: ->
+    cw = Math.round(@frame.width/2)
+    ch = Math.round(@frame.height/2)
+    @x = cw
+    @y = cy
+    @w = @frame.width
+    @h = @frame.height
+
 # Message box class for displaying messages in the user interface
 #
 class Elements.MessageBox extends Elements.BoxElement
