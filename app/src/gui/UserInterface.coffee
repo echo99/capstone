@@ -3,16 +3,16 @@
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
 class UserInterface
-  @planetButtons: []
-  @hoveredPlanetButton: null
-  @lastMousePos: {x: 0, y: 0}
-  @unitSelection: null
+  planetButtons: []
+  hoveredPlanetButton: null
+  lastMousePos: {x: 0, y: 0}
+  unitSelection: null
 
   # Creates a new UserInterface
   constructor: () ->
     @unitSelection = new UnitSelection()
 
-  initialize: () ->
+  initialize: (onlyProbe=false) ->
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
@@ -22,7 +22,7 @@ class UserInterface
       el.addChild(b)
       #frameElement.addChild(el)
       @planetButtons.push(el)
-    @unitSelection.initialize()
+    @unitSelection.initialize(onlyProbe)
 
   planetButtonCallback: () ->
     console.log('click')
@@ -111,7 +111,6 @@ class UserInterface
       pos = camera.getWorldCoordinates({x: x, y: y})
       if b.containsPoint(pos.x, pos.y)
         @hoveredPlanetButton = b
-        return
     #     set button to hover
     @unitSelection.onMouseMove(x, y)
 

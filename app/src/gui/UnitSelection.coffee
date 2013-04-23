@@ -1,15 +1,16 @@
 
 # Keeps track of and updates the which units are selected
 class UnitSelection
-  @total_probes: 0
-  @total_colony: 0
-  @total_attack: 0
-  @total_defense: 0
+  totalProbes: 0
+  totalColony: 0
+  totalAttack: 0
+  totalDefense: 0
+  onlyProbe: false
 
   #constructor: ->
 
   # Initializes the class
-  initialize: () ->
+  initialize: (@onlyProbe=false) ->
     for p in game.getPlanets()
       p.unitSelection = {
         probes: [
@@ -52,7 +53,10 @@ class UnitSelection
     winStyle = window.config.windowStyle
     loc = window.config.selectionStyle.location
     w = window.config.selectionStyle.width
-    h = window.config.selectionStyle.height
+    if @onlyProbe
+      h = window.config.selectionStyle.probeHeight
+    else
+      h = window.config.selectionStyle.height
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke
     ctx.lineJoin = winStyle.lineJoin
@@ -67,9 +71,21 @@ class UnitSelection
     ctx.fillStyle = winStyle.titleText.color
     ctx.fillText("Selected Units", loc.x+7, loc.y+17)
     ctx.fillStyle = winStyle.valueText.color
-    ctx.fillText("1", 110, 105)
-    SHEET.drawSprite(SpriteNames.PROBE, 70, 100, ctx, false)
 
+    SHEET.drawSprite(SpriteNames.PROBE, loc.x+20, loc.y+50, ctx, false)
+    ctx.fillText(@totalProbes, loc.x+60, loc.y+55)
+
+    if not @onlyProbe
+      SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+20, loc.y+90, ctx, false)
+      ctx.fillText(@totalColony, loc.x+60, loc.y+95)
+
+      SHEET.drawSprite(SpriteNames.ATTACK_SHIP,
+                       loc.x+20, loc.y+130, ctx, false)
+      ctx.fillText(@totalColony, loc.x+60, loc.y+135)
+
+      SHEET.drawSprite(SpriteNames.DEFENSE_SHIP,
+                       loc.x+20, loc.y+170, ctx, false)
+      ctx.fillText(@totalColony, loc.x+60, loc.y+175)
 
   # Draws the one typ of ship
   #
