@@ -36,11 +36,13 @@ KeyCodes =
 
 SpriteNames = window.config.spriteNames
 
+frameElement = null
+
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
 game = new Game(0, 0)
 
-CurrentMission = new Menu()
+CurrentMission = null
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -125,6 +127,8 @@ main = ->
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
+
+  CurrentMission = new Menu()
 
   sheet = SHEET
   if sheet == null

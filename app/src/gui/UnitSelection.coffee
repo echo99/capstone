@@ -66,9 +66,9 @@ class UnitSelection
     ctx.stroke()
     ctx.fillStyle = winStyle.titleText.color
     ctx.fillText("Selected Units", loc.x+7, loc.y+17)
-    ctx.fillStyle = winStyle.value.color
+    ctx.fillStyle = winStyle.valueText.color
     ctx.fillText("1", 110, 105)
-    spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
+    SHEET.drawSprite(SpriteNames.PROBE, 70, 100, ctx, false)
 
 
   # Draws the one typ of ship

@@ -20,6 +20,7 @@ class UserInterface
       el = new Elements.RadialElement(pos.x, pos.y, r)
       b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback)
       el.addChild(b)
+      #frameElement.addChild(el)
       @planetButtons.push(el)
     @unitSelection.initialize()
 
