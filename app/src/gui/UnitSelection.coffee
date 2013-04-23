@@ -50,6 +50,7 @@ class UnitSelection
     for p in game._planets
       @_drawPlanetUnits(ctx, p)
 
+
   # Draws the one typ of ship
   #
   # @param [CanvasRenderingContext2D] ctx The game context
@@ -94,16 +95,16 @@ class UnitSelection
     units = planet.unitSelection
 
     probe_location = location
-    @drawShips(ctx, probe_location, SpriteNames.PROBE, units.probes)
+    @_drawShips(ctx, probe_location, SpriteNames.PROBE, units.probes)
 
     colony_location = {x: location.x, y: location.y+80}
-    @drawShips(ctx, colony_location, SpriteNames.COLONY_SHIP, units.colony)
+    @_drawShips(ctx, colony_location, SpriteNames.COLONY_SHIP, units.colony)
 
     attack_location = {x: location.x, y: location.y+160}
-    @drawShips(ctx, attack_location, SpriteNames.ATTACK_SHIP, units.attack)
+    @_drawShips(ctx, attack_location, SpriteNames.ATTACK_SHIP, units.attack)
 
     defense_location = {x: location.x, y: location.y+240}
-    @drawShips(ctx, defense_location, SpriteNames.DEFENSE_SHIP, units.defense)
+    @_drawShips(ctx, defense_location, SpriteNames.DEFENSE_SHIP, units.defense)
     #   for each control group
     #     if control group is hovered over
     #       draw expanded view
