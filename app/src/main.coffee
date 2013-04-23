@@ -114,8 +114,13 @@ main = ->
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
+  # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
+  #   canvas.width, canvas.height)
+  frameElement = new Elements.Frame(frame)
   msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
-  msgBox.draw(hudCtx)
+  # msgBox.draw(hudCtx)
+  frameElement.addChild(msgBox)
+  frameElement.drawChildren()
 
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
@@ -172,7 +177,9 @@ main = ->
     bgCanvas.style.left = (0.5+(canvas.width - bgCanvas.width)/2) << 0 + "px"
     bgCanvas.style.top = (0.5+(canvas.height - bgCanvas.height)/2) << 0 + "px"
 
-    msgBox.draw(hudCtx)
+    # msgBox.draw(hudCtx)
+    frameElement.resize()
+    frameElement.drawChildren()
 
     console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
@@ -199,7 +206,7 @@ main = ->
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
-    pointer = msgBox.mouseMove(x, y)
+    pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer
       hudCanvas.style.cursor = pointer
     else
@@ -216,7 +223,8 @@ main = ->
     UI.onMouseClick(e.clientX, e.clientY)
     CurrentMission.onMouseMove(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
-    msgBox.click(e.clientX, e.clientY)
+    # msgBox.click(e.clientX, e.clientY)
+    frameElement.click(e.clientX, e.clientY)
   )
 
   hudCanvas.addEventListener('mousedown', (e) ->
