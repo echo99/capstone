@@ -215,6 +215,8 @@ main = ->
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
+    if not pointer
+      pointer = gameFrame.mouseMove(x, y)
     if pointer
       hudCanvas.style.cursor = pointer
     else
@@ -233,6 +235,7 @@ main = ->
     # if msgBox.containsPoint(e.clientX, e.clientY)
     # msgBox.click(e.clientX, e.clientY)
     frameElement.click(e.clientX, e.clientY)
+    gameFrame.click(e.clientX, e.clientY)
   )
 
   hudCanvas.addEventListener('mousedown', (e) ->

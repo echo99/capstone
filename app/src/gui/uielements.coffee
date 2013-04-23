@@ -294,7 +294,6 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.lineWidth = config.windowStyle.lineWidth
       # ctx.strokeRect(@x, @y, @w, @h)
       # ctx.fillRect(@x, @y, @w, @h)
-      console.log("Stroke style: " + ctx.strokeStyle)
       ctx.strokeRect(x+@cx, y+@cy, @w, @h)
       ctx.fillRect(x+@cx, y+@cy, @w, @h)
       ctx.font = config.windowStyle.labelText.font
