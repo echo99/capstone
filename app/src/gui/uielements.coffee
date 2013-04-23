@@ -325,19 +325,38 @@ class Elements.Button extends Elements.BoxElement
   # @param [Number] y The y-coordinate of the center of the button
   # @param [Number] w The width of the box
   # @param [Number] h The height of the box
-  # @param [Function] callback The function to call when this button is clicked
-  constructor: (@x, @y, @w, @h, @callback) ->
+  # @param [Function] clickHandler (optional) The function to call when this
+  #   button is clicked
+  #
+  constructor: (@x, @y, @w, @h, @clickHandler=null) ->
     super(@x, @y, @w, @h)
+    @hoverHandler = null
+
+  # Set the onClick handler
+  #
+  # @param [Function] clickHandler
+  #
+  setClickHandler: (@clickHandler) ->
+
+  # Set the onHover handler
+  #
+  # @param [Function] hoverHandler
+  #
+  setHoverHandler: (@hoverHandler) ->
 
   # Call the attached callback function when the button is clicked
   #
   _onClick: ->
     # @callback.callback()
-    @callback()
+    # @callback()
+    if @clickHandler isnt null
+      @clickHandler()
 
   # Do something when the user hovers over the button
   #
   _onHover: ->
+    if @hoverHandler isnt null
+      @hoverHandler()
     return CURSOR_TYPES.POINTER
 
 
@@ -350,19 +369,37 @@ class Elements.RadialButton extends Elements.RadialElement
   # @param [Number] x x-position of center of element relative to parent
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] r Radius of element
-  # @param [Function] callback The function to call when this button is clicked
-  constructor: (@x, @y, @r, @callback) ->
+  # @param [Function] clickHandler (optional) The function to call when this
+  #   button is clicked
+  constructor: (@x, @y, @r, @clickHandler=null) ->
     super(@x, @y, @r)
+    @hoverHandler = null
+
+  # Set the onClick handler
+  #
+  # @param [Function] clickHandler
+  #
+  setClickHandler: (@clickHandler) ->
+
+  # Set the onHover handler
+  #
+  # @param [Function] hoverHandler
+  #
+  setHoverHandler: (@hoverHandler) ->
 
   # Call the attached callback function when the button is clicked
   #
   _onClick: ->
     # @callback.callback()
-    @callback()
+    # @callback()
+    if @clickHandler isnt null
+      @clickHandler()
 
   # Do something when the user hovers over the button
   #
   _onHover: ->
+    if @hoverHandler isnt null
+      @hoverHandler()
     return CURSOR_TYPES.POINTER
 
 
