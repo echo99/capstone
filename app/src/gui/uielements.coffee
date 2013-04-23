@@ -173,6 +173,7 @@ class Elements.RadialElement extends Elements.UIElement
     dy = Math.abs(@y - y)
     return dx*dx + dy*dy <= @r2
 
+# Frame for holding all elements in the HUD
 class Elements.Frame extends Elements.BoxElement
 
   # Create a new frame
@@ -180,21 +181,40 @@ class Elements.Frame extends Elements.BoxElement
   # @param [Canvas] frame The frame canvas
   #
   constructor: (@frame) ->
-    cw = Math.round(@frame.width/2)
-    ch = Math.round(@frame.height/2)
-    super(cw, ch, @frame.width, @frame.height)
+    cx = Math.round(@frame.width/2)
+    cy = Math.round(@frame.height/2)
+    super(cx, cy, @frame.width, @frame.height)
 
+  # Resize the frame if the document frame resizes
   resize: ->
-    cw = Math.round(@frame.width/2)
-    ch = Math.round(@frame.height/2)
-    @x = cw
+    cx = Math.round(@frame.width/2)
+    cy = Math.round(@frame.height/2)
+    @x = cx
     @y = cy
     @w = @frame.width
     @h = @frame.height
 
+  # Draw the frame's children
   drawChildren: ->
     for child in @_children
       child.draw()
+
+# Frame for holding all elements in the game
+class Elements.GameFrame extends Elements.UIElement
+
+  # Create a new game frame
+  #
+  # @param [Camera] camera The camera object
+  constructor: (@camera) ->
+
+  # @see Elements.UIElement#containsPoint
+  containsPoint: (x, y) ->
+    return true
+
+  # @see Elements.UIElement#getRelativeLocation
+  getRelativeLocation: (x, y) ->
+    return @camera.getWorldCoordinates({x: x, y: y})
+
 
 # Message box class for displaying messages in the user interface
 #
