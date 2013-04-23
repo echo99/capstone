@@ -68,7 +68,8 @@ class Elements.UIElement
   #
   draw: (ctx, x, y) ->
 
-  # Call to element to check if it is clicked
+  # Call to element to check if it is clicked and executes click handlers if it
+  # is
   #
   # @param [Number] x
   # @param [Number] y
@@ -92,6 +93,12 @@ class Elements.UIElement
   #
   _onClick: ->
 
+  # Call to element to check if it is being hovered over as the mouse moves and
+  # executes hover handlers if it is
+  #
+  # @param [Number] x
+  # @param [Number] y
+  #
   mouseMove: (x, y) ->
     pointerType = null
     if @containsPoint(x, y) and @visible
