@@ -272,6 +272,9 @@ class Elements.Button extends Elements.BoxElement
   _onHover: ->
     return CURSOR_TYPES.POINTER
 
+
+# Button class for circular buttons
+#
 class Elements.RadialButton extends Elements.RadialElement
 
   # Create a new radial button
@@ -293,3 +296,48 @@ class Elements.RadialButton extends Elements.RadialElement
   #
   _onHover: ->
     return CURSOR_TYPES.POINTER
+
+
+# Class for handling DOM buttons
+#
+class Elements.DOMButton
+
+  # Create a new DOM button
+  #
+  # @param [AnimatedSprite] sprite The sprite to use for the button
+  # @param [SpriteSheet] sheet The sprite sheet the sprite belongs to
+  constructor: (@sprite, @sheet) ->
+    spt = @sheet.getSprite(@sprite)
+    @w = spt.w
+    @h = spt.h
+    @canvas = document.createElement('canvas')
+    @canvas.width = @w
+    @canvas.height = @h
+    @canvas.style.cursor = 'pointer'
+    @canvas.style.position = 'absolute'
+    document.body.appendChild(@canvas)
+    ctx = @canvas.getContext('2d')
+    # ctx.fillStyle = "rgb(255,0,0)"
+    # ctx.fillRect(0,0,16,16)
+    @sheet.drawSprite(@sprite, Math.round(@w/2), Math.round(@h/2), ctx, false)
+    return this
+
+  setTop: (@offsetTop) ->
+    @canvas.style.top = @offsetTop + 'px'
+    return this
+
+  setBottom: (@offsetBottom) ->
+    @canvas.style.bottom = @offsetBottom + 'px'
+    return this
+
+  setLeft: (@offsetLeft) ->
+    @canvas.style.left = @offsetLeft + 'px'
+    return this
+
+  setRight: (@offsetRight) ->
+    @canvas.style.right = @offsetRight + 'px'
+    return this
+
+  setClickHandler: (@callback) ->
+    @canvas.addEventListener('mousedown', @callback)
+    return this
