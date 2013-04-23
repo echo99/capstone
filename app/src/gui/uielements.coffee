@@ -192,6 +192,10 @@ class Elements.Frame extends Elements.BoxElement
     @w = @frame.width
     @h = @frame.height
 
+  drawChildren: ->
+    for child in @_children
+      child.draw()
+
 # Message box class for displaying messages in the user interface
 #
 class Elements.MessageBox extends Elements.BoxElement
@@ -246,8 +250,9 @@ class Elements.MessageBox extends Elements.BoxElement
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
-  draw: (ctx) ->
+  draw: ->
     if @visible
+      ctx = @ctx
       ctx.strokeStyle = config.windowStyle.stroke
       ctx.fillStyle = config.windowStyle.fill
       # ctx.strokeRect(@x, @y, @w, @h)
