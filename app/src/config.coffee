@@ -36,6 +36,14 @@ window.config =
     resourcePath:
       stroke: "rgba(0, 255, 255, 0.5)"
       lineWidth: 2
+  unitDisplay:
+    location: {x: -250, y: -140}
+    fill: "rgba(255, 255, 0, 0.5)"
+    stroke: "rgba(255, 255, 0, 1)"
+    lineWidth: 4
+    width: 32
+    height: 32
+    spacing: 40
   selectionStyle:
     stroke: "rgba(255, 255, 0, 1)"
     lineWidth: 2

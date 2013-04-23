@@ -32,7 +32,10 @@ class Menu extends Mission
     #   Small, Medium, Large
 
     # Add probe to Home planet
-    @Planets.Home._probes = 1
+    @Planets.Home._probes = 44
+    @Planets.Home._colonys = 4
+    @Planets.Home._attackShips = 30
+    @Planets.Home._defenseShips = 21
 
     UI.initialize()
 
