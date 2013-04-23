@@ -41,6 +41,7 @@ frameElement = null
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
 game = new Game(0, 0)
+gameFrame = new Elements.GameFrame(camera)
 
 CurrentMission = null
 
