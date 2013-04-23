@@ -1,5 +1,7 @@
 #Defines a class to represent planets
 
+root = exports ? window
+
 #_require ControlGroup
 
 class Planet
@@ -127,8 +129,4 @@ class Planet
 
 
 
-
-
-
-		
-
+root.Planet = Planet
