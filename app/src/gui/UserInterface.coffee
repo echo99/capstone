@@ -18,9 +18,8 @@ class UserInterface
       pos = p.location()
       r = window.config.planetRadius
       el = new Elements.RadialElement(pos.x, pos.y, r)
-      #b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback)
-      #b = new Elements.RadialButton(pos.x, pos.y, 2*r, 2*r)
-      #el.addChild(b)
+      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback)
+      el.addChild(b)
       @planetButtons.push(el)
     @unitSelection.initialize()
 
