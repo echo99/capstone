@@ -88,20 +88,40 @@ class Planet
   buildUpkeep: ->
     null
 
+  movementUpkeep1: ->
+    group.updateAi for group in @_controlGroups
+    move group for group in @_controlGroups
+
+  movementUpkeep2: ->
+    group.resetMoved for group in @_controlGroups
+	  
   # INGAME COMMANDS #
 
   build: (name) ->
     null
 
-  move: (dest) ->
-    controlGroup = null
-
+  move: (attackShips, defenseShips, probes, colonies, dest) ->
+    controlGroup = new ControlGroup(attackShips, defenseShips, probes, colonies, dest)
+    @_controlGroups.push(controlGroup)
+    
   # SETTERS FOR USE BY GAME CLASS #
 
   addNeighbor: (otherplanet) ->
     @_adjacentPlanets.push(otherplanet)
     otherplanet._adjacentPlanets.push(@)
     
+  # HELPER FUNCTIONS #
+
+  move: (group) ->
+    if not group.moved
+      group.setMoved
+      @_controlGroups.filter(group)
+      group.next.receiveGroup(group)
+
+  receiveGroup: (group) ->
+    @_controlGroups.push(group)
+
+
 
 
 
