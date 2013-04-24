@@ -17,16 +17,24 @@ class UserInterface
     for p in game.getPlanets()
       pos = p.location()
       r = window.config.planetRadius
-      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback)
+      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback(p))
+      b.setHoverHandler(@planetButtonHoverCallback(p))
       gameFrame.addChild(b)
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
 
-  planetButtonCallback: () =>
-    if @unitSelection.total > 0
-      console.log("moving units")
-    else
-      console.log("not moving units")
+  planetButtonCallback: (planet) =>
+    return () =>
+      console.log(planet._x + ", " + planet._y)
+      if @unitSelection.total > 0
+        console.log("moving units")
+      else
+        console.log("not moving units")
+
+  planetButtonHoverCallback: (planet) =>
+    return () =>
+      console.log(planet._x + ", " + planet._y)
+      console.log("hover")
 
   # Draws the game and HUD
   #
@@ -61,7 +69,7 @@ class UserInterface
       SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
     #  @drawPlanetStructure(ctx, p)
     #  @drawPlanetUnits(ctx, p)
-    @unitSelection.draw(ctx)
+    @unitSelection.draw(ctx, hudCtx)
 
     # Draw stuff attached to the game frame
     gameFrame.drawChildren()
