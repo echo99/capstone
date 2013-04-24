@@ -46,7 +46,7 @@ class Menu extends Mission
     ctx.fillStyle = winStyle.defaultText.color
     ctx.textAlign = 'center'
     for p in @Names
-    #   if the planet is visible and the probe is not on it
+      # if the planet is visible and the probe is not on it
       planet = @Planets[p]
       if planet._probes == 0
         loc = planet.location()
