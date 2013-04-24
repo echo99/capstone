@@ -114,7 +114,7 @@ class Elements.UIElement
   mouseMove: (x, y) ->
     pointerType = null
     if @containsPoint(x, y) and @visible
-      pointerType = @_onHover()
+      pointerType = @_onHover() if @clickable
       relLoc = @getRelativeLocation(x, y)
       # console.log("relative location: #{@constructor.name} #{relLoc.x},
       #   #{relLoc.y} | #{pointerType}")
@@ -127,7 +127,7 @@ class Elements.UIElement
   # @abstract
   #
   _onHover: ->
-    return null
+    return CURSOR_TYPES.DEFAULT
 
   # Gets the relative location of the point to this element
   #

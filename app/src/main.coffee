@@ -215,9 +215,9 @@ main = ->
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
-    if not pointer
+    if pointer is null
       pointer = gameFrame.mouseMove(x, y)
-    if pointer
+    if pointer isnt null
       hudCanvas.style.cursor = pointer
     else
       hudCanvas.style.cursor = 'auto'
