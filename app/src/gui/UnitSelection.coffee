@@ -3,35 +3,66 @@
 class UnitSelection
   total: 0
   totalProbes: 0
-  totalColony: 0
-  totalAttack: 0
-  totalDefense: 0
+  totalColonys: 0
+  totalAttacks: 0
+  totalDefenses: 0
   onlyProbe: false
+  hudUpdate: false
 
   #constructor: ->
 
   # Initializes the class
   initialize: (@onlyProbe=false) ->
     for p in game.getPlanets()
-      p.unitSelection = {
-        probes: [
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()],
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()]
-        ]
-        colony: [
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()],
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()]
-        ]
-        attack: [
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()],
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()]
-        ]
-        defense: [
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()],
-          [new Stack(), new Stack(), new Stack(), new Stack(), new Stack()]
-        ]
-      }
+      @_initUnitSelection(p)
       @updateSelection(p)
+
+  # Initilizes the data structure that tracks which units are selected
+  _initUnitSelection: (planet) ->
+    l = window.config.unitDisplay.location
+    location = {x: l.x, y: l.y}
+    pLoc = planet.location()
+    location.x += pLoc.x
+    location.y += pLoc.y
+
+    units = {probes: [], colonys: [], attacks: [], defenses: []}
+
+    probe_location = location
+    @_initUnits(probe_location, units.probes, (count) =>
+      @totalProbes += count
+      @total += count
+      @hudUpdate = true)
+
+    colony_location = {x: location.x, y: location.y+80}
+    @_initUnits(colony_location, units.colonys, (count) =>
+      @totalColonys += count
+      @total += count
+      @hudUpdate = true)
+
+    attack_location = {x: location.x, y: location.y+160}
+    @_initUnits(attack_location, units.attacks, (count) =>
+      @totalAttacks += count
+      @total += count
+      @hudUpdate = true)
+
+    defense_location = {x: location.x, y: location.y+240}
+    @_initUnits(defense_location, units.defenses, (count) =>
+      @totalDefenses += count
+      @total += count
+      @hudUpdate = true)
+
+    planet.unitSelection = units
+
+  # Initalizes on set of ships in the data structure that tracks
+  # unit selection
+  _initUnits: (location, stacks, callback) ->
+    space = window.config.unitDisplay.spacing
+    for row in [0..window.config.unitDisplay.rows - 1]
+      stacks.push([])
+      for col in [0..window.config.unitDisplay.columns - 1]
+        locX = location.x + space * col
+        locY = location.y + space * row
+        stacks[row].push(new Stack(locX, locY, callback))
 
   # This expects to be called when the mouse moves
   #
@@ -54,9 +85,29 @@ class UnitSelection
   # Draws the units next to each planet
   #
   # @param [CanvasRenderingContext2D] ctx The game context
-  draw: (ctx) ->
+  # @param [CanvasRenderingContext2D] hudCtx The hud context
+  draw: (ctx, hudCtx) ->
     for p in game._planets
+      units = p.unitSelection
+      @_drawStacks(ctx, units.probes)
+      @_drawStacks(ctx, units.colonys)
+      @_drawStacks(ctx, units.attacks)
+      @_drawStacks(ctx, units.defenses)
       @_drawPlanetUnits(ctx, p)
+
+    @_drawSelection(hudCtx)
+
+  # Draws the highlighting for a stack of ships
+  _drawStacks: (ctx, stacks) ->
+    for row in stacks
+      for stack in row
+        stack.draw(ctx)
+
+  # Draws the hud that shows total selected units
+  _drawSelection: (ctx) ->
+    if not @hudUpdate
+      return
+    @hudUpdate = false
     winStyle = window.config.windowStyle
     loc = window.config.selectionStyle.location
     w = window.config.selectionStyle.width
@@ -64,6 +115,7 @@ class UnitSelection
       h = window.config.selectionStyle.probeHeight
     else
       h = window.config.selectionStyle.height
+    ctx.clearRect(loc.x, loc.y, w, h)
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke
     ctx.lineJoin = winStyle.lineJoin
@@ -76,6 +128,7 @@ class UnitSelection
     ctx.lineTo(loc.x+w, loc.y+23)
     ctx.stroke()
     ctx.fillStyle = winStyle.titleText.color
+    ctx.textAlign = 'left'
     ctx.fillText("Selected Units", loc.x+7, loc.y+17)
     ctx.fillStyle = winStyle.valueText.color
 
@@ -84,28 +137,23 @@ class UnitSelection
 
     if not @onlyProbe
       SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+20, loc.y+90, ctx, false)
-      ctx.fillText(@totalColony, loc.x+60, loc.y+95)
+      ctx.fillText(@totalColonys, loc.x+60, loc.y+95)
 
       SHEET.drawSprite(SpriteNames.ATTACK_SHIP,
                        loc.x+20, loc.y+130, ctx, false)
-      ctx.fillText(@totalColony, loc.x+60, loc.y+135)
+      ctx.fillText(@totalAttacks, loc.x+60, loc.y+135)
 
       SHEET.drawSprite(SpriteNames.DEFENSE_SHIP,
                        loc.x+20, loc.y+170, ctx, false)
-      ctx.fillText(@totalColony, loc.x+60, loc.y+175)
+      ctx.fillText(@totalDefenses, loc.x+60, loc.y+175)
 
-  #_checkUnitHover: (stacks) ->
-  #  for row in stacks
-  #    for stack in row
-  #      if
-
-  # Draws the one typ of ship
+  # Draws the one type of ship
   #
   # @param [CanvasRenderingContext2D] ctx The game context
   # @param [Object] location Where to draw the ships
   # @param [AnimatedSprite] sprite The sprite to draw
   # @param [Array<Array<Stack>>] stacks The list of stacks
-  _drawShips: (ctx, location, sprite, stacks) ->
+  _drawShips: (ctx, sprite, stacks) ->
     x = 0
     y = 0
     win = window.config.windowStyle
@@ -114,13 +162,15 @@ class UnitSelection
       for stack in row
         count = stack.getCount()
         if count > 0
-          locX = location.x + dis.spacing * x
-          locY = location.y + dis.spacing * y
+          locX = stack.x
+          locY = stack.y
           SHEET.drawSprite(sprite, locX, locY, ctx)
           ctx.font = win.defaultText.font
           ctx.fillStyle = win.defaultText.color
           ctx.textAlign = 'left'
-          coords = camera.getScreenCoordinates({x: locX+10, y: locY+20})
+          offset = window.config.unitDisplay.numberOffset
+          coords = camera.getScreenCoordinates(
+            {x: locX+offset.x, y: locY+offset.y})
           if camera.onScreen(coords)
             ctx.fillText(stack.getCount(), coords.x, coords.y)
         x++
@@ -142,17 +192,10 @@ class UnitSelection
 
     units = planet.unitSelection
 
-    probe_location = location
-    @_drawShips(ctx, probe_location, SpriteNames.PROBE, units.probes)
-
-    colony_location = {x: location.x, y: location.y+80}
-    @_drawShips(ctx, colony_location, SpriteNames.COLONY_SHIP, units.colony)
-
-    attack_location = {x: location.x, y: location.y+160}
-    @_drawShips(ctx, attack_location, SpriteNames.ATTACK_SHIP, units.attack)
-
-    defense_location = {x: location.x, y: location.y+240}
-    @_drawShips(ctx, defense_location, SpriteNames.DEFENSE_SHIP, units.defense)
+    @_drawShips(ctx, SpriteNames.PROBE, units.probes)
+    @_drawShips(ctx, SpriteNames.COLONY_SHIP, units.colonys)
+    @_drawShips(ctx, SpriteNames.ATTACK_SHIP, units.attacks)
+    @_drawShips(ctx, SpriteNames.DEFENSE_SHIP, units.defenses)
     #   for each control group
     #     if control group is hovered over
     #       draw expanded view
@@ -166,9 +209,9 @@ class UnitSelection
   updateSelection: (planet) ->
     units = planet.unitSelection
     @_allocate(units.probes, planet._probes)
-    @_allocate(units.colony, planet._colonys)
-    @_allocate(units.attack, planet._attackShips)
-    @_allocate(units.defense, planet._defenseShips)
+    @_allocate(units.colonys, planet._colonys)
+    @_allocate(units.attacks, planet._attackShips)
+    @_allocate(units.defenses, planet._defenseShips)
 
   # Distributes the number givin into the given list of stacks
   #
@@ -211,25 +254,37 @@ class Stack
   @hovered: false
 
   # Constructs a new stack with a default count of 0
-  constructor: (@count=0) ->
+  constructor: (@x, @y, @callback, @count=0) ->
+    @w = window.config.unitDisplay.width
+    @h = window.config.unitDisplay.height
+    @b = new Elements.Button(x, y, @w, @h, @toggleSelection)
+    @b.setHoverHandler(@toggleHover)
+    gameFrame.addChild(@b)
 
   # Draws the selection of the stack
   #
   # @param [CanvasRenderingContext2D] ctx The game context
   # @param [Number] x The x location of the stack
   # @param [Number] y The y location of the stack
-  draw: (ctx, x, y) ->
-    w = window.config.unitDisplay.width
-    h = window.config.unitDisplay.height
-    x = x - w / 2
-    y = y - h / 2
-    if @selected
-      ctx.fillStyle = window.config.unitDisplay.fill
-      ctx.fillRect(x, y, w, h)
-    if @hovered
-      ctx.strokeStyle = window.config.unitDisplay.stroke
-      ctx.lineWidth = window.config.unitDisplay.lineWidth
-      ctx.strokeRect(x, y, w, h)
+  draw: (ctx) ->
+    if @count == 0
+      @b.visible = false
+      return
+    else
+      @b.visible = true
+    x = @x - @w / 2
+    y = @y - @h / 2
+    coords = camera.getScreenCoordinates({x: x, y: y})
+    if camera.onScreen(coords)
+      z = camera.getZoom()
+      if @selected
+        ctx.fillStyle = window.config.unitDisplay.fill
+        ctx.fillRect(coords.x, coords.y, @w*z, @h*z)
+      if @hovered
+        ctx.strokeStyle = window.config.unitDisplay.stroke
+        ctx.lineWidth = window.config.unitDisplay.lineWidth
+        ctx.lineJoin = window.config.unitDisplay.lineJoin
+        ctx.strokeRect(coords.x, coords.y, @w*z, @h*z)
 
   # Sets the count of the stack
   #
@@ -253,8 +308,12 @@ class Stack
     return @selected
 
   # Toggles whether this stack is selected
-  toggleSelection: () ->
+  toggleSelection: () =>
     @selected = not @selected
+    if @selected
+      @callback(@count)
+    else
+      @callback(-@count)
 
   # Test if this stack is hovered over
   #
@@ -263,5 +322,5 @@ class Stack
     return @hovered
 
   # Toggles whether this stack is hovered over
-  toggleHover: () ->
+  toggleHover: () =>
     @hovered = not @hovered
