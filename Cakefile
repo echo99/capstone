@@ -42,7 +42,7 @@ coffeeLintConfig =
   no_trailing_whitespace:
     level: 'error'
   max_line_length:
-    value: 80
+    value: 85
     level: 'error'
   camel_case_classes:
     level: 'error'
@@ -192,9 +192,15 @@ notify = (message, msgLvl) ->
 
 
 ###############################################################################
+# Options
+
+option '-v', '--verbose', 'Print out verbose output'
+
+
+###############################################################################
 # Tasks
 
-task 'build', 'Build coffee2js using Rehab', sbuild = ->
+task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
   if not BUILDING
     BUILDING = true
     checkDep ->
@@ -219,7 +225,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
                 # notify("Build successful!", MessageLevel.INFO) if WATCHING
                 console.log('Build successful!'.green)
                 console.log()
-              invoke 'lint'
+              invoke 'lint', options
         BUILDING = false
         # else
         #   console.log('Build failed!'.red)
@@ -343,8 +349,9 @@ task 'check', 'Temporarily compiles coffee files to check syntax', ->
 task 'install-dep', 'Install all necessary node modules', ->
   installDep()
 
-task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
+task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
   checkDep ->
+    options.verbose = 'verbose' of options
     console.log("Checking #{SRC_DIR}/*.coffee for lint".yellow)
     pass = "✔".green
     warn = "⚠".yellow
@@ -372,8 +379,8 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
             failCount++
             level = if res.level is 'error' then fail else warn
             console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
-        else
-          # console.log("#{pass}  #{shortPath}".green)
+        else if options.verbose
+          console.log("#{pass}  #{shortPath}".green)
         if filesToLint == 0
           # console.log("#{failCount} lint failures")
           if failCount > 0
@@ -391,7 +398,7 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
               MessageLevel.INFO) if WATCHING
             console.log('No lint errors found!'.green)
 
-task 'doc', 'Document the source code using Codo', ->
+task 'doc', 'Document the source code using Codo', (options) ->
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
     checkGlobalModule 'Codo', 'codo', 'codo', ->
@@ -424,31 +431,23 @@ task 'doc', 'Document the source code using Codo', ->
 #     throw err if err
 #     console.log output
 
-task "test", "Run tests", ->
+task "test", "Run tests", (options) ->
   tryRequire('mocha')
   tryRequire('chai')
   tryRequire('coffee-script')
+  reporter =  if 'verbose' of options then 'spec' else 'dot'
   checkDep ->
     cmd = './node_modules/.bin/mocha'
-    args = " --compilers coffee:coffee-script -u tdd --reporter dot " +
-      "--require coffee-script --require test/helpers/test_helper.coffee " +
+    args = [
+      " --compilers coffee:coffee-script"
+      "-u tdd --reporter #{reporter}"
+      "--require coffee-script"
+      "--require test/helpers/test_helper.coffee"
       "--colors"
+    ].join(' ')
     if process.platform == 'win32'
       cmd = '.\\node_modules\\.bin\\mocha'
     exec cmd + args, (err, output, stderr) ->
       console.log(output) if output
       console.log(stderr) if stderr
       # throw err if err
-  # exec "mocha --compilers coffee:coffee-script -u tdd --reporter spec --require coffee-script --require test/helpers/test_helper.coffee --colors", (err, output, stderr) ->
-  #     # throw err if err
-  #   console.log output
-  # mocha = spawn '.\\node_modules\\.bin\\mocha.cmd', ['--compilers', 'coffee:coffee-script', '-u', 'tdd', '--reporter', 'spec', '--require', 'coffee-script', '--require', 'test/helpers/test_helper.coffee', '--colors']
-  # mocha.stdout.pipe(process.stdout, end: false)
-  # mocha.stderr.pipe(process.stderr)
-  # # mocha.stdout.on 'data', (data) ->
-  # #   console.log(data.toString())
-  # mocha.on 'exit', (status) ->
-  #   console.log ("DONE!" + status)
-  # # coffee = spawn cmd, args
-
-  # #   coffee.stdout.on 'data', (data) ->
