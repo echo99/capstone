@@ -4,7 +4,9 @@ root.Elements ?= {}
 # Elements = Elements or {}
 Elements = root.Elements
 
-CURSOR_TYPES =
+
+# An "Enum" of cursor types
+CursorType =
   DEFAULT: 'auto'
   POINTER: 'pointer'
   WAIT: 'wait'
@@ -20,6 +22,9 @@ class Elements.UIElement
   # @property [Boolean] Flag for if an element can obstruct clicks (might need
   #   to come up with a better name)
   clickable: true
+
+  # @private @property [Boolean] Flag for if an element is being hovered over
+  _hovering: false
 
   # Create a new UI element
   #
@@ -114,6 +119,7 @@ class Elements.UIElement
   mouseMove: (x, y) ->
     pointerType = null
     if @containsPoint(x, y) and @visible
+      @_hovering = true
       pointerType = @_onHover() if @clickable
       relLoc = @getRelativeLocation(x, y)
       # console.log("relative location: #{@constructor.name} #{relLoc.x},
@@ -121,13 +127,30 @@ class Elements.UIElement
       for child in @_children
         pointer = child.mouseMove(relLoc.x, relLoc.y)
         pointerType = pointer if pointer
+    else if @_hovering and @visible
+      @_hovering = false
+      _onHover()
     return pointerType
+
+  # Call when the mouse leaves the element (for times when the event can't be
+  # automatically detected)
+  mouseOut: ->
+    if @_hovering
+      @_hovering = false
+      @_onHover()
+      for child in @_children
+        child.mouseOut()
 
   # @private Action to perform when element is hovered over
   # @abstract
   #
   _onHover: ->
-    return CURSOR_TYPES.DEFAULT
+    return CursorType.DEFAULT
+
+  # @private Action to perform when an element is no longer being hovered over
+  # @abstract
+  #
+  _onMouseOut: ->
 
   # Gets the relative location of the point to this element
   #
@@ -136,7 +159,6 @@ class Elements.UIElement
   # @return [Object] The coordinates `{'x': x, 'y': y}`
   getRelativeLocation: (x, y) ->
     return {'x': x, 'y': y}
-
 
 
 # A box UI element
@@ -294,7 +316,7 @@ class Elements.MessageBox extends Elements.BoxElement
     lw = config.windowStyle.lineWidth
     lw2 = lw + lw
     @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
-    @ctx.canvas.style.cursor = CURSOR_TYPES.DEFAULT
+    @ctx.canvas.style.cursor = CursorType.DEFAULT
 
 
   # Add a callback to call when the message box updates
@@ -356,6 +378,7 @@ class Elements.Button extends Elements.BoxElement
   constructor: (@x, @y, @w, @h, @clickHandler=null) ->
     super(@x, @y, @w, @h)
     @hoverHandler = null
+    @mouseOutHandler = null
 
   # Set the onClick handler
   #
@@ -368,6 +391,12 @@ class Elements.Button extends Elements.BoxElement
   # @param [Function] hoverHandler
   #
   setHoverHandler: (@hoverHandler) ->
+
+  # Set the onMouseOut handler
+  #
+  # @param [Function] mouseOutHandler
+  #
+  setMouseOutHandler: (@mouseOutHandler) ->
 
   # Call the attached callback function when the button is clicked
   #
@@ -382,7 +411,13 @@ class Elements.Button extends Elements.BoxElement
   _onHover: ->
     if @hoverHandler isnt null
       @hoverHandler()
-    return CURSOR_TYPES.POINTER
+    return CursorType.POINTER
+
+  # Do something when the user's mouse leaves the button
+  #
+  _onMouseOut: ->
+    if @mouseOutHandler isnt null
+      @mouseOutHandler()
 
 
 # Button class for circular buttons
@@ -399,6 +434,7 @@ class Elements.RadialButton extends Elements.RadialElement
   constructor: (@x, @y, @r, @clickHandler=null) ->
     super(@x, @y, @r)
     @hoverHandler = null
+    @mouseOutHandler = null
 
   # Set the onClick handler
   #
@@ -411,6 +447,12 @@ class Elements.RadialButton extends Elements.RadialElement
   # @param [Function] hoverHandler
   #
   setHoverHandler: (@hoverHandler) ->
+
+  # Set the onMouseOut handler
+  #
+  # @param [Function] mouseOutHandler
+  #
+  setMouseOutHandler: (@mouseOutHandler) ->
 
   # Call the attached callback function when the button is clicked
   #
@@ -425,7 +467,13 @@ class Elements.RadialButton extends Elements.RadialElement
   _onHover: ->
     if @hoverHandler isnt null
       @hoverHandler()
-    return CURSOR_TYPES.POINTER
+    return CursorType.POINTER
+
+  # Do something when the user's mouse leaves the button
+  #
+  _onMouseOut: ->
+    if @mouseOutHandler isnt null
+      @mouseOutHandler()
 
 
 # Class for handling DOM (Document Object Model) buttons. These buttons are
