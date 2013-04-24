@@ -50,13 +50,13 @@ class UserInterface
     ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     for p in game.getPlanets()
       pos = camera.getScreenCoordinates(p.location())
-    #   add this planet to visited planets
+      # add this planet to visited planets
       visited.push(p)
-    #   for each neighbor
+      # for each neighbor
       for neighbor in p._adjacentPlanets
-    #     if neighbor is not in visited planets
+        # if neighbor is not in visited planets
         if neighbor not in visited
-    #       draw connection to the neighbor
+          # draw connection to the neighbor
           nPos = camera.getScreenCoordinates(neighbor.location())
           ctx.beginPath()
           ctx.moveTo(pos.x, pos.y)
@@ -65,7 +65,7 @@ class UserInterface
 
     # for each planet
     for p in game._planets
-    #   draw planet
+      # draw planet
       SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
     #  @drawPlanetStructure(ctx, p)
     #  @drawPlanetUnits(ctx, p)
@@ -87,7 +87,7 @@ class UserInterface
     #     else
     #       draw regular image
     if @hoveredPlanetButton
-    # if the button is a planet
+      # if the button is a planet
       ctx.strokeStyle = window.config.selectionStyle.stroke
       ctx.lineWidth = window.config.selectionStyle.lineWidth
       x = @hoveredPlanetButton.x
@@ -116,7 +116,7 @@ class UserInterface
     @hoveredPlanetButton = null
     # for each button
     for b in @planetButtons
-    #   if (x, y) on button
+      # if (x, y) on button
       pos = camera.getWorldCoordinates({x: x, y: y})
       if b.containsPoint(pos.x, pos.y)
         @hoveredPlanetButton = b
@@ -131,7 +131,7 @@ class UserInterface
     # for each button
     #   if button is hovered over
     #     perform button action
-#    pos = camera.getWorldCoordinates({x: x, y: y})
-#    if @hoveredPlanetButton and
-#       @hoveredPlanetButton.containsPoint(pos.x, pos.y)
+    # pos = camera.getWorldCoordinates({x: x, y: y})
+    #if @hoveredPlanetButton and
+    #   @hoveredPlanetButton.containsPoint(pos.x, pos.y)
     @unitSelection.onMouseClick(x, y)
