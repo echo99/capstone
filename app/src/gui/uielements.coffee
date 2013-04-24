@@ -17,6 +17,10 @@ class Elements.UIElement
   # @property [Boolean] Flag for if element is visible
   visible: true
 
+  # @property [Boolean] Flag for if an element can obstruct clicks (might need
+  #   to come up with a better name)
+  clickable: true
+
   # Create a new UI element
   #
   constructor: ->
@@ -73,20 +77,28 @@ class Elements.UIElement
   #
   # @param [Number] x
   # @param [Number] y
+  # @return [Boolean] whether or not any of the element's children were clicked
   #
   click: (x, y) =>
+    clickedSomething = false
     if @containsPoint(x, y) and @visible
+      clickedSomething = @clickable
       console.log("clicked #{@constructor.name} at (#{x}, #{y})")
       @_onClick()
       relLoc = @getRelativeLocation(x, y)
-      console.log("relative location: #{relLoc.x}, #{relLoc.y}")
+      console.log("  relative location: #{relLoc.x}, #{relLoc.y}")
       # console.log("In loop")
-      # console.log("Children of #{@name} : #{@_children}")
+      # console.log("Children of #{@constructor.name} : #{@_children}")
       for child in @_children
         if child.visible
           # console.log("Checking #{child.name}")
-          child.click(relLoc.x, relLoc.y)
+          clickedChild = child.click(relLoc.x, relLoc.y)
+          clickedSomething or= clickedChild
+          # console.log("ClickedSomething: #{clickedSomething}")
       # console.log("Out of loop")
+    # else
+    #   console.log("missed #{@constructor.name} at (#{x}, #{y})")
+    return clickedSomething
 
   # @private Action to perform when element is clicked
   # @abstract
@@ -174,26 +186,38 @@ class Elements.RadialElement extends Elements.UIElement
     dy = Math.abs(@y - y)
     return dx*dx + dy*dy <= @r2
 
+
 # Frame for holding all elements in the HUD
-class Elements.Frame extends Elements.BoxElement
+class Elements.Frame extends Elements.UIElement
 
   # Create a new frame
   #
   # @param [Canvas] frame The frame canvas
   #
   constructor: (@frame) ->
-    cx = Math.round(@frame.width/2)
-    cy = Math.round(@frame.height/2)
-    super(cx, cy, @frame.width, @frame.height)
+    super()
+    @resize()
+    @clickable = false
+    # cx = Math.round(@frame.width/2)
+    # cy = Math.round(@frame.height/2)
+    # super(cx, cy, @frame.width, @frame.height)
 
   # Resize the frame if the document frame resizes
   resize: ->
-    cx = Math.round(@frame.width/2)
-    cy = Math.round(@frame.height/2)
-    @x = cx
-    @y = cy
+    # cx = Math.round(@frame.width/2)
+    # cy = Math.round(@frame.height/2)
+    # @x = cx
+    # @y = cy
     @w = @frame.width
     @h = @frame.height
+
+  # @see Elements.UIElement#containsPoint
+  containsPoint: (x, y) ->
+    return true
+
+  # @see Elements.UIElement#getRelativeLocation
+  getRelativeLocation: (x, y) ->
+    return {x: x, y: y}
 
   # Draw the frame's children
   drawChildren: ->
@@ -209,6 +233,7 @@ class Elements.GameFrame extends Elements.UIElement
   # @param [Camera] camera The camera object
   constructor: (@camera) ->
     super()
+    @clickable = false
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
