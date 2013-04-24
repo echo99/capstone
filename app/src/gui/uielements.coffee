@@ -129,7 +129,7 @@ class Elements.UIElement
         pointerType = pointer if pointer
     else if @_hovering and @visible
       @_hovering = false
-      _onHover()
+      @_onMouseOut()
     return pointerType
 
   # Call when the mouse leaves the element (for times when the event can't be
@@ -137,7 +137,7 @@ class Elements.UIElement
   mouseOut: ->
     if @_hovering
       @_hovering = false
-      @_onHover()
+      @_onMouseOut()
       for child in @_children
         child.mouseOut()
 
