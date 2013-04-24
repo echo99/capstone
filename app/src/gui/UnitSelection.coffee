@@ -258,7 +258,8 @@ class Stack
     @w = window.config.unitDisplay.width
     @h = window.config.unitDisplay.height
     @b = new Elements.Button(x, y, @w, @h, @toggleSelection)
-    @b.setHoverHandler(@toggleHover)
+    @b.setHoverHandler(() => @hovered = true)
+    @b.setMouseOutHandler(() => @hovered = false)
     gameFrame.addChild(@b)
 
   # Draws the selection of the stack
