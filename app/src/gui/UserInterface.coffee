@@ -4,7 +4,7 @@
 # input related to the game directly.
 class UserInterface
   planetButtons: []
-  hoveredPlanetButton: null
+  hoveredPlanet: null
   lastMousePos: {x: 0, y: 0}
   unitSelection: null
 
@@ -19,6 +19,7 @@ class UserInterface
       r = window.config.planetRadius
       b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback(p))
       b.setHoverHandler(@planetButtonHoverCallback(p))
+      b.setMouseOutHandler(@planetButtonOutCallback)
       gameFrame.addChild(b)
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
@@ -27,14 +28,19 @@ class UserInterface
     return () =>
       console.log(planet._x + ", " + planet._y)
       if @unitSelection.total > 0
-        console.log("moving units")
-      else
-        console.log("not moving units")
+        for p in @unitSelection.planetsWithSelectedUnits
+          console.log("moving from " +
+            "(" + p.location().x + ", " + p.location().y + ")" + " to " +
+            "(" + planet.location().x + ", " + planet.location().y + ")")
+        @unitSelection.deselectAllUnits()
+        @unitSelection.updateSelection()
 
   planetButtonHoverCallback: (planet) =>
     return () =>
-      console.log(planet._x + ", " + planet._y)
-      console.log("hover")
+      @hoveredPlanet = planet
+
+  planetButtonOutCallback: () =>
+    @hoveredPlanet = null
 
   # Draws the game and HUD
   #
@@ -86,13 +92,12 @@ class UserInterface
     #       draw hover image
     #     else
     #       draw regular image
-    if @hoveredPlanetButton
+    if @hoveredPlanet
       # if the button is a planet
       ctx.strokeStyle = window.config.selectionStyle.stroke
       ctx.lineWidth = window.config.selectionStyle.lineWidth
-      x = @hoveredPlanetButton.x
-      y = @hoveredPlanetButton.y
-      pos = camera.getScreenCoordinates({x: x, y: y})
+      loc = @hoveredPlanet.location()
+      pos = camera.getScreenCoordinates(loc)
       r = (window.config.planetRadius + window.config.selectionStyle.radius) *
           camera.getZoom()
       ctx.beginPath()
@@ -112,15 +117,11 @@ class UserInterface
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
     @lastMousePos = {x: x, y: y}
-    #   set button to not hover
-    @hoveredPlanetButton = null
-    # for each button
-    for b in @planetButtons
-      # if (x, y) on button
-      pos = camera.getWorldCoordinates({x: x, y: y})
-      if b.containsPoint(pos.x, pos.y)
-        @hoveredPlanetButton = b
-    #     set button to hover
+    #@hoveredPlanetButton = null
+    #for b in @planetButtons
+      #pos = camera.getWorldCoordinates({x: x, y: y})
+      #if b.containsPoint(pos.x, pos.y)
+        #@hoveredPlanetButton = b
     @unitSelection.onMouseMove(x, y)
 
   # The UI expects this to be called when the mouse clicks

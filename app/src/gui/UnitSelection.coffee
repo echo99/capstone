@@ -9,6 +9,7 @@ class UnitSelection
   onlyProbe: false
   hudUpdate: false
   lastMousePos: {x: 0, y: 0}
+  planetsWithSelectedUnits: []
 
   #constructor: ->
 
@@ -20,39 +21,52 @@ class UnitSelection
 
   # Initilizes the data structure that tracks which units are selected
   _initUnitSelection: (planet) ->
-    l = window.config.unitDisplay.location
-    location = {x: l.x, y: l.y}
+    location = window.config.unitDisplay.location
     pLoc = planet.location()
     location.x += pLoc.x
     location.y += pLoc.y
 
     units = {probes: [], colonys: [], attacks: [], defenses: []}
 
+    updateSelectedPlanets = (count) =>
+      planet.selectedUnits += count
+      if planet.selectedUnits == 0
+        @planetsWithSelectedUnits =
+          @planetsWithSelectedUnits.filter((el, i, arr) => el != planet)
+      else
+        if planet not in @planetsWithSelectedUnits
+          @planetsWithSelectedUnits.push(planet)
+
     probe_location = location
     @_initUnits(probe_location, units.probes, (count) =>
       @totalProbes += count
       @total += count
+      updateSelectedPlanets(count)
       @hudUpdate = true)
 
     colony_location = {x: location.x, y: location.y+80}
     @_initUnits(colony_location, units.colonys, (count) =>
       @totalColonys += count
       @total += count
+      updateSelectedPlanets(count)
       @hudUpdate = true)
 
     attack_location = {x: location.x, y: location.y+160}
     @_initUnits(attack_location, units.attacks, (count) =>
       @totalAttacks += count
       @total += count
+      updateSelectedPlanets(count)
       @hudUpdate = true)
 
     defense_location = {x: location.x, y: location.y+240}
     @_initUnits(defense_location, units.defenses, (count) =>
       @totalDefenses += count
       @total += count
+      updateSelectedPlanets(count)
       @hudUpdate = true)
 
     planet.unitSelection = units
+    planet.selectedUnits = 0
 
   # Initalizes on set of ships in the data structure that tracks
   # unit selection
@@ -64,6 +78,30 @@ class UnitSelection
         locX = location.x + space * col
         locY = location.y + space * row
         stacks[row].push(new Stack(locX, locY, callback))
+
+  _clearStacks: (stacks) ->
+    for row in stacks
+      for stack in row
+        stack.clear()
+
+  deselectAllUnits: () ->
+    for p in @planetsWithSelectedUnits
+      units = p.unitSelection
+      @_clearStacks(units.probes)
+      @_clearStacks(units.colonys)
+      @_clearStacks(units.attacks)
+      @_clearStacks(units.defenses)
+      p.selectedUnits = 0
+    @planetsWithSelectedUnits = []
+    @total = 0
+    @totalProbes = 0
+    @totalColonys = 0
+    @totalAttacks = 0
+    @totalDefenses = 0
+    @hudUpdate = true
+
+  getNumberOfProbes: (planet) ->
+
 
   # This expects to be called when the mouse moves
   #
@@ -280,6 +318,10 @@ class Stack
     @b.setHoverHandler(() => @hovered = true)
     @b.setMouseOutHandler(() => @hovered = false)
     gameFrame.addChild(@b)
+
+  clear: () ->
+    @selected = false
+    @hovered = false
 
   # Draws the selection of the stack
   #

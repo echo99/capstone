@@ -33,7 +33,7 @@ class Menu extends Mission
 
     # Add probe to Home planet
     @Planets.Home._probes = 23
-    #@Planets.Home._colonys = 23
+    @Planets.Missions._probes = 23
     #@Planets.Home._attackShips = 23
     #@Planets.Home._defenseShips = 23
 
