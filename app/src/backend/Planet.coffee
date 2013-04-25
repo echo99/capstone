@@ -2,6 +2,10 @@
 
 root = exports ? window
 
+if exports isnt undefined
+  {config} = require '../config'
+root.config = config
+
 #_require ControlGroup
 
 class Planet
@@ -21,6 +25,7 @@ class Planet
     @_controlGroups = []
     @_unitConstructing = null
     @_turnsToComplete = 0
+    @_visibility = window.config.visibility.invisible
 
   # GETTERS #
 
@@ -28,37 +33,45 @@ class Planet
     return {x: @_x, y: @_y}
 
   resources: ->
-    return resources
+    return @_resources
 
   availableResources: ->
-    return availableResources
+    return @_availableResources
+
+  visibility: ->
+    return @_visibility
 
   numShips: (type) ->
-    return null
+    return switch unit
+      when window.config.units.probe then @_probes
+      when window.config.units.colonyShip then @_colonys
+      when window.config.units.attackShip then @_attackShips
+      when window.config.units.defenseShip then @_defenseShips
+      else throw new Error("Ship type unknown.") 
 
   fungusStrength: ->
-    return null
+    return @_fungusStrength
 
   hasOutpost: ->
-    return null
+    return @_outpost
 
   hasStation: ->
-    return null
+    return @_station
 
   getAdjacentPlanets: ->
-    return []
+    return @_adjacentPlanets
 
   getControlGroups: ->
-    return []
+    return @_controlGroups
 
   buildStatus: ->
-    return null
+    return @_turnsToComplete
 
   buildUnit: ->
-    return null
+    return @_unitConstructing
 
   isBuilding: ->
-    if @_turnstocomplete is 0
+    if @_unitConstructing is null or @_turnsToComplete is 0
       return false
     else
       return true
@@ -91,7 +104,17 @@ class Planet
     null
 
   buildUpkeep: ->
-    null
+    if @_turnsToComplete >= 1
+      @_turnsToComplete--
+      if @_turnsToComplete == 0
+        unit = @_unitConstructing
+        @_unitConstructing = null
+        switch unit
+          when window.config.units.probe then @_probes++
+          when window.config.units.colonyShip then @_colonys++
+          when window.config.units.attackShip then @_attackShips++
+          when window.config.units.defenseShip then @_defenseShips++
+          else throw new Error("Ship type unknown.")        
 
   movementUpkeep1: ->
     group.updateAi for group in @_controlGroups
@@ -103,12 +126,43 @@ class Planet
   # INGAME COMMANDS #
 
   build: (name) ->
-    null
+    if @_unitConstructing != null or @_turnsToComplete != 0
+      throw new Error("Planet is already constructing something else.")
+    else if @_availableResources < name.cost
+      throw new Error("Not enough available resources.")
+    else
+      @_unitConstructing = name
+      @_availableResources -= name.cost
+      @_turnsToComplete = name.turns
 
   move: (attackShips, defenseShips, probes, colonies, dest) ->
-    controlGroup = new ControlGroup(attackShips, defenseShips, probes,
-      colonies, dest)
-    @_controlGroups.push(controlGroup)
+    # check for insufficient ships
+    if attackShips > @_attackShips or
+       defenseShips > @_defenseShips or
+       probes > @_probes or
+       colonies > @_colonies
+      throw error "Insufficient Ships"
+    else
+      # generate control group
+      controlGroup = new ControlGroup(attackShips, defenseShips, probes, colonies, dest)
+      # update planet
+      @_attackShips -= attackShips
+      @_defenseShips -= defenseShips
+      @_probes -= probes
+      @_colonies -= colonies
+      # add to planet
+      @_controlGroups.push(controlGroup)
+
+  # SETTERS FOR USE BY GUI #
+
+  setVisibility: (state) ->
+    if (state is window.config.visibility.visible) or
+       (state is window.config.visibility.fungus) or
+       (state is window.config.visibility.nonfungus) or
+       (state is window.config.visibility.invisible)
+      @_visibility = state
+    else
+      throw error "Invalid Visibility"
 
   # SETTERS FOR USE BY GAME CLASS #
 
@@ -121,8 +175,14 @@ class Planet
   move: (group) ->
     if not group.moved
       group.setMoved
+      if ((group.destination is @) and (group.destination is group.next))
+        @_attackShips += group.attackShips
+        @_defenseShips += group.defenseShips
+        @_probes += group.probes
+        @_colonies += group.colonies
+      else
+        group.next.receiveGroup(group)
       @_controlGroups.filter(group)
-      group.next.receiveGroup(group)
 
   receiveGroup: (group) ->
     @_controlGroups.push(group)

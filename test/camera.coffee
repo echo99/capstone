@@ -10,6 +10,7 @@ suite 'Camera', ->
   suite "(size: #{width} x #{height})", ->
     setup ->
       camera = new Camera(0, 0, width, height)
+      camera.setDragMode('ONE_TO_ONE')
 
     suite '.constructor', ->
       test 'should be at (0,0)', ->
