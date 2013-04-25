@@ -7,7 +7,7 @@ class UnitSelection
   totalAttacks: 0
   totalDefenses: 0
   onlyProbe: false
-  hudUpdate: false
+  hudUpdate: true
   lastMousePos: {x: 0, y: 0}
   planetsWithSelectedUnits: []
 
@@ -100,7 +100,25 @@ class UnitSelection
     @totalDefenses = 0
     @hudUpdate = true
 
+  _countUnits: (stacks) ->
+    count = 0
+    for row in stacks
+      for stack in row
+        if stack.isSelected()
+          count += stack.getCount()
+    return count
+
   getNumberOfProbes: (planet) ->
+    return @_countUnits(planet.unitSelection.probes)
+
+  getNumberOfColonys: (planet) ->
+    return @_countUnits(planet.unitSelection.colonys)
+
+  getNumberOfAttacks: (planet) ->
+    return @_countUnits(planet.unitSelection.attacks)
+
+  getNumberOfDefenses: (planet) ->
+    return @_countUnits(planet.unitSelection.defenses)
 
 
   # This expects to be called when the mouse moves
@@ -122,7 +140,7 @@ class UnitSelection
   # @param [CanvasRenderingContext2D] hudCtx The hud context
   draw: (ctx, hudCtx) ->
     found = false
-    for p in game._planets
+    for p in game.getPlanets()
       units = p.unitSelection
       @_drawStacks(ctx, units.probes)
       @_drawStacks(ctx, units.colonys)
@@ -265,10 +283,11 @@ class UnitSelection
   # @param [Planet] planet The planet whose unit stacks to update
   updateSelection: (planet) ->
     units = planet.unitSelection
-    @_allocate(units.probes, planet._probes)
-    @_allocate(units.colonys, planet._colonys)
-    @_allocate(units.attacks, planet._attackShips)
-    @_allocate(units.defenses, planet._defenseShips)
+    names = window.config.units
+    @_allocate(units.probes, planet.numShips(names.probe))
+    @_allocate(units.colonys, planet.numShips(names.colonyShip))
+    @_allocate(units.attacks, planet.numShips(names.attackShip))
+    @_allocate(units.defenses, planet.numShips(names.defenseShip))
 
   # Distributes the number givin into the given list of stacks
   #

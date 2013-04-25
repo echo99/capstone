@@ -2,6 +2,15 @@
 
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
+# TODO:
+#   - End turn button
+#   - Deselect all units button
+#   - Menu button, with option for not displaying it because the main menu doesn't
+#     need it
+#   - Display number of units selected locally. This will also be a button that
+#     toggles selecting all of the unit type.
+#   - Display planet resources. Turn this off for main menu.
+#   - Display control groups
 class UserInterface
   planetButtons: []
   hoveredPlanet: null
@@ -26,14 +35,19 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
-      console.log(planet._x + ", " + planet._y)
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           console.log("moving from " +
             "(" + p.location().x + ", " + p.location().y + ")" + " to " +
             "(" + planet.location().x + ", " + planet.location().y + ")")
+          p.moveShips(@unitSelection.getNumberOfAttacks(p),
+                      @unitSelection.getNumberOfDefenses(p),
+                      @unitSelection.getNumberOfProbes(p),
+                      @unitSelection.getNumberOfColonys(p), planet)
+          @unitSelection.updateSelection(p)
         @unitSelection.deselectAllUnits()
-        @unitSelection.updateSelection()
+      else
+        console.log("opening structure menu...")
 
   planetButtonHoverCallback: (planet) =>
     return () =>
@@ -49,18 +63,13 @@ class UserInterface
   draw: (ctx, hudCtx) ->
     # Note: there are alot of things that need to check for hovering and many
     #       of which draw tool tips if they are
-    # visited planets = set
     visited = []
-    # for each planet
     ctx.strokeStyle = window.config.connectionStyle.normal.stroke
     ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     for p in game.getPlanets()
       pos = camera.getScreenCoordinates(p.location())
-      # add this planet to visited planets
       visited.push(p)
-      # for each neighbor
-      for neighbor in p._adjacentPlanets
-        # if neighbor is not in visited planets
+      for neighbor in p.getAdjacentPlanets()
         if neighbor not in visited
           # draw connection to the neighbor
           nPos = camera.getScreenCoordinates(neighbor.location())
@@ -69,10 +78,12 @@ class UserInterface
           ctx.lineTo(nPos.x, nPos.y)
           ctx.stroke()
 
-    # for each planet
-    for p in game._planets
-      # draw planet
-      SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
+    for p in game.getPlanets()
+      loc = p.location()
+      if p.fungusStrength() > 0
+        SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
+      else
+        SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
     #  @drawPlanetStructure(ctx, p)
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)
@@ -103,13 +114,15 @@ class UserInterface
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
+      ctx.textAlign = "left"
+      ctx.font = window.config.toolTipStyle.font
+      ctx.fillStyle = window.config.toolTipStyle.color
+      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
       if @unitSelection.total > 0
-        ctx.textAlign = "left"
-        ctx.font = window.config.toolTipStyle.font
-        ctx.fillStyle = window.config.toolTipStyle.color
-        x = @lastMousePos.x + window.config.toolTipStyle.xOffset
-        y = @lastMousePos.y + window.config.toolTipStyle.yOffset
         ctx.fillText("Move selected units", x, y)
+      else
+        ctx.fillText("Open structure menu", x, y)
 
   # The UI expects this to be called when the mouse moves
   #

@@ -73,6 +73,7 @@ root.config =
     COLONY_SHIP: new AnimatedSprite(['colony_ship.png'])
     PROBE: new AnimatedSprite(['probe.png'])
     PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
+    PLANET_BLUE_FUNGUS: new AnimatedSprite(['planet_blue_fungus.png'])
     PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
     TITLE: new AnimatedSprite(['title.png'])
     FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])

@@ -70,26 +70,6 @@ drawBackground = (ctx, spritesheet, name) ->
     for yPos in yCoords
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
-# Keeping this here for reference, delete when no longer useful
-#drawHUD = (ctx, spritesheet) ->
-#  winStyle = window.config.windowStyle
-#  ctx.fillStyle = winStyle.fill #"rgba(0, 37, 255, 0.5)"
-#  ctx.strokeStyle = winStyle.stroke #"rgba(0, 37, 255, 1)"
-#  ctx.lineJoin = winStyle.lineJoin #"bevel"
-#  ctx.lineWidth = winStyle.lineWidth #5
-#  ctx.font = winStyle.title.font #"15px Arial"
-#  ctx.fillRect(50, 50, 105, 100)
-#  ctx.strokeRect(50, 50, 105, 100)
-#  ctx.beginPath()
-#  ctx.moveTo(50, 73)
-#  ctx.lineTo(155, 73)
-#  ctx.stroke()
-#  ctx.fillStyle = winStyle.title.color #"rgba(255, 255, 255, 1)"
-#  ctx.fillText("Selected Units", 57, 67)
-#  ctx.fillStyle = winStyle.value.color #"rgba(255, 255, 0, 1)"
-#  ctx.fillText("1", 110, 105)
-#  spritesheet.drawSprite(SpriteNames.PROBE, 70, 100, ctx)
-
 # Update the size of the frame and the canvases when the window size changes
 updateCanvases = (frame, canvases...) ->
   frameWidth = window.innerWidth
@@ -121,9 +101,9 @@ main = ->
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
   frameElement = new Elements.Frame(frame)
-  msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
+  #msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
   # msgBox.draw(hudCtx)
-  frameElement.addChild(msgBox)
+  #frameElement.addChild(msgBox)
   frameElement.drawChildren()
 
   msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
@@ -195,7 +175,10 @@ main = ->
 
   document.body.addEventListener('keydown', (e) ->
     if e.keyCode == KeyCodes.HOME
-      camera.setTarget(0, 0))
+      camera.setTarget(0, 0)
+    else if e.keyCode == KeyCodes.SPACE
+      game.endTurn()
+  )
 
   # Catch accidental leaving
   window.onbeforeunload = (e) ->

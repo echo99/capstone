@@ -43,12 +43,12 @@ class Planet
     return @_visibility
 
   numShips: (type) ->
-    return switch unit
+    return switch type
       when window.config.units.probe then @_probes
       when window.config.units.colonyShip then @_colonys
       when window.config.units.attackShip then @_attackShips
       when window.config.units.defenseShip then @_defenseShips
-      else throw new Error("Ship type unknown.") 
+      else throw new Error("Ship type unknown.")
 
   fungusStrength: ->
     return @_fungusStrength
@@ -115,7 +115,7 @@ class Planet
           when window.config.units.colonyShip then @_colonys++
           when window.config.units.attackShip then @_attackShips++
           when window.config.units.defenseShip then @_defenseShips++
-          else throw new Error("Ship type unknown.")        
+          else throw new Error("Ship type unknown.")
 
   movementUpkeep1: ->
     group.updateAi for group in @_controlGroups
@@ -136,7 +136,7 @@ class Planet
       @_availableResources -= name.cost
       @_turnsToComplete = name.turns
 
-  move: (attackShips, defenseShips, probes, colonies, dest) ->
+  moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
     # check for insufficient ships
     if attackShips > @_attackShips or
        defenseShips > @_defenseShips or
@@ -174,6 +174,7 @@ class Planet
   # HELPER FUNCTIONS #
 
   move: (group) ->
+    console.log("group ", group)
     if not group.moved
       group.setMoved
       if ((group.destination is @) and (group.destination is group.next))
