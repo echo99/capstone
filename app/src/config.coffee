@@ -2,7 +2,7 @@
 
 root = exports ? window
 
-if exports isnt undefined
+if exports?
   {Sprite, AnimatedSprite} = require './util/Sprite'
 
 DRAG_TYPES = ['DEFAULT', 'ONE_TO_ONE']

@@ -2,7 +2,7 @@
 
 root = exports ? window
 
-if exports isnt undefined
+if exports?
   {config} = require '../config'
 root.config = config
 
