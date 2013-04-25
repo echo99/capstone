@@ -69,9 +69,12 @@ class Planet
     if @_fungusStrength >= @_fungusMaximumStrength
       # Spore
       for i in [2..@_fungusStrength]
-        planet = @_adjacentPlanets[Math.floor(Math.random() * @_adjacentPlanets.length)]
-        if planet._fungusStrength - planet._fungusLeaving + planet._fungusArriving < planet._fungusMaximumStrength
-          # this DOES introduce dependence on what order grow is called on planets, but it should be okay
+        planet = @_adjacentPlanets[Math.floor(
+          Math.random() * @_adjacentPlanets.length)]
+        if planet._fungusStrength - planet._fungusLeaving +
+            planet._fungusArriving < planet._fungusMaximumStrength
+          # this DOES introduce dependence on what order grow is called on planets,
+          # but it should be okay
           planet._fungusArriving++
           @_fungusLeaving++
     else
@@ -96,22 +99,23 @@ class Planet
 
   movementUpkeep2: ->
     group.resetMoved for group in @_controlGroups
-	  
+
   # INGAME COMMANDS #
 
   build: (name) ->
     null
 
   move: (attackShips, defenseShips, probes, colonies, dest) ->
-    controlGroup = new ControlGroup(attackShips, defenseShips, probes, colonies, dest)
+    controlGroup = new ControlGroup(attackShips, defenseShips, probes,
+      colonies, dest)
     @_controlGroups.push(controlGroup)
-    
+
   # SETTERS FOR USE BY GAME CLASS #
 
   addNeighbor: (otherplanet) ->
     @_adjacentPlanets.push(otherplanet)
     otherplanet._adjacentPlanets.push(@)
-    
+
   # HELPER FUNCTIONS #
 
   move: (group) ->
@@ -122,11 +126,6 @@ class Planet
 
   receiveGroup: (group) ->
     @_controlGroups.push(group)
-
-
-
-
-
 
 
 root.Planet = Planet

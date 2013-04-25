@@ -1,8 +1,11 @@
 # Defines a class to represent control groups
 
+root = exports ? window
+
 class ControlGroup
 
-  constructor: (@_attackShips, @_defenseShips, @_probes, @_colonies, @_destination) ->
+  constructor: (@_attackShips, @_defenseShips, @_probes, @_colonies,
+      @_destination) ->
     @_route = []
     @_hasMoved = false
 
@@ -52,8 +55,6 @@ class ControlGroup
 
   updateAi: ->
     null
-    
-  
 
 
-  
+root.ControlGroup = ControlGroup
