@@ -149,7 +149,7 @@ class Planet
   move: (group) ->
     if not group.moved
       group.setMoved
-      if true #((group.destination is @) and (group.destination is group.next))
+      if ((group.destination is @) and (group.destination is group.next))
         @_attackShips += group.attackShips
         @_defenseShips += group.defenseShips
         @_probes += group.probes
