@@ -94,36 +94,44 @@ installDep = (callback = null) ->
   curModuleNum = 0
   installMissingModules = ->
     if curModuleNum < missingModules.length
+      # There are still more modules to load
       moduleName = missingModules[curModuleNum]
       console.log()
       console.log("Installing #{moduleName}...")
       curModuleNum++
       wrappedExec("npm install #{moduleName}", true, installMissingModules)
     else
+      # All done! Reload dependencies
       getDependencies()
+      # Print success message
       console.log()
       console.log('All modules have been successfully installed!'.green)
       console.log()
+      # Empty missing modules
+      missingModules = []
+      # Call callback function if one was given
       if callback != null
         callback()
   installMissingModules()
 
 # Check to see if a global node module is missing, and if it isn't executes the
 # callback
-checkGlobalModule = (moduleName, modulePkg, cmd, callback) ->
+checkGlobalModule = (moduleName, modulePkg, cmd, failOnError, callback) ->
   exec "#{cmd} -h", (err, stdout, stderr) ->
     if err
       if process.platform == 'win32'
         # Handle Windows errors
         if err.code == 1
           # 1 = "ERROR_INVALID_FUNCTION"
-          missingGlobalModule(moduleName, modulePkg, err)
+          missingGlobalModule(moduleName, modulePkg, err) if failOnError
       else if err.code == 127
         # 127 = "illegal command"
-        missingGlobalModule(moduleName, modulePkg, err)
+        missingGlobalModule(moduleName, modulePkg, err) if failOnError
       else
         throw err # Unknown error
-    callback()
+      callback(false)
+    else
+      callback(true)
 
 # Handle missing global modules
 missingGlobalModule = (moduleName, modulePkg, error) ->
@@ -195,12 +203,14 @@ notify = (message, msgLvl) ->
 # Options
 
 option '-v', '--verbose', 'Print out verbose output'
+option '-n', '--no-doc', 'Don\'t document the source files when building'
 
 
 ###############################################################################
 # Tasks
 
 task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
+  options['no-doc'] ?= 'no-doc' of options
   if not BUILDING
     BUILDING = true
     checkDep ->
@@ -224,8 +234,9 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
               else
                 # notify("Build successful!", MessageLevel.INFO) if WATCHING
                 console.log('Build successful!'.green)
-                console.log()
-              invoke 'lint', options
+                # console.log()
+              invoke 'lint'
+              invoke 'doc' if not options['no-doc']
         BUILDING = false
         # else
         #   console.log('Build failed!'.red)
@@ -306,7 +317,7 @@ task 'integrate', 'Compile and combine all files', sbuild = ->
 task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
   console.log 'Minifying app.js and vendor.js'
 
-  checkGlobalModule 'UglifyJS', 'uglify-js', 'uglifyjs', ->
+  checkGlobalModule 'UglifyJS', 'uglify-js', 'uglifyjs', true, (hasModule = false) ->
     exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
       throw err if err
 
@@ -391,31 +402,31 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
               "#{fileFailCount} file(s)!").red.bold)
             console.error("As a reminder:".grey.underline)
             console.error("- Indentation is two spaces. No tabs allowed".grey)
-            console.error("- Maximum line width is 80 characters".grey)
-            console.error("") if WATCHING
+            console.error(("- Maximum line width is " +
+              "#{coffeeLintConfig.max_line_length.value} characters").grey)
           else
             notify("Build succeeded. All files passed lint.",
               MessageLevel.INFO) if WATCHING
             console.log('No lint errors found!'.green)
+          console.log("") if WATCHING
 
 task 'doc', 'Document the source code using Codo', (options) ->
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
-    checkGlobalModule 'Codo', 'codo', 'codo', ->
-      exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
-        console.log(stdout)
-        throw err if err
-        # if err
-        #   if process.platform == 'win32'
-        #     # Handle Windows errors
-        #     if err.code == 1
-        #       # 1 = "ERROR_INVALID_FUNCTION"
-        #       missingGlobalModule('Codo', 'codo', err)
-        #   else if err.code == 127
-        #     # 127 = "illegal command"
-        #     missingGlobalModule('Codo', 'codo', err)
-        #   else
-        #     throw err # Unknown error
+    checkGlobalModule 'Codo', 'codo', 'codo', false, (hasModule = false) ->
+      if hasModule
+        exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
+          console.log(stdout)
+          throw err if err
+      else
+        tryRequire('codo')
+        checkDep ->
+          cmd = './node_modules/.bin/codo'
+          if process.platform == 'win32'
+            cmd = '.\\node_modules\\.bin\\codo'
+          exec cmd + " " + SRC_DIR, (err, stdout, stderr) ->
+            console.log(stdout)
+            throw err if err
 
 # REPORTER = "min"
 
