@@ -124,3 +124,9 @@ root.config =
       cost: 7
       turns: 4
       defense: 1
+  visibility:
+    visible: 0
+    fungus: 1
+    nonfungus: 2
+    invisible: 3
+    size: 4
