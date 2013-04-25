@@ -2,6 +2,9 @@
 
 root = exports ? window
 
+if exports isnt undefined
+  {Sprite, AnimatedSprite} = require './util/Sprite'
+
 DRAG_TYPES = ['DEFAULT', 'ONE_TO_ONE']
 
 root.config =

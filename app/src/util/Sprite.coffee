@@ -1,3 +1,5 @@
+root = exports ? window
+
 # A simple sprite class for keeping track of a sprite's properties
 #
 class Sprite
@@ -39,3 +41,6 @@ class AnimatedSprite
       if AnimatedSprite.drawCounter % @interval == 0
         @currentFrame = (@currentFrame + 1) % @sprites.length
     return @sprites[@currentFrame]
+
+root.Sprite = Sprite
+root.AnimatedSprite = AnimatedSprite
