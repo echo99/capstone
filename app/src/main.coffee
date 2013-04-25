@@ -125,7 +125,8 @@ main = ->
   frameElement.addChild(msgBox)
   frameElement.drawChildren()
 
-  msgBox2 = new Elements.MessageBox(0, 0, 100, 100, "test", ctx)
+  msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
+  msgBox2.setZIndex(1)
   gameFrame.addChild(msgBox2)
 
   # msgBox.addUpdateCallback ->
@@ -217,6 +218,8 @@ main = ->
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
       pointer = gameFrame.mouseMove(x, y)
+    else
+      gameFrame.mouseOut()
     if pointer isnt null
       hudCanvas.style.cursor = pointer
     else

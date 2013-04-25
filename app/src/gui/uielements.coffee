@@ -26,27 +26,57 @@ class Elements.UIElement
   # @private @property [Boolean] Flag for if an element is being hovered over
   _hovering: false
 
+  # @private @property [Number] Element ordering rank
+  _zIndex: 0
+
   # Create a new UI element
   #
   constructor: ->
     # @private @property [Array<UIElement>]
     @_children = []
+    @zIndices = [0]
+    @zIndicesRev = [0]
+    @_childBuckets = {0: []}
+    # @private @property [UIElement]
+    @_parent = null
 
   # Add a child element to this element
   #
   # @param [UIElement] elem
   #
   addChild: (elem) ->
+    elem._parent = this
     @_children.push(elem)
+    zIndex = elem._zIndex
+    if zIndex in @zIndices
+      @_childBuckets[zIndex].push(elem)
+    else
+      @zIndices.push(zIndex)
+      @zIndices.sort()
+      @zIndicesRev = @zIndices.slice(0)
+      @zIndicesRev.reverse()
+      @_childBuckets[zIndex] = [elem]
+
+    # @_children.unshift(elem)
 
   # Remove a child element from this element if it exists
   #
   # @param [UIElement] elem
+  # @return [Boolean] Whether or not the child was successfully removed
   #
   removeChild: (elem) ->
+    elem._parent = null
     index = @_children.indexOf(elem)
     if index != -1
       @_children.splice(index)
+    zIndex = elem._zIndex
+    if zIndex of @_childBuckets
+      childBucket = @_childBuckets[zIndex]
+      index = childBucket.indexOf(elem)
+      if index != -1
+        childBucket.splice(index)
+        return true
+    return false
 
   # Check if the given point is within the boundaries of the UI element
   #
@@ -94,13 +124,16 @@ class Elements.UIElement
       console.log("  relative location: #{relLoc.x}, #{relLoc.y}")
       # console.log("In loop")
       # console.log("Children of #{@constructor.name} : #{@_children}")
-      for child in @_children
-        if child.visible
-          # console.log("Checking #{child.name}")
-          clickedChild = child.click(relLoc.x, relLoc.y)
-          clickedSomething or= clickedChild
-          # console.log("ClickedSomething: #{clickedSomething}")
-      # console.log("Out of loop")
+      for zIndex in @zIndicesRev
+        children = @_childBuckets[zIndex]
+        # for child in @_children
+        for child in children
+          if child.visible
+            # console.log("Checking #{child.name}")
+            clickedChild = child.click(relLoc.x, relLoc.y)
+            clickedSomething or= clickedChild
+            # console.log("ClickedSomething: #{clickedSomething}")
+        # console.log("Out of loop")
     # else
     #   console.log("missed #{@constructor.name} at (#{x}, #{y})")
     return clickedSomething
@@ -115,6 +148,7 @@ class Elements.UIElement
   #
   # @param [Number] x
   # @param [Number] y
+  # @return [String] Pointer type if element is being hovered over, else null
   #
   mouseMove: (x, y) ->
     pointerType = null
@@ -124,9 +158,19 @@ class Elements.UIElement
       relLoc = @getRelativeLocation(x, y)
       # console.log("relative location: #{@constructor.name} #{relLoc.x},
       #   #{relLoc.y} | #{pointerType}")
-      for child in @_children
-        pointer = child.mouseMove(relLoc.x, relLoc.y)
-        pointerType = pointer if pointer
+      # Flag to see if a child is being hovered over
+      hoveredChild = false
+      for zIndex in @zIndicesRev
+        children = @_childBuckets[zIndex]
+        # for child in @_children
+        for child in children
+          if hoveredChild
+            child.mouseOut()
+          else
+            pointer = child.mouseMove(relLoc.x, relLoc.y)
+            if pointer
+              pointerType = pointer
+              hoveredChild = true
     else if @_hovering and @visible
       @_hovering = false
       @_onMouseOut()
@@ -160,6 +204,42 @@ class Elements.UIElement
   getRelativeLocation: (x, y) ->
     return {'x': x, 'y': y}
 
+  # Set the z-index of the element
+  #
+  # @param [Number] zIndex (Must be an integer value)
+  #
+  setZIndex: (zIndex) ->
+    lastZIndex = @_zIndex
+    if lastZIndex != zIndex
+      @_zIndex = zIndex
+      if @_parent isnt null
+        @_parent._updateChildOrdering(this, lastZIndex)
+
+  # @private Update ordering of child elements when a child's z-index updates
+  #
+  # @param [UIElement] child
+  # @param [Number] lastZIndex
+  #
+  _updateChildOrdering: (child, lastZIndex) ->
+    # May be able to do this with calls to @removeChild and @addChild instead
+    # but this works for now
+    if lastZIndex of @_childBuckets
+      childBucket = @_childBuckets[lastZIndex]
+      console.log(childBucket)
+      index = childBucket.indexOf(child)
+      if index != -1
+        childBucket.splice(index)
+    zIndex = child._zIndex
+    if zIndex in @zIndices
+      @_childBuckets[zIndex].push(child)
+    else
+      @zIndices.push(zIndex)
+      @zIndices.sort()
+      @zIndicesRev = @zIndices.slice(0)
+      @zIndicesRev.reverse()
+      @_childBuckets[zIndex] = [child]
+
+
 
 # A box UI element
 #
@@ -180,7 +260,6 @@ class Elements.BoxElement extends Elements.UIElement
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
     # return not (@x < x or x > @x + width or @y < y or y > @y + width)
-    # return @x <= x <= @x + @w and @y <= y <= @y + @h
     return @x + @cx <= x <= @x - @cx and @y + @cy <= y <= @y - @cy
 
   # @see Elements.UIElement#getRelativeLocation
@@ -243,8 +322,10 @@ class Elements.Frame extends Elements.UIElement
 
   # Draw the frame's children
   drawChildren: ->
-    for child in @_children
-      child.draw()
+    for zIndex in @zIndices
+      children = @_childBuckets[zIndex]
+      for child in children
+        child.draw()
 
 
 # Frame for holding all elements in the game
@@ -267,10 +348,12 @@ class Elements.GameFrame extends Elements.UIElement
 
   # Draw the frame's children if they are on the screen
   drawChildren: ->
-    for child in @_children
-      coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
-      if @camera.onScreen(coords)
-        child.draw(coords)
+    for zIndex in @zIndices
+      children = @_childBuckets[zIndex]
+      for child in children
+        coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
+        if @camera.onScreen(coords)
+          child.draw(coords, @camera.getZoom())
 
 
 # Message box class for displaying messages in the user interface
@@ -301,8 +384,8 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
-    console.log("My children: #{@_children}")
-    console.log("Button's children: #{@closeBtn._children}")
+    # console.log("My children: #{@_children}")
+    # console.log("Button's children: #{@closeBtn._children}")
 
   # # Temporary callback function
   # callback: () ->
@@ -326,8 +409,9 @@ class Elements.MessageBox extends Elements.BoxElement
   # Draw this message box to the canvas context
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  # @param [Number] zoom The current zoom
   #
-  draw: (coords = null) ->
+  draw: (coords = null, zoom = null) ->
     if @visible
       if coords
         x = coords.x
@@ -335,20 +419,38 @@ class Elements.MessageBox extends Elements.BoxElement
       else
         x = @x
         y = @y
+      # if zoom
+      #   cx = @cx * zoom
+      #   cy = @cy * zoom
+      #   w = @w * zoom
+      #   h = @h * zoom
+      # else
+      if zoom
+        @ctx.save()
+        @ctx.translate(x, y)
+        # x = @x
+        # y = @y
+        x = 0
+        y = 0
+        @ctx.scale(zoom, zoom)
+      cx = @cx
+      cy = @cy
+      w = @w
+      h = @h
       ctx = @ctx
       ctx.strokeStyle = config.windowStyle.stroke
       ctx.fillStyle = config.windowStyle.fill
       ctx.lineWidth = config.windowStyle.lineWidth
       # ctx.strokeRect(@x, @y, @w, @h)
       # ctx.fillRect(@x, @y, @w, @h)
-      ctx.strokeRect(x+@cx, y+@cy, @w, @h)
-      ctx.fillRect(x+@cx, y+@cy, @w, @h)
+      ctx.strokeRect(x+cx, y+cy, w, h)
+      ctx.fillRect(x+cx, y+cy, w, h)
       ctx.font = config.windowStyle.labelText.font
       ctx.fillStyle = config.windowStyle.labelText.color
       ctx.textAlign = 'center'
       # cx = Math.round(@w/2 + @x)
       # cy = Math.round(@h/2 + @y)
-      ctx.fillText(@message, cx, cy)
+      # ctx.fillText(@message, cx, cy)
       ctx.fillText(@message, x, y)
 
       btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
@@ -360,6 +462,9 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.fillStyle = 'rgb(255,255,255)'
       ctx.font = '12pt Arial'
       ctx.fillText('x', cx, cy)
+
+      if zoom
+        @ctx.restore()
 
 
 # Button class for handling user interactions
