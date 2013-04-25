@@ -1,6 +1,7 @@
 #_require util/Sprite
 
-root = exports ? window
+if not root?
+  root = exports ? window
 
 if exports?
   {Sprite, AnimatedSprite} = require './util/Sprite'
@@ -130,3 +131,5 @@ root.config =
     nonfungus: 2
     invisible: 3
     size: 4
+
+config = root.config

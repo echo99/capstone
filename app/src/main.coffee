@@ -40,7 +40,7 @@ frameElement = null
 
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
-camera.setDragMode(config.DRAG_TYPE)
+camera.setDragMode(window.config.DRAG_TYPE)
 game = new Game(0, 0)
 gameFrame = new Elements.GameFrame(camera)
 

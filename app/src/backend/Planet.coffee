@@ -1,10 +1,11 @@
 #Defines a class to represent planets
 
-root = exports ? window
+if not root?
+  root = exports ? window
 
 if exports?
   {config} = require '../config'
-root.config = config
+  root.config = config
 
 #_require ControlGroup
 

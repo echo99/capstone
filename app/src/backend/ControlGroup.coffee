@@ -1,6 +1,7 @@
 # Defines a class to represent control groups
 
-root = exports ? window
+if not root?
+  root = exports ? window
 
 class ControlGroup
 

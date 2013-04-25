@@ -1,5 +1,6 @@
 # Elements namespace
-root = exports ? window
+if not root?
+  root = exports ? window
 root.Elements ?= {}
 # Elements = Elements or {}
 Elements = root.Elements
@@ -34,11 +35,16 @@ class Elements.UIElement
   constructor: ->
     # @private @property [Array<UIElement>]
     @_children = []
+    # @private @property [Array<Number>]
     @zIndices = [0]
+    # @private @property [Array<Number>]
     @zIndicesRev = [0]
+    # @private @property [Object]
     @_childBuckets = {0: []}
     # @private @property [UIElement]
     @_parent = null
+    # @private @property [Object]
+    @_properties = {}
 
   # Add a child element to this element
   #
@@ -77,6 +83,24 @@ class Elements.UIElement
         childBucket.splice(index)
         return true
     return false
+
+  # Set a custom property for this element
+  #
+  # @param [String] key
+  # @param [Mixed] value
+  #
+  setProperty: (key, value) ->
+    @_properties[key] = value
+
+  # Get a custom property value from this element
+  #
+  # @param [String] key
+  # @return [Mixed] Property value that was set
+  #
+  getProperty: (key) ->
+    if key of @_properties
+      return @_properties[key]
+    else return null
 
   # Check if the given point is within the boundaries of the UI element
   #

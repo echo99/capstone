@@ -1,4 +1,5 @@
-root = exports ? window
+if not root?
+  root = exports ? window
 
 # The Camera class has an x and y position and a width and a height. It uses
 # these attributes to transform world coordinates into screen coordinates. It
