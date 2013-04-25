@@ -40,6 +40,7 @@ frameElement = null
 
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
+camera.setDragMode(config.DRAG_TYPE)
 game = new Game(0, 0)
 gameFrame = new Elements.GameFrame(camera)
 
@@ -227,10 +228,18 @@ main = ->
     if drag
       difx = x - prevPos.x
       dify = y - prevPos.y
-      newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
-      newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
-      camera.setPosition(newX, newY)
-      prevPos = {x: x, y: y})
+      # difx = difx / Math.abs(difx) if difx
+      # dify = dify / Math.abs(dify) if dify
+      # console.log "Difx: #{difx}, dify: #{dify}"
+      # newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
+      # newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
+      # camera.setPosition(newX, newY)
+      prevPos = {x: x, y: y}
+      camera.moveCameraByScreenDistance(difx, dify)
+      # coords = camera.getWorldCoordinates({x: x, y: x})
+      # camera.setPosition(coords.x, coords.y)
+      # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
+  )
 
   hudCanvas.addEventListener('click', (e) ->
     UI.onMouseClick(e.clientX, e.clientY)

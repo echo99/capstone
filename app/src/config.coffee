@@ -2,10 +2,13 @@
 
 root = exports ? window
 
+DRAG_TYPES = ['DEFAULT', 'ONE_TO_ONE']
+
 root.config =
   ZOOM_SPEED: 0.02
   PAN_SPEED_FACTOR: 3
   BG_PAN_SPEED_FACTOR: 50
+  DRAG_TYPE: DRAG_TYPES[0]
   windowStyle:
     fill: "rgba(0, 37, 255, 0.5)"
     stroke: "rgba(0, 37, 255, 1)"
