@@ -2,6 +2,10 @@
 
 root = exports ? window
 
+if exports isnt undefined
+  {config} = require '../config'
+root.config = config
+
 #_require ControlGroup
 
 class Planet
