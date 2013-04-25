@@ -19,6 +19,7 @@ class Planet
     @_controlGroups = []
     @_unitConstructing = null
     @_turnsToComplete = 0
+    @_visibility = window.config.visibility.invisible
 
   # GETTERS #
 
@@ -30,6 +31,9 @@ class Planet
 
   availableResources: ->
     return availableResources
+
+  visibility: ->
+    return @_visibility
 
   numShips: (type) ->
     return null
@@ -101,8 +105,33 @@ class Planet
     null
 
   move: (attackShips, defenseShips, probes, colonies, dest) ->
-    controlGroup = new ControlGroup(attackShips, defenseShips, probes, colonies, dest)
-    @_controlGroups.push(controlGroup)
+    # check for insufficient ships
+    if attackShips > @_attackShips or
+       defenseShips > @_defenseShips or
+       probes > @_probes or
+       colonies > @_colonies
+      throw error "Insufficient Ships"
+    else
+      # generate control group
+      controlGroup = new ControlGroup(attackShips, defenseShips, probes, colonies, dest)
+      # update planet
+      @_attackShips -= attackShips
+      @_defenseShips -= defenseShips
+      @_probes -= probes
+      @_colonies -= colonies
+      # add to planet
+      @_controlGroups.push(controlGroup)
+
+  # SETTERS FOR USE BY GUI #
+
+  setVisibility: (state) ->
+    if (state is window.config.visibility.visible) or
+       (state is window.config.visibility.fungus) or
+       (state is window.config.visibility.nonfungus) or
+       (state is window.config.visibility.invisible)
+      @_visibility = state
+    else
+      throw error "Invalid Visibility"
     
   # SETTERS FOR USE BY GAME CLASS #
 
@@ -115,8 +144,14 @@ class Planet
   move: (group) ->
     if not group.moved
       group.setMoved
+      if true #((group.destination is @) and (group.destination is group.next))
+        @_attackShips += group.attackShips
+        @_defenseShips += group.defenseShips
+        @_probes += group.probes
+        @_colonies += group.colonies
+      else
+        group.next.receiveGroup(group)
       @_controlGroups.filter(group)
-      group.next.receiveGroup(group)
 
   receiveGroup: (group) ->
     @_controlGroups.push(group)
