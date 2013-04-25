@@ -351,7 +351,7 @@ task 'install-dep', 'Install all necessary node modules', ->
 
 task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
   checkDep ->
-    options.verbose = 'verbose' of options
+    options.verbose ?= 'verbose' of options
     console.log("Checking #{SRC_DIR}/*.coffee for lint".yellow)
     pass = "✔".green
     warn = "⚠".yellow
