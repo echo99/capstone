@@ -8,6 +8,7 @@ class UnitSelection
   totalDefenses: 0
   onlyProbe: false
   hudUpdate: false
+  lastMousePos: {x: 0, y: 0}
 
   #constructor: ->
 
@@ -69,12 +70,7 @@ class UnitSelection
   # @param [Number] x The x position of the mouse
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
-    #for p in game.getPalnets()
-    #  units = p.unitSelection
-     # _checkUnitHover(units.probes)
-     # _checkUnitHover(units.colony)
-     # _checkUnitHover(units.attack)
-     # _checkUnitHover(units.defense)
+    @lastMousePos = {x: x, y: y}
 
   # This expects to be called when the mouse clicks
   #
@@ -87,15 +83,38 @@ class UnitSelection
   # @param [CanvasRenderingContext2D] ctx The game context
   # @param [CanvasRenderingContext2D] hudCtx The hud context
   draw: (ctx, hudCtx) ->
+    found = false
     for p in game._planets
       units = p.unitSelection
       @_drawStacks(ctx, units.probes)
       @_drawStacks(ctx, units.colonys)
       @_drawStacks(ctx, units.attacks)
       @_drawStacks(ctx, units.defenses)
+
       @_drawPlanetUnits(ctx, p)
 
+      found = @_drawToolTip(ctx, units.probes) or
+              @_drawToolTip(ctx, units.colonys) or
+              @_drawToolTip(ctx, units.attacks) or
+              @_drawToolTip(ctx, units.defenses)
+
     @_drawSelection(hudCtx)
+
+  _drawToolTip: (ctx, stacks) ->
+    for row in stacks
+      for stack in row
+        if stack.isHovered()
+          ctx.textAlign = "left"
+          ctx.font = window.config.toolTipStyle.font
+          ctx.fillStyle = window.config.toolTipStyle.color
+          x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+          y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+          if stack.isSelected()
+            ctx.fillText("Deselect units", x, y)
+          else
+            ctx.fillText("Select units", x, y)
+          return true
+    return false
 
   # Draws the highlighting for a stack of ships
   _drawStacks: (ctx, stacks) ->
