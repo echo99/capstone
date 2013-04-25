@@ -4,7 +4,7 @@ path = require 'path'
 
 # Add to list any modules that cannot be found
 missingModules = []
-requireOrExit = (moduleName) ->
+tryRequire = (moduleName) ->
   try
     module = require moduleName
     return module
@@ -17,9 +17,9 @@ requireOrExit = (moduleName) ->
 coffeelint = null
 Rehab = null
 getDependencies = ->
-  colors = requireOrExit('colors')
-  coffeelint = requireOrExit('coffeelint')
-  Rehab = requireOrExit('rehab')
+  colors = tryRequire('colors')
+  coffeelint = tryRequire('coffeelint')
+  Rehab = tryRequire('rehab')
 getDependencies()
 
 # Constants
@@ -42,7 +42,7 @@ coffeeLintConfig =
   no_trailing_whitespace:
     level: 'error'
   max_line_length:
-    value: 80
+    value: 85
     level: 'error'
   camel_case_classes:
     level: 'error'
@@ -94,19 +94,51 @@ installDep = (callback = null) ->
   curModuleNum = 0
   installMissingModules = ->
     if curModuleNum < missingModules.length
+      # There are still more modules to load
       moduleName = missingModules[curModuleNum]
       console.log()
       console.log("Installing #{moduleName}...")
       curModuleNum++
       wrappedExec("npm install #{moduleName}", true, installMissingModules)
     else
+      # All done! Reload dependencies
       getDependencies()
+      # Print success message
       console.log()
       console.log('All modules have been successfully installed!'.green)
       console.log()
+      # Empty missing modules
+      missingModules = []
+      # Call callback function if one was given
       if callback != null
         callback()
   installMissingModules()
+
+# Check to see if a global node module is missing, and if it isn't executes the
+# callback
+checkGlobalModule = (moduleName, modulePkg, cmd, failOnError, callback) ->
+  exec "#{cmd} -h", (err, stdout, stderr) ->
+    if err
+      if process.platform == 'win32'
+        # Handle Windows errors
+        if err.code == 1
+          # 1 = "ERROR_INVALID_FUNCTION"
+          missingGlobalModule(moduleName, modulePkg, err) if failOnError
+      else if err.code == 127
+        # 127 = "illegal command"
+        missingGlobalModule(moduleName, modulePkg, err) if failOnError
+      else
+        throw err # Unknown error
+      callback(false)
+    else
+      callback(true)
+
+# Handle missing global modules
+missingGlobalModule = (moduleName, modulePkg, error) ->
+  console.error(error.toString().trim().red)
+  console.error("#{moduleName} may not be installed correctly".red)
+  console.error("Please install using \"npm install -g #{modulePkg}\"".red)
+  process.exit(error.code)
 
 # Compile CoffeeScript output to null to check for syntax errors
 checkSyntax = (callback) ->
@@ -115,7 +147,8 @@ checkSyntax = (callback) ->
   exec "coffee -p -c #{SRC_DIR} > #{nulDir}", (err, stdout, stderr) ->
     if err
       console.error(err.toString().trim().red)
-      notify("Build failed! Please check the terminal for details.", MessageLevel.ERROR) if WATCHING
+      notify("Build failed! Please check the terminal for details.",
+        MessageLevel.ERROR) if WATCHING
       callback(false)
     else
       callback(true)
@@ -162,17 +195,27 @@ notify = (message, msgLvl) ->
       when MessageLevel.ERROR
         icon += 'dialog-error'
         time = 10000
-    spawn cmd, ['-i', icon, '-t', time, 'Cake Status', message]
+    spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
+      message]
+
+
+###############################################################################
+# Options
+
+option '-v', '--verbose', 'Print out verbose output'
+option '-n', '--no-doc', 'Don\'t document the source files when building'
 
 
 ###############################################################################
 # Tasks
 
-task 'build', 'Build coffee2js using Rehab', sbuild = ->
+task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
+  options['no-doc'] ?= 'no-doc' of options
   if not BUILDING
     BUILDING = true
     checkDep ->
-      console.log("Building project from #{SRC_DIR}/*.coffee to #{APP_JS}...".yellow)
+      console.log(
+        "Building project from #{SRC_DIR}/*.coffee to #{APP_JS}...".yellow)
       # Try to compile all files individually first, to get a better
       # error message, then if it succeeds, compile them all to one file
       callback = (passed) ->
@@ -182,16 +225,18 @@ task 'build', 'Build coffee2js using Rehab', sbuild = ->
           to_single_file = "--join #{APP_JS}"
           from_files = "--compile #{files.join ' '}"
 
-          exec "coffee #{to_single_file} #{from_files}", (err, stdout, stderr) ->
-            if err
-              # Should probably figure out way to handle this error
-              # However, if it got to this point, there should be no problems
-              console.error(err.toString().trim().red)
-            else
-              # notify("Build successful!", MessageLevel.INFO) if WATCHING
-              console.log('Build successful!'.green)
-              console.log()
-            invoke 'lint'
+          exec "coffee #{to_single_file} #{from_files}",
+            (err, stdout, stderr) ->
+              if err
+                # Should probably figure out way to handle this error
+                # However, if it got to this point, there should be no problems
+                console.error(err.toString().trim().red)
+              else
+                # notify("Build successful!", MessageLevel.INFO) if WATCHING
+                console.log('Build successful!'.green)
+                # console.log()
+              invoke 'lint'
+              invoke 'doc' if not options['no-doc']
         BUILDING = false
         # else
         #   console.log('Build failed!'.red)
@@ -272,24 +317,28 @@ task 'integrate', 'Compile and combine all files', sbuild = ->
 task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
   console.log 'Minifying app.js and vendor.js'
 
-  missingUglify = (error) ->
-    console.error(error.toString().trim())
-    console.error('UglifyJS may not be installed correctly')
-    console.error('Please install using "npm install -g uglify-js"')
-    process.exit(error.code)
+  checkGlobalModule 'UglifyJS', 'uglify-js', 'uglifyjs', true, (hasModule = false) ->
+    exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
+      throw err if err
 
-  exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
-    if err
-      if process.platform == 'win32'
-        # Handle Windows errors
-        if err.code == 1
-          # 1 = "ERROR_INVALID_FUNCTION"
-          missingUglify(err)
-      else if err.code == 127
-        # 127 = "illegal command"
-        missingUglify(err)
-      else
-        throw err # Unknown error
+  # missingUglify = (error) ->
+  #   console.error(error.toString().trim())
+  #   console.error('UglifyJS may not be installed correctly')
+  #   console.error('Please install using "npm install -g uglify-js"')
+  #   process.exit(error.code)
+
+  # exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
+  #   if err
+  #     if process.platform == 'win32'
+  #       # Handle Windows errors
+  #       if err.code == 1
+  #         # 1 = "ERROR_INVALID_FUNCTION"
+  #         missingUglify(err)
+  #     else if err.code == 127
+  #       # 127 = "illegal command"
+  #       missingUglify(err)
+  #     else
+  #       throw err # Unknown error
 
   exec "uglifyjs #{VENDOR_JS} -o #{VENDOR_JS}", (err, stdout, stderr) ->
     if err
@@ -311,8 +360,9 @@ task 'check', 'Temporarily compiles coffee files to check syntax', ->
 task 'install-dep', 'Install all necessary node modules', ->
   installDep()
 
-task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
+task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
   checkDep ->
+    options.verbose ?= 'verbose' of options
     console.log("Checking #{SRC_DIR}/*.coffee for lint".yellow)
     pass = "✔".green
     warn = "⚠".yellow
@@ -340,47 +390,43 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', ->
             failCount++
             level = if res.level is 'error' then fail else warn
             console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
-        else
-          # console.log("#{pass}  #{shortPath}".green)
+        else if options.verbose
+          console.log("#{pass}  #{shortPath}".green)
         if filesToLint == 0
           # console.log("#{failCount} lint failures")
           if failCount > 0
             notify("Build succeeded, but #{failCount} lint errors were " +
               "found! Please check the terminal for more details.",
               MessageLevel.ERROR) if WATCHING
-            console.error("\n#{failCount} lint error(s) found in #{fileFailCount} file(s)!".red.bold)
+            console.error(("\n#{failCount} lint error(s) found in " +
+              "#{fileFailCount} file(s)!").red.bold)
             console.error("As a reminder:".grey.underline)
             console.error("- Indentation is two spaces. No tabs allowed".grey)
-            console.error("- Maximum line width is 80 characters".grey)
-            console.error("") if WATCHING
+            console.error(("- Maximum line width is " +
+              "#{coffeeLintConfig.max_line_length.value} characters").grey)
           else
             notify("Build succeeded. All files passed lint.",
               MessageLevel.INFO) if WATCHING
             console.log('No lint errors found!'.green)
+          console.log("") if WATCHING
 
-
-missingGlobalModule = (moduleName, modulePkg) ->
-  console.error(error.toString().trim().red)
-  console.error(moduleName + ' may not be installed correctly'.red)
-  console.error('Please install using "npm install -g ' + modulePkg + '"'.red)
-  process.exit(error.code)
-
-task 'doc', 'Document the source code using Codo', ->
+task 'doc', 'Document the source code using Codo', (options) ->
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
-    exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
-      console.log(stdout)
-      if err
-        if process.platform == 'win32'
-          # Handle Windows errors
-          if err.code == 1
-            # 1 = "ERROR_INVALID_FUNCTION"
-            missingGlobalModule('Codo', 'codo')
-        else if err.code == 127
-          # 127 = "illegal command"
-          missingGlobalModule('Codo', 'codo')
-        else
-          throw err # Unknown error
+    checkGlobalModule 'Codo', 'codo', 'codo', false, (hasModule = false) ->
+      if hasModule
+        exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
+          console.log(stdout)
+          throw err if err
+      else
+        tryRequire('codo')
+        checkDep ->
+          cmd = './node_modules/.bin/codo'
+          if process.platform == 'win32'
+            cmd = '.\\node_modules\\.bin\\codo'
+          exec cmd + " " + SRC_DIR, (err, stdout, stderr) ->
+            console.log(stdout)
+            throw err if err
 
 # REPORTER = "min"
 
@@ -396,28 +442,23 @@ task 'doc', 'Document the source code using Codo', ->
 #     throw err if err
 #     console.log output
 
-task "test", "Run tests", ->
-  requireOrExit('mocha')
-  requireOrExit('chai')
-  requireOrExit('coffee-script')
+task "test", "Run tests", (options) ->
+  tryRequire('mocha')
+  tryRequire('chai')
+  tryRequire('coffee-script')
+  reporter =  if 'verbose' of options then 'spec' else 'dot'
   checkDep ->
     cmd = './node_modules/.bin/mocha'
+    args = [
+      " --compilers coffee:coffee-script"
+      "-u tdd --reporter #{reporter}"
+      "--require coffee-script"
+      "--require test/helpers/test_helper.coffee"
+      "--colors"
+    ].join(' ')
     if process.platform == 'win32'
       cmd = '.\\node_modules\\.bin\\mocha'
-    exec cmd + " --compilers coffee:coffee-script -u tdd --reporter dot --require coffee-script --require test/helpers/test_helper.coffee --colors", (err, output, stderr) ->
+    exec cmd + args, (err, output, stderr) ->
       console.log(output) if output
       console.log(stderr) if stderr
-      throw err if err
-  # exec "mocha --compilers coffee:coffee-script -u tdd --reporter spec --require coffee-script --require test/helpers/test_helper.coffee --colors", (err, output, stderr) ->
-  #     # throw err if err
-  #   console.log output
-  # mocha = spawn '.\\node_modules\\.bin\\mocha.cmd', ['--compilers', 'coffee:coffee-script', '-u', 'tdd', '--reporter', 'spec', '--require', 'coffee-script', '--require', 'test/helpers/test_helper.coffee', '--colors']
-  # mocha.stdout.pipe(process.stdout, end: false)
-  # mocha.stderr.pipe(process.stderr)
-  # # mocha.stdout.on 'data', (data) ->
-  # #   console.log(data.toString())
-  # mocha.on 'exit', (status) ->
-  #   console.log ("DONE!" + status)
-  # # coffee = spawn cmd, args
-
-  # #   coffee.stdout.on 'data', (data) ->
+      # throw err if err

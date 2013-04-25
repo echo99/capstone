@@ -1,5 +1,7 @@
 # Defines a class to represent control groups
 
+root = exports ? window
+
 class ControlGroup
 
   constructor: (@_attackShips,
@@ -74,3 +76,5 @@ class ControlGroup
           seen.push u
           q.push [u, t]
     return null
+
+root.ControlGroup = ControlGroup

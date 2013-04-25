@@ -1,9 +1,17 @@
 #_require util/Sprite
 
-window.config =
+root = exports ? window
+
+if exports isnt undefined
+  {Sprite, AnimatedSprite} = require './util/Sprite'
+
+DRAG_TYPES = ['DEFAULT', 'ONE_TO_ONE']
+
+root.config =
   ZOOM_SPEED: 0.02
   PAN_SPEED_FACTOR: 3
   BG_PAN_SPEED_FACTOR: 50
+  DRAG_TYPE: DRAG_TYPES[0]
   windowStyle:
     fill: "rgba(0, 37, 255, 0.5)"
     stroke: "rgba(0, 37, 255, 1)"
@@ -36,10 +44,26 @@ window.config =
     resourcePath:
       stroke: "rgba(0, 255, 255, 0.5)"
       lineWidth: 2
+  unitDisplay:
+    location: {x: -250, y: -140}
+    fill: "rgba(255, 255, 0, 0.5)"
+    stroke: "rgba(255, 255, 0, 1)"
+    lineWidth: 2
+    lineJoin: "miter"
+    width: 32
+    height: 32
+    spacing: 40
+    rows: 2
+    columns: 5
+    numberOffset: {x: 10, y: 20}
   selectionStyle:
     stroke: "rgba(255, 255, 0, 1)"
     lineWidth: 2
     radius: 20
+    location: {x: 5, y: 5}
+    width: 105
+    height: 200
+    probeHeight: 80
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])

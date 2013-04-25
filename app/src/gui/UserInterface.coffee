@@ -1,25 +1,40 @@
+#_require UnitSelection
+
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
 class UserInterface
-  @planetButtons: []
-  @hoveredPlanetButton: null
-  @lastMousePos: {x: 0, y: 0}
+  planetButtons: []
+  hoveredPlanetButton: null
+  lastMousePos: {x: 0, y: 0}
+  unitSelection: null
 
   # Creates a new UserInterface
   constructor: () ->
+    @unitSelection = new UnitSelection()
 
-  initialize: () ->
+  initialize: (onlyProbe=false) ->
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
       r = window.config.planetRadius
-      el = new Elements.RadialElement(pos.x, pos.y, r)
-      #b = new Elements.Button(-r, -r, r*2, r*2, @planetButtonCallback)
-      #el.addChild(b)
-      @planetButtons.push(el)
+      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback(p))
+      b.setHoverHandler(@planetButtonHoverCallback(p))
+      gameFrame.addChild(b)
+      @planetButtons.push(b)
+    @unitSelection.initialize(onlyProbe)
 
-  planetButtonCallback: () ->
-    console.log('click')
+  planetButtonCallback: (planet) =>
+    return () =>
+      console.log(planet._x + ", " + planet._y)
+      if @unitSelection.total > 0
+        console.log("moving units")
+      else
+        console.log("not moving units")
+
+  planetButtonHoverCallback: (planet) =>
+    return () =>
+      console.log(planet._x + ", " + planet._y)
+      console.log("hover")
 
   # Draws the game and HUD
   #
@@ -35,13 +50,13 @@ class UserInterface
     ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     for p in game.getPlanets()
       pos = camera.getScreenCoordinates(p.location())
-    #   add this planet to visited planets
+      # add this planet to visited planets
       visited.push(p)
-    #   for each neighbor
+      # for each neighbor
       for neighbor in p._adjacentPlanets
-    #     if neighbor is not in visited planets
+        # if neighbor is not in visited planets
         if neighbor not in visited
-    #       draw connection to the neighbor
+          # draw connection to the neighbor
           nPos = camera.getScreenCoordinates(neighbor.location())
           ctx.beginPath()
           ctx.moveTo(pos.x, pos.y)
@@ -50,20 +65,15 @@ class UserInterface
 
     # for each planet
     for p in game._planets
-    #   draw planet
+      # draw planet
       SHEET.drawSprite(SpriteNames.PLANET_BLUE, p._x, p._y, ctx)
-    #   if structure
-    #     draw structure
-    #   if units
-      if p._probes > 0
-    #     draw units
-        SHEET.drawSprite(SpriteNames.PROBE, p._x+100, p._y-50, ctx)
-    #   for each control group
-    #     if control group is hovered over
-    #       draw expanded view
-    #     else
-    #       draw unexpanded view
-    #
+    #  @drawPlanetStructure(ctx, p)
+    #  @drawPlanetUnits(ctx, p)
+    @unitSelection.draw(ctx, hudCtx)
+
+    # Draw stuff attached to the game frame
+    gameFrame.drawChildren()
+
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
     #   "Pres HOME to return to map"
@@ -77,7 +87,7 @@ class UserInterface
     #     else
     #       draw regular image
     if @hoveredPlanetButton
-    # if the button is a planet
+      # if the button is a planet
       ctx.strokeStyle = window.config.selectionStyle.stroke
       ctx.lineWidth = window.config.selectionStyle.lineWidth
       x = @hoveredPlanetButton.x
@@ -88,13 +98,13 @@ class UserInterface
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
-    # if there are selected units
-      ctx.textAlign = "left"
-      ctx.font = window.config.toolTipStyle.font
-      ctx.fillStyle = window.config.toolTipStyle.color
-      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
-      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
-      ctx.fillText("Move selected units", x, y)
+      if @unitSelection.total > 0
+        ctx.textAlign = "left"
+        ctx.font = window.config.toolTipStyle.font
+        ctx.fillStyle = window.config.toolTipStyle.color
+        x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+        y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+        ctx.fillText("Move selected units", x, y)
 
   # The UI expects this to be called when the mouse moves
   #
@@ -102,16 +112,16 @@ class UserInterface
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
     @lastMousePos = {x: x, y: y}
+    #   set button to not hover
+    @hoveredPlanetButton = null
     # for each button
     for b in @planetButtons
-    #   set button to not hover
-    #   if (x, y) on button
+      # if (x, y) on button
       pos = camera.getWorldCoordinates({x: x, y: y})
       if b.containsPoint(pos.x, pos.y)
         @hoveredPlanetButton = b
-        return
     #     set button to hover
-    @hoveredPlanetButton = null
+    @unitSelection.onMouseMove(x, y)
 
   # The UI expects this to be called when the mouse clicks
   #
@@ -121,7 +131,7 @@ class UserInterface
     # for each button
     #   if button is hovered over
     #     perform button action
-    pos = camera.getWorldCoordinates({x: x, y: y})
-    if @hoveredPlanetButton and
-       @hoveredPlanetButton.containsPoint(pos.x, pos.y)
-      console.log("clicked planet")
+    # pos = camera.getWorldCoordinates({x: x, y: y})
+    #if @hoveredPlanetButton and
+    #   @hoveredPlanetButton.containsPoint(pos.x, pos.y)
+    @unitSelection.onMouseClick(x, y)

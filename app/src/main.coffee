@@ -36,11 +36,15 @@ KeyCodes =
 
 SpriteNames = window.config.spriteNames
 
+frameElement = null
+
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
+camera.setDragMode(config.DRAG_TYPE)
 game = new Game(0, 0)
+gameFrame = new Elements.GameFrame(camera)
 
-CurrentMission = new Menu()
+CurrentMission = null
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -114,12 +118,23 @@ main = ->
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
+  # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
+  #   canvas.width, canvas.height)
+  frameElement = new Elements.Frame(frame)
   msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
-  msgBox.draw(hudCtx)
+  # msgBox.draw(hudCtx)
+  frameElement.addChild(msgBox)
+  frameElement.drawChildren()
+
+  msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
+  msgBox2.setZIndex(1)
+  gameFrame.addChild(msgBox2)
 
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
+
+  CurrentMission = new Menu()
 
   sheet = SHEET
   if sheet == null
@@ -172,7 +187,9 @@ main = ->
     bgCanvas.style.left = (0.5+(canvas.width - bgCanvas.width)/2) << 0 + "px"
     bgCanvas.style.top = (0.5+(canvas.height - bgCanvas.height)/2) << 0 + "px"
 
-    msgBox.draw(hudCtx)
+    # msgBox.draw(hudCtx)
+    frameElement.resize()
+    frameElement.drawChildren()
 
     console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
@@ -199,24 +216,42 @@ main = ->
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
-    pointer = msgBox.mouseMove(x, y)
-    if pointer
+    pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
+    if pointer is null
+      pointer = gameFrame.mouseMove(x, y)
+    else
+      gameFrame.mouseOut()
+    if pointer isnt null
       hudCanvas.style.cursor = pointer
     else
       hudCanvas.style.cursor = 'auto'
     if drag
       difx = x - prevPos.x
       dify = y - prevPos.y
-      newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
-      newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
-      camera.setPosition(newX, newY)
-      prevPos = {x: x, y: y})
+      # difx = difx / Math.abs(difx) if difx
+      # dify = dify / Math.abs(dify) if dify
+      # console.log "Difx: #{difx}, dify: #{dify}"
+      # newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
+      # newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
+      # camera.setPosition(newX, newY)
+      prevPos = {x: x, y: y}
+      camera.moveCameraByScreenDistance(difx, dify)
+      # coords = camera.getWorldCoordinates({x: x, y: x})
+      # camera.setPosition(coords.x, coords.y)
+      # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
+  )
 
   hudCanvas.addEventListener('click', (e) ->
     UI.onMouseClick(e.clientX, e.clientY)
     CurrentMission.onMouseMove(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
-    msgBox.click(e.clientX, e.clientY)
+    # msgBox.click(e.clientX, e.clientY)
+    x = e.clientX
+    y = e.clientY
+    if frameElement.click(x, y)
+      frameElement.mouseMove(x, y)
+    else if gameFrame.click(x, y)
+      gameFrame.mouseMove(x, y)
   )
 
   hudCanvas.addEventListener('mousedown', (e) ->

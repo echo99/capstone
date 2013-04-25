@@ -32,9 +32,12 @@ class Menu extends Mission
     #   Small, Medium, Large
 
     # Add probe to Home planet
-    @Planets.Home._probes = 1
+    @Planets.Home._probes = 23
+    #@Planets.Home._colonys = 23
+    #@Planets.Home._attackShips = 23
+    #@Planets.Home._defenseShips = 23
 
-    UI.initialize()
+    UI.initialize(true)
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -46,7 +49,7 @@ class Menu extends Mission
     ctx.fillStyle = winStyle.defaultText.color
     ctx.textAlign = 'center'
     for p in @Names
-    #   if the planet is visible and the probe is not on it
+      # if the planet is visible and the probe is not on it
       planet = @Planets[p]
       if planet._probes == 0
         loc = planet.location()

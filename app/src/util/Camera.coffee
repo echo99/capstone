@@ -1,3 +1,5 @@
+root = exports ? window
+
 # The Camera class has an x and y position and a width and a height. It uses
 # these attributes to transform world coordinates into screen coordinates. It
 # also provids funcionality for smooth movement to a new location.
@@ -17,6 +19,10 @@ class Camera
   # A factor for controlling the movement speed when approaching the target
   MOVEFACTOR: 10
 
+  @DragMode:
+    DEFAULT: 1
+    ONE_TO_ONE: 2
+
   # Creates a new camera
   #
   # @param [Number] targetX The initial target x coordinate
@@ -26,6 +32,7 @@ class Camera
   # @param [Number] zoom The initial zoom
   constructor: (@targetX, @targetY, @width, @height, @zoom=1.0) ->
     @setZoom(@zoom)
+    @curDragMode = @constructor.DragMode.DEFAULT
 
   # Sets the width and height of the camera
   #
@@ -60,6 +67,23 @@ class Camera
     else
       @zoom = z
 
+  # Set the drag mode of the camera
+  #
+  # @param [String] dragMode The name of the drag mode
+  setDragMode: (dragMode) ->
+    if dragMode of @constructor.DragMode
+      @curDragMode = @constructor.DragMode[dragMode]
+
+  # Move the camera using screen distance
+  #
+  # @param [Number] dx
+  # @param [Number] dy
+  moveCameraByScreenDistance: (dx, dy) ->
+    if @curDragMode is @constructor.DragMode.ONE_TO_ONE
+      dx /= @zoom
+      dy /= @zoom
+    @setPosition(@x+dx, @y+dy)
+
   # Gets the current zoom
   #
   # @return [Number] The current zoom
@@ -75,7 +99,11 @@ class Camera
   getScreenCoordinates: (coords) ->
     difX = (@x + coords.x) * @zoom
     difY = (@y + coords.y) * @zoom
-    return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
+    switch @curDragMode
+      when @constructor.DragMode.DEFAULT
+        return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
+      when @constructor.DragMode.ONE_TO_ONE
+        return {x: difX + @width / 2, y: difY + @height / 2}
 
   # Takes the given screen coords and returns a new set represting where the
   # given ones appear in the world
@@ -84,8 +112,14 @@ class Camera
   #                        to modify
   # @return [Object] The modified coordinates
   getWorldCoordinates: (coords) ->
-    difX = coords.x - @x - (@width / 2)
-    difY = coords.y - @y - (@height / 2)
+    difX = difY = 0
+    switch @curDragMode
+      when @constructor.DragMode.DEFAULT
+        difX = coords.x - @x - (@width / 2)
+        difY = coords.y - @y - (@height / 2)
+      when @constructor.DragMode.ONE_TO_ONE
+        difX = coords.x - (@width / 2)
+        difY = coords.y - (@height / 2)
     posX = (difX / @zoom) - @x
     posY = (difY / @zoom) - @y
     return {x: posX, y: posY}
@@ -105,3 +139,5 @@ class Camera
     dify = @targetY - @y
     @x = @x + difx / @MOVEFACTOR
     @y = @y + dify / @MOVEFACTOR
+
+root.Camera = Camera
