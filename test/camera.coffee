@@ -41,7 +41,7 @@ suite 'Camera', ->
           x: startCoords.x + cameraOffset1.x
           y: startCoords.y + cameraOffset1.y
         test "moving camera to (#{cameraOffset1.x}, #{cameraOffset1.y})", ->
-          camera.setPosition(cameraOffset1.y, cameraOffset1.x)
+          camera.setPosition(cameraOffset1.x, cameraOffset1.y)
           assert.deepEqual(camera.getScreenCoordinates(coords), expCoords1)
           # console.log "Screen coordinates:"
           # console.log camera.getScreenCoordinates(coords)
@@ -53,7 +53,8 @@ suite 'Camera', ->
           x: startCoords.x + cameraOffset2.x
           y: startCoords.y + cameraOffset2.y
         test "moving camera to (#{cameraOffset2.x}, #{cameraOffset2.y})", ->
-          camera.setPosition(cameraOffset2.y, cameraOffset2.x)
+          camera.setPosition(cameraOffset2.x, cameraOffset2.y)
+          # console.log coords
           assert.deepEqual(camera.getScreenCoordinates(coords), expCoords2)
 
       suite 'with coordinate (350, 0)', ->
@@ -72,7 +73,7 @@ suite 'Camera', ->
         test "should start at (#{startCoords.x}, #{startCoords.y})", ->
           assert.deepEqual(camera.getScreenCoordinates(coords), startCoords)
         test "moving camera to (#{cameraOffset.x}, #{cameraOffset.y})", ->
-          camera.setPosition(cameraOffset.y, cameraOffset.x)
+          camera.setPosition(cameraOffset.x, cameraOffset.y)
           assert.deepEqual(camera.getScreenCoordinates(coords), expCoords)
           # console.log camera.getScreenCoordinates(coords)
 

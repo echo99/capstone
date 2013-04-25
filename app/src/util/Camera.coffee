@@ -1,3 +1,5 @@
+root = exports ? window
+
 # The Camera class has an x and y position and a width and a height. It uses
 # these attributes to transform world coordinates into screen coordinates. It
 # also provids funcionality for smooth movement to a new location.
@@ -105,3 +107,5 @@ class Camera
     dify = @targetY - @y
     @x = @x + difx / @MOVEFACTOR
     @y = @y + dify / @MOVEFACTOR
+
+root.Camera = Camera
