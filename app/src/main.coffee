@@ -171,6 +171,7 @@ main = ->
 
     # msgBox.draw(hudCtx)
     frameElement.resize()
+    frameElement.setDirty()
     frameElement.drawChildren()
 
     # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
