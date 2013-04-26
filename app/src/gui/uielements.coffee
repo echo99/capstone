@@ -6,6 +6,11 @@ root.Elements ?= {}
 Elements = root.Elements
 
 
+#_require ../util/Module
+if exports?
+  {Module} = require '../util/Module'
+
+
 # An "Enum" of cursor types
 CursorType =
   DEFAULT: 'auto'
@@ -16,7 +21,7 @@ CursorType =
 
 # The base class for UI elements
 #
-class Elements.UIElement
+class Elements.UIElement extends Module
   # @property [Boolean] Flag for if element is visible
   visible: true
 
@@ -30,10 +35,13 @@ class Elements.UIElement
   # @private @property [Number] Element ordering rank
   _zIndex: 0
 
+  # @property [Boolean] Flag for if the elemnt needs to be redrawn
+  dirty: true
+
   # Create a new UI element
   #
   constructor: ->
-    # @private @property [Array<UIElement>]
+    # @private @property [Array<Elements.UIElement>]
     @_children = []
     # @private @property [Array<Number>]
     @zIndices = [0]
@@ -41,10 +49,11 @@ class Elements.UIElement
     @zIndicesRev = [0]
     # @private @property [Object]
     @_childBuckets = {0: []}
-    # @private @property [UIElement]
+    # @private @property [Elements.UIElement]
     @_parent = null
     # @private @property [Object]
     @_properties = {}
+    @_drawFunc = null
 
   # Add a child element to this element
   #
@@ -121,15 +130,38 @@ class Elements.UIElement
   containsCoords: (coords) ->
     return @containsPoint(coords.x, coords.y)
 
-  # Draw the element to the canvas
+  # Sets the draw function for this element
+  setDrawFunc: (@_drawFunc) ->
+
+  # # Draw the element to the canvas
+  # #
+  # # @abstract Each element will have its own draw function
+  # #
+  # # @param [CanvasRenderingContext2D] ctx
+  # # @param [Number] x
+  # # @param [Number] y
+  # #
+  # draw: (ctx, x, y) ->
+
+  # Call the draw function with the passed arguments
   #
-  # @abstract Each element will have its own draw function
+  # @overload draw(ctx)
+  #   Draw the element
+  #   @param [CanvasRenderingContext2D] ctx
   #
-  # @param [CanvasRenderingContext2D] ctx
-  # @param [Number] x
-  # @param [Number] y
+  # @overload draw(ctx, coords, zoom)
+  #   Draw the element at the given coordinates and zoom
+  #   @param [CanvasRenderingContext2D] ctx
+  #   @param [Object] coords The coordinates to draw to
+  #   @param [Number] zoom The current zoom
   #
-  draw: (ctx, x, y) ->
+  draw: (ctx, coords=null, zoom=1.0) ->
+    @dirty = false
+    if @_drawFunc
+      if coords is null
+        @_drawFunc(ctx)
+      else
+        @_drawFunc(ctx, coords, zoom)
 
   # Call to element to check if it is clicked and executes click handlers if it
   # is
@@ -142,10 +174,10 @@ class Elements.UIElement
     clickedSomething = false
     if @containsPoint(x, y) and @visible
       clickedSomething = @clickable
-      console.log("clicked #{@constructor.name} at (#{x}, #{y})")
+      # console.log("clicked #{@constructor.name} at (#{x}, #{y})")
       @_onClick()
       relLoc = @getRelativeLocation(x, y)
-      console.log("  relative location: #{relLoc.x}, #{relLoc.y}")
+      # console.log("  relative location: #{relLoc.x}, #{relLoc.y}")
       # console.log("In loop")
       # console.log("Children of #{@constructor.name} : #{@_children}")
       for zIndex in @zIndicesRev
@@ -317,12 +349,14 @@ class Elements.Frame extends Elements.UIElement
 
   # Create a new frame
   #
-  # @param [Canvas] frame The frame canvas
+  # @param [Div] frame The frame div
+  # @param [Canvas] canvas The HUD canvas
   #
-  constructor: (@frame) ->
+  constructor: (@frame, @canvas) ->
     super()
     @resize()
     @clickable = false
+    @ctx = @canvas.getContext('2d')
     # cx = Math.round(@frame.width/2)
     # cy = Math.round(@frame.height/2)
     # super(cx, cy, @frame.width, @frame.height)
@@ -349,7 +383,7 @@ class Elements.Frame extends Elements.UIElement
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
-        child.draw()
+        child.draw(@ctx) if child.dirty
 
 
 # Frame for holding all elements in the game
@@ -358,9 +392,12 @@ class Elements.GameFrame extends Elements.UIElement
   # Create a new game frame
   #
   # @param [Camera] camera The camera object
-  constructor: (@camera) ->
+  # @param [Canvas] canvas The game canvas
+  #
+  constructor: (@camera, @canvas) ->
     super()
     @clickable = false
+    @ctx = @canvas.getContext('2d')
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
@@ -377,7 +414,7 @@ class Elements.GameFrame extends Elements.UIElement
       for child in children
         coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
         if @camera.onScreen(coords)
-          child.draw(coords, @camera.getZoom())
+          child.draw(@ctx, coords, @camera.getZoom())
 
 
 # Message box class for displaying messages in the user interface
@@ -433,9 +470,10 @@ class Elements.MessageBox extends Elements.BoxElement
   # Draw this message box to the canvas context
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  # @param [Object] coords The coordinates to draw to
   # @param [Number] zoom The current zoom
   #
-  draw: (coords = null, zoom = null) ->
+  draw: (ctx, coords = null, zoom = null) ->
     if @visible
       if coords
         x = coords.x
@@ -450,18 +488,17 @@ class Elements.MessageBox extends Elements.BoxElement
       #   h = @h * zoom
       # else
       if zoom
-        @ctx.save()
-        @ctx.translate(x, y)
+        ctx.save()
+        ctx.translate(x, y)
         # x = @x
         # y = @y
         x = 0
         y = 0
-        @ctx.scale(zoom, zoom)
+        ctx.scale(zoom, zoom)
       cx = @cx
       cy = @cy
       w = @w
       h = @h
-      ctx = @ctx
       ctx.strokeStyle = config.windowStyle.stroke
       ctx.fillStyle = config.windowStyle.fill
       ctx.lineWidth = config.windowStyle.lineWidth
@@ -488,7 +525,46 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.fillText('x', cx, cy)
 
       if zoom
-        @ctx.restore()
+        ctx.restore()
+
+
+Button =
+  # Set the onClick handler
+  #
+  # @param [Function] clickHandler
+  #
+  setClickHandler: (@clickHandler) ->
+
+  # Set the onHover handler
+  #
+  # @param [Function] hoverHandler
+  #
+  setHoverHandler: (@hoverHandler) ->
+
+  # Set the onMouseOut handler
+  #
+  # @param [Function] mouseOutHandler
+  #
+  setMouseOutHandler: (@mouseOutHandler) ->
+
+  # Call the attached callback function when the button is clicked
+  #
+  _onClick: ->
+    if @clickHandler isnt null
+      @clickHandler()
+
+  # Do something when the user hovers over the button
+  #
+  _onHover: ->
+    if @hoverHandler isnt null
+      @hoverHandler()
+    return CursorType.POINTER
+
+  # Do something when the user's mouse leaves the button
+  #
+  _onMouseOut: ->
+    if @mouseOutHandler isnt null
+      @mouseOutHandler()
 
 
 # Button class for handling user interactions

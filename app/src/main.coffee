@@ -42,7 +42,7 @@ UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
 camera.setDragMode(window.config.DRAG_TYPE)
 game = new Game(0, 0)
-gameFrame = new Elements.GameFrame(camera)
+gameFrame = null
 
 CurrentMission = null
 
@@ -100,10 +100,12 @@ main = ->
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
-  frameElement = new Elements.Frame(frame)
-  #msgBox = new Elements.MessageBox(60, 60, 100, 100, "test", hudCtx)
-  # msgBox.draw(hudCtx)
-  #frameElement.addChild(msgBox)
+  frameElement = new Elements.Frame(frame, hudCanvas)
+  gameFrame = new Elements.GameFrame(camera, canvas)
+  # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
+  # frameElement.addChild(msgBox)
+  # frameElement.addChild(new Elements.MessageBox(200, 500, 200, 80,
+  #   "This message is too long", hudCtx))
   frameElement.drawChildren()
 
   msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
@@ -153,7 +155,7 @@ main = ->
     .setRight(5).setBottom(26)
 
   window.onresize = ->
-    console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
+    # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
     updateCanvases(frame, canvas, hudCanvas)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
@@ -171,7 +173,7 @@ main = ->
     frameElement.resize()
     frameElement.drawChildren()
 
-    console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
+    # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
   document.body.addEventListener('keydown', (e) ->
     if e.keyCode == KeyCodes.HOME
