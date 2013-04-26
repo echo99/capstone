@@ -43,7 +43,7 @@ class Planet
       when window.config.units.colonyShip then @_colonys
       when window.config.units.attackShip then @_attackShips
       when window.config.units.defenseShip then @_defenseShips
-      else throw new Error("Ship type unknown.") 
+      else throw new Error("Ship type unknown.")
 
   fungusStrength: ->
     return @_fungusStrength
@@ -97,7 +97,59 @@ class Planet
     @_fungusArriving = 0
 
   resolveCombat: ->
-    null
+    fungusDamage = 0
+    humanDamage = 0
+    fungusDefense = 0
+    humanDefense = 0
+    # Roll for damage
+    fungusDamage += rollForDamage(root.config.units.fungus.attack, @_fungusStrength)
+    humanDamage += rollForDamage(root.config.units.attackShip.attack, @_attackShips)
+    humanDamage += rollForDamage(root.config.units.defenseShip.attack, @_defenseShips)
+    humanDamage += rollForDamage(root.config.units.colonyShip.attack, @_defenseShips)
+    humanDamage += rollForDamage(root.config.units.probe.attack, @_probes)
+    # Roll for defense rating
+    fungusDefense += rollForDamage(root.config.units.fungus.defense, @_fungusStrength)
+    humanDefense += rollForDamage(root.config.units.attackShip.defense, @_attackShips)
+    humanDefense += rollForDamage(root.config.units.defenseShip.defense, @_defenseShips)
+    humanDefense += rollForDamage(root.config.units.colonyShip.defense, @_defenseShips)
+    humanDefense += rollForDamage(root.config.units.probe.defense, @_probes)
+    # Apply defensive ratings to damage
+    fungusDamage -= humanDefense
+    humanDamage -= fungusDefense
+    # Destroy units
+    @_fungusStrength -= humanDamage
+    # Destroy attack ships first
+    if @_attackShips >= fungusDamage
+      @_attackShips -= fungusDamage
+      return null
+    @_attackShips = 0
+    fungusDamage -= @_attackShips
+    # Destroy defense ships second
+    if @_defenseShips >= fungusDamage
+      @_defenseShips -= fungusDamage
+      return null
+    @_defenseShips = 0
+    fungusDamage -= @_defenseShips
+    # Destroy probes third
+    if @_probes >= fungusDamage
+      @_probes -= fungusDamage
+      return null
+    @_probes = 0
+    fungusDamage -= @_probes
+    # Destroy colony ships last
+    if @_colonyShips >= fungusDamage
+      @_colonyShips -= fungusDamage
+      return null
+    @_colonyShips = 0
+    fungusDamage -= @_colonyShips
+    # If there is any leftover fungus damage
+    # then destroy all structures
+    if fungusDamage > 0
+      @_station = false
+      @_outpost = false
+
+
+
 
   buildUpkeep: ->
     if @_turnsToComplete >= 1
@@ -106,18 +158,20 @@ class Planet
         unit = @_unitConstructing
         @_unitConstructing = null
         switch unit
-          when window.config.units.probe then @_probes++
-          when window.config.units.colonyShip then @_colonys++
-          when window.config.units.attackShip then @_attackShips++
-          when window.config.units.defenseShip then @_defenseShips++
-          else throw new Error("Ship type unknown.")        
+          when root.config.units.probe then @_probes++
+          when root.config.units.colonyShip then @_colonys++
+          when root.config.units.attackShip then @_attackShips++
+          when root.config.units.defenseShip then @_defenseShips++
+          else throw new Error("Ship type unknown.")
 
   movementUpkeep1: ->
-    group.updateAi for group in @_controlGroups
     move group for group in @_controlGroups
 
   movementUpkeep2: ->
     group.resetMoved for group in @_controlGroups
+
+  updateAI: ->
+    group.updateAi for group in @_controlGroups
 
   # INGAME COMMANDS #
 
@@ -152,10 +206,10 @@ class Planet
   # SETTERS FOR USE BY GUI #
 
   setVisibility: (state) ->
-    if (state is window.config.visibility.visible) or
-       (state is window.config.visibility.fungus) or
-       (state is window.config.visibility.nonfungus) or
-       (state is window.config.visibility.invisible)
+    if (state is root.config.visibility.visible) or
+       (state is root.config.visibility.fungus) or
+       (state is root.config.visibility.nonfungus) or
+       (state is rootb.config.visibility.invisible)
       @_visibility = state
     else
       throw error "Invalid Visibility"
@@ -182,6 +236,14 @@ class Planet
 
   receiveGroup: (group) ->
     @_controlGroups.push(group)
+
+  rollForDamage: (power, quantity) ->
+    total = 0
+    for x in [0...quantity] by 1
+      roll = Math.random()
+      if roll >= root.config.fungus.attack
+        total++
+    return total
 
 
 root.Planet = Planet

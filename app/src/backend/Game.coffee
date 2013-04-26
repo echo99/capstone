@@ -30,4 +30,10 @@ class Game
 
   # UPKEEP #
   endTurn: ->
-    return null
+    planet.growPass1 for planet in @_planets
+    planet.growPass2 for planet in @_planets
+    planet.movementUpkeep1 for planet in @_planets
+    planet.movementUpkeep2 for planet in @_planets
+    planet.resolveCombat for planet in @_planets
+    planet.buildUpkeep for planet in @_planets
+    planet.updateAI for planet in @_planets
