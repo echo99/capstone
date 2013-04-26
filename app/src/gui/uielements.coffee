@@ -163,6 +163,15 @@ class Elements.UIElement extends Module
       else
         @_drawFunc(ctx, coords, zoom)
 
+  # Set this element and all child elements to dirty
+  #
+  setDirty: ->
+    @dirty = true
+    for zIndex in @zIndices
+      children = @_childBuckets[zIndex]
+      for child in children
+        child.setDirty()
+
   # Call to element to check if it is clicked and executes click handlers if it
   # is
   #
