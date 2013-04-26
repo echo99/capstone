@@ -1,8 +1,9 @@
 #_require util/Sprite
 
-root = exports ? window
+if not root?
+  root = exports ? window
 
-if exports isnt undefined
+if exports?
   {Sprite, AnimatedSprite} = require './util/Sprite'
 
 DRAG_TYPES = ['DEFAULT', 'ONE_TO_ONE']
@@ -11,7 +12,7 @@ root.config =
   ZOOM_SPEED: 0.02
   PAN_SPEED_FACTOR: 3
   BG_PAN_SPEED_FACTOR: 50
-  DRAG_TYPE: DRAG_TYPES[0]
+  DRAG_TYPE: DRAG_TYPES[1]
   windowStyle:
     fill: "rgba(0, 37, 255, 0.5)"
     stroke: "rgba(0, 37, 255, 1)"
@@ -72,6 +73,7 @@ root.config =
     COLONY_SHIP: new AnimatedSprite(['colony_ship.png'])
     PROBE: new AnimatedSprite(['probe.png'])
     PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
+    PLANET_BLUE_FUNGUS: new AnimatedSprite(['planet_blue_fungus.png'])
     PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
     TITLE: new AnimatedSprite(['title.png'])
     FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
@@ -133,3 +135,5 @@ root.config =
     nonfungus: 2
     invisible: 3
     size: 4
+
+config = root.config

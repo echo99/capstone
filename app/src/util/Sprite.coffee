@@ -1,4 +1,5 @@
-root = exports ? window
+if not root?
+  root = exports ? window
 
 # A simple sprite class for keeping track of a sprite's properties
 #
