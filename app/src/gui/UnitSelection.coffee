@@ -9,17 +9,32 @@ class UnitSelection
   totalAttacks: 0
   totalDefenses: 0
   onlyProbe: false
-  hudUpdate: true
+  #hudUpate: true
   lastMousePos: {x: 0, y: 0}
   planetsWithSelectedUnits: []
+  totalDisplay: null
 
   #constructor: ->
 
   # Initializes the class
-  initialize: (@onlyProbe=false) ->
+  initialize: (onlyProbe=false) ->
     for p in game.getPlanets()
       @_initUnitSelection(p)
       @updateSelection(p)
+    @setOnlyProbe(onlyProbe)
+
+  setOnlyProbe: (@onlyProbe) ->
+    if @totalDisplay != null
+      frameElement.removeChild(@totalDisplay)
+    loc = window.config.selectionStyle.location
+    w = window.config.selectionStyle.width
+    if @onlyProbe
+      h = window.config.selectionStyle.probeHeight
+    else
+      h = window.config.selectionStyle.height
+    @totalDisplay = new Elements.BoxElement(loc.x, loc.y, w, h)
+    @totalDisplay.setDrawFunc(@_drawSelection)
+    frameElement.addChild(@totalDisplay)
 
   # Initilizes the data structure that tracks which units are selected
   _initUnitSelection: (planet) ->
@@ -44,28 +59,28 @@ class UnitSelection
       @totalProbes += count
       @total += count
       updateSelectedPlanets(count)
-      @hudUpdate = true)
+      @totalDisplay.dirty = true)
 
     colony_location = {x: location.x, y: location.y+80}
     @_initUnits(colony_location, units.colonys, (count) =>
       @totalColonys += count
       @total += count
       updateSelectedPlanets(count)
-      @hudUpdate = true)
+      @totalDisplay.dirty = true)
 
     attack_location = {x: location.x, y: location.y+160}
     @_initUnits(attack_location, units.attacks, (count) =>
       @totalAttacks += count
       @total += count
       updateSelectedPlanets(count)
-      @hudUpdate = true)
+      @totalDisplay.dirty = true)
 
     defense_location = {x: location.x, y: location.y+240}
     @_initUnits(defense_location, units.defenses, (count) =>
       @totalDefenses += count
       @total += count
       updateSelectedPlanets(count)
-      @hudUpdate = true)
+      @totalDisplay.dirty = true)
 
     planet.unitSelection = units
     planet.selectedUnits = 0
@@ -100,7 +115,8 @@ class UnitSelection
     @totalColonys = 0
     @totalAttacks = 0
     @totalDefenses = 0
-    @hudUpdate = true
+    #@hudUpdate = true
+    @totalDisplay.dirty = true
 
   _countUnits: (stacks) ->
     count = 0
@@ -156,7 +172,7 @@ class UnitSelection
               @_drawToolTip(ctx, units.attacks) or
               @_drawToolTip(ctx, units.defenses)
 
-    @_drawSelection(hudCtx)
+    #@_drawSelection(hudCtx)
 
   _drawToolTip: (ctx, stacks) ->
     for row in stacks
@@ -181,17 +197,14 @@ class UnitSelection
         stack.draw(ctx)
 
   # Draws the hud that shows total selected units
-  _drawSelection: (ctx) ->
-    if not @hudUpdate
-      return
-    @hudUpdate = false
+  _drawSelection: (ctx) =>
+    #if not @hudUpdate
+    #  return
+    #@hudUpdate = false
     winStyle = window.config.windowStyle
-    loc = window.config.selectionStyle.location
-    w = window.config.selectionStyle.width
-    if @onlyProbe
-      h = window.config.selectionStyle.probeHeight
-    else
-      h = window.config.selectionStyle.height
+    w = @totalDisplay.w
+    h = @totalDisplay.h
+    loc = {x: @totalDisplay.x, y: @totalDisplay.y}
     ctx.clearRect(loc.x, loc.y, w, h)
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke
