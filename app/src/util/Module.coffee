@@ -23,3 +23,6 @@ class Module
 
     obj.included?.apply(@)
     this
+
+if exports?
+  exports.Module = Module

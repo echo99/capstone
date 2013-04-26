@@ -527,7 +527,8 @@ class Elements.MessageBox extends Elements.BoxElement
       if zoom
         ctx.restore()
 
-
+# Button mixin [WIP]
+# @mixin
 Button =
   # Set the onClick handler
   #
@@ -565,6 +566,14 @@ Button =
   _onMouseOut: ->
     if @mouseOutHandler isnt null
       @mouseOutHandler()
+
+
+# All possible states for a button
+ButtonStates =
+  LINK: 1
+  VISITED: 2
+  HOVER: 3
+  ACTIVE: 4
 
 
 # Button class for handling user interactions
