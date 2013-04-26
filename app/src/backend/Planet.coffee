@@ -127,7 +127,7 @@ class Planet
     # Apply defensive ratings to damage
     fungusDamage -= humanDefense
     humanDamage -= fungusDefense
-    if fungusDamage < 0 
+    if fungusDamage < 0
       fungusDamage = 0
     if humanDamage < 0
       humanDamage = 0
@@ -237,7 +237,6 @@ class Planet
   # HELPER FUNCTIONS #
 
   move: (group) ->
-    console.log("group ", group)
     if not group.moved()
       group.setMoved()
       if ((group.destination() is @) and (group.destination() is group.next()))

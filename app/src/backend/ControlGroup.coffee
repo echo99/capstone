@@ -64,12 +64,12 @@ class ControlGroup
     q.push([v, null])
     seen.push(v)
     while q.length > 0
-      t = q.unshift() # remove element at front of list
+      t = q.shift()
       if t[0] is @_destination
         current = t
-        while current[1] is not null
+        while current[1] != null
           # add element to back of list
-          @_route.shift(current[0])
+          @_route.unshift(current[0])
           current = current[1]
         break
       for u in t[0].getAdjacentPlanets()
@@ -78,7 +78,6 @@ class ControlGroup
             not (u.visibility is window.config.visibility.fungus)
           seen.push(u)
           q.push([u, t])
-    console.log('route ' + @_route)
     return null
 
 root.ControlGroup = ControlGroup
