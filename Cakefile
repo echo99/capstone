@@ -356,6 +356,19 @@ task 'check', 'Temporarily compiles coffee files to check syntax', ->
 #     console.log('hello!')
 #     console.log()
 #     console.log('hello!'.green)
+# task 'print', 'Dummy task for testing purposes', ->
+#   # exec "pwd", (err, stdout, stderr) ->
+#   #   console.log stdout
+#   #   exec "cd app", (err, stdout, stderr) ->
+#   #     console.log stdout
+#   #     exec "pwd", (err, stdout, stderr) ->
+#   #       console.log stdout
+#   console.log('Starting directory: ' + process.cwd())
+#   try
+#     process.chdir('app')
+#     console.log('New directory: ' + process.cwd())
+#   catch err
+#     console.log('chdir: ' + err)
 
 task 'install-dep', 'Install all necessary node modules', ->
   installDep()
@@ -411,22 +424,48 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
           console.log("") if WATCHING
 
 task 'doc', 'Document the source code using Codo', (options) ->
+  lastResortCodoFix = (cmd, callback=null) ->
+    console.log('Documenting with codo failed'.red)
+    try
+      if process.platform == 'win32'
+        process.chdir('node_modules\\codo')
+      else
+        process.chdir('node_modules/codo')
+      console.log('Attempting to force installation of walkdir v0.0.5...'.yellow)
+      exec "npm install walkdir@0.0.5", (err, stdout, stderr) ->
+        console.log(stdout)
+        throw err if err
+        if process.platform == 'win32'
+          process.chdir('..\\..')
+        else
+          process.chdir('../..')
+        console.log('Attempting to run codo again...'.yellow)
+        exex cmd, (err, stdout, stderr) ->
+          onsole.log(stdout)
+          throw err if err
+
+      # console.log('New directory: ' + process.cwd())
+    catch err
+      console.log('chdir: ' + err)
+
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
     checkGlobalModule 'Codo', 'codo', 'codo', false, (hasModule = false) ->
+      cmd = './node_modules/.bin/codo'
+      if process.platform == 'win32'
+        cmd = '.\\node_modules\\.bin\\codo'
       if hasModule
         exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
           console.log(stdout)
-          throw err if err
+          # throw err if err
+          lastResortCodoFix(cmd) if err
       else
         tryRequire('codo')
         checkDep ->
-          cmd = './node_modules/.bin/codo'
-          if process.platform == 'win32'
-            cmd = '.\\node_modules\\.bin\\codo'
           exec cmd + " " + SRC_DIR, (err, stdout, stderr) ->
             console.log(stdout)
-            throw err if err
+            # throw err if err
+            lastResortCodoFix(cmd) if err
 
 # REPORTER = "min"
 
