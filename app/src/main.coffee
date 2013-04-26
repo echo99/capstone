@@ -106,7 +106,7 @@ main = ->
   # frameElement.addChild(msgBox)
   # frameElement.addChild(new Elements.MessageBox(200, 500, 200, 80,
   #   "This message is too long", hudCtx))
-  frameElement.drawChildren()
+  #frameElement.drawChildren()
 
   msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
   msgBox2.setZIndex(1)
@@ -265,6 +265,8 @@ main = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
     UI.draw(ctx, hudCtx)
     CurrentMission.draw(ctx, hudCtx)
+    frameElement.drawChildren()
+    gameFrame.drawChildren()
     bgCanvas.style.left = Math.floor(camera.x /
       window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
     bgCanvas.style.top = Math.floor(camera.y /

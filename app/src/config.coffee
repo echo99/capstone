@@ -85,13 +85,13 @@ root.config =
     STATION_BUILDINGS_GATHERING: new AnimatedSprite(
       ['station_buildings_gathering_1.png',
        'station_buildings_gathering_2.png'], 20)
-    STATION_CONSTRUCTING: new AnimatedSprite(
-      ['station_constructing.png'])
-    STATION_NOT_CONSTRUCTING: new AnimatedSprite(
-      ['station_not_constructing.png'])
+    STATION_CONSTRUCTING: new AnimatedSprite(['station_constructing.png'])
+    STATION_NOT_CONSTRUCTING: new AnimatedSprite(['station_not_constructing.png'])
     PROBE_CONSTRUCTION: new AnimatedSprite(['probe_construction.png'])
     WARP_GATE: new AnimatedSprite(['warp_gate_1.png', 'warp_gate_2.png',
       'warp_gate_3.png', 'warp_gate_4.png'], 3)
+    END_TURN_BUTTON_IDLE: new AnimatedSprite(['end_turn_button_idle.png'])
+    END_TURN_BUTTON_HOVER: new AnimatedSprite(['end_turn_button_hover.png'])
   units:
     probe:
       cost: 1
