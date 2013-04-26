@@ -177,7 +177,9 @@ main = ->
     if e.keyCode == KeyCodes.HOME
       camera.setTarget(0, 0)
     else if e.keyCode == KeyCodes.SPACE
+      console.log("end turn")
       game.endTurn()
+      UI.endTurn()
   )
 
   # Catch accidental leaving

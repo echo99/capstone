@@ -19,7 +19,7 @@ class Game
     @_planets.push(planet)
 
   removePlanet: (planet) ->
-    @_planets.filter(planet)
+    @_planets = @_planets.filter((p) => p != planet)
 
   setNeighbors: (planet1, planet2) ->
     planet1.addNeighbor(planet2)
@@ -30,10 +30,10 @@ class Game
 
   # UPKEEP #
   endTurn: ->
-    planet.growPass1 for planet in @_planets
-    planet.growPass2 for planet in @_planets
-    planet.movementUpkeep1 for planet in @_planets
-    planet.movementUpkeep2 for planet in @_planets
-    planet.resolveCombat for planet in @_planets
-    planet.buildUpkeep for planet in @_planets
-    planet.updateAI for planet in @_planets
+    planet.growPass1() for planet in @_planets
+    planet.growPass2() for planet in @_planets
+    planet.movementUpkeep1() for planet in @_planets
+    planet.movementUpkeep2() for planet in @_planets
+    planet.resolveCombat() for planet in @_planets
+    planet.buildUpkeep() for planet in @_planets
+    planet.updateAI() for planet in @_planets

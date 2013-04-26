@@ -48,6 +48,7 @@ class UserInterface
         @unitSelection.deselectAllUnits()
       else
         console.log("opening structure menu...")
+        console.log(planet)
 
   planetButtonHoverCallback: (planet) =>
     return () =>
@@ -149,3 +150,7 @@ class UserInterface
     #if @hoveredPlanetButton and
     #   @hoveredPlanetButton.containsPoint(pos.x, pos.y)
     @unitSelection.onMouseClick(x, y)
+
+  endTurn: () ->
+    for p in game.getPlanets()
+      @unitSelection.updateSelection(p)

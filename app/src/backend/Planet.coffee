@@ -107,17 +107,23 @@ class Planet
     fungusDefense = 0
     humanDefense = 0
     # Roll for damage
-    fungusDamage += rollForDamage(root.config.units.fungus.attack, @_fungusStrength)
-    humanDamage += rollForDamage(root.config.units.attackShip.attack, @_attackShips)
-    humanDamage += rollForDamage(root.config.units.defenseShip.attack, @_defenseShips)
-    humanDamage += rollForDamage(root.config.units.colonyShip.attack, @_defenseShips)
-    humanDamage += rollForDamage(root.config.units.probe.attack, @_probes)
+    fungusDamage += @rollForDamage(root.config.units.fungus.attack, @_fungusStrength)
+    humanDamage += @rollForDamage(root.config.units.attackShip.attack, @_attackShips)
+    humanDamage += @rollForDamage(root.config.units.defenseShip.attack,
+                                  @_defenseShips)
+    humanDamage += @rollForDamage(root.config.units.colonyShip.attack,
+                                  @_defenseShips)
+    humanDamage += @rollForDamage(root.config.units.probe.attack, @_probes)
     # Roll for defense rating
-    fungusDefense += rollForDamage(root.config.units.fungus.defense, @_fungusStrength)
-    humanDefense += rollForDamage(root.config.units.attackShip.defense, @_attackShips)
-    humanDefense += rollForDamage(root.config.units.defenseShip.defense, @_defenseShips)
-    humanDefense += rollForDamage(root.config.units.colonyShip.defense, @_defenseShips)
-    humanDefense += rollForDamage(root.config.units.probe.defense, @_probes)
+    fungusDefense += @rollForDamage(root.config.units.fungus.defense,
+                                    @_fungusStrength)
+    humanDefense += @rollForDamage(root.config.units.attackShip.defense,
+                                   @_attackShips)
+    humanDefense += @rollForDamage(root.config.units.defenseShip.defense,
+                                   @_defenseShips)
+    humanDefense += @rollForDamage(root.config.units.colonyShip.defense,
+                                   @_defenseShips)
+    humanDefense += @rollForDamage(root.config.units.probe.defense, @_probes)
     # Apply defensive ratings to damage
     fungusDamage -= humanDefense
     humanDamage -= fungusDefense
@@ -153,9 +159,6 @@ class Planet
       @_station = false
       @_outpost = false
 
-
-
-
   buildUpkeep: ->
     if @_turnsToComplete >= 1
       @_turnsToComplete--
@@ -170,13 +173,13 @@ class Planet
           else throw new Error("Ship type unknown.")
 
   movementUpkeep1: ->
-    move group for group in @_controlGroups
+    @move(group) for group in @_controlGroups
 
   movementUpkeep2: ->
-    group.resetMoved for group in @_controlGroups
+    group.resetMoved() for group in @_controlGroups
 
   updateAI: ->
-    group.updateAi for group in @_controlGroups
+    group.updateAi(@) for group in @_controlGroups
 
   # INGAME COMMANDS #
 
@@ -190,21 +193,23 @@ class Planet
       @_availableResources -= name.cost
       @_turnsToComplete = name.turns
 
-  moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
+  moveShips: (attackShips, defenseShips, probes, colonys, dest) ->
     # check for insufficient ships
     if attackShips > @_attackShips or
        defenseShips > @_defenseShips or
        probes > @_probes or
-       colonies > @_colonies
+       colonys > @_colonys
       throw error "Insufficient Ships"
     else
       # generate control group
-      controlGroup = new ControlGroup(attackShips, defenseShips, probes, colonies, dest)
+      controlGroup = new ControlGroup(attackShips, defenseShips,
+                                      probes, colonys, dest)
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips
       @_probes -= probes
-      @_colonies -= colonies
+      @_colonys -= colonys
+      controlGroup.updateAi(@)
       # add to planet
       @_controlGroups.push(controlGroup)
 
@@ -229,16 +234,16 @@ class Planet
 
   move: (group) ->
     console.log("group ", group)
-    if not group.moved
-      group.setMoved
-      if ((group.destination is @) and (group.destination is group.next))
-        @_attackShips += group.attackShips
-        @_defenseShips += group.defenseShips
-        @_probes += group.probes
-        @_colonies += group.colonies
+    if not group.moved()
+      group.setMoved()
+      if ((group.destination() is @) and (group.destination() is group.next()))
+        @_attackShips += group.attackShips()
+        @_defenseShips += group.defenseShips()
+        @_probes += group.probes()
+        @_colonys += group.colonys()
       else
-        group.next.receiveGroup(group)
-      @_controlGroups.filter(group)
+        group.next().receiveGroup(group)
+      @_controlGroups = @_controlGroups.filter((g) => g != group)
 
   receiveGroup: (group) ->
     @_controlGroups.push(group)
@@ -247,7 +252,7 @@ class Planet
     total = 0
     for x in [0...quantity] by 1
       roll = Math.random()
-      if roll >= root.config.fungus.attack
+      if roll >= window.config.units.fungus.attack
         total++
     return total
 
