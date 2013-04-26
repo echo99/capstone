@@ -433,15 +433,16 @@ task 'doc', 'Document the source code using Codo', (options) ->
         process.chdir('node_modules/codo')
       console.log('Attempting to force installation of walkdir v0.0.5...'.yellow)
       exec "npm install walkdir@0.0.5", (err, stdout, stderr) ->
-        console.log(stdout)
+        # console.log(stdout)
         throw err if err
         if process.platform == 'win32'
           process.chdir('..\\..')
         else
           process.chdir('../..')
+        console.log('Installation successful'.green)
         console.log('Attempting to run codo again...'.yellow)
-        exex cmd, (err, stdout, stderr) ->
-          onsole.log(stdout)
+        exec cmd, (err, stdout, stderr) ->
+          console.log(stdout)
           throw err if err
 
       # console.log('New directory: ' + process.cwd())
