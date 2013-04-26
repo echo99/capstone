@@ -32,6 +32,25 @@ class UserInterface
       gameFrame.addChild(b)
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
+    b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
+    b.hovered = false
+    b.setClickHandler(() => console.log('END TURN'))
+    b.setHoverHandler(() =>
+      b.hovered = true
+      b.dirty = true
+    )
+    b.setMouseOutHandler(() =>
+      b.hovered = false
+      b.dirty = true
+    )
+    b.setDrawFunc((ctx) =>
+      b.y = camera.height-5-20
+      if b.hovered
+        SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, b.x, b.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, b.x, b.y, ctx, false)
+    )
+    frameElement.addChild(b)
 
   planetButtonCallback: (planet) =>
     return () =>

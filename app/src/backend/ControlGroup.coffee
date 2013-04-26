@@ -61,23 +61,23 @@ class ControlGroup
     @_route = []
     q = []
     seen = []
-    q.push [v, null]
-    seen.push v
+    q.push([v, null])
+    seen.push(v)
     while q.length > 0
-      t = q.shift() # remove element at front of list
+      t = q.unshift() # remove element at front of list
       if t[0] is @_destination
         current = t
         while current[1] is not null
-          # add element to front of list, is this what was intended?
-          @_route.unshift current[0]
+          # add element to back of list
+          @_route.shift(current[0])
           current = current[1]
         break
       for u in t[0].getAdjacentPlanets()
         if (not (u in seen)) and
             not (u.visibility is window.config.visibility.invisible) and
             not (u.visibility is window.config.visibility.fungus)
-          seen.push u
-          q.push [u, t]
+          seen.push(u)
+          q.push([u, t])
     console.log('route ' + @_route)
     return null
 

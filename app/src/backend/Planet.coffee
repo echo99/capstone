@@ -112,7 +112,7 @@ class Planet
     humanDamage += @rollForDamage(root.config.units.defenseShip.attack,
                                   @_defenseShips)
     humanDamage += @rollForDamage(root.config.units.colonyShip.attack,
-                                  @_defenseShips)
+                                  @_colonyShips)
     humanDamage += @rollForDamage(root.config.units.probe.attack, @_probes)
     # Roll for defense rating
     fungusDefense += @rollForDamage(root.config.units.fungus.defense,
@@ -122,11 +122,15 @@ class Planet
     humanDefense += @rollForDamage(root.config.units.defenseShip.defense,
                                    @_defenseShips)
     humanDefense += @rollForDamage(root.config.units.colonyShip.defense,
-                                   @_defenseShips)
+                                   @_colonyShips)
     humanDefense += @rollForDamage(root.config.units.probe.defense, @_probes)
     # Apply defensive ratings to damage
     fungusDamage -= humanDefense
     humanDamage -= fungusDefense
+    if fungusDamage < 0 
+      fungusDamage = 0
+    if humanDamage < 0
+      humanDamage = 0
     # Destroy units
     @_fungusStrength -= humanDamage
     # Destroy attack ships first
@@ -252,7 +256,7 @@ class Planet
     total = 0
     for x in [0...quantity] by 1
       roll = Math.random()
-      if roll >= window.config.units.fungus.attack
+      if roll >= power
         total++
     return total
 
