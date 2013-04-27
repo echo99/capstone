@@ -454,6 +454,32 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
+    @ctx.font = config.windowStyle.labelText.font
+    textWidth = @ctx.measureText(@message).width
+    console.log("Width of #{@message} : #{textWidth}")
+    @lines = []
+    if textWidth > @w
+      words = @message.split(" ")
+      console.log("Words: #{words}")
+      line = null
+      lastTried = null
+      for word in words
+        lastTried = line
+        if line is null
+          line = word
+        else
+          line += ' ' + word
+        if @ctx.measureText(line).width > @w
+          if lastTried isnt null
+            @lines.push(lastTried)
+            line = word
+          else
+            @lines.push(line)
+            line = null
+      if line isnt null
+        @lines.push(line)
+    console.log(@lines)
+
     # console.log("My children: #{@_children}")
     # console.log("Button's children: #{@closeBtn._children}")
 
@@ -518,15 +544,24 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.font = config.windowStyle.labelText.font
       ctx.fillStyle = config.windowStyle.labelText.color
       ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
       # cx = Math.round(@w/2 + @x)
       # cy = Math.round(@h/2 + @y)
       # ctx.fillText(@message, cx, cy)
-      ctx.fillText(@message, x, y)
+
+      if @lines.length > 0
+        yOffset = (@lines.length-1) * 15
+        yTmp = y - yOffset
+        for line in @lines
+          ctx.fillText(line, x, yTmp)
+          yTmp += 30
+      else
+        ctx.fillText(@message, x, y)
 
       btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
       btnOffsetY = y + @cy + @closeBtn.y + @closeBtn.cy
       cx = Math.round(@closeBtn.w/2 + btnOffsetX)
-      cy = Math.round(@closeBtn.h/2 + btnOffsetY) + 4
+      cy = Math.round(@closeBtn.h/2 + btnOffsetY)
       ctx.fillStyle = 'rgb(0,0,0)'
       ctx.fillRect(btnOffsetX, btnOffsetY, @closeBtn.w, @closeBtn.h)
       ctx.fillStyle = 'rgb(255,255,255)'

@@ -102,11 +102,11 @@ main = ->
   #   canvas.width, canvas.height)
   frameElement = new Elements.Frame(frame, hudCanvas)
   gameFrame = new Elements.GameFrame(camera, canvas)
-  # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
+  msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
   # frameElement.addChild(msgBox)
-  # frameElement.addChild(new Elements.MessageBox(200, 500, 200, 80,
-  #   "This message is too long", hudCtx))
-  #frameElement.drawChildren()
+  frameElement.addChild(new Elements.MessageBox(110, 500, 200, 100,
+    "This message is too long", hudCtx))
+  frameElement.drawChildren()
 
   msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
   msgBox2.setZIndex(1)
