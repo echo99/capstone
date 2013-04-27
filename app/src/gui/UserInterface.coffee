@@ -62,7 +62,7 @@ class UserInterface
           p.moveShips(@unitSelection.getNumberOfAttacks(p),
                       @unitSelection.getNumberOfDefenses(p),
                       @unitSelection.getNumberOfProbes(p),
-                      @unitSelection.getNumberOfColonys(p), planet)
+                      @unitSelection.getNumberOfColonies(p), planet)
           @unitSelection.updateSelection(p)
         @unitSelection.deselectAllUnits()
       else

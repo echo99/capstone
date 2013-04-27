@@ -5,7 +5,7 @@
 class UnitSelection
   total: 0
   totalProbes: 0
-  totalColonys: 0
+  totalColonies: 0
   totalAttacks: 0
   totalDefenses: 0
   onlyProbe: false
@@ -43,7 +43,7 @@ class UnitSelection
     location.x += pLoc.x
     location.y += pLoc.y
 
-    units = {probes: [], colonys: [], attacks: [], defenses: []}
+    units = {probes: [], colonies: [], attacks: [], defenses: []}
 
     updateSelectedPlanets = (count) =>
       planet.selectedUnits += count
@@ -62,8 +62,8 @@ class UnitSelection
       @totalDisplay.dirty = true)
 
     colony_location = {x: location.x, y: location.y+80}
-    @_initUnits(colony_location, units.colonys, (count) =>
-      @totalColonys += count
+    @_initUnits(colony_location, units.colonies, (count) =>
+      @totalColonies += count
       @total += count
       updateSelectedPlanets(count)
       @totalDisplay.dirty = true)
@@ -105,14 +105,14 @@ class UnitSelection
     for p in @planetsWithSelectedUnits
       units = p.unitSelection
       @_clearStacks(units.probes)
-      @_clearStacks(units.colonys)
+      @_clearStacks(units.colonies)
       @_clearStacks(units.attacks)
       @_clearStacks(units.defenses)
       p.selectedUnits = 0
     @planetsWithSelectedUnits = []
     @total = 0
     @totalProbes = 0
-    @totalColonys = 0
+    @totalcolonies = 0
     @totalAttacks = 0
     @totalDefenses = 0
     #@hudUpdate = true
@@ -129,8 +129,8 @@ class UnitSelection
   getNumberOfProbes: (planet) ->
     return @_countUnits(planet.unitSelection.probes)
 
-  getNumberOfColonys: (planet) ->
-    return @_countUnits(planet.unitSelection.colonys)
+  getNumberOfColonies: (planet) ->
+    return @_countUnits(planet.unitSelection.colonies)
 
   getNumberOfAttacks: (planet) ->
     return @_countUnits(planet.unitSelection.attacks)
@@ -161,14 +161,14 @@ class UnitSelection
     for p in game.getPlanets()
       units = p.unitSelection
       @_drawStacks(ctx, units.probes)
-      @_drawStacks(ctx, units.colonys)
+      @_drawStacks(ctx, units.colonies)
       @_drawStacks(ctx, units.attacks)
       @_drawStacks(ctx, units.defenses)
 
       @_drawPlanetUnits(ctx, p)
 
       found = @_drawToolTip(ctx, units.probes) or
-              @_drawToolTip(ctx, units.colonys) or
+              @_drawToolTip(ctx, units.colonies) or
               @_drawToolTip(ctx, units.attacks) or
               @_drawToolTip(ctx, units.defenses)
 
@@ -227,7 +227,7 @@ class UnitSelection
 
     if not @onlyProbe
       SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+20, loc.y+90, ctx, false)
-      ctx.fillText(@totalColonys, loc.x+60, loc.y+95)
+      ctx.fillText(@totalcolonies, loc.x+60, loc.y+95)
 
       SHEET.drawSprite(SpriteNames.ATTACK_SHIP,
                        loc.x+20, loc.y+130, ctx, false)
@@ -283,7 +283,7 @@ class UnitSelection
     units = planet.unitSelection
 
     @_drawShips(ctx, SpriteNames.PROBE, units.probes)
-    @_drawShips(ctx, SpriteNames.COLONY_SHIP, units.colonys)
+    @_drawShips(ctx, SpriteNames.COLONY_SHIP, units.colonies)
     @_drawShips(ctx, SpriteNames.ATTACK_SHIP, units.attacks)
     @_drawShips(ctx, SpriteNames.DEFENSE_SHIP, units.defenses)
     #   for each control group
@@ -300,7 +300,7 @@ class UnitSelection
     units = planet.unitSelection
     names = window.config.units
     @_allocate(units.probes, planet.numShips(names.probe))
-    @_allocate(units.colonys, planet.numShips(names.colonyShip))
+    @_allocate(units.colonies, planet.numShips(names.colonyShip))
     @_allocate(units.attacks, planet.numShips(names.attackShip))
     @_allocate(units.defenses, planet.numShips(names.defenseShip))
 
