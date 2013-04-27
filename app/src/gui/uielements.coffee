@@ -389,6 +389,7 @@ class Elements.Frame extends Elements.UIElement
 
   # Draw the frame's children
   drawChildren: ->
+    # console.log("Frame's drawChildren called!")
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
@@ -418,6 +419,7 @@ class Elements.GameFrame extends Elements.UIElement
 
   # Draw the frame's children if they are on the screen
   drawChildren: ->
+    # console.log("GameFrame's drawChildren called!")
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
@@ -457,8 +459,9 @@ class Elements.MessageBox extends Elements.BoxElement
     @ctx.font = config.windowStyle.labelText.font
     textWidth = @ctx.measureText(@message).width
     console.log("Width of #{@message} : #{textWidth}")
+    allowedWidth = @w - config.windowStyle.lineWidth
     @lines = []
-    if textWidth > @w
+    if textWidth > allowedWidth
       words = @message.split(" ")
       console.log("Words: #{words}")
       line = null
@@ -469,7 +472,7 @@ class Elements.MessageBox extends Elements.BoxElement
           line = word
         else
           line += ' ' + word
-        if @ctx.measureText(line).width > @w
+        if @ctx.measureText(line).width > allowedWidth
           if lastTried isnt null
             @lines.push(lastTried)
             line = word
@@ -509,6 +512,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] zoom The current zoom
   #
   draw: (ctx, coords = null, zoom = null) ->
+    super(ctx)
     if @visible
       if coords
         x = coords.x
@@ -550,6 +554,7 @@ class Elements.MessageBox extends Elements.BoxElement
       # ctx.fillText(@message, cx, cy)
 
       if @lines.length > 0
+        console.log("Box is dirty: #{@dirty}")
         yOffset = (@lines.length-1) * 15
         yTmp = y - yOffset
         for line in @lines

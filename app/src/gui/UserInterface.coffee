@@ -108,8 +108,8 @@ class UserInterface
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)
 
-    # Draw stuff attached to the game frame
-    gameFrame.drawChildren()
+    # # Draw stuff attached to the game frame
+    # gameFrame.drawChildren()
 
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
