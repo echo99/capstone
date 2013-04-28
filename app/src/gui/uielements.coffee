@@ -481,10 +481,11 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
-    @ctx.font = config.windowStyle.labelText.font
+    @ctx.font = config.windowStyle.msgBoxText.font
     textWidth = @ctx.measureText(@message).width
     console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
     if textWidth > allowedWidth
       words = @message.split(" ")
@@ -570,8 +571,8 @@ class Elements.MessageBox extends Elements.BoxElement
       # ctx.fillRect(@x, @y, @w, @h)
       ctx.strokeRect(x+cx, y+cy, w, h)
       ctx.fillRect(x+cx, y+cy, w, h)
-      ctx.font = config.windowStyle.labelText.font
-      ctx.fillStyle = config.windowStyle.labelText.color
+      ctx.font = config.windowStyle.msgBoxText.font
+      ctx.fillStyle = config.windowStyle.msgBoxText.color
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       # cx = Math.round(@w/2 + @x)
@@ -580,11 +581,11 @@ class Elements.MessageBox extends Elements.BoxElement
 
       if @lines.length > 0
         console.log("Box is dirty: #{@dirty}")
-        yOffset = (@lines.length-1) * 15
+        yOffset = (@lines.length-1) * @lineSpacing
         yTmp = y - yOffset
         for line in @lines
           ctx.fillText(line, x, yTmp)
-          yTmp += 30
+          yTmp += config.windowStyle.msgBoxText.lineWidth
       else
         ctx.fillText(@message, x, y)
 

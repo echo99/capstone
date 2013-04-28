@@ -102,7 +102,7 @@ main = ->
   #   canvas.width, canvas.height)
   frameElement = new Elements.Frame(frame, hudCanvas)
   gameFrame = new Elements.GameFrame(camera, canvas)
-  msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
+  # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
   # frameElement.addChild(msgBox)
   frameElement.addChild(new Elements.MessageBox(150, 400, 280, 100,
     "This message needs to be wrapped", hudCtx))
