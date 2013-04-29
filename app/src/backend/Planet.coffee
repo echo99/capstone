@@ -11,6 +11,9 @@ if exports?
 
 class Planet
   constructor: (@_x, @_y, @_resources = 0, @_rate = 0) ->
+    @_lastSeenResources = null
+    @_lastSeenFungus = false
+    @_hasBeenSeen = false
     @_availableResources = 0
     @_adjacentPlanets = []
     @_fungusStrength = 0
@@ -26,7 +29,7 @@ class Planet
     @_controlGroups = []
     @_unitConstructing = null
     @_turnsToComplete = 0
-    @_visibility = window.config.visibility.invisible
+    @_visibility = root.config.visibility.invisible
 
   # GETTERS #
 
@@ -34,7 +37,7 @@ class Planet
     return {x: @_x, y: @_y}
 
   resources: ->
-    return @_resources
+    return @_lastSeenResources
 
   availableResources: ->
     return @_availableResources
@@ -107,8 +110,10 @@ class Planet
     fungusDefense = 0
     humanDefense = 0
     # Roll for damage
-    fungusDamage += @rollForDamage(root.config.units.fungus.attack, @_fungusStrength)
-    humanDamage += @rollForDamage(root.config.units.attackShip.attack, @_attackShips)
+    fungusDamage += @rollForDamage(root.config.units.fungus.attack,
+                                   @_fungusStrength)
+    humanDamage += @rollForDamage(root.config.units.attackShip.attack,
+                                  @_attackShips)
     humanDamage += @rollForDamage(root.config.units.defenseShip.attack,
                                   @_defenseShips)
     humanDamage += @rollForDamage(root.config.units.colonyShip.attack,
@@ -184,6 +189,43 @@ class Planet
 
   movementUpkeep2: ->
     group.resetMoved() for group in @_controlGroups
+
+  visibilityUpkeep: ->
+    # Update last seen in case a tracked planet becomes untracked
+    if @_visibility = root.config.visibility.visible
+      @_lastSeenFungus = @_fungusStrength
+      @_lastSeenResources = @_resources
+    # If it has probes:
+    if @_probes > 0
+      # If it isn't visible make it visible
+      if @_visibility != root.config.visibility.visible
+        @_lastSeenFungus = @_fungusStrength
+        @_lastSeenResources = @_resources
+        @_visibility = root.config.visibility.visible
+    # If it is adjacent to a probe:
+    else if neighborsHaveProbes()
+      # Mark that this planet has been seen
+      if !@_hasBeenSeen
+        @_hasBeenSeen = true
+      # Set visibility based on actual fungus strength
+      if @_fungusStrength > 0
+        @_visibility = root.config.visibility.fungus
+      else
+        @_visibility = root.config.visibility.nonfungus
+    # If it is not adjacent to a probe:
+    else
+      # If it has never been seen it is invisible
+      if !@_hasBeenSeen
+        @_visibility = root.config.visibility.invisible
+      # If it has been seen set visibility based on last seen fungus strength
+      else
+        if @_lastSeenFungus > 0
+          @_visibility = root.config.visibility.fungus
+        else
+          @_visibility = root.config.visibility.nonfungus
+    checkRepresentationalInvariants()
+
+
 
   updateAI: ->
     group.updateAi(@) for group in @_controlGroups
@@ -261,6 +303,40 @@ class Planet
       if roll >= power
         total++
     return total
+
+  neighboursHaveProbes: ->
+    for planet in @_adjacentPlanets
+      if planet.numShips(root.config.units.probe) > 0
+        return true
+    return false
+
+  checkRepresentationalInvariants: ->
+    if @_attackShips < 0
+      throw error "Less than 0 attack ships"
+    if @_defenseShips < 0
+      throw error "Less than 0 defense ships"
+    if @_probes < 0
+      throw error "Less than 0 probes"
+    if @_colonys < 0
+      throw error "less than 0 colony ships"
+    if @_fungusStrength
+      throw error "negative fungus strength"
+    for planet in @_adjacentPlanets
+      if !planet._adjacentPlanets.contains(@)
+        throw error "we have a directed graph somehow"
+    if @_visibility = root.config.visibility.visible
+      if @_lastSeenResources != @_resources
+        throw error "last seen resources don't match. Status: visible"
+      if @_lastSeenFungus != @_fungusStrength
+        throw error "last seen fungus dosn't match. Status: visible"
+    if @_visibility = root.config.visibility.invisible and
+       @_hasBeenSeen != false
+      throw error "seen planet is invisible"
+    if @_visibility = root.config.visibility.fungus and @_lastSeenFungus < 1
+      throw error "incorrectly remembering planet as having had fungus"
+    if @_visibility = root.config.visibility.nonfungus and @_lastSeenFungus > 0
+      throw error "incorrectly remembering planet as having not had fungus"
+
 
 
 root.Planet = Planet
