@@ -37,3 +37,4 @@ class Game
     planet.resolveCombat() for planet in @_planets
     planet.buildUpkeep() for planet in @_planets
     planet.updateAI() for planet in @_planets
+    planet.visibilityUpkeep() for planet in @_planets
