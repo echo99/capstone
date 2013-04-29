@@ -104,9 +104,9 @@ main = ->
   gameFrame = new Elements.GameFrame(camera, canvas)
   # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
   # frameElement.addChild(msgBox)
-  # frameElement.addChild(new Elements.MessageBox(200, 500, 200, 80,
-  #   "This message is too long", hudCtx))
-  #frameElement.drawChildren()
+  frameElement.addChild(new Elements.MessageBox(150, 400, 280, 100,
+    "This message needs to be wrapped", hudCtx))
+  frameElement.drawChildren()
 
   msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test", ctx)
   msgBox2.setZIndex(1)
@@ -180,7 +180,6 @@ main = ->
     if e.keyCode == KeyCodes.HOME
       camera.setTarget(0, 0)
     else if e.keyCode == KeyCodes.SPACE
-      console.log("end turn")
       game.endTurn()
       UI.endTurn()
   )

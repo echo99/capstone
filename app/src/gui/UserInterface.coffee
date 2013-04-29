@@ -34,7 +34,9 @@ class UserInterface
     @unitSelection.initialize(onlyProbe)
     b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
     b.hovered = false
-    b.setClickHandler(() => console.log('END TURN'))
+    b.setClickHandler(() =>
+      game.endTurn()
+      UI.endTurn())
     b.setHoverHandler(() =>
       b.hovered = true
       b.dirty = true
@@ -62,7 +64,7 @@ class UserInterface
           p.moveShips(@unitSelection.getNumberOfAttacks(p),
                       @unitSelection.getNumberOfDefenses(p),
                       @unitSelection.getNumberOfProbes(p),
-                      @unitSelection.getNumberOfColonys(p), planet)
+                      @unitSelection.getNumberOfColonies(p), planet)
           @unitSelection.updateSelection(p)
         @unitSelection.deselectAllUnits()
       else
@@ -108,8 +110,8 @@ class UserInterface
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)
 
-    # Draw stuff attached to the game frame
-    gameFrame.drawChildren()
+    # # Draw stuff attached to the game frame
+    # gameFrame.drawChildren()
 
     # If all planets are off screen
     #   draw text in middle of screen that says something like:

@@ -22,16 +22,26 @@ getDependencies = ->
   Rehab = tryRequire('rehab')
 getDependencies()
 
+PLATFORM = process.platform
+
+Platform =
+  WINDOWS: 'win32'
+  LINUX: 'linux'
+
+SLASH = if PLATFORM == Platform.WINDOWS then '\\' else '/'
+
 # Constants
-APP_JS = 'public/app.js'
-VENDOR_JS = 'public/vendor.js'
-SRC_DIR = 'app/src'
-VENDOR_DIR = 'vendor/scripts'
-if process.platform == 'win32'
-  APP_JS = 'public\\app.js'
-  VENDOR_JS = 'public\\vendor.js'
-  SRC_DIR = 'app\\src'
-  VENDOR_DIR = 'vendor\\scripts'
+APP_JS = "public#{SLASH}app.js"
+VENDOR_JS = "public#{SLASH}vendor.js"
+SRC_DIR = "app#{SLASH}src"
+VENDOR_DIR = "vendor#{SLASH}scripts"
+NODE_DIR = ".#{SLASH}node_modules"
+NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
+# if process.platform == 'win32'
+#   APP_JS = 'public\\app.js'
+#   VENDOR_JS = 'public\\vendor.js'
+#   SRC_DIR = 'app\\src'
+#   VENDOR_DIR = 'vendor\\scripts'
 # Flag to make sure we aren't calling build multiple times at once
 BUILDING = false
 WATCHING = false
@@ -119,7 +129,7 @@ installDep = (callback = null) ->
 checkGlobalModule = (moduleName, modulePkg, cmd, failOnError, callback) ->
   exec "#{cmd} -h", (err, stdout, stderr) ->
     if err
-      if process.platform == 'win32'
+      if PLATFORM == Platform.WINDOWS
         # Handle Windows errors
         if err.code == 1
           # 1 = "ERROR_INVALID_FUNCTION"
@@ -167,36 +177,34 @@ getSourceFilePaths = (dirPath = SRC_DIR) ->
 
 # Sends a system notification
 notify = (message, msgLvl) ->
-  if process.platform == 'win32'
-    notifu = '.\\vendor\\tools\\notifu'
-    time = 5000
-    switch msgLvl
-      when MessageLevel.INFO
-        time = 3000
-      when MessageLevel.WARN
-        time = 5000
-      when MessageLevel.ERROR
-        time = 10000
-    # cmd = "#{notifu} /p Cake /m \"#{message}\" /t #{msgLvl} /d {time}"
-    # spawn cmd, (err, stdout, stderr) ->
-    #   throw err if err
-    spawn notifu, ['/p', 'Cake Status', '/m', message, '/t', msgLvl]
-  else if process.platform == 'linux'
-    cmd = 'notify-send'
-    icon = ''
-    time = 5000
-    switch msgLvl
-      when MessageLevel.INFO
-        icon += 'dialog-information'
-        time = 3000
-      when MessageLevel.WARN
-        icon += 'dialog-warning'
-        time = 5000
-      when MessageLevel.ERROR
-        icon += 'dialog-error'
-        time = 10000
-    spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
-      message]
+  switch PLATFORM
+    when Platform.WINDOWS
+      notifu = '.\\vendor\\tools\\notifu'
+      time = 5000
+      switch msgLvl
+        when MessageLevel.INFO
+          time = 3000
+        when MessageLevel.WARN
+          time = 5000
+        when MessageLevel.ERROR
+          time = 10000
+      spawn notifu, ['/p', 'Cake Status', '/m', message, '/t', msgLvl]
+    when Platform.LINUX
+      cmd = 'notify-send'
+      icon = ''
+      time = 5000
+      switch msgLvl
+        when MessageLevel.INFO
+          icon += 'dialog-information'
+          time = 3000
+        when MessageLevel.WARN
+          icon += 'dialog-warning'
+          time = 5000
+        when MessageLevel.ERROR
+          icon += 'dialog-error'
+          time = 10000
+      spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
+        message]
 
 
 ###############################################################################
@@ -215,7 +223,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
     BUILDING = true
     checkDep ->
       console.log(
-        "Building project from #{SRC_DIR}/*.coffee to #{APP_JS}...".yellow)
+        "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
       # Try to compile all files individually first, to get a better
       # error message, then if it succeeds, compile them all to one file
       callback = (passed) ->
@@ -277,7 +285,7 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
 task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
   WATCHING = true
   checkDep ->
-    console.log("Watching files #{SRC_DIR}/*.coffee".yellow)
+    console.log("Watching files #{SRC_DIR}#{SLASH}*.coffee".yellow)
 
     # Get total number of files
     files = new Rehab().process './'+SRC_DIR
@@ -321,25 +329,6 @@ task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
     exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
       throw err if err
 
-  # missingUglify = (error) ->
-  #   console.error(error.toString().trim())
-  #   console.error('UglifyJS may not be installed correctly')
-  #   console.error('Please install using "npm install -g uglify-js"')
-  #   process.exit(error.code)
-
-  # exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
-  #   if err
-  #     if process.platform == 'win32'
-  #       # Handle Windows errors
-  #       if err.code == 1
-  #         # 1 = "ERROR_INVALID_FUNCTION"
-  #         missingUglify(err)
-  #     else if err.code == 127
-  #       # 127 = "illegal command"
-  #       missingUglify(err)
-  #     else
-  #       throw err # Unknown error
-
   exec "uglifyjs #{VENDOR_JS} -o #{VENDOR_JS}", (err, stdout, stderr) ->
     if err
       throw err
@@ -376,7 +365,7 @@ task 'install-dep', 'Install all necessary node modules', ->
 task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
   checkDep ->
     options.verbose ?= 'verbose' of options
-    console.log("Checking #{SRC_DIR}/*.coffee for lint".yellow)
+    console.log("Checking #{SRC_DIR}#{SLASH}*.coffee for lint".yellow)
     pass = "✔".green
     warn = "⚠".yellow
     fail = "✖".red
@@ -427,18 +416,20 @@ task 'doc', 'Document the source code using Codo', (options) ->
   lastResortCodoFix = (cmd, callback=null) ->
     console.log('Documenting with codo failed'.red)
     try
-      if process.platform == 'win32'
-        process.chdir('node_modules\\codo')
-      else
-        process.chdir('node_modules/codo')
+      # if process.platform == 'win32'
+      #   process.chdir('node_modules\\codo')
+      # else
+      #   process.chdir('node_modules/codo')
+      process.chdir("#{NODE_DIR}#{SLASH}codo")
       console.log('Attempting to force installation of walkdir v0.0.5...'.yellow)
       exec "npm install walkdir@0.0.5", (err, stdout, stderr) ->
         # console.log(stdout)
         throw err if err
-        if process.platform == 'win32'
-          process.chdir('..\\..')
-        else
-          process.chdir('../..')
+        # if process.platform == 'win32'
+        #   process.chdir('..\\..')
+        # else
+        #   process.chdir('../..')
+        process.chdir("..#{SLASH}..")
         console.log('Installation successful'.green)
         console.log('Attempting to run codo again...'.yellow)
         exec cmd, (err, stdout, stderr) ->
@@ -452,9 +443,10 @@ task 'doc', 'Document the source code using Codo', (options) ->
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
     checkGlobalModule 'Codo', 'codo', 'codo', false, (hasModule = false) ->
-      cmd = './node_modules/.bin/codo'
-      if process.platform == 'win32'
-        cmd = '.\\node_modules\\.bin\\codo'
+      # cmd = './node_modules/.bin/codo'
+      # if process.platform == 'win32'
+      #   cmd = '.\\node_modules\\.bin\\codo'
+      cmd = "#{NODE_BIN_DIR}#{SLASH}codo"
       if hasModule
         exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
           console.log(stdout)
@@ -488,7 +480,8 @@ task "test", "Run tests", (options) ->
   tryRequire('coffee-script')
   reporter =  if 'verbose' of options then 'spec' else 'dot'
   checkDep ->
-    cmd = './node_modules/.bin/mocha'
+    # cmd = './node_modules/.bin/mocha'
+    cmd = "#{NODE_BIN_DIR}#{SLASH}mocha"
     args = [
       " --compilers coffee:coffee-script"
       "-u tdd --reporter #{reporter}"
@@ -496,8 +489,8 @@ task "test", "Run tests", (options) ->
       "--require test/helpers/test_helper.coffee"
       "--colors"
     ].join(' ')
-    if process.platform == 'win32'
-      cmd = '.\\node_modules\\.bin\\mocha'
+    # if process.platform == 'win32'
+    #   cmd = '.\\node_modules\\.bin\\mocha'
     exec cmd + args, (err, output, stderr) ->
       console.log(output) if output
       console.log(stderr) if stderr

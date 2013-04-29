@@ -78,6 +78,7 @@ class ControlGroup
             not (u.visibility is window.config.visibility.fungus)
           seen.push(u)
           q.push([u, t])
+    console.log("route: " + @_route)
     return null
 
 root.ControlGroup = ControlGroup
