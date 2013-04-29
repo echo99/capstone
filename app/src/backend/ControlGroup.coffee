@@ -8,7 +8,7 @@ class ControlGroup
   constructor: (@_attackShips,
                 @_defenseShips,
                 @_probes,
-                @_colonys,
+                @_colonies,
                 @_destination) ->
     @_route = []
     @_hasMoved = false
@@ -25,8 +25,8 @@ class ControlGroup
   probes: ->
     @_probes
 
-  colonys: ->
-    @_colonys
+  colonies: ->
+    @_colonies
 
   route: ->
     @_route
@@ -46,8 +46,8 @@ class ControlGroup
   setProbes: (ships) ->
     @_probes = ships
 
-  setColonys: (ships) ->
-    @_colonys = ships
+  setColonies: (ships) ->
+    @_colonies = ships
 
   setMoved: ->
     @_moved = true
