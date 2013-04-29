@@ -133,16 +133,6 @@ class Elements.UIElement extends Module
   # Sets the draw function for this element
   setDrawFunc: (@_drawFunc) ->
 
-  # # Draw the element to the canvas
-  # #
-  # # @abstract Each element will have its own draw function
-  # #
-  # # @param [CanvasRenderingContext2D] ctx
-  # # @param [Number] x
-  # # @param [Number] y
-  # #
-  # draw: (ctx, x, y) ->
-
   # Call the draw function with the passed arguments
   #
   # @overload draw(ctx)
@@ -164,6 +154,9 @@ class Elements.UIElement extends Module
         @_drawFunc(ctx, coords, zoom)
 
   # Set this element and all child elements to dirty
+  #
+  # @TODO: Somehow propogate dirty state back to parent so it knows to redraw it,
+  #   but we don't always want to redraw the dirty parent.
   #
   setDirty: ->
     @dirty = true
@@ -202,11 +195,6 @@ class Elements.UIElement extends Module
     # else
     #   console.log("missed #{@constructor.name} at (#{x}, #{y})")
     return clickedSomething
-
-  # @private Action to perform when element is clicked
-  # @abstract
-  #
-  _onClick: ->
 
   # Call to element to check if it is being hovered over as the mouse moves and
   # executes hover handlers if it is
@@ -250,16 +238,53 @@ class Elements.UIElement extends Module
       for child in @_children
         child.mouseOut()
 
+  # # @private Action to perform when element is hovered over
+  # # @abstract
+  # #
+  # _onHover: ->
+  #   return CursorType.DEFAULT
+
+  # # @private Action to perform when an element is no longer being hovered over
+  # # @abstract
+  # #
+  # _onMouseOut: ->
+
+  # Set the onClick handler
+  #
+  # @param [Function] clickHandler
+  #
+  setClickHandler: (@clickHandler) ->
+
+  # Set the onHover handler
+  #
+  # @param [Function] hoverHandler
+  #
+  setHoverHandler: (@hoverHandler) ->
+
+  # Set the onMouseOut handler
+  #
+  # @param [Function] mouseOutHandler
+  #
+  setMouseOutHandler: (@mouseOutHandler) ->
+
+  # @private Action to perform when element is clicked
+  #
+  _onClick: ->
+    if @clickHandler?
+      @clickHandler()
+
   # @private Action to perform when element is hovered over
-  # @abstract
   #
   _onHover: ->
+    if @hoverHandler?
+      @hoverHandler()
     return CursorType.DEFAULT
 
-  # @private Action to perform when an element is no longer being hovered over
-  # @abstract
+  # private Action to perform when an element is no longer being hovered over
   #
   _onMouseOut: ->
+    if @mouseOutHandler?
+      @mouseOutHandler()
 
   # Gets the relative location of the point to this element
   #
@@ -389,6 +414,7 @@ class Elements.Frame extends Elements.UIElement
 
   # Draw the frame's children
   drawChildren: ->
+    # console.log("Frame's drawChildren called!")
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
@@ -418,6 +444,7 @@ class Elements.GameFrame extends Elements.UIElement
 
   # Draw the frame's children if they are on the screen
   drawChildren: ->
+    # console.log("GameFrame's drawChildren called!")
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
@@ -454,6 +481,34 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
+    @ctx.font = config.windowStyle.msgBoxText.font
+    textWidth = @ctx.measureText(@message).width
+    console.log("Width of #{@message} : #{textWidth}")
+    allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
+    @lines = []
+    if textWidth > allowedWidth
+      words = @message.split(" ")
+      console.log("Words: #{words}")
+      line = null
+      lastTried = null
+      for word in words
+        lastTried = line
+        if line is null
+          line = word
+        else
+          line += ' ' + word
+        if @ctx.measureText(line).width > allowedWidth
+          if lastTried isnt null
+            @lines.push(lastTried)
+            line = word
+          else
+            @lines.push(line)
+            line = null
+      if line isnt null
+        @lines.push(line)
+    console.log(@lines)
+
     # console.log("My children: #{@_children}")
     # console.log("Button's children: #{@closeBtn._children}")
 
@@ -469,7 +524,7 @@ class Elements.MessageBox extends Elements.BoxElement
     lw = config.windowStyle.lineWidth
     lw2 = lw + lw
     @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
-    @ctx.canvas.style.cursor = CursorType.DEFAULT
+    # @ctx.canvas.style.cursor = CursorType.DEFAULT
 
 
   # Add a callback to call when the message box updates
@@ -483,6 +538,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] zoom The current zoom
   #
   draw: (ctx, coords = null, zoom = null) ->
+    super(ctx)
     if @visible
       if coords
         x = coords.x
@@ -515,18 +571,28 @@ class Elements.MessageBox extends Elements.BoxElement
       # ctx.fillRect(@x, @y, @w, @h)
       ctx.strokeRect(x+cx, y+cy, w, h)
       ctx.fillRect(x+cx, y+cy, w, h)
-      ctx.font = config.windowStyle.labelText.font
-      ctx.fillStyle = config.windowStyle.labelText.color
+      ctx.font = config.windowStyle.msgBoxText.font
+      ctx.fillStyle = config.windowStyle.msgBoxText.color
       ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
       # cx = Math.round(@w/2 + @x)
       # cy = Math.round(@h/2 + @y)
       # ctx.fillText(@message, cx, cy)
-      ctx.fillText(@message, x, y)
+
+      if @lines.length > 0
+        console.log("Box is dirty: #{@dirty}")
+        yOffset = (@lines.length-1) * @lineSpacing
+        yTmp = y - yOffset
+        for line in @lines
+          ctx.fillText(line, x, yTmp)
+          yTmp += config.windowStyle.msgBoxText.lineWidth
+      else
+        ctx.fillText(@message, x, y)
 
       btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
       btnOffsetY = y + @cy + @closeBtn.y + @closeBtn.cy
       cx = Math.round(@closeBtn.w/2 + btnOffsetX)
-      cy = Math.round(@closeBtn.h/2 + btnOffsetY) + 4
+      cy = Math.round(@closeBtn.h/2 + btnOffsetY)
       ctx.fillStyle = 'rgb(0,0,0)'
       ctx.fillRect(btnOffsetX, btnOffsetY, @closeBtn.w, @closeBtn.h)
       ctx.fillStyle = 'rgb(255,255,255)'
@@ -579,10 +645,10 @@ Button =
 
 # All possible states for a button
 ButtonStates =
-  LINK: 1
-  VISITED: 2
-  HOVER: 3
-  ACTIVE: 4
+  DEFAULT: 1
+  HOVER: 2
+  PRESSED: 3
+  DISABLED: 4
 
 
 # Button class for handling user interactions
@@ -600,47 +666,48 @@ class Elements.Button extends Elements.BoxElement
   #
   constructor: (@x, @y, @w, @h, @clickHandler=null) ->
     super(@x, @y, @w, @h)
-    @hoverHandler = null
-    @mouseOutHandler = null
+    # @hoverHandler = null
+    # @mouseOutHandler = null
 
-  # Set the onClick handler
-  #
-  # @param [Function] clickHandler
-  #
-  setClickHandler: (@clickHandler) ->
+  # # Set the onClick handler
+  # #
+  # # @param [Function] clickHandler
+  # #
+  # setClickHandler: (@clickHandler) ->
 
-  # Set the onHover handler
-  #
-  # @param [Function] hoverHandler
-  #
-  setHoverHandler: (@hoverHandler) ->
+  # # Set the onHover handler
+  # #
+  # # @param [Function] hoverHandler
+  # #
+  # setHoverHandler: (@hoverHandler) ->
 
-  # Set the onMouseOut handler
-  #
-  # @param [Function] mouseOutHandler
-  #
-  setMouseOutHandler: (@mouseOutHandler) ->
+  # # Set the onMouseOut handler
+  # #
+  # # @param [Function] mouseOutHandler
+  # #
+  # setMouseOutHandler: (@mouseOutHandler) ->
 
-  # Call the attached callback function when the button is clicked
-  #
-  _onClick: ->
-    # @callback.callback()
-    # @callback()
-    if @clickHandler isnt null
-      @clickHandler()
+  # # Call the attached callback function when the button is clicked
+  # #
+  # _onClick: ->
+  #   # @callback.callback()
+  #   # @callback()
+  #   if @clickHandler isnt null
+  #     @clickHandler()
 
   # Do something when the user hovers over the button
   #
   _onHover: ->
-    if @hoverHandler isnt null
-      @hoverHandler()
+    super()
+    # if @hoverHandler isnt null
+    #   @hoverHandler()
     return CursorType.POINTER
 
-  # Do something when the user's mouse leaves the button
-  #
-  _onMouseOut: ->
-    if @mouseOutHandler isnt null
-      @mouseOutHandler()
+  # # Do something when the user's mouse leaves the button
+  # #
+  # _onMouseOut: ->
+  #   if @mouseOutHandler isnt null
+  #     @mouseOutHandler()
 
 
 # Button class for circular buttons
@@ -656,47 +723,48 @@ class Elements.RadialButton extends Elements.RadialElement
   #   button is clicked
   constructor: (@x, @y, @r, @clickHandler=null) ->
     super(@x, @y, @r)
-    @hoverHandler = null
-    @mouseOutHandler = null
+    # @hoverHandler = null
+    # @mouseOutHandler = null
 
-  # Set the onClick handler
-  #
-  # @param [Function] clickHandler
-  #
-  setClickHandler: (@clickHandler) ->
+  # # Set the onClick handler
+  # #
+  # # @param [Function] clickHandler
+  # #
+  # setClickHandler: (@clickHandler) ->
 
-  # Set the onHover handler
-  #
-  # @param [Function] hoverHandler
-  #
-  setHoverHandler: (@hoverHandler) ->
+  # # Set the onHover handler
+  # #
+  # # @param [Function] hoverHandler
+  # #
+  # setHoverHandler: (@hoverHandler) ->
 
-  # Set the onMouseOut handler
-  #
-  # @param [Function] mouseOutHandler
-  #
-  setMouseOutHandler: (@mouseOutHandler) ->
+  # # Set the onMouseOut handler
+  # #
+  # # @param [Function] mouseOutHandler
+  # #
+  # setMouseOutHandler: (@mouseOutHandler) ->
 
-  # Call the attached callback function when the button is clicked
-  #
-  _onClick: ->
-    # @callback.callback()
-    # @callback()
-    if @clickHandler isnt null
-      @clickHandler()
+  # # Call the attached callback function when the button is clicked
+  # #
+  # _onClick: ->
+  #   # @callback.callback()
+  #   # @callback()
+  #   if @clickHandler isnt null
+  #     @clickHandler()
 
   # Do something when the user hovers over the button
   #
   _onHover: ->
-    if @hoverHandler isnt null
-      @hoverHandler()
+    super()
+    # if @hoverHandler isnt null
+    #   @hoverHandler()
     return CursorType.POINTER
 
-  # Do something when the user's mouse leaves the button
-  #
-  _onMouseOut: ->
-    if @mouseOutHandler isnt null
-      @mouseOutHandler()
+  # # Do something when the user's mouse leaves the button
+  # #
+  # _onMouseOut: ->
+  #   if @mouseOutHandler isnt null
+  #     @mouseOutHandler()
 
 
 # Class for handling DOM (Document Object Model) buttons. These buttons are

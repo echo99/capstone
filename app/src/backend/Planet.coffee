@@ -20,7 +20,7 @@ class Planet
     @_attackShips = 0
     @_defenseShips = 0
     @_probes = 0
-    @_colonys = 0
+    @_colonies = 0
     @_outpost = false
     @_station = false
     @_controlGroups = []
@@ -45,7 +45,7 @@ class Planet
   numShips: (type) ->
     return switch type
       when root.config.units.probe then @_probes
-      when root.config.units.colonyShip then @_colonys
+      when root.config.units.colonyShip then @_colonies
       when root.config.units.attackShip then @_attackShips
       when root.config.units.defenseShip then @_defenseShips
       else throw new Error("Ship type unknown.")
@@ -171,7 +171,7 @@ class Planet
         @_unitConstructing = null
         switch unit
           when root.config.units.probe then @_probes++
-          when root.config.units.colonyShip then @_colonys++
+          when root.config.units.colonyShip then @_colonies++
           when root.config.units.attackShip then @_attackShips++
           when root.config.units.defenseShip then @_defenseShips++
           else throw new Error("Ship type unknown.")
@@ -197,22 +197,22 @@ class Planet
       @_availableResources -= name.cost
       @_turnsToComplete = name.turns
 
-  moveShips: (attackShips, defenseShips, probes, colonys, dest) ->
+  moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
     # check for insufficient ships
     if attackShips > @_attackShips or
        defenseShips > @_defenseShips or
        probes > @_probes or
-       colonys > @_colonys
+       colonies > @_colonies
       throw error "Insufficient Ships"
     else
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
-                                      probes, colonys, dest)
+                                      probes, colonies, dest)
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips
       @_probes -= probes
-      @_colonys -= colonys
+      @_colonies -= colonies
       controlGroup.updateAi(@)
       # add to planet
       @_controlGroups.push(controlGroup)
@@ -243,7 +243,7 @@ class Planet
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
         @_probes += group.probes()
-        @_colonys += group.colonys()
+        @_colonies += group.colonies()
       else
         group.next().receiveGroup(group)
       @_controlGroups = @_controlGroups.filter((g) => g != group)
