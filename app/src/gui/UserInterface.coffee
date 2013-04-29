@@ -34,7 +34,9 @@ class UserInterface
     @unitSelection.initialize(onlyProbe)
     b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
     b.hovered = false
-    b.setClickHandler(() => console.log('END TURN'))
+    b.setClickHandler(() =>
+      game.endTurn()
+      UI.endTurn())
     b.setHoverHandler(() =>
       b.hovered = true
       b.dirty = true

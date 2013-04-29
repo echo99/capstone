@@ -38,10 +38,9 @@ class UnitSelection
 
   # Initilizes the data structure that tracks which units are selected
   _initUnitSelection: (planet) ->
-    location = window.config.unitDisplay.location
+    loc = window.config.unitDisplay.location
     pLoc = planet.location()
-    location.x += pLoc.x
-    location.y += pLoc.y
+    location = {x: loc.x + pLoc.x, y: loc.y + pLoc.y}
 
     units = {probes: [], colonys: [], attacks: [], defenses: []}
 

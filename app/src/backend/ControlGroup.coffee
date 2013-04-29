@@ -8,7 +8,7 @@ class ControlGroup
   constructor: (@_attackShips,
                 @_defenseShips,
                 @_probes,
-                @_colonies,
+                @_colonys,
                 @_destination) ->
     @_route = []
     @_hasMoved = false
@@ -25,8 +25,8 @@ class ControlGroup
   probes: ->
     @_probes
 
-  colonies: ->
-    @_colonies
+  colonys: ->
+    @_colonys
 
   route: ->
     @_route
@@ -46,8 +46,8 @@ class ControlGroup
   setProbes: (ships) ->
     @_probes = ships
 
-  setColonies: (ships) ->
-    @_colonies = ships
+  setColonys: (ships) ->
+    @_colonys = ships
 
   setMoved: ->
     @_moved = true
@@ -78,6 +78,7 @@ class ControlGroup
             not (u.visibility is window.config.visibility.fungus)
           seen.push(u)
           q.push([u, t])
+    console.log("route: " + @_route)
     return null
 
 root.ControlGroup = ControlGroup
