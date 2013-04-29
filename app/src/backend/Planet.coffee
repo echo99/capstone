@@ -132,7 +132,10 @@ class Planet
     if humanDamage < 0
       humanDamage = 0
     # Destroy units
-    @_fungusStrength -= humanDamage
+    if @_fungusStrength >= humanDamage
+      @_fungusStrength -= humanDamage
+    else
+      @_fungusStrength = 0
     # Destroy attack ships first
     if @_attackShips >= fungusDamage
       @_attackShips -= fungusDamage
