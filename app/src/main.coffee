@@ -106,8 +106,16 @@ main = ->
   # frameElement.addChild(msgBox)
   # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
   #   "This message needs to be wrapped"))
-  frameElement.addChild(new Elements.MessageBox(150, 500, 280, 100,
-    "This message\nhas a newline"))
+  # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
+  #   "This message is left aligned", 'left'))
+  # frameElement.addChild(new Elements.MessageBox(450, 350, 280, 100,
+  #   "This message is right aligned", 'right'))
+  # frameElement.addChild(new Elements.MessageBox(150, 500, 280, 100,
+  #   "This message\nhas a newline"))
+  # frameElement.addChild(new Elements.MessageBox(450, 500, 280, 100,
+  #   "This message is top right aligned", 'right', 'top'))
+  # frameElement.addChild(new Elements.MessageBox(750, 350, 280, 100,
+  #   "This message is bottom left aligned", 'left', 'bottom'))
   win = new Elements.Window(100, 200, 100, 100)
   win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
   win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
