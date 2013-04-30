@@ -20,7 +20,7 @@ class UserInterface
   constructor: () ->
     @unitSelection = new UnitSelection()
 
-  initialize: (onlyProbe=false) ->
+  initialize: (onlyProbe=false, @moveToDiscovered=true) ->
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
@@ -32,23 +32,20 @@ class UserInterface
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
     b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
-    b.setProperty("hover", false)
     b.setClickHandler(() =>
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
     )
     b.setHoverHandler(() =>
-      b.setProperty("hover", true)
       b.setDirty()
     )
     b.setMouseOutHandler(() =>
-      b.setProperty("hover", false)
       b.setDirty()
     )
     b.setDrawFunc((ctx) =>
       b.y = camera.height-5-10
-      if b.getProperty("hover")
+      if b.isHovered()
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, b.x, b.y, ctx, false)
       else
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, b.x, b.y, ctx, false)
@@ -63,6 +60,9 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
+      if planet.visibility() == window.config.visibility.discovered and
+         not @moveToDiscovered
+        return
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -84,7 +84,10 @@ class UserInterface
 
   planetButtonHoverCallback: (planet) =>
     return () =>
-      @hoveredPlanet = planet
+      vis = planet.visibility()
+      if vis == window.config.visibility.visible or
+         (@moveToDiscovered and vis == window.config.visibility.discovered)
+        @hoveredPlanet = planet
 
   planetButtonOutCallback: () =>
     @hoveredPlanet = null

@@ -60,7 +60,7 @@ class Menu extends Mission
 
     @lastPlanet = @Planets.Home
 
-    UI.initialize(true)
+    UI.initialize(true, false)
     camera.setZoom(0.5)
 
     # Note: The position currently doesn't update if the camera changes
@@ -68,21 +68,18 @@ class Menu extends Mission
                                             300, 200,
                                             "This is the mission 1 message box")
     button = new Elements.Button(100, 170, 101, 20)
-    button.setProperty("hover", false)
     button.setClickHandler(() =>
       console.log('clicked mission 1 button')
     )
     button.setHoverHandler(() =>
-      button.setProperty("hover", true)
       button.setDirty()
     )
     button.setMouseOutHandler(() =>
-      button.setProperty("hover", false)
       button.setDirty()
     )
     button.setDrawFunc((ctx) =>
       loc = @mission1Menu.getActualLocation(button.x, button.y)
-      if button.getProperty("hover")
+      if button.isHovered()
         SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
                          loc.x, loc.y, ctx, false)
       else
@@ -97,21 +94,18 @@ class Menu extends Mission
     @exterminationMenu = new Elements.MessageBox(camera.width/2, camera.height/2,
       400, 100, "Exterminate all fungus before it exterminates you.")
     button2 = new Elements.Button(345, 85, 101, 20)
-    button2.setProperty("hover", false)
     button2.setClickHandler(() =>
       console.log('clicked extermination button')
     )
     button2.setHoverHandler(() =>
-      button2.setProperty("hover", true)
       button2.setDirty()
     )
     button2.setMouseOutHandler(() =>
-      button2.setProperty("hover", false)
       button2.setDirty()
     )
     button2.setDrawFunc((ctx) =>
       loc = @exterminationMenu.getActualLocation(button2.x, button2.y)
-      if button2.getProperty("hover")
+      if button2.isHovered()
         SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
                          loc.x, loc.y, ctx, false)
       else
@@ -155,12 +149,22 @@ class Menu extends Mission
   onMouseClick: (x, y) ->
     # if the probe has been set to move to a new planet
     #   advance the turn
-    if @lastPlanet.numShips(window.config.units.probe) == 0
+    inGroup = false
+    for c in @lastPlanet.getControlGroups()
+      if c.probes() == 1
+        inGroup = true
+        break
+    while inGroup#@lastPlanet.numShips(window.config.units.probe) == 0 or inGroup
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
       loc = @lastPlanet.location()
       camera.setTarget(loc.x, loc.y)
+      inGroup = false
+      for c in @lastPlanet.getControlGroups()
+        if c.probes() == 1
+          inGroup = true
+          break
 
     # NOTE: this assumes that the game handle the mouse click first,
     #       if that's not the case this may have to be done differently
