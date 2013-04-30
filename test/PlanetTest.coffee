@@ -17,7 +17,7 @@ suite 'Planet', ->
     test 'Building fails when something is already under construction.', ->
       testPlanet = new Planet(0, 0, 100, 0)
       testPlanet._availableResources = 5
-      assert.doesNotThrow(-> testPLanet.build(units.probe))
+      assert.doesNotThrow(-> testPlanet.build(units.probe))
       assert.throws(-> testPlanet.build(units.probe))
 
   suite '#buildUpkeep', ->
