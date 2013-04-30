@@ -584,23 +584,26 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] w The width of the box
   # @param [Number] h The height of the box
   # @param [String] message The message to display in the box
-  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  # @param [Elements.UIElement] closeBtn
   # @param [String] textAlign
   #   Horizontal alignment of the text: `'left'`, `'center'`, `'right'`
   # @param [String] vAlign
   #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`
   #
-  constructor: (@x, @y, @w, @h, @message, @textAlign='center', @vAlign='middle') ->
+  constructor: (@x, @y, @w, @h, @message, @closeBtn=null, @textAlign='center',
+      @vAlign='middle') ->
     super(@x, @y, @w, @h)
     # test = ->
     #   alert(@visible)
     #   @visible = false
     #   alert(@visible)
     # @closeBtn = new Elements.Button(5, 5, 16, 16, @)
-    @closeBtn = new Elements.Button(8, 8, 16, 16,
-      ((obj) ->
-        return -> obj.close())(this))
-    @addChild(@closeBtn)
+    # if not @closeBtn?
+    #   @closeBtn = new Elements.Button(8, 8, 16, 16,
+    #     ((obj) ->
+    #       return -> obj.close())(this))
+    #   @addChild(@closeBtn)
+    @usingDefaultBtn = false
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
     @_closing = false
@@ -608,6 +611,15 @@ class Elements.MessageBox extends Elements.BoxElement
 
     # console.log("My children: #{@_children}")
     # console.log("Button's children: #{@closeBtn._children}")
+
+  # Set the default close button for this message box
+  #
+  setDefaultCloseBtn: ->
+    @closeBtn = new Elements.Button(8, 8, 16, 16,
+      ((obj) ->
+        return -> obj.close())(this))
+    @addChild(@closeBtn)
+    @usingDefaultBtn = true
 
   # @private Wrap the text for this message box so the message will fit in the box
   #
@@ -655,14 +667,16 @@ class Elements.MessageBox extends Elements.BoxElement
   # Open this message box
   #
   open: ->
-    @setDirty()
-    @visible = true
+    if not @visible
+      @setDirty()
+      @visible = true
 
   # Close this message box
   #
   close: ->
-    @setDirty()
-    @_closing = true
+    if @visible
+      @setDirty()
+      @_closing = true
 
 
   # Add a callback to call when the message box updates
@@ -675,7 +689,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   _clearBox: (ctx) ->
-    lw = config.windowStyle.lineWidth
+    lw = config.windowStyle.lineWidth / 2
     lw2 = lw + lw
     ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 
@@ -771,17 +785,18 @@ class Elements.MessageBox extends Elements.BoxElement
         # ctx.fillText(@message, x, y)
         ctx.fillText(@message, tx, ty)
 
-      btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
-      btnOffsetY = y + @cy + @closeBtn.y + @closeBtn.cy
-      cx = Math.round(@closeBtn.w/2 + btnOffsetX)
-      cy = Math.round(@closeBtn.h/2 + btnOffsetY)
-      ctx.fillStyle = 'rgb(0,0,0)'
-      ctx.fillRect(btnOffsetX, btnOffsetY, @closeBtn.w, @closeBtn.h)
-      ctx.fillStyle = 'rgb(255,255,255)'
-      ctx.font = '12pt Arial'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText('x', cx, cy)
+      if @closeBtn? and @usingDefaultBtn
+        btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
+        btnOffsetY = y + @cy + @closeBtn.y + @closeBtn.cy
+        cx = Math.round(@closeBtn.w/2 + btnOffsetX)
+        cy = Math.round(@closeBtn.h/2 + btnOffsetY)
+        ctx.fillStyle = 'rgb(0,0,0)'
+        ctx.fillRect(btnOffsetX, btnOffsetY, @closeBtn.w, @closeBtn.h)
+        ctx.fillStyle = 'rgb(255,255,255)'
+        ctx.font = '12pt Arial'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('x', cx, cy)
 
       if zoom
         ctx.restore()

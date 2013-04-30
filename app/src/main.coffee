@@ -123,6 +123,7 @@ main = ->
   frameElement.drawChildren()
 
   msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
+  msgBox2.setDefaultCloseBtn()
   msgBox2.setZIndex(1)
   gameFrame.addChild(msgBox2)
 
