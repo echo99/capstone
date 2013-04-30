@@ -369,6 +369,13 @@ class Elements.UIElement extends Module
       @zIndicesRev.reverse()
       @_childBuckets[zIndex] = [child]
 
+  # Get the string representation of the UIElement
+  #
+  # @return [String] String representation of element
+  #
+  toString: ->
+    return "#{@constructor.name}: (#{@x}, #{@y})"
+
 
 
 # A box UI element

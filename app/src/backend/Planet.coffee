@@ -33,6 +33,13 @@ class Planet
 
   # GETTERS #
 
+  # Returns the string representation of the planet.
+  #
+  # @return [String] String representation of planet
+  #
+  toString: ->
+    return "Planet(#{@_x}, #{@_y}, #{@_resources}, #{@_rate})"
+
   # Returns the (x, y) location of the planet.
   #
   # @return [{x: ..., y: ...}] Location of planet
