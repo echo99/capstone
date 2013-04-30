@@ -176,20 +176,22 @@ class Elements.UIElement extends Module
   # @TODO: Somehow propogate dirty state back to parent so it knows to redraw it,
   #   but we don't always want to redraw the dirty parent.
   #
-  setDirty: ->
+  setDirty: (propagateUp = true) ->
+    # console.log("SetDirty called on #{@constructor.name}")
     @dirty = true
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
-        child.setDirty()
-    _parent?._handleDirtyChild(this)
+        child.setDirty(false) if not child.dirty
+    @_parent?._handleDirtyChild(this) if propagateUp
 
   # @private Method for propogating dirtyness
   #
   # @param [UIElement] child
   #
   _handleDirtyChild: (child) ->
-    if @clickable
+    # console.log("HandleDirtyChild called")
+    if @clickable and not @dirty
       @setDirty()
 
   # Call to element to check if it is clicked and executes click handlers if it
@@ -584,7 +586,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [String] message The message to display in the box
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
-  constructor: (@x, @y, @w, @h, @message, @ctx) ->
+  constructor: (@x, @y, @w, @h, @message) ->
     super(@x, @y, @w, @h)
     # test = ->
     #   alert(@visible)
@@ -595,12 +597,46 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
-    @ctx.font = config.windowStyle.msgBoxText.font
-    textWidth = @ctx.measureText(@message).width
-    console.log("Width of #{@message} : #{textWidth}")
-    allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    # @ctx.font = config.windowStyle.msgBoxText.font
+    # textWidth = @ctx.measureText(@message).width
+    # console.log("Width of #{@message} : #{textWidth}")
+    # allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    # @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
+    # @lines = []
+    # if textWidth > allowedWidth
+    #   words = @message.split(" ")
+    #   console.log("Words: #{words}")
+    #   line = null
+    #   lastTried = null
+    #   for word in words
+    #     lastTried = line
+    #     if line is null
+    #       line = word
+    #     else
+    #       line += ' ' + word
+    #     if @ctx.measureText(line).width > allowedWidth
+    #       if lastTried isnt null
+    #         @lines.push(lastTried)
+    #         line = word
+    #       else
+    #         @lines.push(line)
+    #         line = null
+    #   if line isnt null
+    #     @lines.push(line)
+    # console.log(@lines)
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
+    @_closing = false
+    @_checkedWrap = false
+
+    # console.log("My children: #{@_children}")
+    # console.log("Button's children: #{@closeBtn._children}")
+
+  _wrapText: (ctx) ->
+    ctx.font = config.windowStyle.msgBoxText.font
+    textWidth = ctx.measureText(@message).width
+    console.log("Width of #{@message} : #{textWidth}")
+    allowedWidth = @w - (config.windowStyle.lineWidth * 2)
     if textWidth > allowedWidth
       words = @message.split(" ")
       console.log("Words: #{words}")
@@ -612,7 +648,7 @@ class Elements.MessageBox extends Elements.BoxElement
           line = word
         else
           line += ' ' + word
-        if @ctx.measureText(line).width > allowedWidth
+        if ctx.measureText(line).width > allowedWidth
           if lastTried isnt null
             @lines.push(lastTried)
             line = word
@@ -622,9 +658,8 @@ class Elements.MessageBox extends Elements.BoxElement
       if line isnt null
         @lines.push(line)
     console.log(@lines)
+    @_checkedWrap = true
 
-    # console.log("My children: #{@_children}")
-    # console.log("Button's children: #{@closeBtn._children}")
 
   # # Temporary callback function
   # callback: () ->
@@ -634,10 +669,13 @@ class Elements.MessageBox extends Elements.BoxElement
 
   # Close this message box
   close: ->
-    @visible = false
-    lw = config.windowStyle.lineWidth
-    lw2 = lw + lw
-    @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
+    # @visible = true
+    # @dirty = true
+    @setDirty()
+    @_closing = true
+    # lw = config.windowStyle.lineWidth
+    # lw2 = lw + lw
+    # @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
     # @ctx.canvas.style.cursor = CursorType.DEFAULT
 
 
@@ -652,8 +690,16 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] zoom The current zoom
   #
   draw: (ctx, coords = null, zoom = null) ->
-    super(ctx)
-    if @visible
+    if @_closing
+      @_closing = false
+      @visible = false
+      lw = config.windowStyle.lineWidth
+      lw2 = lw + lw
+      ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+      @setDirty()
+    else if @visible
+      if not @_checkedWrap
+        @_wrapText(ctx)
       if coords
         x = coords.x
         y = coords.y
@@ -717,6 +763,8 @@ class Elements.MessageBox extends Elements.BoxElement
 
       if zoom
         ctx.restore()
+
+      super(ctx, coords, zoom)
 
 # Button mixin [WIP]
 # @mixin
