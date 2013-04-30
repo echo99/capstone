@@ -1,5 +1,3 @@
-#Defines a class to represent planets
-
 if not root?
   root = exports ? window
 
@@ -9,6 +7,8 @@ if exports?
 
 #_require ControlGroup
 
+# Defines a class to represent planets
+#
 class Planet
   constructor: (@_x, @_y, @_resources = 0, @_rate = 0) ->
     @_lastSeenResources = null
@@ -33,23 +33,55 @@ class Planet
 
   # GETTERS #
 
+  # Returns the (x, y) location of the planet.
+  #
+  # @return [{x: ..., y: ...}] Location of planet
+  #
   location: ->
     return {x: @_x, y: @_y}
 
+  # Returns the distance between this planet and the specified planet.
+  #
+  # @param [Planet] planet The other planet
+  #
+  # @return [Double] The distance between this planet and the specified planet.
+  #
   distance: (planet) ->
     oX = planet.location.x
     oY = planet.location.y
     return sqrt(Math.pow(@_x - oX, 2) + Math.pow(@_y - oY, 2))
 
+  # Returns the last-known amount of (unharvested) resources left on the planet.
+  # This resource count is updated if a probe or outpost/station is on the planet.
+  #
+  # @return [Integer] The last-known count of (unharvested) resources left on the planet.
+  #
   resources: ->
     return @_lastSeenResources
 
+  # Returns the amount of usable resources on the planet's station,
+  # or zero if no station exists.
+  #
+  # @return [Integer] The amount of usable resources on the planet.
+  #
   availableResources: ->
     return @_availableResources
 
+  # Returns the current visibility state of the planet.
+  #
+  # @return [root.config.visibility.*] The current visibility state of the planet.
+  #
   visibility: ->
     return @_visibility
 
+  # Returns the current number of ships on the planet of the specified type.
+  #
+  # @param [root.config.units.*] type The specified type
+  #
+  # @return [Integer] The number of ships of the specified type.
+  #
+  # @throw [Error] If the ship type is not one of root.config.units.*
+  #
   numShips: (type) ->
     return switch type
       when root.config.units.probe then @_probes
@@ -58,27 +90,60 @@ class Planet
       when root.config.units.defenseShip then @_defenseShips
       else throw new Error("Ship type unknown.")
 
+  # Returns the current fungus strength on the planet.
+  #
+  # @return [Integer] The current fungus strength.
+  #
   fungusStrength: ->
     return @_fungusStrength
 
+  # Returns whether the planet has an outpost.
+  #
+  # @return [Boolean] True if the planet has an outpost.
+  #
   hasOutpost: ->
     return @_outpost
 
+  # Returns whether the planet has a station.
+  #
+  # @return [Boolean] True if the planet has a station.
+  #
   hasStation: ->
     return @_station
 
+  # Returns a list of planets adjacent to this one.
+  #
+  # @return [List] A list of planets adjacent to this one.
+  #
   getAdjacentPlanets: ->
     return @_adjacentPlanets
 
+  # Returns the list of control groups stationed at this planet.
+  #
+  # @return [List] The list of control groups stationed at this planet.
   getControlGroups: ->
     return @_controlGroups
 
+  # Returns the number of turns left for construction to complete
+  # on this planet, or 0 if nothing is being constructed.
+  #
+  # @return [Integer] The number of turns left for construction.
+  #
   buildStatus: ->
     return @_turnsToComplete
 
+  # Returns the type of unit being constructed, or null if no unit is being
+  # constructed.
+  #
+  # @return [root.config.units.*] The type of unit being constructed
+  #
   buildUnit: ->
     return @_unitConstructing
 
+  # Returns whether a unit is being constructed at this planet.
+  #
+  # @return [Boolean] True if a unit is being constructed.
+  #
   isBuilding: ->
     if @_unitConstructing is null or @_turnsToComplete is 0
       return false
@@ -87,6 +152,14 @@ class Planet
 
   # SETTERS #
 
+  # Immediately adds the specified number of the specified type of ship to
+  # those on the planet.  This does not incur a resource cost or build delay.
+  #
+  # @param [root.config.unit.*] type The type of ship to build.
+  # @param [Integer] number The number of ships to build.
+  #
+  # @throw [Error] if type is not one of root.config.unit.*
+  #
   addShips: (type, number) ->
     switch type
       when root.config.units.probe
@@ -100,7 +173,10 @@ class Planet
       else throw new Error("Ship type unknown.")
 
   # UPKEEP #
-
+  
+  # Fungus growth phase 1.
+  # Determines growth and sporing for next turn.
+  #
   growPass1: ->
     if @_fungusStrength >= @_fungusMaximumStrength
       # Spore
@@ -117,12 +193,17 @@ class Planet
       # Grow
       @_fungusArriving += if Math.random() >= 0 then 1 else 0
 
+  # Fungus growth phase 2.
+  # Applies fungus changes determined from pass 1.
+  #
   growPass2: ->
     @_fungusStrength -= @_fungusLeaving
     @_fungusLeaving = 0
     @_fungusStrength += @_fungusArriving
     @_fungusArriving = 0
 
+  # Resolves combat between player/fungus on a planet.
+  #
   resolveCombat: ->
     fungusDamage = 0
     humanDamage = 0
@@ -189,7 +270,13 @@ class Planet
     if fungusDamage > 0
       @_station = false
       @_outpost = false
+      @_turnsToComplete = 0
+      @_unitConstructing = null
 
+  # Build upkeep method.
+  # Called at the end of turn to advance building on the unit under
+  # construction.
+  #
   buildUpkeep: ->
     if @_turnsToComplete >= 1
       @_turnsToComplete--
@@ -203,12 +290,22 @@ class Planet
           when root.config.units.defenseShip then @_defenseShips++
           else throw new Error("Ship type unknown.")
 
+  # Movement phase 1.
+  # Moves control groups.
+  #
   movementUpkeep1: ->
     @move(group) for group in @_controlGroups
 
+  # Movement phase 2.
+  # Resets all control groups to allow movement again.
+  #
   movementUpkeep2: ->
     group.resetMoved() for group in @_controlGroups
 
+  # Visibility upkeep method.
+  # Updates visibility status and last-known values to reflect planet
+  # visibility.
+  #
   visibilityUpkeep: ->
     # If it has probes:
     if @_probes > 0 or @_station or @_outpost
@@ -235,15 +332,18 @@ class Planet
         @_visibility = root.config.visibility.discovered
     @checkRepresentationalInvariants()
 
-
-
+  # Causes control groups to recalculate paths to their destinations
+  # based on currently-known information.
+  #
   updateAI: ->
     group.updateAi(@) for group in @_controlGroups
 
   # INGAME COMMANDS #
 
   build: (name) ->
-    if @_unitConstructing != null or @_turnsToComplete != 0
+    if @_station = false
+      throw new Error("Planet has no station to build ships.")
+    else if @_unitConstructing != null or @_turnsToComplete != 0
       throw new Error("Planet is already constructing something else.")
     else if @_availableResources < name.cost
       throw new Error("Not enough available resources.")
