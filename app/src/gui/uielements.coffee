@@ -585,8 +585,12 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] h The height of the box
   # @param [String] message The message to display in the box
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  # @param [String] textAlign
+  #   Horizontal alignment of the text: `'left'`, `'center'`, `'right'`
+  # @param [String] vAlign
+  #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`
   #
-  constructor: (@x, @y, @w, @h, @message) ->
+  constructor: (@x, @y, @w, @h, @message, @textAlign='center', @vAlign='middle') ->
     super(@x, @y, @w, @h)
     # test = ->
     #   alert(@visible)
@@ -615,7 +619,7 @@ class Elements.MessageBox extends Elements.BoxElement
     console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 2)
     lines = @message.split("\n")
-    # console.log(lines)
+    console.log(lines)
     for line in lines
       if textWidth > allowedWidth
         words = line.split(" ")
@@ -628,7 +632,7 @@ class Elements.MessageBox extends Elements.BoxElement
             curline = word
           else
             curline += ' ' + word
-          if ctx.measureText(line).width > allowedWidth
+          if ctx.measureText(curline).width > allowedWidth
             if lastTried isnt null
               @lines.push(lastTried)
               curline = word
@@ -728,8 +732,8 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.fillRect(x+cx, y+cy, w, h)
       ctx.font = config.windowStyle.msgBoxText.font
       ctx.fillStyle = config.windowStyle.msgBoxText.color
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
+      ctx.textAlign = @textAlign
+      ctx.textBaseline = @vAlign
       # cx = Math.round(@w/2 + @x)
       # cy = Math.round(@h/2 + @y)
       # ctx.fillText(@message, cx, cy)
