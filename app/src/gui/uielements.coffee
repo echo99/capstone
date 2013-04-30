@@ -614,28 +614,29 @@ class Elements.MessageBox extends Elements.BoxElement
     textWidth = ctx.measureText(@message).width
     console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 2)
-    # lines = @message.split("\n")
+    lines = @message.split("\n")
     # console.log(lines)
-    if textWidth > allowedWidth
-      words = @message.split(" ")
-      console.log("Words: #{words}")
-      line = null
-      lastTried = null
-      for word in words
-        lastTried = line
-        if line is null
-          line = word
-        else
-          line += ' ' + word
-        if ctx.measureText(line).width > allowedWidth
-          if lastTried isnt null
-            @lines.push(lastTried)
-            line = word
+    for line in lines
+      if textWidth > allowedWidth
+        words = line.split(" ")
+        console.log("Words: #{words}")
+        curline = null
+        lastTried = null
+        for word in words
+          lastTried = curline
+          if curline is null
+            curline = word
           else
-            @lines.push(line)
-            line = null
-      if line isnt null
-        @lines.push(line)
+            curline += ' ' + word
+          if ctx.measureText(line).width > allowedWidth
+            if lastTried isnt null
+              @lines.push(lastTried)
+              curline = word
+            else
+              @lines.push(curline)
+              curline = null
+        if curline isnt null
+          @lines.push(curline)
     console.log(@lines)
     @_checkedWrap = true
 
