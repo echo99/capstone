@@ -41,7 +41,7 @@ frameElement = null
 UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
 camera.setDragMode(window.config.DRAG_TYPE)
-game = new Game(0, 0)
+game = new Game(10000, 10000)
 gameFrame = null
 
 CurrentMission = null

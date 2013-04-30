@@ -9,6 +9,8 @@ class Menu extends Mission
     #   Add fungus to locked mission planets
     #
     # Create planets:
+    #game.setup(10, null)
+    #return
     @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
               "Extermination", "Credits"]
     @Planets =
@@ -54,7 +56,7 @@ class Menu extends Mission
 
     # Note: The position currently doesn't update if the camera changes
     @mission1Menu = new Elements.MessageBox(camera.width/2, camera.height/2,
-                                            200, 200,
+                                            300, 200,
                                             "This is the mission 1 message box")
     button = new Elements.Button(100, 170, 101, 20)
     button.setProperty("hover", false)
