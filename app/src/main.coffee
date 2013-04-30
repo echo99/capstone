@@ -104,15 +104,17 @@ main = ->
   gameFrame = new Elements.GameFrame(camera, canvas)
   # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
   # frameElement.addChild(msgBox)
+  # frameElement.addChild(new Elements.MessageBox(150, 400, 280, 100,
+  #   "This message needs to be wrapped"))
   frameElement.addChild(new Elements.MessageBox(150, 400, 280, 100,
-    "This message needs to be wrapped"))
+    "This message\nhas\na newline"))
   win = new Elements.Window(100, 200, 100, 100)
   win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
   win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
   frameElement.addChild(win)
   frameElement.drawChildren()
 
-  msgBox2 = new Elements.MessageBox(50, -50, 100, 100, "test")
+  msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
   msgBox2.setZIndex(1)
   gameFrame.addChild(msgBox2)
 
