@@ -667,6 +667,12 @@ class Elements.MessageBox extends Elements.BoxElement
   #   if @updCallback
   #     @updCallback()
 
+
+  # Open this message box
+  open: ->
+    @setDirty()
+    @visible = true
+
   # Close this message box
   close: ->
     # @visible = true
@@ -683,6 +689,17 @@ class Elements.MessageBox extends Elements.BoxElement
   addUpdateCallback: (callback) ->
     @updCallback = callback
 
+
+  # @private Clear this message box from the context
+  # 
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
+  _clearBox: (ctx) ->
+    lw = config.windowStyle.lineWidth
+    lw2 = lw + lw
+    ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+
+
   # Draw this message box to the canvas context
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
@@ -693,11 +710,14 @@ class Elements.MessageBox extends Elements.BoxElement
     if @_closing
       @_closing = false
       @visible = false
-      lw = config.windowStyle.lineWidth
-      lw2 = lw + lw
-      ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+      # lw = config.windowStyle.lineWidth
+      # lw2 = lw + lw
+      # ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+      @_clearBox(ctx)
       @setDirty()
     else if @visible
+      if not @_parent.clickable
+        @_clearBox(ctx)
       if not @_checkedWrap
         @_wrapText(ctx)
       if coords
@@ -830,34 +850,6 @@ class Elements.Button extends Elements.BoxElement
   #
   constructor: (@x, @y, @w, @h, @clickHandler=null) ->
     super(@x, @y, @w, @h)
-    # @hoverHandler = null
-    # @mouseOutHandler = null
-
-  # # Set the onClick handler
-  # #
-  # # @param [Function] clickHandler
-  # #
-  # setClickHandler: (@clickHandler) ->
-
-  # # Set the onHover handler
-  # #
-  # # @param [Function] hoverHandler
-  # #
-  # setHoverHandler: (@hoverHandler) ->
-
-  # # Set the onMouseOut handler
-  # #
-  # # @param [Function] mouseOutHandler
-  # #
-  # setMouseOutHandler: (@mouseOutHandler) ->
-
-  # # Call the attached callback function when the button is clicked
-  # #
-  # _onClick: ->
-  #   # @callback.callback()
-  #   # @callback()
-  #   if @clickHandler isnt null
-  #     @clickHandler()
 
   # Do something when the user hovers over the button
   #
@@ -866,12 +858,6 @@ class Elements.Button extends Elements.BoxElement
     # if @hoverHandler isnt null
     #   @hoverHandler()
     return CursorType.POINTER
-
-  # # Do something when the user's mouse leaves the button
-  # #
-  # _onMouseOut: ->
-  #   if @mouseOutHandler isnt null
-  #     @mouseOutHandler()
 
 
 # Button class for circular buttons
@@ -887,49 +873,12 @@ class Elements.RadialButton extends Elements.RadialElement
   #   button is clicked
   constructor: (@x, @y, @r, @clickHandler=null) ->
     super(@x, @y, @r)
-    # @hoverHandler = null
-    # @mouseOutHandler = null
-
-  # # Set the onClick handler
-  # #
-  # # @param [Function] clickHandler
-  # #
-  # setClickHandler: (@clickHandler) ->
-
-  # # Set the onHover handler
-  # #
-  # # @param [Function] hoverHandler
-  # #
-  # setHoverHandler: (@hoverHandler) ->
-
-  # # Set the onMouseOut handler
-  # #
-  # # @param [Function] mouseOutHandler
-  # #
-  # setMouseOutHandler: (@mouseOutHandler) ->
-
-  # # Call the attached callback function when the button is clicked
-  # #
-  # _onClick: ->
-  #   # @callback.callback()
-  #   # @callback()
-  #   if @clickHandler isnt null
-  #     @clickHandler()
 
   # Do something when the user hovers over the button
   #
   _onHover: ->
     super()
-    # if @hoverHandler isnt null
-    #   @hoverHandler()
     return CursorType.POINTER
-
-  # # Do something when the user's mouse leaves the button
-  # #
-  # _onMouseOut: ->
-  #   if @mouseOutHandler isnt null
-  #     @mouseOutHandler()
-
 
 # Class for handling DOM (Document Object Model) buttons. These buttons are
 # inserted into the DOM rather than drawn onto one of the existing canvases.
