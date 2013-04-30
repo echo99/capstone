@@ -58,7 +58,7 @@ class UserInterface
 
     @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
       "Press HOME to return")
-    @help.visible = false
+    @help.close()
     frameElement.addChild(@help)
 
   planetButtonCallback: (planet) =>
@@ -137,7 +137,7 @@ class UserInterface
     @unitSelection.draw(ctx, hudCtx)
 
     if lost
-      @help.visible = true
+      @help.open()
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
     #   "Pres HOME to return to map"

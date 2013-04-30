@@ -211,7 +211,8 @@ class UnitSelection
     ctx.stroke()
     ctx.fillStyle = winStyle.titleText.color
     ctx.textAlign = 'left'
-    ctx.fillText("Selected Units", loc.x+7, loc.y+13)
+    ctx.textBaseline = 'top'
+    ctx.fillText("Selected Units", loc.x+6, loc.y+5)
     ctx.fillStyle = winStyle.valueText.color
 
     SHEET.drawSprite(SpriteNames.PROBE, loc.x+20, loc.y+50, ctx, false)
