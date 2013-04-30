@@ -372,23 +372,30 @@ class Elements.UIElement extends Module
   # @private Action to perform when the mouse is pressed on this element
   #
   _onMouseDown: ->
-    console.log(@toString() + " pressed")
+    # console.log(@toString() + " pressed")
     @_pressed = true
     @mouseDownHandler?()
 
   # @private Action to perform when the mouse is lifted off this element
   #
   _onMouseUp: ->
-    console.log(@toString() + " mouse up")
+    # console.log(@toString() + " mouse up")
     @_pressed = false
     @mouseUpHandler?()
 
   # Get the hover status of this element
   #
-  # @return [Boolean] whether or not this element is currently being hovered over
+  # @return [Boolean] Whether or not this element is currently being hovered over
   #
   isHovered: ->
     return @_hovering
+
+  # Get the pressed status of this element
+  #
+  # @return [Boolean] Whether or not this element is currently being pressed
+  #
+  isPressed: ->
+    return @_pressed
 
   # Gets the relative location of the point to this element
   #
@@ -479,6 +486,10 @@ class Elements.BoxElement extends Elements.UIElement
   getActualLocation: (x, y) ->
     return {'x': x+@x+@cx, 'y': y+@y+@cy}
 
+  # @see Elements.UIElement#toString
+  toString: ->
+    return "#{@constructor.name}: (#{@x}, #{@y}, #{@w}, #{h})"
+
 
 # A radial UI element
 #
@@ -499,6 +510,10 @@ class Elements.RadialElement extends Elements.UIElement
     dx = Math.abs(@x - x)
     dy = Math.abs(@y - y)
     return dx*dx + dy*dy <= @r2
+
+  # @see Elements.UIElement#toString
+  toString: ->
+    return "#{@constructor.name}: (#{@x}, #{@y}, #{@r})"
 
 
 # A window for holding various other elements
