@@ -194,7 +194,7 @@ main = ->
 
   document.body.addEventListener('keydown', (e) ->
     if e.keyCode == KeyCodes.HOME
-      camera.setTarget(0, 0)
+      camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
       game.endTurn()
       UI.endTurn()

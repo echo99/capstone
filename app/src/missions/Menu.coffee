@@ -60,7 +60,7 @@ class Menu extends Mission
 
     @lastPlanet = @Planets.Home
 
-    UI.initialize(true, false)
+    UI.initialize(true, true)
     camera.setZoom(0.5)
 
     # Note: The position currently doesn't update if the camera changes
@@ -68,6 +68,8 @@ class Menu extends Mission
                                             300, 200,
                                             "This is the mission 1 message box")
     button = new Elements.Button(100, 170, 101, 20)
+    ###################################################################
+    # TODO: Fix buttons
     button.setClickHandler(() =>
       console.log('clicked mission 1 button')
     )
@@ -158,8 +160,7 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-      loc = @lastPlanet.location()
-      camera.setTarget(loc.x, loc.y)
+      camera.setTarget(@lastPlanet.location())
       inGroup = false
       for c in @lastPlanet.getControlGroups()
         if c.probes() == 1
@@ -175,6 +176,9 @@ class Menu extends Mission
     #     CurrentMission = the mission that the planet goes to
     #   else
     #     (other buttons?)
+
+  getHomeTarget: ->
+    return @lastPlanet.location()
 
   # @see Mission#onEndTurn
   onEndTurn: ->
@@ -199,8 +203,7 @@ class Menu extends Mission
         break
     if not found
       @lastPlanet._probes = 1
-      loc = @lastPlanet.location()
-      camera.setTarget(loc.x, loc.y)
+      camera.setTarget(@lastPlanet.location)
     #   for each planet that leaves the menu
     #     if the planet has a probe on it
     #       open prompt for the planet

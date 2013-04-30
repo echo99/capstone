@@ -31,7 +31,7 @@ class UnitSelection
       h = window.config.selectionStyle.probeHeight
     else
       h = window.config.selectionStyle.height
-    @totalDisplay = new Elements.BoxElement(loc.x, loc.y, w, h)
+    @totalDisplay = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
     @totalDisplay.setDrawFunc(@_drawSelection)
     frameElement.addChild(@totalDisplay)
 
@@ -196,7 +196,7 @@ class UnitSelection
     winStyle = window.config.windowStyle
     w = @totalDisplay.w
     h = @totalDisplay.h
-    loc = {x: @totalDisplay.x, y: @totalDisplay.y}
+    loc = {x: @totalDisplay.x-w/2, y: @totalDisplay.y-h/2}
     ctx.clearRect(loc.x, loc.y, w, h)
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke

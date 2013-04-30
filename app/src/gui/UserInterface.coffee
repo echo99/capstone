@@ -28,6 +28,7 @@ class UserInterface
       b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback(p))
       b.setHoverHandler(@planetButtonHoverCallback(p))
       b.setMouseOutHandler(@planetButtonOutCallback)
+      b.setProperty("planet", p)
       gameFrame.addChild(b)
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
@@ -60,9 +61,6 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
-      if planet.visibility() == window.config.visibility.discovered and
-         not @moveToDiscovered
-        return
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -80,14 +78,11 @@ class UserInterface
         @unitSelection.deselectAllUnits()
       else
         console.log("opening structure menu...")
-        console.log(planet)
+        console.log(planet.toString())
 
   planetButtonHoverCallback: (planet) =>
     return () =>
-      vis = planet.visibility()
-      if vis == window.config.visibility.visible or
-         (@moveToDiscovered and vis == window.config.visibility.discovered)
-        @hoveredPlanet = planet
+      @hoveredPlanet = planet
 
   planetButtonOutCallback: () =>
     @hoveredPlanet = null
@@ -141,18 +136,7 @@ class UserInterface
 
     if lost
       @help.open()
-    # If all planets are off screen
-    #   draw text in middle of screen that says something like:
-    #   "Pres HOME to return to map"
-    #
-    # draw HUD
-    #
-    # for each button
-    #   if button is visible (certian buttons aren't always visible)
-    #     if button is hovered over
-    #       draw hover image
-    #     else
-    #       draw regular image
+
     if @hoveredPlanet
       # if the button is a planet
       ctx.strokeStyle = window.config.selectionStyle.stroke
@@ -171,7 +155,7 @@ class UserInterface
       y = @lastMousePos.y + window.config.toolTipStyle.yOffset
       if @unitSelection.total > 0
         ctx.fillText("Move selected units", x, y)
-      else
+      else # if it has structure
         ctx.fillText("Open structure menu", x, y)
 
   # The UI expects this to be called when the mouse moves
@@ -180,11 +164,6 @@ class UserInterface
   # @param [Number] y The y position of the mouse
   onMouseMove: (x, y) ->
     @lastMousePos = {x: x, y: y}
-    #@hoveredPlanetButton = null
-    #for b in @planetButtons
-      #pos = camera.getWorldCoordinates({x: x, y: y})
-      #if b.containsPoint(pos.x, pos.y)
-        #@hoveredPlanetButton = b
     @unitSelection.onMouseMove(x, y)
 
   # The UI expects this to be called when the mouse clicks
@@ -192,14 +171,17 @@ class UserInterface
   # @param [Number] x The x position of the mouse
   # @param [Number] y The y position of the mouse
   onMouseClick: (x, y) ->
-    # for each button
-    #   if button is hovered over
-    #     perform button action
-    # pos = camera.getWorldCoordinates({x: x, y: y})
-    #if @hoveredPlanetButton and
-    #   @hoveredPlanetButton.containsPoint(pos.x, pos.y)
     @unitSelection.onMouseClick(x, y)
 
   endTurn: () ->
     for p in game.getPlanets()
       @unitSelection.updateSelection(p)
+    for b in @planetButtons
+      p = b.getProperty("planet")
+      vis = p.visibility()
+      if vis == window.config.visibility.undiscovered or
+         (vis == window.config.visibility.discovered and
+         not @moveToDiscovered)
+        b.visible = false
+      else
+        b.visible = true
