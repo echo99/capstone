@@ -597,33 +597,6 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
-    # @ctx.font = config.windowStyle.msgBoxText.font
-    # textWidth = @ctx.measureText(@message).width
-    # console.log("Width of #{@message} : #{textWidth}")
-    # allowedWidth = @w - (config.windowStyle.lineWidth * 2)
-    # @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
-    # @lines = []
-    # if textWidth > allowedWidth
-    #   words = @message.split(" ")
-    #   console.log("Words: #{words}")
-    #   line = null
-    #   lastTried = null
-    #   for word in words
-    #     lastTried = line
-    #     if line is null
-    #       line = word
-    #     else
-    #       line += ' ' + word
-    #     if @ctx.measureText(line).width > allowedWidth
-    #       if lastTried isnt null
-    #         @lines.push(lastTried)
-    #         line = word
-    #       else
-    #         @lines.push(line)
-    #         line = null
-    #   if line isnt null
-    #     @lines.push(line)
-    # console.log(@lines)
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
     @_closing = false
@@ -632,11 +605,17 @@ class Elements.MessageBox extends Elements.BoxElement
     # console.log("My children: #{@_children}")
     # console.log("Button's children: #{@closeBtn._children}")
 
+  # @private Wrap the text for this message box so the message will fit in the box
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
   _wrapText: (ctx) ->
     ctx.font = config.windowStyle.msgBoxText.font
     textWidth = ctx.measureText(@message).width
     console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    # lines = @message.split("\n")
+    # console.log(lines)
     if textWidth > allowedWidth
       words = @message.split(" ")
       console.log("Words: #{words}")
@@ -669,20 +648,16 @@ class Elements.MessageBox extends Elements.BoxElement
 
 
   # Open this message box
+  #
   open: ->
     @setDirty()
     @visible = true
 
   # Close this message box
+  #
   close: ->
-    # @visible = true
-    # @dirty = true
     @setDirty()
     @_closing = true
-    # lw = config.windowStyle.lineWidth
-    # lw2 = lw + lw
-    # @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
-    # @ctx.canvas.style.cursor = CursorType.DEFAULT
 
 
   # Add a callback to call when the message box updates
@@ -691,7 +666,7 @@ class Elements.MessageBox extends Elements.BoxElement
 
 
   # @private Clear this message box from the context
-  # 
+  #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   _clearBox: (ctx) ->
@@ -710,9 +685,6 @@ class Elements.MessageBox extends Elements.BoxElement
     if @_closing
       @_closing = false
       @visible = false
-      # lw = config.windowStyle.lineWidth
-      # lw2 = lw + lw
-      # ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
       @_clearBox(ctx)
       @setDirty()
     else if @visible
@@ -871,6 +843,7 @@ class Elements.RadialButton extends Elements.RadialElement
   # @param [Number] r Radius of element
   # @param [Function] clickHandler (optional) The function to call when this
   #   button is clicked
+  #
   constructor: (@x, @y, @r, @clickHandler=null) ->
     super(@x, @y, @r)
 
