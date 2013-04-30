@@ -224,7 +224,7 @@ class Planet
       if !@_hasBeenSeen
         @_hasBeenSeen = true
       @_lastSeenFungus = @_fungusStrength
-	  @_visibility = root.config.visibility.visible
+      @_visibility = root.config.visibility.visible
     # If it is not adjacent to a probe:
     else
       # If it has never been seen it is invisible
