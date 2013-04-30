@@ -617,7 +617,7 @@ class Elements.MessageBox extends Elements.BoxElement
     ctx.font = config.windowStyle.msgBoxText.font
     textWidth = ctx.measureText(@message).width
     console.log("Width of #{@message} : #{textWidth}")
-    allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    allowedWidth = @w - (config.windowStyle.lineWidth * 4)
     lines = @message.split("\n")
     console.log(lines)
     for line in lines
@@ -738,15 +738,38 @@ class Elements.MessageBox extends Elements.BoxElement
       # cy = Math.round(@h/2 + @y)
       # ctx.fillText(@message, cx, cy)
 
+      lineWidth = config.windowStyle.lineWidth * 2
+      switch @textAlign
+        when 'left'
+          tx = x + cx + lineWidth
+        when 'right'
+          tx = x - cx - lineWidth
+        when 'center'
+          tx = x
+
+      yOffset = (@lines.length-1) * @lineSpacing
+      switch @vAlign
+        when 'top'
+          ty = y + cy + lineWidth
+          yTmp = ty
+        when 'middle'
+          ty = y
+          yTmp = ty - yOffset
+        when 'bottom'
+          ty = y - cy - lineWidth
+          yTmp = ty - yOffset*2
+
       if @lines.length > 0
         # console.log("Box is dirty: #{@dirty}")
-        yOffset = (@lines.length-1) * @lineSpacing
-        yTmp = y - yOffset
+        # yOffset = (@lines.length-1) * @lineSpacing
+        # yTmp = y - yOffset
         for line in @lines
-          ctx.fillText(line, x, yTmp)
+          # ctx.fillText(line, x, yTmp)
+          ctx.fillText(line, tx, yTmp)
           yTmp += config.windowStyle.msgBoxText.lineWidth
       else
-        ctx.fillText(@message, x, y)
+        # ctx.fillText(@message, x, y)
+        ctx.fillText(@message, tx, ty)
 
       btnOffsetX = x + @cx + @closeBtn.x + @closeBtn.cx
       btnOffsetY = y + @cy + @closeBtn.y + @closeBtn.cy
@@ -756,6 +779,8 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.fillRect(btnOffsetX, btnOffsetY, @closeBtn.w, @closeBtn.h)
       ctx.fillStyle = 'rgb(255,255,255)'
       ctx.font = '12pt Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
       ctx.fillText('x', cx, cy)
 
       if zoom
