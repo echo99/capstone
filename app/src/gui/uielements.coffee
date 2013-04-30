@@ -369,6 +369,13 @@ class Elements.UIElement extends Module
       @zIndicesRev.reverse()
       @_childBuckets[zIndex] = [child]
 
+  # Get the string representation of the UIElement
+  #
+  # @return [String] String representation of element
+  #
+  toString: ->
+    return "#{@constructor.name}: (#{@x}, #{@y})"
+
 
 
 # A box UI element
@@ -593,16 +600,8 @@ class Elements.MessageBox extends Elements.BoxElement
   constructor: (@x, @y, @w, @h, @message, @closeBtn=null, @textAlign='center',
       @vAlign='middle') ->
     super(@x, @y, @w, @h)
-    # test = ->
-    #   alert(@visible)
-    #   @visible = false
-    #   alert(@visible)
-    # @closeBtn = new Elements.Button(5, 5, 16, 16, @)
-    # if not @closeBtn?
-    #   @closeBtn = new Elements.Button(8, 8, 16, 16,
-    #     ((obj) ->
-    #       return -> obj.close())(this))
-    #   @addChild(@closeBtn)
+    if @closeBtn?
+      @addChild(@closeBtn)
     @usingDefaultBtn = false
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
@@ -689,7 +688,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   _clearBox: (ctx) ->
-    lw = config.windowStyle.lineWidth / 2
+    lw = Math.ceil(config.windowStyle.lineWidth / 2)
     lw2 = lw + lw
     ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 

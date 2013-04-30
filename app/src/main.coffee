@@ -121,6 +121,7 @@ main = ->
   win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
   frameElement.addChild(win)
   frameElement.drawChildren()
+  console.log(frameElement.toString())
 
   msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
   msgBox2.setDefaultCloseBtn()
