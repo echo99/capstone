@@ -108,8 +108,11 @@ class UserInterface
           ctx.lineTo(nPos.x, nPos.y)
           ctx.stroke()
 
+    planetOnScreen = false
     for p in game.getPlanets()
       loc = p.location()
+      if camera.onScreen(camera.getScreenCoordinates(loc))
+        planetOnScreen = true
       vis = p.visibility()
       if vis == window.config.visibility.discovered
         if p.fungusStrength() > 0
@@ -127,9 +130,8 @@ class UserInterface
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)
 
-    # # Draw stuff attached to the game frame
-    # gameFrame.drawChildren()
-
+    if not planetOnScreen
+      console.log("press HOME")
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
     #   "Pres HOME to return to map"
