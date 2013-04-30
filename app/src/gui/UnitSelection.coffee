@@ -9,7 +9,6 @@ class UnitSelection
   totalAttacks: 0
   totalDefenses: 0
   onlyProbe: false
-  #hudUpate: true
   lastMousePos: {x: 0, y: 0}
   planetsWithSelectedUnits: []
   totalDisplay: null
@@ -114,7 +113,6 @@ class UnitSelection
     @totalcolonies = 0
     @totalAttacks = 0
     @totalDefenses = 0
-    #@hudUpdate = true
     @totalDisplay.dirty = true
 
   _countUnits: (stacks) ->
@@ -171,8 +169,6 @@ class UnitSelection
               @_drawToolTip(ctx, units.attacks) or
               @_drawToolTip(ctx, units.defenses)
 
-    #@_drawSelection(hudCtx)
-
   _drawToolTip: (ctx, stacks) ->
     for row in stacks
       for stack in row
@@ -197,9 +193,6 @@ class UnitSelection
 
   # Draws the hud that shows total selected units
   _drawSelection: (ctx) =>
-    #if not @hudUpdate
-    #  return
-    #@hudUpdate = false
     winStyle = window.config.windowStyle
     w = @totalDisplay.w
     h = @totalDisplay.h
@@ -218,7 +211,7 @@ class UnitSelection
     ctx.stroke()
     ctx.fillStyle = winStyle.titleText.color
     ctx.textAlign = 'left'
-    ctx.fillText("Selected Units", loc.x+7, loc.y+17)
+    ctx.fillText("Selected Units", loc.x+7, loc.y+13)
     ctx.fillStyle = winStyle.valueText.color
 
     SHEET.drawSprite(SpriteNames.PROBE, loc.x+20, loc.y+50, ctx, false)

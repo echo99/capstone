@@ -3,7 +3,6 @@
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
 # TODO:
-#   - End turn button
 #   - Deselect all units button
 #   - Menu button, with option for not displaying it because the main menu doesn't
 #     need it
@@ -33,23 +32,23 @@ class UserInterface
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
     b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
-    b.hovered = false
+    b.setProperty("hover", false)
     b.setClickHandler(() =>
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
     )
     b.setHoverHandler(() =>
-      b.hovered = true
+      b.setProperty("hover", true)
       b.setDirty()
     )
     b.setMouseOutHandler(() =>
-      b.hovered = false
+      b.setProperty("hover", false)
       b.setDirty()
     )
     b.setDrawFunc((ctx) =>
-      b.y = camera.height-5-20
-      if b.hovered
+      b.y = camera.height-5-10
+      if b.getProperty("hover")
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, b.x, b.y, ctx, false)
       else
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, b.x, b.y, ctx, false)
@@ -61,13 +60,17 @@ class UserInterface
     return () =>
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
-          console.log("moving from " +
+          attack = @unitSelection.getNumberOfAttacks(p)
+          defense = @unitSelection.getNumberOfDefenses(p)
+          probe = @unitSelection.getNumberOfProbes(p)
+          colony = @unitSelection.getNumberOfColonies(p)
+          console.log("moving " + attack + " attack ships, " +
+            defense + " defense ships, " +
+            probe + " probes, " +
+            colony + " colony ships from " +
             "(" + p.location().x + ", " + p.location().y + ")" + " to " +
             "(" + planet.location().x + ", " + planet.location().y + ")")
-          p.moveShips(@unitSelection.getNumberOfAttacks(p),
-                      @unitSelection.getNumberOfDefenses(p),
-                      @unitSelection.getNumberOfProbes(p),
-                      @unitSelection.getNumberOfColonies(p), planet)
+            p.moveShips(attack, defense, probe, colony, planet)
           @unitSelection.updateSelection(p)
         @unitSelection.deselectAllUnits()
       else
@@ -95,7 +98,9 @@ class UserInterface
       pos = camera.getScreenCoordinates(p.location())
       visited.push(p)
       for neighbor in p.getAdjacentPlanets()
-        if neighbor not in visited
+        if neighbor not in visited and
+           p.visibility() != window.config.visibility.undiscovered and
+           neighbor.visibility() != window.config.visibility.undiscovered
           # draw connection to the neighbor
           nPos = camera.getScreenCoordinates(neighbor.location())
           ctx.beginPath()
@@ -106,16 +111,18 @@ class UserInterface
     for p in game.getPlanets()
       loc = p.location()
       vis = p.visibility()
-      if vis == window.config.visibility.invisible
+      if vis == window.config.visibility.discovered
         if p.fungusStrength() > 0
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
-      else
+      else if vis == window.config.visibility.visible
         if p.fungusStrength() > 0
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
+      #if vis != window.config.visiblity.undiscovered
+      #  draw resources
     #  @drawPlanetStructure(ctx, p)
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)

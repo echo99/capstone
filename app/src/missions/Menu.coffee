@@ -52,9 +52,66 @@ class Menu extends Mission
     UI.initialize(true)
     camera.setZoom(0.5)
 
-    @mission1Menu = {x: 200, y: 200, w: 200, h: 200,
-    message: "This is the mission 1 message box"}
-    @showMission1Menu = false
+    # Note: The position currently doesn't update if the camera changes
+    @mission1Menu = new Elements.MessageBox(camera.width/2, camera.height/2,
+                                            200, 200,
+                                            "This is the mission 1 message box")
+    button = new Elements.Button(100, 170, 101, 20)
+    button.setProperty("hover", false)
+    button.setClickHandler(() =>
+      console.log('clicked mission 1 button')
+    )
+    button.setHoverHandler(() =>
+      button.setProperty("hover", true)
+      button.setDirty()
+    )
+    button.setMouseOutHandler(() =>
+      button.setProperty("hover", false)
+      button.setDirty()
+    )
+    button.setDrawFunc((ctx) =>
+      loc = @mission1Menu.getActualLocation(button.x, button.y)
+      if button.getProperty("hover")
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    button.setZIndex(100)
+    @mission1Menu.addChild(button)
+    @mission1Menu.visible = false
+    frameElement.addChild(@mission1Menu)
+
+    @exterminationMenu = new Elements.MessageBox(camera.width/2, camera.height/2,
+      400, 100, "Exterminate all fungus before it exterminates you.")
+    button2 = new Elements.Button(345, 85, 101, 20)
+    button2.setProperty("hover", false)
+    button2.setClickHandler(() =>
+      console.log('clicked extermination button')
+    )
+    button2.setHoverHandler(() =>
+      button2.setProperty("hover", true)
+      button2.setDirty()
+    )
+    button2.setMouseOutHandler(() =>
+      button2.setProperty("hover", false)
+      button2.setDirty()
+    )
+    button2.setDrawFunc((ctx) =>
+      loc = @exterminationMenu.getActualLocation(button2.x, button2.y)
+      if button2.getProperty("hover")
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    button2.setZIndex(100)
+    @exterminationMenu.addChild(button2)
+    @exterminationMenu.visible = false
+    frameElement.addChild(@exterminationMenu)
+
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -72,42 +129,6 @@ class Menu extends Mission
         coords = camera.getScreenCoordinates(coords)
         if camera.onScreen(coords)
           ctx.fillText(p, coords.x, coords.y)
-    if @showMission1Menu
-      @showMission1Menu = false
-      console.log('showMission1Menu')
-      if @menu1
-        console.log('menu1')
-        @menu1.visible = true
-      else
-        console.log('not menu1')
-        @menu1 = new Elements.MessageBox(@mission1Menu.x, @mission1Menu.y,
-                                         @mission1Menu.w, @mission1Menu.y,
-                                         @mission1Menu.message, ctx)
-        @mission1Button = new Elements.Button(300, 300, 100, 50)
-        @mission1Button.setProperty("hover", false)
-        @mission1Button.setClickHandler(() =>
-          console.log('clicked mission 1 button')
-        )
-        @mission1Button.setHoverHandler(() =>
-          @mission1Button.setProperty("hover", true)
-          @mission1Button.setDirty()
-        )
-        @mission1Button.setMouseOutHandler(() =>
-          @mission1Button.setProperty("hover", false)
-          @mission1Button.setDirty()
-        )
-        @mission1Button.setDrawFunc((ctx) =>
-          x = @mission1Button.x
-          y = @mission1Button.y
-          if @mission1Button.getProperty("hover")
-            SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, x, y, ctx, false)
-          else
-            SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, x, y, ctx, false)
-        )
-        @mission1Button.setZIndex(100)
-        frameElement.addChild(@mission1Button)
-
-        frameElement.addChild(@menu1)
 
     # if the probe is on a planet of interest
     #   draw prompt to make sure the player wants to play the mission
@@ -125,8 +146,6 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-      if @lastPlanet == @Planets.Mission1
-        @showMission1Menu = true
       loc = @lastPlanet.location()
       camera.setTarget(loc.x, loc.y)
 
@@ -144,12 +163,27 @@ class Menu extends Mission
   onEndTurn: ->
     found = false
     for p in game.getPlanets()
-      if p.numShips(window.config.units.probe) == 1
+      inGroup = false
+      for c in p.getControlGroups()
+        if c.probes() == 1
+          inGroup = true
+          break
+      if p.numShips(window.config.units.probe) == 1 or inGroup
         found = true
         @lastPlanet = p
+        if @lastPlanet == @Planets.Mission1
+          @mission1Menu.visible = true
+        else if @mission1Menu.visible
+          @mission1Menu.close()
+        if @lastPlanet == @Planets.Extermination
+          @exterminationMenu.visible = true
+        else if @exterminationMenu.visible
+          @exterminationMenu.close()
         break
     if not found
       @lastPlanet._probes = 1
+      loc = @lastPlanet.location()
+      camera.setTarget(loc.x, loc.y)
     #   for each planet that leaves the menu
     #     if the planet has a probe on it
     #       open prompt for the planet
