@@ -338,7 +338,7 @@ class Planet
       throw new Error "Less than 0 probes"
     if @_colonys < 0
       throw new Error "less than 0 colony ships"
-    if @_fungusStrength
+    if @_fungusStrength < 0
       throw new Error "negative fungus strength"
     for planet in @_adjacentPlanets
       if !(@ in planet._adjacentPlanets)
