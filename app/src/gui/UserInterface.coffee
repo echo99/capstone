@@ -56,6 +56,11 @@ class UserInterface
     b.setZIndex(100)
     frameElement.addChild(b)
 
+    @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
+      "Press HOME to return")
+    @help.visible = false
+    frameElement.addChild(@help)
+
   planetButtonCallback: (planet) =>
     return () =>
       if @unitSelection.total > 0
@@ -108,8 +113,12 @@ class UserInterface
           ctx.lineTo(nPos.x, nPos.y)
           ctx.stroke()
 
+    lost = true
     for p in game.getPlanets()
       loc = p.location()
+      if camera.onScreen(camera.getScreenCoordinates(loc))
+        lost = false
+        @help.close()
       vis = p.visibility()
       if vis == window.config.visibility.discovered
         if p.fungusStrength() > 0
@@ -127,9 +136,8 @@ class UserInterface
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)
 
-    # # Draw stuff attached to the game frame
-    # gameFrame.drawChildren()
-
+    if lost
+      @help.visible = true
     # If all planets are off screen
     #   draw text in middle of screen that says something like:
     #   "Pres HOME to return to map"
