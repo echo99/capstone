@@ -140,5 +140,14 @@ root.config =
     nonfungus: 2
     invisible: 3
     size: 4
+  minimumPlanetDistance: 500
+  maximumAdjacencyDistance: 800
+  resources:
+    homePlanetResources: 40
+    homePlanetRate: 2
+    meanResources: 20
+    stdevResource: 5
+    meanRate: 1
+    stdevRate: .5
 
 config = root.config

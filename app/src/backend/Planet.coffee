@@ -36,6 +36,11 @@ class Planet
   location: ->
     return {x: @_x, y: @_y}
 
+  distance: (planet) ->
+    oX = planet.location.x
+    oY = planet.location.y
+    return sqrt(Math.pow(@_x - oX, 2) + Math.pow(@_y - oY, 2))
+
   resources: ->
     return @_lastSeenResources
 
@@ -79,6 +84,20 @@ class Planet
       return false
     else
       return true
+
+  # SETTERS #
+
+  addShips: (type, number) ->
+    switch type
+      when root.config.units.probe
+        @_probes += number
+      when root.config.units.colonyShip
+        @_colonies += number
+      when root.config.units.attackShip
+        @_attackShips += number
+      when root.config.units.defenseShip
+        @_defenseShips += number
+      else throw new Error("Ship type unknown.")
 
   # UPKEEP #
 
