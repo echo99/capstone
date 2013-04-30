@@ -182,6 +182,7 @@ main = ->
     else if e.keyCode == KeyCodes.SPACE
       game.endTurn()
       UI.endTurn()
+      CurrentMission.onEndTurn()
   )
 
   # Catch accidental leaving

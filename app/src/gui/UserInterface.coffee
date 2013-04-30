@@ -36,14 +36,16 @@ class UserInterface
     b.hovered = false
     b.setClickHandler(() =>
       game.endTurn()
-      UI.endTurn())
+      UI.endTurn()
+      CurrentMission.onEndTurn()
+    )
     b.setHoverHandler(() =>
       b.hovered = true
-      b.dirty = true
+      b.setDirty()
     )
     b.setMouseOutHandler(() =>
       b.hovered = false
-      b.dirty = true
+      b.setDirty()
     )
     b.setDrawFunc((ctx) =>
       b.y = camera.height-5-20
@@ -52,6 +54,7 @@ class UserInterface
       else
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, b.x, b.y, ctx, false)
     )
+    b.setZIndex(100)
     frameElement.addChild(b)
 
   planetButtonCallback: (planet) =>
@@ -102,10 +105,17 @@ class UserInterface
 
     for p in game.getPlanets()
       loc = p.location()
-      if p.fungusStrength() > 0
-        SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
+      vis = p.visibility()
+      if vis == window.config.visibility.invisible
+        if p.fungusStrength() > 0
+          SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE_FUNGUS, loc.x, loc.y, ctx)
+        else
+          SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
       else
-        SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
+        if p.fungusStrength() > 0
+          SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
+        else
+          SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
     #  @drawPlanetStructure(ctx, p)
     #  @drawPlanetUnits(ctx, p)
     @unitSelection.draw(ctx, hudCtx)

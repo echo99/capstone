@@ -222,7 +222,7 @@ class Planet
         @_lastSeenResources = @_resources
         @_visibility = root.config.visibility.visible
     # If it is adjacent to a probe:
-    else if neighborsHaveProbes()
+    else if @neighborsHaveProbes()
       # Mark that this planet has been seen
       if !@_hasBeenSeen
         @_hasBeenSeen = true
@@ -242,7 +242,7 @@ class Planet
           @_visibility = root.config.visibility.fungus
         else
           @_visibility = root.config.visibility.nonfungus
-    checkRepresentationalInvariants()
+    @checkRepresentationalInvariants()
 
 
 
@@ -287,7 +287,7 @@ class Planet
     if (state is root.config.visibility.visible) or
        (state is root.config.visibility.fungus) or
        (state is root.config.visibility.nonfungus) or
-       (state is rootb.config.visibility.invisible)
+       (state is root.config.visibility.invisible)
       @_visibility = state
     else
       throw error "Invalid Visibility"
@@ -323,7 +323,7 @@ class Planet
         total++
     return total
 
-  neighboursHaveProbes: ->
+  neighborsHaveProbes: ->
     for planet in @_adjacentPlanets
       if planet.numShips(root.config.units.probe) > 0
         return true
@@ -331,30 +331,30 @@ class Planet
 
   checkRepresentationalInvariants: ->
     if @_attackShips < 0
-      throw error "Less than 0 attack ships"
+      throw new Error "Less than 0 attack ships"
     if @_defenseShips < 0
-      throw error "Less than 0 defense ships"
+      throw new Error "Less than 0 defense ships"
     if @_probes < 0
-      throw error "Less than 0 probes"
+      throw new Error "Less than 0 probes"
     if @_colonys < 0
-      throw error "less than 0 colony ships"
+      throw new Error "less than 0 colony ships"
     if @_fungusStrength
-      throw error "negative fungus strength"
+      throw new Error "negative fungus strength"
     for planet in @_adjacentPlanets
-      if !planet._adjacentPlanets.contains(@)
-        throw error "we have a directed graph somehow"
+      if !(@ in planet._adjacentPlanets)
+        throw new Error "we have a directed graph somehow"
     if @_visibility = root.config.visibility.visible
       if @_lastSeenResources != @_resources
-        throw error "last seen resources don't match. Status: visible"
+        throw new Error "last seen resources don't match. Status: visible"
       if @_lastSeenFungus != @_fungusStrength
-        throw error "last seen fungus dosn't match. Status: visible"
+        throw new Error "last seen fungus dosn't match. Status: visible"
     if @_visibility = root.config.visibility.invisible and
        @_hasBeenSeen != false
-      throw error "seen planet is invisible"
+      throw new Error "seen planet is invisible"
     if @_visibility = root.config.visibility.fungus and @_lastSeenFungus < 1
-      throw error "incorrectly remembering planet as having had fungus"
+      throw new Error "incorrectly remembering planet as having had fungus"
     if @_visibility = root.config.visibility.nonfungus and @_lastSeenFungus > 0
-      throw error "incorrectly remembering planet as having not had fungus"
+      throw new Error "incorrectly remembering planet as having not had fungus"
 
 
 

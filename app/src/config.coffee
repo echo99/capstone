@@ -79,6 +79,7 @@ root.config =
     PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
     PLANET_BLUE_FUNGUS: new AnimatedSprite(['planet_blue_fungus.png'])
     PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
+    PLANET_INVISIBLE_FUNGUS: new AnimatedSprite(['planet_invisible_fungus.png'])
     TITLE: new AnimatedSprite(['title.png'])
     FULL_SCREEN: new AnimatedSprite(['activate_full_screen_button.png'])
     UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
