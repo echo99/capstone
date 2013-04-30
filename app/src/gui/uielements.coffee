@@ -619,7 +619,7 @@ class Elements.MessageBox extends Elements.BoxElement
     console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 2)
     lines = @message.split("\n")
-    # console.log(lines)
+    console.log(lines)
     for line in lines
       if textWidth > allowedWidth
         words = line.split(" ")
@@ -632,7 +632,7 @@ class Elements.MessageBox extends Elements.BoxElement
             curline = word
           else
             curline += ' ' + word
-          if ctx.measureText(line).width > allowedWidth
+          if ctx.measureText(curline).width > allowedWidth
             if lastTried isnt null
               @lines.push(lastTried)
               curline = word
@@ -732,7 +732,7 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.fillRect(x+cx, y+cy, w, h)
       ctx.font = config.windowStyle.msgBoxText.font
       ctx.fillStyle = config.windowStyle.msgBoxText.color
-      ctx.textAlign = @testAlign
+      ctx.textAlign = @textAlign
       ctx.textBaseline = @vAlign
       # cx = Math.round(@w/2 + @x)
       # cy = Math.round(@h/2 + @y)
