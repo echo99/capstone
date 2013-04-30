@@ -593,16 +593,8 @@ class Elements.MessageBox extends Elements.BoxElement
   constructor: (@x, @y, @w, @h, @message, @closeBtn=null, @textAlign='center',
       @vAlign='middle') ->
     super(@x, @y, @w, @h)
-    # test = ->
-    #   alert(@visible)
-    #   @visible = false
-    #   alert(@visible)
-    # @closeBtn = new Elements.Button(5, 5, 16, 16, @)
-    # if not @closeBtn?
-    #   @closeBtn = new Elements.Button(8, 8, 16, 16,
-    #     ((obj) ->
-    #       return -> obj.close())(this))
-    #   @addChild(@closeBtn)
+    if @closeBtn?
+      @addChild(@closeBtn)
     @usingDefaultBtn = false
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
