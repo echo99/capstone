@@ -276,9 +276,8 @@ class Planet
 
   setVisibility: (state) ->
     if (state is root.config.visibility.visible) or
-       (state is root.config.visibility.fungus) or
-       (state is root.config.visibility.nonfungus) or
-       (state is root.config.visibility.invisible)
+       (state is root.config.visibility.discovered) or
+       (state is root.config.visibility.undiscovered)
       @_visibility = state
     else
       throw error "Invalid Visibility"
@@ -334,19 +333,14 @@ class Planet
     for planet in @_adjacentPlanets
       if !(@ in planet._adjacentPlanets)
         throw new Error "we have a directed graph somehow"
-    if @_visibility = root.config.visibility.visible
+    if @_visibility == root.config.visibility.visible
       if @_lastSeenResources != @_resources
         throw new Error "last seen resources don't match. Status: visible"
       if @_lastSeenFungus != @_fungusStrength
         throw new Error "last seen fungus dosn't match. Status: visible"
-    if @_visibility = root.config.visibility.invisible and
+    if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
-      throw new Error "seen planet is invisible"
-    if @_visibility = root.config.visibility.fungus and @_lastSeenFungus < 1
-      throw new Error "incorrectly remembering planet as having had fungus"
-    if @_visibility = root.config.visibility.nonfungus and @_lastSeenFungus > 0
-      throw new Error "incorrectly remembering planet as having not had fungus"
-
+      throw new Error "seen planet is undiscovered"
 
 
 root.Planet = Planet
