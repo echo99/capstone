@@ -233,6 +233,12 @@ class Planet
       # If it has been seen it is discovered
       else
         @_visibility = root.config.visibility.discovered
+    # Check to be sure that we aren't displaying the wrong thing
+    if @_visibility == root.config.visibility.visible
+      if @_lastSeenResources != @_resources
+        throw new Error "last seen resources don't match. Status: visible"
+      if @_lastSeenFungus != @_fungusStrength
+        throw new Error "last seen fungus dosn't match. Status: visible"
     @checkRepresentationalInvariants()
 
 
@@ -333,11 +339,6 @@ class Planet
     for planet in @_adjacentPlanets
       if !(@ in planet._adjacentPlanets)
         throw new Error "we have a directed graph somehow"
-    if @_visibility == root.config.visibility.visible
-      if @_lastSeenResources != @_resources
-        throw new Error "last seen resources don't match. Status: visible"
-      if @_lastSeenFungus != @_fungusStrength
-        throw new Error "last seen fungus dosn't match. Status: visible"
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
