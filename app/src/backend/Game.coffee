@@ -33,6 +33,7 @@ class Game
         if isGoodPlanet(newPlanet)
           makeAdjacent(newPlanet)
           @_planets.push(newPlanet)
+    endTurn()
 
 
   setGraph: (planets) ->

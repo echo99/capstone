@@ -210,38 +210,29 @@ class Planet
     group.resetMoved() for group in @_controlGroups
 
   visibilityUpkeep: ->
-    # Update last seen in case a tracked planet becomes untracked
-    if @_visibility = root.config.visibility.visible
-      @_lastSeenFungus = @_fungusStrength
-      @_lastSeenResources = @_resources
     # If it has probes:
-    if @_probes > 0
-      # If it isn't visible make it visible
-      if @_visibility != root.config.visibility.visible
-        @_lastSeenFungus = @_fungusStrength
-        @_lastSeenResources = @_resources
-        @_visibility = root.config.visibility.visible
-    # If it is adjacent to a probe:
-    else if @neighborsHaveProbes()
-      # Mark that this planet has been seen
+    if @_probes > 0 or @_station or @_outpost
+      # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen
         @_hasBeenSeen = true
-      # Set visibility based on actual fungus strength
-      if @_fungusStrength > 0
-        @_visibility = root.config.visibility.fungus
-      else
-        @_visibility = root.config.visibility.nonfungus
+      @_lastSeenFungus = @_fungusStrength
+      @_lastSeenResources = @_resources
+      @_visibility = root.config.visibility.visible
+    # If it is adjacent to a probe:
+    else if @neighborsHaveProbes()
+      # If it isn't visible make it visible and update fungus
+      if !@_hasBeenSeen
+        @_hasBeenSeen = true
+      @_lastSeenFungus = @_fungusStrength
+	  @_visibility = root.config.visibility.visible
     # If it is not adjacent to a probe:
     else
       # If it has never been seen it is invisible
       if !@_hasBeenSeen
-        @_visibility = root.config.visibility.invisible
-      # If it has been seen set visibility based on last seen fungus strength
+        @_visibility = root.config.visibility.undiscovered
+      # If it has been seen it is discovered
       else
-        if @_lastSeenFungus > 0
-          @_visibility = root.config.visibility.fungus
-        else
-          @_visibility = root.config.visibility.nonfungus
+        @_visibility = root.config.visibility.discovered
     @checkRepresentationalInvariants()
 
 
