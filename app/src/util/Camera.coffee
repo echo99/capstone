@@ -45,7 +45,9 @@ class Camera
   #
   # @param [Number] targetX The desired x position of the camera
   # @param [Number] targetY The desired y position of the camera
-  setTarget: (@targetX, @targetY) ->
+  setTarget: (x, y) ->
+    @targetX = -x
+    @targetY = -y
 
   # Sets the camera position immediately
   #

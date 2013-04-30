@@ -97,6 +97,9 @@ root.config =
       'warp_gate_3.png', 'warp_gate_4.png'], 3)
     END_TURN_BUTTON_IDLE: new AnimatedSprite(['end_turn_button_idle.png'])
     END_TURN_BUTTON_HOVER: new AnimatedSprite(['end_turn_button_hover.png'])
+    START_MISSION_BUTTON_IDLE: new AnimatedSprite(['start_mission_button_idle.png'])
+    START_MISSION_BUTTON_HOVER: new AnimatedSprite(
+      ['start_mission_button_hover.png'])
   units:
     probe:
       cost: 1

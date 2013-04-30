@@ -21,6 +21,9 @@ CursorType =
 
 # The base class for UI elements
 #
+# TODO:
+# - Figure what to do about duplicate child references
+#
 class Elements.UIElement extends Module
   # @property [Boolean] Flag for if element is visible
   visible: true
@@ -40,7 +43,7 @@ class Elements.UIElement extends Module
 
   # Create a new UI element
   #
-  constructor: ->
+  constructor: (@x, @y) ->
     # @private @property [Array<Elements.UIElement>]
     @_children = []
     # @private @property [Array<Number>]
@@ -55,12 +58,16 @@ class Elements.UIElement extends Module
     @_properties = {}
     @_drawFunc = null
 
+    @actX = @x
+    @actY = @y
+
   # Add a child element to this element
   #
   # @param [UIElement] elem
   #
   addChild: (elem) ->
     elem._parent = this
+    elem.setActualLocation(this)
     @_children.push(elem)
     zIndex = elem._zIndex
     if zIndex in @zIndices
@@ -92,6 +99,14 @@ class Elements.UIElement extends Module
         childBucket.splice(index)
         return true
     return false
+
+  # Set actual location
+  setActualLocation: (parent) ->
+    {x, y} = parent.getActualLocation(0, 0)
+    # @actX = parent.actX - @x
+    # @actY = parent.actY - @y
+    @actX = x + @x
+    @actY = y + @y
 
   # Set a custom property for this element
   #
@@ -152,18 +167,32 @@ class Elements.UIElement extends Module
         @_drawFunc(ctx)
       else
         @_drawFunc(ctx, coords, zoom)
+    # Draw all children
+    for child in @_children
+      child.draw(ctx, coords, zoom)
 
   # Set this element and all child elements to dirty
   #
   # @TODO: Somehow propogate dirty state back to parent so it knows to redraw it,
   #   but we don't always want to redraw the dirty parent.
   #
-  setDirty: ->
+  setDirty: (propagateUp = true) ->
+    # console.log("SetDirty called on #{@constructor.name}")
     @dirty = true
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
-        child.setDirty()
+        child.setDirty(false) if not child.dirty
+    @_parent?._handleDirtyChild(this) if propagateUp
+
+  # @private Method for propogating dirtyness
+  #
+  # @param [UIElement] child
+  #
+  _handleDirtyChild: (child) ->
+    # console.log("HandleDirtyChild called")
+    if @clickable and not @dirty
+      @setDirty()
 
   # Call to element to check if it is clicked and executes click handlers if it
   # is
@@ -270,21 +299,24 @@ class Elements.UIElement extends Module
   # @private Action to perform when element is clicked
   #
   _onClick: ->
-    if @clickHandler?
-      @clickHandler()
+    @clickHandler?()
 
   # @private Action to perform when element is hovered over
   #
   _onHover: ->
-    if @hoverHandler?
-      @hoverHandler()
+    @hoverHandler?()
     return CursorType.DEFAULT
 
   # private Action to perform when an element is no longer being hovered over
   #
   _onMouseOut: ->
-    if @mouseOutHandler?
-      @mouseOutHandler()
+    @mouseOutHandler?()
+
+  # Get the hover status of this element
+  #
+  # @return [Boolean] whether or not this element is currently being hovered over
+  isHovered: ->
+    return @_hovering
 
   # Gets the relative location of the point to this element
   #
@@ -292,6 +324,14 @@ class Elements.UIElement extends Module
   # @param [Number] y
   # @return [Object] The coordinates `{'x': x, 'y': y}`
   getRelativeLocation: (x, y) ->
+    return {'x': x, 'y': y}
+
+  # Gets the actual location of the on this element in relation to the root element
+  #
+  # @param [Number] x
+  # @param [Number] y
+  # @return [Object] The coordinates `{'x': x, 'y': y}`
+  getActualLocation: (x, y) ->
     return {'x': x, 'y': y}
 
   # Set the z-index of the element
@@ -343,7 +383,7 @@ class Elements.BoxElement extends Elements.UIElement
   # @param [Number] h Height of element
   #
   constructor: (@x, @y, @w, @h) ->
-    super()
+    super(@x, @y)
     @cx = -Math.round(@w/2)
     @cy = -Math.round(@h/2)
 
@@ -355,6 +395,10 @@ class Elements.BoxElement extends Elements.UIElement
   # @see Elements.UIElement#getRelativeLocation
   getRelativeLocation: (x, y) ->
     return {'x': x-@x-@cx, 'y': y-@y-@cy}
+
+  # @see Elements.UIElement#getActualLocation
+  getActualLocation: (x, y) ->
+    return {'x': x+@x+@cx, 'y': y+@y+@cy}
 
 
 # A radial UI element
@@ -368,7 +412,7 @@ class Elements.RadialElement extends Elements.UIElement
   # @param [Number] r Radius of element
   #
   constructor: (@x, @y, @r) ->
-    super()
+    super(@x, @y)
     @r2 = @r*@r
 
   # @see Elements.UIElement#containsPoint
@@ -376,6 +420,78 @@ class Elements.RadialElement extends Elements.UIElement
     dx = Math.abs(@x - x)
     dy = Math.abs(@y - y)
     return dx*dx + dy*dy <= @r2
+
+
+# A window for holding various other elements
+#
+class Elements.Window extends Elements.BoxElement
+
+  # Create a new window
+  #
+  # @param [Number] x x-position of center of element relative to parent
+  # @param [Number] y y-position of center of element relative to parent
+  # @param [Number] w Width of element
+  # @param [Number] h Height of element
+  #
+  constructor: (@x, @y, @w, @h) ->
+    super(@x, @y, @w, @h)
+    @_backgroundColor = null
+    @_fadeFrames = 15
+    @_currentAlpha = 0.5
+    @_minAlpha = 0.5
+    @_alphaInc = 1 / @_fadeFrames
+    @_animating = false
+    @_animateChildren = true
+    # @hoverHandler = ->
+    #   alert("hi")
+
+  # Set the background color of this window
+  #
+  # @param [String] _backgroundColor
+  #
+  setBackgroundColor: (@_backgroundColor) ->
+
+  _onHover: ->
+    @_animating = true
+    @setDirty()
+    super()
+
+  _onMouseOut: ->
+    @_animating = true
+    @setDirty()
+    super()
+
+
+  # Draw the window
+  #
+  # @param [CanvasRenderingContext2D] ctx
+  draw: (ctx) ->
+    if @_backgroundColor?
+      ctx.fillStyle = @_backgroundColor
+      ctx.save()
+      # console.log(@_hovering)
+      # console.log(@_currentAlpha)
+      if @_hovering and @_currentAlpha < 1
+        @_currentAlpha += @_alphaInc
+        # @setDirty()
+      else if not @_hovering and @_currentAlpha > @_minAlpha
+        # console.log(@_currentAlpha)
+        @_currentAlpha -= @_alphaInc
+      else
+        @_animating = false
+      ctx.globalAlpha = @_currentAlpha
+      ctx.clearRect(@x+@cx, @y+@cy, @w, @h)
+      ctx.fillRect(@x+@cx, @y+@cy, @w, @h)
+      if @_animateChildren
+        super(ctx)
+        ctx.restore()
+      else
+        ctx.restore()
+        super(ctx)
+    else
+      super(ctx)
+    if @_animating
+      @setDirty()
 
 
 # Frame for holding all elements in the HUD
@@ -387,7 +503,7 @@ class Elements.Frame extends Elements.UIElement
   # @param [Canvas] canvas The HUD canvas
   #
   constructor: (@frame, @canvas) ->
-    super()
+    super(0, 0)
     @resize()
     @clickable = false
     @ctx = @canvas.getContext('2d')
@@ -430,7 +546,7 @@ class Elements.GameFrame extends Elements.UIElement
   # @param [Canvas] canvas The game canvas
   #
   constructor: (@camera, @canvas) ->
-    super()
+    super(0, 0)
     @clickable = false
     @ctx = @canvas.getContext('2d')
 
@@ -470,7 +586,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [String] message The message to display in the box
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
-  constructor: (@x, @y, @w, @h, @message, @ctx) ->
+  constructor: (@x, @y, @w, @h, @message) ->
     super(@x, @y, @w, @h)
     # test = ->
     #   alert(@visible)
@@ -481,12 +597,25 @@ class Elements.MessageBox extends Elements.BoxElement
       ((obj) ->
         return -> obj.close())(this))
     @addChild(@closeBtn)
-    @ctx.font = config.windowStyle.msgBoxText.font
-    textWidth = @ctx.measureText(@message).width
-    console.log("Width of #{@message} : #{textWidth}")
-    allowedWidth = @w - (config.windowStyle.lineWidth * 2)
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
+    @_closing = false
+    @_checkedWrap = false
+
+    # console.log("My children: #{@_children}")
+    # console.log("Button's children: #{@closeBtn._children}")
+
+  # @private Wrap the text for this message box so the message will fit in the box
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
+  _wrapText: (ctx) ->
+    ctx.font = config.windowStyle.msgBoxText.font
+    textWidth = ctx.measureText(@message).width
+    console.log("Width of #{@message} : #{textWidth}")
+    allowedWidth = @w - (config.windowStyle.lineWidth * 2)
+    # lines = @message.split("\n")
+    # console.log(lines)
     if textWidth > allowedWidth
       words = @message.split(" ")
       console.log("Words: #{words}")
@@ -498,7 +627,7 @@ class Elements.MessageBox extends Elements.BoxElement
           line = word
         else
           line += ' ' + word
-        if @ctx.measureText(line).width > allowedWidth
+        if ctx.measureText(line).width > allowedWidth
           if lastTried isnt null
             @lines.push(lastTried)
             line = word
@@ -508,9 +637,8 @@ class Elements.MessageBox extends Elements.BoxElement
       if line isnt null
         @lines.push(line)
     console.log(@lines)
+    @_checkedWrap = true
 
-    # console.log("My children: #{@_children}")
-    # console.log("Button's children: #{@closeBtn._children}")
 
   # # Temporary callback function
   # callback: () ->
@@ -518,18 +646,34 @@ class Elements.MessageBox extends Elements.BoxElement
   #   if @updCallback
   #     @updCallback()
 
+
+  # Open this message box
+  #
+  open: ->
+    @setDirty()
+    @visible = true
+
   # Close this message box
+  #
   close: ->
-    @visible = false
-    lw = config.windowStyle.lineWidth
-    lw2 = lw + lw
-    @ctx.clearRect(@x+@cx-lw, @y+@cy-lw, @w + lw2, @h + lw2)
-    # @ctx.canvas.style.cursor = CursorType.DEFAULT
+    @setDirty()
+    @_closing = true
 
 
   # Add a callback to call when the message box updates
   addUpdateCallback: (callback) ->
     @updCallback = callback
+
+
+  # @private Clear this message box from the context
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
+  _clearBox: (ctx) ->
+    lw = config.windowStyle.lineWidth
+    lw2 = lw + lw
+    ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+
 
   # Draw this message box to the canvas context
   #
@@ -538,14 +682,24 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] zoom The current zoom
   #
   draw: (ctx, coords = null, zoom = null) ->
-    super(ctx)
-    if @visible
+    if @_closing
+      @_closing = false
+      @visible = false
+      @_clearBox(ctx)
+      @setDirty()
+    else if @visible
+      if not @_parent.clickable
+        @_clearBox(ctx)
+      if not @_checkedWrap
+        @_wrapText(ctx)
       if coords
         x = coords.x
         y = coords.y
       else
-        x = @x
-        y = @y
+        # x = @x
+        # y = @y
+        x = @actX
+        y = @actY
       # if zoom
       #   cx = @cx * zoom
       #   cy = @cy * zoom
@@ -580,7 +734,7 @@ class Elements.MessageBox extends Elements.BoxElement
       # ctx.fillText(@message, cx, cy)
 
       if @lines.length > 0
-        console.log("Box is dirty: #{@dirty}")
+        # console.log("Box is dirty: #{@dirty}")
         yOffset = (@lines.length-1) * @lineSpacing
         yTmp = y - yOffset
         for line in @lines
@@ -601,6 +755,8 @@ class Elements.MessageBox extends Elements.BoxElement
 
       if zoom
         ctx.restore()
+
+      super(ctx, coords, zoom)
 
 # Button mixin [WIP]
 # @mixin
@@ -666,34 +822,6 @@ class Elements.Button extends Elements.BoxElement
   #
   constructor: (@x, @y, @w, @h, @clickHandler=null) ->
     super(@x, @y, @w, @h)
-    # @hoverHandler = null
-    # @mouseOutHandler = null
-
-  # # Set the onClick handler
-  # #
-  # # @param [Function] clickHandler
-  # #
-  # setClickHandler: (@clickHandler) ->
-
-  # # Set the onHover handler
-  # #
-  # # @param [Function] hoverHandler
-  # #
-  # setHoverHandler: (@hoverHandler) ->
-
-  # # Set the onMouseOut handler
-  # #
-  # # @param [Function] mouseOutHandler
-  # #
-  # setMouseOutHandler: (@mouseOutHandler) ->
-
-  # # Call the attached callback function when the button is clicked
-  # #
-  # _onClick: ->
-  #   # @callback.callback()
-  #   # @callback()
-  #   if @clickHandler isnt null
-  #     @clickHandler()
 
   # Do something when the user hovers over the button
   #
@@ -702,12 +830,6 @@ class Elements.Button extends Elements.BoxElement
     # if @hoverHandler isnt null
     #   @hoverHandler()
     return CursorType.POINTER
-
-  # # Do something when the user's mouse leaves the button
-  # #
-  # _onMouseOut: ->
-  #   if @mouseOutHandler isnt null
-  #     @mouseOutHandler()
 
 
 # Button class for circular buttons
@@ -721,51 +843,15 @@ class Elements.RadialButton extends Elements.RadialElement
   # @param [Number] r Radius of element
   # @param [Function] clickHandler (optional) The function to call when this
   #   button is clicked
+  #
   constructor: (@x, @y, @r, @clickHandler=null) ->
     super(@x, @y, @r)
-    # @hoverHandler = null
-    # @mouseOutHandler = null
-
-  # # Set the onClick handler
-  # #
-  # # @param [Function] clickHandler
-  # #
-  # setClickHandler: (@clickHandler) ->
-
-  # # Set the onHover handler
-  # #
-  # # @param [Function] hoverHandler
-  # #
-  # setHoverHandler: (@hoverHandler) ->
-
-  # # Set the onMouseOut handler
-  # #
-  # # @param [Function] mouseOutHandler
-  # #
-  # setMouseOutHandler: (@mouseOutHandler) ->
-
-  # # Call the attached callback function when the button is clicked
-  # #
-  # _onClick: ->
-  #   # @callback.callback()
-  #   # @callback()
-  #   if @clickHandler isnt null
-  #     @clickHandler()
 
   # Do something when the user hovers over the button
   #
   _onHover: ->
     super()
-    # if @hoverHandler isnt null
-    #   @hoverHandler()
     return CursorType.POINTER
-
-  # # Do something when the user's mouse leaves the button
-  # #
-  # _onMouseOut: ->
-  #   if @mouseOutHandler isnt null
-  #     @mouseOutHandler()
-
 
 # Class for handling DOM (Document Object Model) buttons. These buttons are
 # inserted into the DOM rather than drawn onto one of the existing canvases.
