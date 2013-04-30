@@ -681,7 +681,7 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   _clearBox: (ctx) ->
-    lw = config.windowStyle.lineWidth / 2
+    lw = Math.ceil(config.windowStyle.lineWidth / 2)
     lw2 = lw + lw
     ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 
