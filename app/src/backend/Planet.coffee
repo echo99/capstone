@@ -29,7 +29,7 @@ class Planet
     @_controlGroups = []
     @_unitConstructing = null
     @_turnsToComplete = 0
-    @_visibility = root.config.visibility.invisible
+    @_visibility = root.config.visibility.undiscovered
 
   # GETTERS #
 
