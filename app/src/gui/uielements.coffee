@@ -35,6 +35,8 @@ class Elements.UIElement extends Module
   # @private @property [Boolean] Flag for if an element is being hovered over
   _hovering: false
 
+  _pressed: false
+
   # @private @property [Number] Element ordering rank
   _zIndex: 0
 
@@ -267,6 +269,48 @@ class Elements.UIElement extends Module
       for child in @_children
         child.mouseOut()
 
+  # Call to element to check if it is being pressed
+  #
+  # @param [Number] x
+  # @param [Number] y
+  # @param [Boolean] Whether or not an element was pressed
+  #
+  mouseDown: (x, y) ->
+    if @containsPoint(x, y) and @visible
+      @_onMouseDown()
+      relLoc = @getRelativeLocation(x, y)
+      # console.log("relative location: #{@constructor.name} #{relLoc.x},
+      #   #{relLoc.y} | #{pointerType}")
+      # Flag to see if a child is being hovered over
+      pressedChild = false
+      for zIndex in @zIndicesRev
+        children = @_childBuckets[zIndex]
+        for child in children
+          # if pressedChild
+          #   child.mouseOut()
+          # else
+          pressedChild or= child.mouseDown(relLoc.x, relLoc.y)
+          break if pressedChild
+      return (@_pressed and @clickable) or pressedChild
+    return false
+          # if not pressedChild
+          #   pressed = child.mouseDown(relLoc.x, relLoc.y)
+            # pointer = child.mouseMove(relLoc.x, relLoc.y)
+            # if pointer
+            #   pointerType = pointer
+              # hoveredChild = true
+    # else if @_hovering and @visible
+    #   @_hovering = false
+    #   @_onMouseOut()
+    # return pointerType
+
+  # Call when the mouse lifts off the element
+  mouseUp: ->
+    if @_pressed
+      @_onMouseUp()
+      for child in @_children
+        child.mouseUp() if child._pressed
+
   # # @private Action to perform when element is hovered over
   # # @abstract
   # #
@@ -296,6 +340,18 @@ class Elements.UIElement extends Module
   #
   setMouseOutHandler: (@mouseOutHandler) ->
 
+  # Set the onMouseDown handler
+  #
+  # @param [Function] mouseDownHandler
+  #
+  setMouseDownHandler: (@mouseDownHandler) ->
+
+  # Set the onMouseUp handler
+  #
+  # @param [Function] mouseUpHandler
+  #
+  setMouseUpHandler: (@mouseUpHandler) ->
+
   # @private Action to perform when element is clicked
   #
   _onClick: ->
@@ -307,14 +363,30 @@ class Elements.UIElement extends Module
     @hoverHandler?()
     return CursorType.DEFAULT
 
-  # private Action to perform when an element is no longer being hovered over
+  # @private Action to perform when an element is no longer being hovered over
   #
   _onMouseOut: ->
+    @_pressed = false
     @mouseOutHandler?()
+
+  # @private Action to perform when the mouse is pressed on this element
+  #
+  _onMouseDown: ->
+    console.log(@toString() + " pressed")
+    @_pressed = true
+    @mouseDownHandler?()
+
+  # @private Action to perform when the mouse is lifted off this element
+  #
+  _onMouseUp: ->
+    console.log(@toString() + " mouse up")
+    @_pressed = false
+    @mouseUpHandler?()
 
   # Get the hover status of this element
   #
   # @return [Boolean] whether or not this element is currently being hovered over
+  #
   isHovered: ->
     return @_hovering
 

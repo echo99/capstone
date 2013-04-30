@@ -260,11 +260,17 @@ main = ->
   )
 
   hudCanvas.addEventListener('mousedown', (e) ->
-    drag = true
-    prevPos = {x: e.clientX, y: e.clientY})
+    if not frameElement.mouseDown(e.clientX, e.clientY)
+      drag = true
+      prevPos = {x: e.clientX, y: e.clientY}
+      gameFrame.mouseDown(e.clientX, e.clientY)
+  )
 
   hudCanvas.addEventListener('mouseup', (e) ->
-    drag = false)
+    drag = false
+    frameElement.mouseUp()
+    gameFrame.mouseUp()
+  )
 
   hudCanvas.addEventListener('mouseout', (e) ->
     drag = false)
