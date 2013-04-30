@@ -139,10 +139,9 @@ root.config =
       defense: .1
   visibility:
     visible: 0
-    fungus: 1
-    nonfungus: 2
-    invisible: 3
-    size: 4
+    discovered: 1
+    undiscovered: 2
+    size: 3
   minimumPlanetDistance: 500
   maximumAdjacencyDistance: 800
   resources:
