@@ -1,0 +1,2 @@
+class Camera
+  contructor: (@x, @y, @width, @height) ->

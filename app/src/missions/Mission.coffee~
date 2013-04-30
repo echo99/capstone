@@ -1,0 +1,8 @@
+class Mission
+  reset: ->
+    
+  draw: (ctx) ->
+
+  onMouseMove: (x, y) ->
+
+  onMouseClick: ->

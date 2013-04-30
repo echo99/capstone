@@ -22,6 +22,15 @@ class Menu extends Mission
       Extermination: new Planet(400, 150)
       Credits: new Planet(-400, 150)
 
+    # Set visibilities
+    @Planets.Home.setVisibility(window.config.visibility.discovered)
+    @Planets.Missions.setVisibility(window.config.visibility.discovered)
+    @Planets.Mission1.setVisibility(window.config.visibility.discovered)
+    @Planets.Mission2.setVisibility(window.config.visibility.discovered)
+    @Planets.Mission3.setVisibility(window.config.visibility.discovered)
+    @Planets.Extermination.setVisibility(window.config.visibility.discovered)
+    @Planets.Credits.setVisibility(window.config.visibility.discovered)
+
     # Add planets to game
     game.addPlanet(@Planets.Home)
     game.addPlanet(@Planets.Missions)
@@ -114,6 +123,7 @@ class Menu extends Mission
     @exterminationMenu.close()
     frameElement.addChild(@exterminationMenu)
 
+    game.setup(0, null)
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -125,7 +135,8 @@ class Menu extends Mission
     ctx.textAlign = 'center'
     for p in @Names
       planet = @Planets[p]
-      if planet._probes == 0
+      if planet.numShips(window.config.units.probe) == 0 and
+         planet.visibility() == window.config.visibility.visible
         loc = planet.location()
         coords = {x: loc.x, y: loc.y - 100}
         coords = camera.getScreenCoordinates(coords)

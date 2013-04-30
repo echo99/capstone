@@ -211,15 +211,15 @@ class UnitSelection
     ctx.stroke()
     ctx.fillStyle = winStyle.titleText.color
     ctx.textAlign = 'left'
-    ctx.textBaseline = 'top'
-    ctx.fillText("Selected Units", loc.x+6, loc.y+5)
+    ctx.textBaseline = 'center'
+    ctx.fillText("Selected Units", loc.x+6, loc.y+17)
     ctx.fillStyle = winStyle.valueText.color
 
-    SHEET.drawSprite(SpriteNames.PROBE, loc.x+20, loc.y+50, ctx, false)
+    SHEET.drawSprite(SpriteNames.PROBE, loc.x+30, loc.y+50, ctx, false)
     ctx.fillText(@totalProbes, loc.x+60, loc.y+55)
 
     if not @onlyProbe
-      SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+20, loc.y+90, ctx, false)
+      SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+30, loc.y+90, ctx, false)
       ctx.fillText(@totalcolonies, loc.x+60, loc.y+95)
 
       SHEET.drawSprite(SpriteNames.ATTACK_SHIP,

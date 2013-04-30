@@ -173,7 +173,7 @@ class Planet
       else throw new Error("Ship type unknown.")
 
   # UPKEEP #
-  
+
   # Fungus growth phase 1.
   # Determines growth and sporing for next turn.
   #
@@ -400,6 +400,7 @@ class Planet
     if not group.moved()
       group.setMoved()
       if ((group.destination() is @) and (group.destination() is group.next()))
+        console.log('arrived at ' + @_x + ", " + @_y)
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
         @_probes += group.probes()

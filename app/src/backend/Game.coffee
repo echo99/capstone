@@ -9,7 +9,7 @@ class Game
   setup: (@_numplanets = 0, planets) ->
     if planets isnt null
       @_planets = planets
-    else
+    else if @_numplanets != 0
       # Generate home planet.
       homePlanetX = Math.floor(Math.random() * @_width)
       homePlanetY = Math.floor(Math.random() * @_height)
@@ -33,7 +33,7 @@ class Game
         if isGoodPlanet(newPlanet)
           makeAdjacent(newPlanet)
           @_planets.push(newPlanet)
-    endTurn()
+    @endTurn()
 
 
   setGraph: (planets) ->

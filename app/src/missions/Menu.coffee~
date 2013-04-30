@@ -1,0 +1,11 @@
+#_require Mission
+
+class Menu extends Mission
+  constructor: ->
+    planet = null
+
+  draw: (ctx) ->
+
+  onMouseMove: (x, y) ->
+
+  onMouseClick: ->
