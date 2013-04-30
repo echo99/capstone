@@ -82,7 +82,7 @@ class Menu extends Mission
     )
     button.setZIndex(100)
     @mission1Menu.addChild(button)
-    @mission1Menu.visible = false
+    @mission1Menu.close()
     frameElement.addChild(@mission1Menu)
 
     @exterminationMenu = new Elements.MessageBox(camera.width/2, camera.height/2,
@@ -111,7 +111,7 @@ class Menu extends Mission
     )
     button2.setZIndex(100)
     @exterminationMenu.addChild(button2)
-    @exterminationMenu.visible = false
+    @exterminationMenu.close()
     frameElement.addChild(@exterminationMenu)
 
 
@@ -175,11 +175,11 @@ class Menu extends Mission
         @lastPlanet = p
         if @lastPlanet == @Planets.Mission1
           @mission1Menu.visible = true
-        else if @mission1Menu.visible
+        else
           @mission1Menu.close()
         if @lastPlanet == @Planets.Extermination
           @exterminationMenu.visible = true
-        else if @exterminationMenu.visible
+        else
           @exterminationMenu.close()
         break
     if not found
