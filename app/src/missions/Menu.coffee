@@ -69,11 +69,14 @@ class Menu extends Mission
                                             "This is the mission 1 message box")
     button = new Elements.Button(100, 170, 101, 20)
     ###################################################################
-    # TODO: Fix buttons
+    # TODO: Fix buttons, add close buttons, respawn probe
     button.setClickHandler(() =>
       console.log('clicked mission 1 button')
     )
-    button.setHoverHandler(() =>
+    button.setMouseUpHandler(() =>
+      button.setDirty()
+    )
+    button.setMouseDownHandler(() =>
       button.setDirty()
     )
     button.setMouseOutHandler(() =>
@@ -81,7 +84,7 @@ class Menu extends Mission
     )
     button.setDrawFunc((ctx) =>
       loc = @mission1Menu.getActualLocation(button.x, button.y)
-      if button.isHovered()
+      if button.isPressed()
         SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
                          loc.x, loc.y, ctx, false)
       else
@@ -99,7 +102,10 @@ class Menu extends Mission
     button2.setClickHandler(() =>
       console.log('clicked extermination button')
     )
-    button2.setHoverHandler(() =>
+    button2.setMouseUpHandler(() =>
+      button2.setDirty()
+    )
+    button2.setMouseDownHandler(() =>
       button2.setDirty()
     )
     button2.setMouseOutHandler(() =>
@@ -107,7 +113,7 @@ class Menu extends Mission
     )
     button2.setDrawFunc((ctx) =>
       loc = @exterminationMenu.getActualLocation(button2.x, button2.y)
-      if button2.isHovered()
+      if button2.isPressed()
         SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
                          loc.x, loc.y, ctx, false)
       else
