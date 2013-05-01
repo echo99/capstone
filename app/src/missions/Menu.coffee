@@ -86,7 +86,7 @@ class Menu extends Mission
     cancel = settings.cancel
     start = settings.start
     cancelButton = new Elements.Button(cancel.x, cancel.y, cancel.w, cancel.h)
-    menuBox = new Elements.MessageBox(camera.width/2, camera.height/2,
+    menuBox = new Elements.MessageBox(0, 0,
                                       settings.w, settings.h,
                                       settings.message,
                                       cancelButton,
@@ -137,7 +137,8 @@ class Menu extends Mission
 
     menuBox.addChild(startButton)
     menuBox.close()
-    frameElement.addChild(menuBox)
+    # frameElement.addChild(menuBox)
+    cameraHudFrame.addChild(menuBox)
 
     return menuBox
 

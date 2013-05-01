@@ -44,10 +44,14 @@ class UserInterface
     b.setZIndex(100)
     frameElement.addChild(b)
 
-    @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
+    # @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
+    #   "Press HOME to return")
+    # @help.close()
+    # frameElement.addChild(@help)
+    @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return")
-    @help.close()
-    frameElement.addChild(@help)
+    @help.visible = false
+    cameraHudFrame.addChild(@help)
 
 
 
