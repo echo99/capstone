@@ -64,6 +64,7 @@ class Elements.UIElement extends Module
 
     @actX = @x
     @actY = @y
+    @positioning = 'default'
 
   # Add a child element to this element
   #
@@ -104,7 +105,10 @@ class Elements.UIElement extends Module
         return true
     return false
 
-  # Set actual location
+  # @private Set actual location of this element
+  #
+  # @param [UIElement] parent
+  #
   setActualLocation: (parent) ->
     {x, y} = parent.getActualLocation(0, 0)
     # @actX = parent.actX - @x
@@ -150,7 +154,18 @@ class Elements.UIElement extends Module
     return @containsPoint(coords.x, coords.y)
 
   # Sets the draw function for this element
+  #
+  # @param [Function] _drawFunc
+  #
   setDrawFunc: (@_drawFunc) ->
+
+  # [WIP] Set the positioning of this element. Setting this currently has no effect.
+  #
+  # @param [String] positioning Either `default` or `center`
+  #
+  setPositioning: (@positioning) ->
+
+
 
   # Call the draw function with the passed arguments
   #
@@ -316,6 +331,12 @@ class Elements.UIElement extends Module
       for child in @_children
         child.mouseUp() if child._pressed
 
+
+  resize: ->
+    @_onResize()
+    for child in @_children
+      child.mouseUp() if child._pressed
+
   # # @private Action to perform when element is hovered over
   # # @abstract
   # #
@@ -357,6 +378,12 @@ class Elements.UIElement extends Module
   #
   setMouseUpHandler: (@mouseUpHandler) ->
 
+  # Set the onResize handler
+  #
+  # @param [Function] resizeHandler
+  #
+  setResizeHandler: (@resizeHandler) ->
+
   # @private Action to perform when element is clicked
   #
   _onClick: ->
@@ -394,6 +421,12 @@ class Elements.UIElement extends Module
     # Not sure if this is the right place to put this
     # @_startPressedOnThis = false
     @mouseUpHandler?()
+
+  # @private Action to perform when the element is resized
+  #
+  _onResize: ->
+    # if
+    @resizeHandler?()
 
   # Get the hover status of this element
   #
@@ -625,6 +658,7 @@ class Elements.Frame extends Elements.UIElement
     # @y = cy
     @w = @frame.width
     @h = @frame.height
+    super()
 
   # @see Elements.UIElement#containsPoint
   containsPoint: (x, y) ->
@@ -641,6 +675,67 @@ class Elements.Frame extends Elements.UIElement
       children = @_childBuckets[zIndex]
       for child in children
         child.draw(@ctx) if child.dirty
+
+
+# Frame for holding all elements that need to be drawn relative to the center
+# of the screen
+#
+class Elements.CameraFrame extends Elements.UIElement
+
+  # Create a new camera frame
+  #
+  # @param [Camera] camera The camera object
+  # @param [Canvas] canvas The camera hud canvas
+  #
+  constructor: (@camera, @canvas) ->
+    # super(Math.floor(@camera.width/2), Math.floor(@camera.height/2))
+    super(Math.floor(@camera.width/2), Math.floor(@camera.height/2))
+    @clickable = false
+    @ctx = @canvas.getContext('2d')
+
+  # @see Elements.UIElement#containsPoint
+  containsPoint: (x, y) ->
+    return true
+
+  # @see Elements.UIElement#getRelativeLocation
+  getRelativeLocation: (x, y) ->
+    return {x: x-@x, y: y-@y}
+
+  # @see Elements.UIElement#getActualLocation
+  getActualLocation: (x, y) ->
+    return {'x': @actX+x, 'y': @actY+y}
+
+  # Resize the frame if the document frame resizes
+  resize: ->
+    # cx = Math.round(@frame.width/2)
+    # cy = Math.round(@frame.height/2)
+    # @x = cx
+    # @y = cy
+    @w = @camera.width
+    @h = @camera.height
+    @canvas.width = @w
+    @canvas.height = @h
+    @x = @w / 2
+    @y = @h / 2
+    @actX = @x
+    @actY = @y
+    # console.log("New x y: #{@x}, #{@y}")
+    for child in @_children
+      child.setActualLocation(this)
+    super()
+    @setDirty()
+    @drawChildren()
+
+  # Draw the frame's children
+  drawChildren: ->
+    # console.log("Frame's drawChildren called!")
+    for zIndex in @zIndices
+      children = @_childBuckets[zIndex]
+      for child in children
+        # if child.dirty
+        #   console.log("Drawing: " + child)
+        child.draw(@ctx) if child.dirty
+
 
 
 # Frame for holding all elements in the game
