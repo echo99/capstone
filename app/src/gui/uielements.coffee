@@ -115,6 +115,9 @@ class Elements.UIElement extends Module
     # @actY = parent.actY - @y
     @actX = x + @x
     @actY = y + @y
+    # Propagate actual location setting
+    for child in @_children
+      child.setActualLocation(this)
 
   # Set a custom property for this element
   #
