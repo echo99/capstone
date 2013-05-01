@@ -36,6 +36,8 @@ class Elements.UIElement extends Module
   _hovering: false
 
   _pressed: false
+  _clicked: false
+  _startPressedOnThis: false
 
   # @private @property [Number] Element ordering rank
   _zIndex: 0
@@ -205,7 +207,7 @@ class Elements.UIElement extends Module
   #
   click: (x, y) =>
     clickedSomething = false
-    if @containsPoint(x, y) and @visible
+    if @containsPoint(x, y) and @visible and @_clicked
       clickedSomething = @clickable
       # console.log("clicked #{@constructor.name} at (#{x}, #{y})")
       @_onClick()
@@ -305,6 +307,9 @@ class Elements.UIElement extends Module
     # return pointerType
 
   # Call when the mouse lifts off the element
+  #
+  # TODO: Maybe make mouseUp() call click() if certain conditions are met?
+  #
   mouseUp: ->
     if @_pressed
       @_onMouseUp()
@@ -355,18 +360,20 @@ class Elements.UIElement extends Module
   # @private Action to perform when element is clicked
   #
   _onClick: ->
+    @_clicked = false
     @clickHandler?()
 
   # @private Action to perform when element is hovered over
   #
   _onHover: ->
     @hoverHandler?()
+    @setDirty()
     return CursorType.DEFAULT
 
   # @private Action to perform when an element is no longer being hovered over
   #
   _onMouseOut: ->
-    @_pressed = false
+    # @_pressed = false
     @mouseOutHandler?()
 
   # @private Action to perform when the mouse is pressed on this element
@@ -374,13 +381,18 @@ class Elements.UIElement extends Module
   _onMouseDown: ->
     # console.log(@toString() + " pressed")
     @_pressed = true
+    # @_startPressedOnThis = true
     @mouseDownHandler?()
 
   # @private Action to perform when the mouse is lifted off this element
   #
   _onMouseUp: ->
     # console.log(@toString() + " mouse up")
+    @_clicked = @_pressed and @_hovering
     @_pressed = false
+    console.log(@_clicked)
+    # Not sure if this is the right place to put this
+    # @_startPressedOnThis = false
     @mouseUpHandler?()
 
   # Get the hover status of this element
@@ -395,7 +407,7 @@ class Elements.UIElement extends Module
   # @return [Boolean] Whether or not this element is currently being pressed
   #
   isPressed: ->
-    return @_pressed
+    return @_pressed and @_hovering
 
   # Gets the relative location of the point to this element
   #
@@ -488,7 +500,7 @@ class Elements.BoxElement extends Elements.UIElement
 
   # @see Elements.UIElement#toString
   toString: ->
-    return "#{@constructor.name}: (#{@x}, #{@y}, #{@w}, #{h})"
+    return "#{@constructor.name}: (#{@x}, #{@y}, #{@w}, #{@h})"
 
 
 # A radial UI element
