@@ -319,6 +319,7 @@ class Planet
 
   # Movement phase 2.
   # Resets all control groups to allow movement again.
+  # Reintegrates control groups that have reached their destination.
   #
   movementUpkeep2: ->
     for group in @_controlGroups
