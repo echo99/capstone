@@ -39,13 +39,22 @@ SpriteNames = window.config.spriteNames
 frameElement = null
 cameraHudFrame = null
 
-UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
 camera.setDragMode(window.config.DRAG_TYPE)
-game = new Game(10000, 10000)
+UI = null
+game = new Game(0, 0)
 gameFrame = null
 
 CurrentMission = null
+
+newMission = (mission) ->
+  CurrentMission.destroy()
+  UI.destroy()
+  UI = new UserInterface()
+  CurrentMission = new mission()
+
+newGame = (w, h) ->
+  game = new Game(w, h)
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -143,6 +152,7 @@ main = ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
 
+  UI = new UserInterface()
   CurrentMission = new Menu()
 
   sheet = SHEET
