@@ -22,6 +22,20 @@ class UnitSelection
       @updateSelection(p)
     @setOnlyProbe(onlyProbe)
 
+  destroy: () ->
+    @deselectAllUnits()
+    for p in game.getPlanets()
+      units = p.unitSelection
+      @_destroyStacks(units.probes)
+      @_destroyStacks(units.colonies)
+      @_destroyStacks(units.attacks)
+      @_destroyStacks(units.defenses)
+
+  _destroyStacks: (stacks) ->
+    for row in stacks
+      for stack in row
+        stack.destroy()
+
   setOnlyProbe: (@onlyProbe) ->
     if @totalDisplay != null
       frameElement.removeChild(@totalDisplay)
@@ -346,7 +360,10 @@ class Stack
     @b.setMouseOutHandler(() => @hovered = false)
     gameFrame.addChild(@b)
 
-  clear: () ->
+  destroy: ->
+    gameFrame.removeChild(@b)
+
+  clear: ->
     @selected = false
     @hovered = false
 
@@ -370,7 +387,6 @@ class Stack
         ctx.fillStyle = window.config.unitDisplay.fill
         ctx.fillRect(coords.x, coords.y, @w*z, @h*z)
       if @hovered
-        console.log('hovered')
         ctx.strokeStyle = window.config.connectionStyle.unit.stroke
         ctx.lineWidth = window.config.connectionStyle.unit.lineWidth
         loc = camera.getScreenCoordinates({x: @x, y: @y})
