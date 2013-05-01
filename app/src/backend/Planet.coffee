@@ -324,7 +324,7 @@ class Planet
   movementUpkeep2: ->
     for group in @_controlGroups
       group.resetMoved()
-      if ((group.destination() is @) and (group.destination() is group.next()))
+      if group.destination() is @
         console.log("Group arrived at " + @_x + ", " + @_y)
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
@@ -455,10 +455,9 @@ class Planet
       console.log("dest is @: " + (group.destination() is @))
       console.log("dest is group.next: " + (group.destination() is group.next()))
       console.log("NEXT: " + group.next())
-      if !((group.destination() is @) and (group.destination() is group.next()))
+      if !(group.destination() is @)
         console.log("Group not yet at destination, send to next planet on path")
         group.next().receiveGroup(group)
-        group.route().shift()
         console.log("removing group: " + group.toString() + " from " + @toString())
         @_controlGroups = @_controlGroups.filter((g) => g != group)
         console.log("new groups: " + @_controlGroups)
@@ -516,6 +515,8 @@ class Planet
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
+    if @_route == undefined
+      throw new Error "route should not be undefined"
 
 
 root.Planet = Planet
