@@ -34,7 +34,6 @@ class UserInterface
     @unitSelection.initialize(onlyProbe)
     b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
     b.setClickHandler(() =>
-      console.log('click')
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
@@ -50,7 +49,6 @@ class UserInterface
     )
     b.setDrawFunc((ctx) =>
       b.y = camera.height-5-10
-      console.log('pressed: ' + b.isPressed())
       if b.isPressed()
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, b.x, b.y, ctx, false)
       else

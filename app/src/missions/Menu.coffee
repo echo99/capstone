@@ -60,7 +60,7 @@ class Menu extends Mission
 
     @lastPlanet = @Planets.Home
 
-    UI.initialize(true, true)
+    UI.initialize(true, false)
     camera.setZoom(0.5)
 
     # Note: The position currently doesn't update if the camera changes

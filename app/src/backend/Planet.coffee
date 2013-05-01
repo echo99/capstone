@@ -301,7 +301,9 @@ class Planet
   # Moves control groups.
   #
   movementUpkeep1: ->
+    console.log("Moveing control groups for " + @toString())
     @move(group) for group in @_controlGroups
+    console.log("Done moving groups")
 
   # Movement phase 2.
   # Resets all control groups to allow movement again.
@@ -349,7 +351,9 @@ class Planet
   # based on currently-known information.
   #
   updateAI: ->
+    console.log("updating control groups in planet " + @toString())
     group.updateAi(@) for group in @_controlGroups
+    console.log("done updating control groups")
 
   # INGAME COMMANDS #
 
@@ -371,11 +375,13 @@ class Planet
        defenseShips > @_defenseShips or
        probes > @_probes or
        colonies > @_colonies
-      throw error "Insufficient Ships"
+      console.log("Insufficient Ships!!!!")
+      #throw error "Insufficient Ships"
     else
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
                                       probes, colonies, dest)
+      console.log("Created new control group on " + @toString())
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips
@@ -383,7 +389,9 @@ class Planet
       @_colonies -= colonies
       controlGroup.updateAi(@)
       # add to planet
+      console.log("Adding control group to planet " + @toString())
       @_controlGroups.push(controlGroup)
+      console.log("Control groups: " + @_controlGroups)
 
   # SETTERS FOR USE BY GUI #
 
@@ -404,20 +412,34 @@ class Planet
   # HELPER FUNCTIONS #
 
   move: (group) ->
+    console.log("Moving control group " + group.toString())
     if not group.moved()
+      console.log("Group has not been moved")
       group.setMoved()
-      if ((group.destination() is @) and (group.destination() is group.next()))
-        console.log('arrived at ' + @_x + ", " + @_y)
+      console.log("dest is @: " + (group.destination() is @))
+      console.log("dest is group.next: " + (group.destination() is group.next()))
+      console.log("NEXT: " + group.next())
+      if (not group.next()? or
+         ((group.destination() is @) and (group.destination() is group.next())))
+        console.log("Group arrived at " + @_x + ", " + @_y)
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
         @_probes += group.probes()
         @_colonies += group.colonies()
       else
+        console.log("Group not yet at destination, send to next planet on path")
         group.next().receiveGroup(group)
+        group.route().shift()
+      console.log("removing group: " + group.toString() + " from " + @toString())
       @_controlGroups = @_controlGroups.filter((g) => g != group)
+      console.log("new groups: " + @_controlGroups)
+    else
+      console.log("Control group already moved")
 
   receiveGroup: (group) ->
+    console.log("planet " + @toString() + " recieving " + group.toString())
     @_controlGroups.push(group)
+    console.log("planet " + @toString() + "'s groups are now " + @_controlGroups)
 
   rollForDamage: (power, quantity) ->
     total = 0
