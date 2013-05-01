@@ -10,6 +10,7 @@ if exports?
 # Defines a class to represent planets
 #
 class Planet
+  # Sets the coordinate location, starting resources, and rate of harvest.
   constructor: (@_x, @_y, @_resources = 0, @_rate = 0) ->
     @_lastSeenResources = null
     @_lastSeenFungus = false
@@ -157,7 +158,18 @@ class Planet
     else
       return true
 
-  # SETTERS #
+  # SETTERS FOR USE BY GUI #
+  
+  # Sets the visibility state to either visible, discovered or undiscovered
+  #
+  setVisibility: (state) ->
+    if (state is root.config.visibility.visible) or
+       (state is root.config.visibility.discovered) or
+       (state is root.config.visibility.undiscovered)
+      @_visibility = state
+    else
+      throw error "Invalid Visibility"
+
 
   # Immediately adds the specified number of the specified type of ship to
   # those on the planet.  This does not incur a resource cost or build delay.
@@ -307,9 +319,19 @@ class Planet
 
   # Movement phase 2.
   # Resets all control groups to allow movement again.
+  # Reintegrates control groups that have reached their destination.
   #
   movementUpkeep2: ->
-    group.resetMoved() for group in @_controlGroups
+    for group in @_controlGroups
+      group.resetMoved()
+      if ((group.destination() is @) and (group.destination() is group.next()))
+        console.log("Group arrived at " + @_x + ", " + @_y)
+        @_attackShips += group.attackShips()
+        @_defenseShips += group.defenseShips()
+        @_probes += group.probes()
+        @_colonies += group.colonies()
+        console.log("removing group: " + group.toString() + " from " + @toString())
+        @_controlGroups = @_controlGroups.filter((g) => g != group)
 
   # Visibility upkeep method.
   # Updates visibility status and last-known values to reflect planet
@@ -357,6 +379,13 @@ class Planet
 
   # INGAME COMMANDS #
 
+  # Causes a unit to be built, sets relevant fields.
+  #
+  # @param [String] The type of unit to be built.
+  #
+  # @throw [Error] If there is no station.
+  # @throw [Error] If construction is already under way.
+  # @throw [Error] If there are not enough resources.
   build: (name) ->
     if @_station = false
       throw new Error("Planet has no station to build ships.")
@@ -369,6 +398,16 @@ class Planet
       @_availableResources -= name.cost
       @_turnsToComplete = name.turns
 
+
+  # Creates a control group at the current planet.
+  #
+  # @param [Integer] Number of attack ships to add to control group.
+  # @param [Integer] Number of defense ships to add to control group.
+  # @param [Integer] Number of probes to add to control group.
+  # @param [Integer] Number of colony ships to add to control group.
+  # @param [Planet] The control group's intended destination.
+  #
+  # @throw [Error]  If there are not enough ships on the planet.
   moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
     # check for insufficient ships
     if attackShips > @_attackShips or
@@ -393,24 +432,21 @@ class Planet
       @_controlGroups.push(controlGroup)
       console.log("Control groups: " + @_controlGroups)
 
-  # SETTERS FOR USE BY GUI #
-
-  setVisibility: (state) ->
-    if (state is root.config.visibility.visible) or
-       (state is root.config.visibility.discovered) or
-       (state is root.config.visibility.undiscovered)
-      @_visibility = state
-    else
-      throw error "Invalid Visibility"
-
   # SETTERS FOR USE BY GAME CLASS #
 
+  # Creates a two-way link between this planet and another.
+  #
+  # @param [Planet] The planet to connect to @.
   addNeighbor: (otherplanet) ->
     @_adjacentPlanets.push(otherplanet)
     otherplanet._adjacentPlanets.push(@)
 
   # HELPER FUNCTIONS #
-
+  
+  # Moves a control group to it's next intermediate destination.
+  #
+  # @param [ControlGroup] The group to be moved.
+  
   move: (group) ->
     console.log("Moving control group " + group.toString())
     if not group.moved()
@@ -419,28 +455,30 @@ class Planet
       console.log("dest is @: " + (group.destination() is @))
       console.log("dest is group.next: " + (group.destination() is group.next()))
       console.log("NEXT: " + group.next())
-      if (not group.next()? or
-         ((group.destination() is @) and (group.destination() is group.next())))
-        console.log("Group arrived at " + @_x + ", " + @_y)
-        @_attackShips += group.attackShips()
-        @_defenseShips += group.defenseShips()
-        @_probes += group.probes()
-        @_colonies += group.colonies()
-      else
+      if !((group.destination() is @) and (group.destination() is group.next()))
         console.log("Group not yet at destination, send to next planet on path")
         group.next().receiveGroup(group)
         group.route().shift()
-      console.log("removing group: " + group.toString() + " from " + @toString())
-      @_controlGroups = @_controlGroups.filter((g) => g != group)
-      console.log("new groups: " + @_controlGroups)
+        console.log("removing group: " + group.toString() + " from " + @toString())
+        @_controlGroups = @_controlGroups.filter((g) => g != group)
+        console.log("new groups: " + @_controlGroups)
     else
       console.log("Control group already moved")
 
+  # Adds a given group to the current planet
+  #
+  # @param [ControlGroup] The group to add.
   receiveGroup: (group) ->
     console.log("planet " + @toString() + " recieving " + group.toString())
     @_controlGroups.push(group)
     console.log("planet " + @toString() + "'s groups are now " + @_controlGroups)
 
+  # Given a chance of success and a number of units, determine one roll.
+  #
+  # @param [Double] The chance of success (between 0 and 1)
+  # @param [Integer] The number of units attempting to attack/defend
+  #
+  # @return [Integer] The number of units which succeed.
   rollForDamage: (power, quantity) ->
     total = 0
     for x in [0...quantity] by 1
@@ -449,12 +487,18 @@ class Planet
         total++
     return total
 
+  # Returns true if any adjacent planets contain probes.
+  #
+  # @return [Bool] Whether or not any adjacent planets contain probes.
   neighborsHaveProbes: ->
     for planet in @_adjacentPlanets
       if planet.numShips(root.config.units.probe) > 0
         return true
     return false
 
+  # Checks various representational invariants
+  #
+  # @throw [Error] If any representational invariant is violated.
   checkRepresentationalInvariants: ->
     if @_attackShips < 0
       throw new Error "Less than 0 attack ships"
