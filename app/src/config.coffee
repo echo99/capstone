@@ -49,6 +49,9 @@ root.config =
     resourcePath:
       stroke: "rgba(0, 255, 255, 0.5)"
       lineWidth: 2
+    unit:
+      stroke: "rgba(255, 255, 0, 0.3)"
+      lineWidth: 1
   unitDisplay:
     location: {x: -250, y: -140}
     fill: "rgba(255, 255, 0, 0.5)"
@@ -100,6 +103,54 @@ root.config =
     START_MISSION_BUTTON_IDLE: new AnimatedSprite(['start_mission_button_idle.png'])
     START_MISSION_BUTTON_HOVER: new AnimatedSprite(
       ['start_mission_button_hover.png'])
+    CANCEL_BUTTON_IDLE: new AnimatedSprite(['cancel_button_idle.png'])
+    CANCEL_BUTTON_HOVER: new AnimatedSprite(['cancel_button_hover.png'])
+  MainMenu:
+    home:
+      x: 0
+      y: 0
+    missions:
+      x: 0
+      y: -400
+    mission1:
+      x: -400
+      y: -750
+      menu:
+        w: 300
+        h: 200
+        message: "This is the mission 1 message box"
+        textAlign: 'left'
+        vAlign: 'top'
+        cancel:
+          x: 200
+          y: 170
+          w: 60
+          h: 20
+        start:
+          x: 100
+          y: 170
+          w: 101
+          h: 20
+    extermination:
+      x: 400
+      y: 150
+      menu:
+        w: 400
+        h: 100
+        message: "Exterminate all fungus before it exterminates you."
+        textAlign: 'center'
+        vAlign: 'top'
+        cancel:
+          x: 345
+          y: 85
+          w: 60
+          h: 20
+        start:
+          x: 245
+          y: 85
+          w: 101
+          h: 20
+
   units:
     probe:
       cost: 1

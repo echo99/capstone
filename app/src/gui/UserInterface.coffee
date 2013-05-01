@@ -19,19 +19,6 @@ class UserInterface
   # Creates a new UserInterface
   constructor: () ->
     @unitSelection = new UnitSelection()
-
-  initialize: (onlyProbe=false, @moveToDiscovered=true) ->
-    @planetButtons = []
-    for p in game.getPlanets()
-      pos = p.location()
-      r = window.config.planetRadius
-      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback(p))
-      b.setHoverHandler(@planetButtonHoverCallback(p))
-      b.setMouseOutHandler(@planetButtonOutCallback)
-      b.setProperty("planet", p)
-      gameFrame.addChild(b)
-      @planetButtons.push(b)
-    @unitSelection.initialize(onlyProbe)
     b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
     b.setClickHandler(() =>
       game.endTurn()
@@ -57,10 +44,36 @@ class UserInterface
     b.setZIndex(100)
     frameElement.addChild(b)
 
-    @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
+    # @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
+    #   "Press HOME to return")
+    # @help.close()
+    # frameElement.addChild(@help)
+    @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return")
-    @help.close()
-    frameElement.addChild(@help)
+    @help.visible = false
+    cameraHudFrame.addChild(@help)
+
+
+
+  initialize: (onlyProbe=false, @moveToDiscovered=true) ->
+    console.log("c " + game)
+    @planetButtons = []
+    for p in game.getPlanets()
+      pos = p.location()
+      r = window.config.planetRadius
+      b = new Elements.RadialButton(pos.x, pos.y, r, @planetButtonCallback(p))
+      b.setHoverHandler(@planetButtonHoverCallback(p))
+      b.setMouseOutHandler(@planetButtonOutCallback)
+      b.setProperty("planet", p)
+      gameFrame.addChild(b)
+      @planetButtons.push(b)
+    @unitSelection.initialize(onlyProbe)
+
+  destroy: () ->
+    for b in @planetButtons
+      gameFrame.removeChild(b)
+    @planetButtons = []
+    @unitSelection.destroy()
 
   planetButtonCallback: (planet) =>
     return () =>

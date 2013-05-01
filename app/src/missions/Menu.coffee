@@ -3,6 +3,7 @@
 
 # This mission acts as our games main menu
 class Menu extends Mission
+  settings: window.config.MainMenu
   # @see Mission#reset
   reset: ->
     # Load user progress
@@ -11,15 +12,17 @@ class Menu extends Mission
     # Create planets:
     #game.setup(10, null)
     #return
+    newGame(10000, 10000)
     @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
               "Extermination", "Credits"]
     @Planets =
-      Home: new Planet(0, 0)
-      Missions: new Planet(0, -400)
-      Mission1: new Planet(-400, -750)
+      Home: new Planet(@settings.home.x, @settings.home.y)
+      Missions: new Planet(@settings.missions.x, @settings.missions.y)
+      Mission1: new Planet(@settings.mission1.x, @settings.mission1.y)
       Mission2: new Planet(0, -800)
       Mission3: new Planet(400, -750)
-      Extermination: new Planet(400, 150)
+      Extermination: new Planet(@settings.extermination.x,
+                                @settings.extermination.y)
       Credits: new Planet(-400, 150)
 
     # Set visibilities
@@ -54,78 +57,90 @@ class Menu extends Mission
 
     # Add probe to Home planet
     @Planets.Home._probes = 1
-    #@Planets.Missions._probes = 23
+    #@Planets.Missions._attackShips = 23
     @Planets.Mission1._fungusStrength = 1
     #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home
-
     UI.initialize(true, false)
     camera.setZoom(0.5)
+    camera.setTarget(@Planets.Home.location())
 
-    # Note: The position currently doesn't update if the camera changes
-    @mission1Menu = new Elements.MessageBox(camera.width/2, camera.height/2,
-                                            300, 200,
-                                            "This is the mission 1 message box")
-    button = new Elements.Button(100, 170, 101, 20)
-    ###################################################################
-    # TODO: Fix buttons, add close buttons, respawn probe
-    button.setClickHandler(() =>
-      console.log('clicked mission 1 button')
-    )
-    button.setMouseUpHandler(() =>
-      button.setDirty()
-    )
-    button.setMouseDownHandler(() =>
-      button.setDirty()
-    )
-    button.setMouseOutHandler(() =>
-      button.setDirty()
-    )
-    button.setDrawFunc((ctx) =>
-      loc = @mission1Menu.getActualLocation(button.x, button.y)
-      if button.isPressed()
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
-                         loc.x, loc.y, ctx, false)
-      else
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
-                         loc.x, loc.y, ctx, false)
-    )
-    button.setZIndex(100)
-    @mission1Menu.addChild(button)
-    @mission1Menu.close()
-    frameElement.addChild(@mission1Menu)
-
-    @exterminationMenu = new Elements.MessageBox(camera.width/2, camera.height/2,
-      400, 100, "Exterminate all fungus before it exterminates you.")
-    button2 = new Elements.Button(345, 85, 101, 20)
-    button2.setClickHandler(() =>
-      console.log('clicked extermination button')
-    )
-    button2.setMouseUpHandler(() =>
-      button2.setDirty()
-    )
-    button2.setMouseDownHandler(() =>
-      button2.setDirty()
-    )
-    button2.setMouseOutHandler(() =>
-      button2.setDirty()
-    )
-    button2.setDrawFunc((ctx) =>
-      loc = @exterminationMenu.getActualLocation(button2.x, button2.y)
-      if button2.isPressed()
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
-                         loc.x, loc.y, ctx, false)
-      else
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
-                         loc.x, loc.y, ctx, false)
-    )
-    button2.setZIndex(100)
-    @exterminationMenu.addChild(button2)
-    @exterminationMenu.close()
-    frameElement.addChild(@exterminationMenu)
-
+    @_initMenus()
     game.setup(0, null)
+
+  destroy: ->
+    frameElement.removeChild(@mission1Menu)
+    frameElement.removeChild(@exterminationMenu)
+
+  _initMenus: ->
+    #@_initMission1Menu()
+    #@_initExerminationMenu()
+    @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
+      console.log('clicked mission 1 button'))
+    @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
+      console.log('clicked extermination button')
+      newMission(Menu))
+
+  _createMenu: (settings, onStart) ->
+    cancel = settings.cancel
+    start = settings.start
+    cancelButton = new Elements.Button(cancel.x, cancel.y, cancel.w, cancel.h)
+    menuBox = new Elements.MessageBox(0, 0,
+                                      settings.w, settings.h,
+                                      settings.message,
+                                      cancelButton,
+                                      settings.textAlign,
+                                      settings.vAlign)
+    cancelButton.setClickHandler(() =>
+      menuBox.close()
+    )
+    cancelButton.setMouseUpHandler(() =>
+      cancelButton.setDirty()
+    )
+    cancelButton.setMouseDownHandler(() =>
+      cancelButton.setDirty()
+    )
+    cancelButton.setMouseOutHandler(() =>
+      cancelButton.setDirty()
+    )
+    cancelButton.setDrawFunc((ctx) =>
+      loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
+      if cancelButton.isPressed()
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+
+    startButton = new Elements.Button(start.x, start.y, start.w, start.h)
+    startButton.setClickHandler(onStart)
+    startButton.setMouseUpHandler(() =>
+      startButton.setDirty()
+    )
+    startButton.setMouseDownHandler(() =>
+      startButton.setDirty()
+    )
+    startButton.setMouseOutHandler(() =>
+      startButton.setDirty()
+    )
+    startButton.setDrawFunc((ctx) =>
+      loc = menuBox.getActualLocation(startButton.x, startButton.y)
+      if startButton.isPressed()
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+
+    menuBox.addChild(startButton)
+    menuBox.close()
+    # frameElement.addChild(menuBox)
+    cameraHudFrame.addChild(menuBox)
+
+    return menuBox
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->

@@ -37,14 +37,24 @@ KeyCodes =
 SpriteNames = window.config.spriteNames
 
 frameElement = null
+cameraHudFrame = null
 
-UI = new UserInterface()
 camera = new Camera(0, 0, 0, 0)
 camera.setDragMode(window.config.DRAG_TYPE)
-game = new Game(10000, 10000)
+UI = null
+game = new Game(0, 0)
 gameFrame = null
 
 CurrentMission = null
+
+newMission = (mission) ->
+  CurrentMission.destroy()
+  UI.destroy()
+  UI = new UserInterface()
+  CurrentMission = new mission()
+
+newGame = (w, h) ->
+  game = new Game(w, h)
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -87,10 +97,17 @@ main = ->
   canvas = document.getElementById('canvas-fg')
   bgCanvas = document.getElementById('canvas-bg')
   hudCanvas = document.getElementById('canvas-hud')
-  updateCanvases(frame, canvas, hudCanvas)
+  camerahudCanvas = document.getElementById('canvas-camerahud')
+  # Need a better variable name for this
+  surface = document.getElementById('surface')
+  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas)
   # we should just make the bg larger than we'll ever need it to be
   bgCanvas.width = screen.width * 2
   bgCanvas.height = screen.height * 2
+  # console.log(screen.width)
+  surface.style.width = screen.width + 'px'
+  surface.style.height = screen.height + 'px'
+  # console.log(topSurface.style.width)
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
@@ -102,6 +119,7 @@ main = ->
   #   canvas.width, canvas.height)
   frameElement = new Elements.Frame(frame, hudCanvas)
   gameFrame = new Elements.GameFrame(camera, canvas)
+  cameraHudFrame = new Elements.CameraFrame(camera, camerahudCanvas)
   # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
   # frameElement.addChild(msgBox)
   # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
@@ -128,10 +146,13 @@ main = ->
   msgBox2.setZIndex(1)
   gameFrame.addChild(msgBox2)
 
+  # cameraHudFrame.addChild(new Elements.MessageBox(0, 0, 100, 100, "test"))
+
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
 
+  UI = new UserInterface()
   CurrentMission = new Menu()
 
   sheet = SHEET
@@ -172,12 +193,14 @@ main = ->
 
   window.onresize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    updateCanvases(frame, canvas, hudCanvas)
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
       bgCanvas.width = screen.width
       drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
+      surface.style.width = screen.width + 'px'
+      surface.style.height = screen.height + 'px'
     if not document.mozFullScreenElement and
         not document.webkitFullScreenElement
       sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
@@ -189,6 +212,7 @@ main = ->
     frameElement.resize()
     frameElement.setDirty()
     frameElement.drawChildren()
+    cameraHudFrame.resize()
 
     # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
@@ -215,20 +239,28 @@ main = ->
 
   prevPos = {x: 0, y: 0}
   drag = false
-  hudCanvas.addEventListener('mousemove', (e) ->
+
+  # hudCanvas.addEventListener('mousemove', (e) ->
+  surface.addEventListener('mousemove', (e) ->
     x = e.clientX
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
-      pointer = gameFrame.mouseMove(x, y)
+      pointer = cameraHudFrame.mouseMove(x, y)
+      if pointer is null
+        pointer = gameFrame.mouseMove(x, y)
+      else
+        gameFrame.mouseOut()
     else
-      gameFrame.mouseOut()
+      cameraHudFrame.mouseOut()
     if pointer isnt null
-      hudCanvas.style.cursor = pointer
+      # hudCanvas.style.cursor = pointer
+      surface.style.cursor = pointer
     else
-      hudCanvas.style.cursor = 'auto'
+      # hudCanvas.style.cursor = 'auto'
+      surface.style.cursor = 'auto'
     if drag
       difx = x - prevPos.x
       dify = y - prevPos.y
@@ -244,8 +276,8 @@ main = ->
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
   )
-
-  hudCanvas.addEventListener('click', (e) ->
+  # hudCanvas.addEventListener('click', (e) ->
+  surface.addEventListener('click', (e) ->
     UI.onMouseClick(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
     # msgBox.click(e.clientX, e.clientY)
@@ -253,26 +285,33 @@ main = ->
     y = e.clientY
     if frameElement.click(x, y)
       frameElement.mouseMove(x, y)
+    else if cameraHudFrame.click(x, y)
+      cameraHudFrame.mouseMove(x, y)
     else if gameFrame.click(x, y)
       gameFrame.mouseMove(x, y)
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
   )
 
-  hudCanvas.addEventListener('mousedown', (e) ->
-    if not frameElement.mouseDown(e.clientX, e.clientY)
+  # hudCanvas.addEventListener('mousedown', (e) ->
+  surface.addEventListener('mousedown', (e) ->
+    if not frameElement.mouseDown(e.clientX, e.clientY) and
+        not cameraHudFrame.mouseDown(e.clientX, e.clientY)
       drag = true
       prevPos = {x: e.clientX, y: e.clientY}
       gameFrame.mouseDown(e.clientX, e.clientY)
   )
 
-  hudCanvas.addEventListener('mouseup', (e) ->
+  # hudCanvas.addEventListener('mouseup', (e) ->
+  surface.addEventListener('mouseup', (e) ->
     drag = false
     frameElement.mouseUp()
+    cameraHudFrame.mouseUp()
     gameFrame.mouseUp()
   )
 
-  hudCanvas.addEventListener('mouseout', (e) ->
+  # hudCanvas.addEventListener('mouseout', (e) ->
+  surface.addEventListener('mouseout', (e) ->
     drag = false)
 
   mouseWheelHandler = (e) ->
@@ -288,6 +327,7 @@ main = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
     UI.draw(ctx, hudCtx)
     CurrentMission.draw(ctx, hudCtx)
+    cameraHudFrame.drawChildren()
     frameElement.drawChildren()
     gameFrame.drawChildren()
     bgCanvas.style.left = Math.floor(camera.x /
