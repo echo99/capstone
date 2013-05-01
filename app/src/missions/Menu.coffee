@@ -54,7 +54,7 @@ class Menu extends Mission
 
     # Add probe to Home planet
     @Planets.Home._probes = 1
-    #@Planets.Missions._probes = 23
+    #@Planets.Missions._attackShips = 23
     @Planets.Mission1._fungusStrength = 1
     #@Planets.Home._defenseShips = 23
 
@@ -166,7 +166,7 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-      camera.setTarget(@lastPlanet.location())
+      #camera.setTarget(@lastPlanet.location())
       inGroup = false
       for c in @lastPlanet.getControlGroups()
         if c.probes() == 1
@@ -209,7 +209,7 @@ class Menu extends Mission
         break
     if not found
       @lastPlanet._probes = 1
-      camera.setTarget(@lastPlanet.location)
+      #camera.setTarget(@lastPlanet.location)
     #   for each planet that leaves the menu
     #     if the planet has a probe on it
     #       open prompt for the planet

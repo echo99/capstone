@@ -49,6 +49,9 @@ root.config =
     resourcePath:
       stroke: "rgba(0, 255, 255, 0.5)"
       lineWidth: 2
+    unit:
+      stroke: "rgba(255, 255, 0, 0.3)"
+      lineWidth: 1
   unitDisplay:
     location: {x: -250, y: -140}
     fill: "rgba(255, 255, 0, 0.5)"

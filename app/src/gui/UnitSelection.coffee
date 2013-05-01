@@ -53,28 +53,28 @@ class UnitSelection
           @planetsWithSelectedUnits.push(planet)
 
     probe_location = location
-    @_initUnits(probe_location, units.probes, (count) =>
+    @_initUnits(probe_location, units.probes, planet, (count) =>
       @totalProbes += count
       @total += count
       updateSelectedPlanets(count)
       @totalDisplay.dirty = true)
 
     colony_location = {x: location.x, y: location.y+80}
-    @_initUnits(colony_location, units.colonies, (count) =>
+    @_initUnits(colony_location, units.colonies, planet, (count) =>
       @totalColonies += count
       @total += count
       updateSelectedPlanets(count)
       @totalDisplay.dirty = true)
 
     attack_location = {x: location.x, y: location.y+160}
-    @_initUnits(attack_location, units.attacks, (count) =>
+    @_initUnits(attack_location, units.attacks, planet, (count) =>
       @totalAttacks += count
       @total += count
       updateSelectedPlanets(count)
       @totalDisplay.dirty = true)
 
     defense_location = {x: location.x, y: location.y+240}
-    @_initUnits(defense_location, units.defenses, (count) =>
+    @_initUnits(defense_location, units.defenses, planet, (count) =>
       @totalDefenses += count
       @total += count
       updateSelectedPlanets(count)
@@ -85,14 +85,14 @@ class UnitSelection
 
   # Initalizes on set of ships in the data structure that tracks
   # unit selection
-  _initUnits: (location, stacks, callback) ->
+  _initUnits: (location, stacks, planet, callback) ->
     space = window.config.unitDisplay.spacing
     for row in [0..window.config.unitDisplay.rows - 1]
       stacks.push([])
       for col in [0..window.config.unitDisplay.columns - 1]
         locX = location.x + space * col
         locY = location.y + space * row
-        stacks[row].push(new Stack(locX, locY, callback))
+        stacks[row].push(new Stack(locX, locY, callback, planet))
 
   _clearStacks: (stacks) ->
     for row in stacks
@@ -338,7 +338,7 @@ class Stack
   @hovered: false
 
   # Constructs a new stack with a default count of 0
-  constructor: (@x, @y, @callback, @count=0) ->
+  constructor: (@x, @y, @callback, @planet, @count=0) ->
     @w = window.config.unitDisplay.width
     @h = window.config.unitDisplay.height
     @b = new Elements.Button(x, y, @w, @h, @toggleSelection)
@@ -370,6 +370,16 @@ class Stack
         ctx.fillStyle = window.config.unitDisplay.fill
         ctx.fillRect(coords.x, coords.y, @w*z, @h*z)
       if @hovered
+        console.log('hovered')
+        ctx.strokeStyle = window.config.connectionStyle.unit.stroke
+        ctx.lineWidth = window.config.connectionStyle.unit.lineWidth
+        loc = camera.getScreenCoordinates({x: @x, y: @y})
+        pLoc = camera.getScreenCoordinates(@planet.location())
+        ctx.beginPath()
+        ctx.moveTo(loc.x, loc.y)
+        ctx.lineTo(pLoc.x, pLoc.y)
+        ctx.stroke()
+
         ctx.strokeStyle = window.config.unitDisplay.stroke
         ctx.lineWidth = window.config.unitDisplay.lineWidth
         ctx.lineJoin = window.config.unitDisplay.lineJoin
