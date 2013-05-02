@@ -38,6 +38,7 @@ class Elements.UIElement extends Module
   _pressed: false
   _clicked: false
   _startPressedOnThis: false
+  _debug: false
 
   # @private @property [Number] Element ordering rank
   _zIndex: 0
@@ -111,10 +112,14 @@ class Elements.UIElement extends Module
   #
   setActualLocation: (parent) ->
     {x, y} = parent.getActualLocation(0, 0)
+    if @_debug
+      console.log("Set actual location called on #{this}")
+      console.log("Parent location: #{x}, #{y}")
     # @actX = parent.actX - @x
     # @actY = parent.actY - @y
     @actX = x + @x
     @actY = y + @y
+    console.log("Set actual location at #{@actX}, #{@actY}") if @_debug
     # Propagate actual location setting
     for child in @_children
       child.setActualLocation(this)
@@ -459,7 +464,7 @@ class Elements.UIElement extends Module
   # @param [Number] y
   # @return [Object] The coordinates `{'x': x, 'y': y}`
   getActualLocation: (x, y) ->
-    return {'x': x, 'y': y}
+    return {'x': @actX, 'y': @actY}
 
   # Set the z-index of the element
   #
@@ -532,7 +537,7 @@ class Elements.BoxElement extends Elements.UIElement
 
   # @see Elements.UIElement#getActualLocation
   getActualLocation: (x, y) ->
-    return {'x': x+@x+@cx, 'y': y+@y+@cy}
+    return {'x': x+@actX+@cx, 'y': y+@actY+@cy}
 
   # @see Elements.UIElement#toString
   toString: ->
