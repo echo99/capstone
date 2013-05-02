@@ -13,6 +13,15 @@ class ControlGroup
     @_route = []
     @_hasMoved = false
   
+  # Check rep invariants.
+  #
+  # throws [Error] if a rep invariant is violated.
+  checkRepInvariants: ->
+    if @_attackShips < 0 or @_defenseShips < 0 or @_probes < 0 or @_colonies < 0
+      throw new Error "Negative number of a type of ship!"
+    else if @_destination is null
+      throw new Error "Destination is null!"
+
   # Returns true if the ship has moved yet this turn.
   #
   # @return [Bool] True if the ship has moved.
