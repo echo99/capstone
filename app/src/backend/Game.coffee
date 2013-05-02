@@ -21,7 +21,7 @@ class Game
   setup: (numplanets = 0) ->
     # Sanitize inputs
     if numplanets < 1
-      throw error "Not positive number of planets requested."
+      throw Error "Not positive number of planets requested."
     # Generate home planet.
     homePlanetX = Math.floor((Math.random() * 2 - 1) * @_maxX)
     homePlanetY = Math.floor((Math.random() * 2 - 1) * @_maxY)
@@ -34,14 +34,14 @@ class Game
     # Generate the rest of the planets.
     while @_planets.length != numplanets
       if @_planets.length > @_numplanets
-        throw error "TOO MANY PLANETS OMG"
+        throw Error "TOO MANY PLANETS OMG"
       seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
       deltaX = Math.floor((Math.random() * 2 - 1) *
                           root.config.minimumPlanetDistance)
       deltaY = Math.floor(Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
                           Math.pow(deltaX, 2)))
-      newX = seedPlanet.location.x + deltaX
-      newY = seedPlanet.location.y + deltaY
+      newX = seedPlanet.location().x + deltaX
+      newY = seedPlanet.location().y + deltaY
       newPlanet = new Planet(newX, newY, @newResources(), @newRate())
       if @isGoodPlanet(newPlanet)
         @makeAdjacent(newPlanet)
