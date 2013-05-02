@@ -70,8 +70,8 @@ class Menu extends Mission
     game.setup(0, null)
 
   destroy: ->
-    frameElement.removeChild(@mission1Menu)
-    frameElement.removeChild(@exterminationMenu)
+    cameraHudFrame.removeChild(@mission1Menu)
+    cameraHudFrame.removeChild(@exterminationMenu)
 
   _initMenus: ->
     #@_initMission1Menu()
@@ -137,7 +137,6 @@ class Menu extends Mission
 
     menuBox.addChild(startButton)
     menuBox.close()
-    # frameElement.addChild(menuBox)
     cameraHudFrame.addChild(menuBox)
 
     return menuBox

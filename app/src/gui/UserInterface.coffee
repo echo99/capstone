@@ -56,7 +56,6 @@ class UserInterface
 
 
   initialize: (onlyProbe=false, @moveToDiscovered=true) ->
-    console.log("c " + game)
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
