@@ -519,8 +519,6 @@ class Planet
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
-    #if @_route == undefined
-    #  throw new Error "route should not be undefined"
 
 
 root.Planet = Planet
