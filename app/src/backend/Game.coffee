@@ -34,9 +34,9 @@ class Game
                            Math.pow(deltaX, 2))
         newX = seedPlanet.location.x + deltaX
         newY = seedPlanet.location.y + deltaY
-        newPlanet = new Planet(newX, newY, newResources(), newRate())
-        if isGoodPlanet(newPlanet)
-          makeAdjacent(newPlanet)
+        newPlanet = new Planet(newX, newY, @newResources(), @newRate())
+        if @isGoodPlanet(newPlanet)
+          @makeAdjacent(newPlanet)
           @_planets.push(newPlanet)
     @endTurn()
 
@@ -66,7 +66,7 @@ class Game
     planet1.addNeighbor(planet2)
 
   # GETTER #
-  
+
   # Get the entire graph as a list of planets
   #
   # @return [Array of Planets] The current graph.
@@ -74,7 +74,7 @@ class Game
     return @_planets
 
   # UPKEEP #
-  
+
   # Does all required upkeep for the end of the turn.
   endTurn: ->
     planet.growPass1() for planet in @_planets
@@ -100,7 +100,7 @@ class Game
   #
   # @return [Integer] A gaussian random amount of resources.
   newResources: ->
-    ret = gaussian(root.config.resources.meanResources,
+    ret = @gaussian(root.config.resources.meanResources,
                    root.config.resources.stdevResources)
     ret = Math.floor(ret)
     if ret < 1
@@ -111,7 +111,7 @@ class Game
   #
   # @return [Integer] A gaussian random amount of resources.
   newRate: ->
-    ret = gaussian(root.config.resources.meanRate,
+    ret = @gaussian(root.config.resources.meanRate,
                    root.config.resources.stdevRate)
     ret = Math.floor(ret)
     if ret < 1
