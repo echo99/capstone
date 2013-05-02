@@ -56,9 +56,21 @@ class UserInterface
     h = style.height
     @stationMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
     @stationMenu.setDrawFunc(@_drawStationMenu)
+    @stationMenu.setClearFunc(@_clearStationMenu)
     @stationMenu.visible = false
     console.log("stationMenu: " + @stationMenu)
     frameElement.addChild(@stationMenu)
+
+  _clearStationMenu: (ctx) =>
+    winStyle = window.config.windowStyle
+    stationStyle = window.config.stationMenuStyle
+    w = @stationMenu.w
+    h = @stationMenu.h
+    loc = {x: @stationMenu.x-w/2, y: @stationMenu.y-h/2}
+    ctx.clearRect(loc.x - winStyle.lineWidth / 2 - 1,
+                  loc.y - winStyle.lineWidth / 2 - 1,
+                  w + winStyle.lineWidth + 2,
+                  h + winStyle.lineWidth + 2)
 
   _drawStationMenu: (ctx) =>
     winStyle = window.config.windowStyle
@@ -70,7 +82,6 @@ class UserInterface
                   loc.y - winStyle.lineWidth / 2 - 1,
                   w + winStyle.lineWidth + 2,
                   h + winStyle.lineWidth + 2)
-    if not @stationMenu.visible then return
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke
     ctx.lineJoin = winStyle.lineJoin
@@ -83,10 +94,10 @@ class UserInterface
     ctx.strokeRect(loc.x, loc.y, w, h)
 
     # Draw dividers
-    #ctx.beginPath()
-    #ctx.moveTo(loc.x, loc.y+23)
-    #ctx.lineTo(loc.x+w, loc.y+23)
-    #ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(loc.x, h/2)
+    ctx.lineTo(loc.x+100, h/2)
+    ctx.stroke()
 
     # Draw text
     #ctx.font = winStyle.titleText.font
@@ -139,12 +150,12 @@ class UserInterface
         if @selectedPlanet == planet
           console.log("closing structure menu for " + planet.toString())
           @selectedPlanet = null
-          @stationMenu.visible = false
+          @stationMenu.close()
           # TODO: close others
         else
           console.log("opening structure menu for " + planet.toString())
           @selectedPlanet = planet
-          @stationMenu.visible = true
+          @stationMenu.open()
         @stationMenu.setDirty()
 
   planetButtonHoverCallback: (planet) =>
