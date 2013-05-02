@@ -88,9 +88,12 @@ class Menu extends Mission
     menuBox = new Elements.MessageBox(0, 0,
                                       settings.w, settings.h,
                                       settings.message,
-                                      cancelButton,
-                                      settings.textAlign,
-                                      settings.vAlign)
+                                      {
+                                        closeBtn: cancelButton,
+                                        textAlign: settings.textAlign,
+                                        vAlign: settings.vAlign,
+                                        visible: false
+                                      })
     cancelButton.setClickHandler(() =>
       menuBox.close()
     )
@@ -135,7 +138,6 @@ class Menu extends Mission
     )
 
     menuBox.addChild(startButton)
-    menuBox.visible = false
     cameraHudFrame.addChild(menuBox)
 
     return menuBox
