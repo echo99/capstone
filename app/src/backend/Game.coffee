@@ -3,6 +3,10 @@
 class Game
   # Set the height and width of the game world
   constructor: (@_height, @_width) ->
+    @_maxX = @_width /2
+    @_minX = 0 - (@_width / 2)
+    @_maxY = @_height / 2
+    @_minY = 0 - (@_height /2)
     @_planets = []
 
   # GAME MANIPULATION #
@@ -19,8 +23,8 @@ class Game
     if numplanets < 1
       throw error "Not positive number of planets requested."
     # Generate home planet.
-    homePlanetX = Math.floor(Math.random() * @_width)
-    homePlanetY = Math.floor(Math.random() * @_height)
+    homePlanetX = Math.floor((Math.random() * 2 - 1) * @_maxX)
+    homePlanetY = Math.floor((Math.random() * 2 - 1) * @_maxY)
     homePlanet = new Planet(homePlanetX,
                             homePlanetY,
                             root.config.resources.homePlanetResources,
@@ -34,8 +38,8 @@ class Game
       seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
       deltaX = Math.floor((Math.random() * 2 - 1) *
                           root.config.minimumPlanetDistance)
-      deltaY = Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
-                          Math.pow(deltaX, 2))
+      deltaY = Math.floor(Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
+                          Math.pow(deltaX, 2)))
       newX = seedPlanet.location.x + deltaX
       newY = seedPlanet.location.y + deltaY
       newPlanet = new Planet(newX, newY, @newResources(), @newRate())
