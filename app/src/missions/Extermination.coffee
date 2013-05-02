@@ -35,7 +35,7 @@ class Extermination extends Mission
     camera.setZoom(0.5)
     camera.setTarget(@Planets.a.location())
 
-    game.setup(0, null)
+    game.setup(10, null)
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
