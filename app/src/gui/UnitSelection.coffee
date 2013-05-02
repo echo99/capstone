@@ -30,6 +30,7 @@ class UnitSelection
       @_destroyStacks(units.colonies)
       @_destroyStacks(units.attacks)
       @_destroyStacks(units.defenses)
+    frameElement.removeChild(@totalDisplay)
 
   _destroyStacks: (stacks) ->
     for row in stacks
@@ -211,7 +212,10 @@ class UnitSelection
     w = @totalDisplay.w
     h = @totalDisplay.h
     loc = {x: @totalDisplay.x-w/2, y: @totalDisplay.y-h/2}
-    ctx.clearRect(loc.x, loc.y, w, h)
+    ctx.clearRect(loc.x - winStyle.lineWidth / 2 - 1,
+                  loc.y - winStyle.lineWidth / 2 - 1,
+                  w + winStyle.lineWidth + 2,
+                  window.config.selectionStyle.height + winStyle.lineWidth + 2)
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke
     ctx.lineJoin = winStyle.lineJoin
@@ -234,14 +238,14 @@ class UnitSelection
 
     if not @onlyProbe
       SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+30, loc.y+90, ctx, false)
-      ctx.fillText(@totalcolonies, loc.x+60, loc.y+95)
+      ctx.fillText(@totalColonies, loc.x+60, loc.y+95)
 
       SHEET.drawSprite(SpriteNames.ATTACK_SHIP,
-                       loc.x+20, loc.y+130, ctx, false)
+                       loc.x+30, loc.y+130, ctx, false)
       ctx.fillText(@totalAttacks, loc.x+60, loc.y+135)
 
       SHEET.drawSprite(SpriteNames.DEFENSE_SHIP,
-                       loc.x+20, loc.y+170, ctx, false)
+                       loc.x+30, loc.y+170, ctx, false)
       ctx.fillText(@totalDefenses, loc.x+60, loc.y+175)
 
   # Draws the one type of ship

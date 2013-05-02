@@ -9,6 +9,10 @@ class Mission
   constructor: ->
     @reset()
 
+  # Removes any Elements that were created and does any other cleanup that might
+  # need to be done before the mission is left.
+  destroy: ->
+
   # Does all the setup that the mission needs. Creating planets, placing
   # initial units and fungus, etc.
   reset: ->

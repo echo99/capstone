@@ -159,7 +159,7 @@ class Planet
       return true
 
   # SETTERS FOR USE BY GUI #
-  
+
   # Sets the visibility state to either visible, discovered or undiscovered
   #
   setVisibility: (state) ->
@@ -442,11 +442,11 @@ class Planet
     otherplanet._adjacentPlanets.push(@)
 
   # HELPER FUNCTIONS #
-  
+
   # Moves a control group to it's next intermediate destination.
   #
   # @param [ControlGroup] The group to be moved.
-  
+
   move: (group) ->
     console.log("Moving control group " + group.toString())
     if not group.moved()
@@ -515,8 +515,8 @@ class Planet
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
-    if @_route == undefined
-      throw new Error "route should not be undefined"
+    #if @_route == undefined
+    #  throw new Error "route should not be undefined"
 
 
 root.Planet = Planet

@@ -56,7 +56,7 @@ class Menu extends Mission
     #   Small, Medium, Large
 
     # Add probe to Home planet
-    @Planets.Home._probes = 1
+    @Planets.Home.addShips(window.config.units.probe, 1)
     #@Planets.Missions._attackShips = 23
     @Planets.Mission1._fungusStrength = 1
     #@Planets.Home._defenseShips = 23
@@ -74,13 +74,11 @@ class Menu extends Mission
     cameraHudFrame.removeChild(@exterminationMenu)
 
   _initMenus: ->
-    #@_initMission1Menu()
-    #@_initExerminationMenu()
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
       console.log('clicked mission 1 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
       console.log('clicked extermination button')
-      newMission(Menu))
+      newMission(Extermination))
 
   _createMenu: (settings, onStart) ->
     cancel = settings.cancel

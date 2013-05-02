@@ -90,12 +90,19 @@ root.config =
     UNMUTED: new AnimatedSprite(['unmuted_button.png'])
     OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
       'outpost_buildings_gathering_2.png'], 20)
-    STATION_BUILDINGS_GATHERING: new AnimatedSprite(
+    OUTPOST_NOT_GATHERING: new AnimatedSprite(
+      ['outpost_buildings_not_gathering.png'])
+    STATION_GATHERING: new AnimatedSprite(
       ['station_buildings_gathering_1.png',
        'station_buildings_gathering_2.png'], 20)
+    STATION_NOT_GATHERING: new AnimatedSprite(
+      ['station_buildings_not_gathering.png'])
     STATION_CONSTRUCTING: new AnimatedSprite(['station_constructing.png'])
     STATION_NOT_CONSTRUCTING: new AnimatedSprite(['station_not_constructing.png'])
     PROBE_CONSTRUCTION: new AnimatedSprite(['probe_construction.png'])
+    COLONY_SHIP_CONSTRUCTION: new AnimatedSprite(['colony_ship_construction.png'])
+    ATTACK_SHIP_CONSTRUCTION: new AnimatedSprite(['attack_ship_construction.png'])
+    DEFENSE_SHIP_CONSTRUCTION: new AnimatedSprite(['defense_ship_construction.png'])
     WARP_GATE: new AnimatedSprite(['warp_gate_1.png', 'warp_gate_2.png',
       'warp_gate_3.png', 'warp_gate_4.png'], 3)
     END_TURN_BUTTON_IDLE: new AnimatedSprite(['end_turn_button_idle.png'])

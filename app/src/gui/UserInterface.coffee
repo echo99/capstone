@@ -44,16 +44,10 @@ class UserInterface
     b.setZIndex(100)
     frameElement.addChild(b)
 
-    # @help = new Elements.MessageBox(camera.width/2, camera.height/2, 300, 50,
-    #   "Press HOME to return")
-    # @help.close()
-    # frameElement.addChild(@help)
     @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return")
     @help.visible = false
     cameraHudFrame.addChild(@help)
-
-
 
   initialize: (onlyProbe=false, @moveToDiscovered=true) ->
     @planetButtons = []
@@ -126,6 +120,8 @@ class UserInterface
           ctx.lineTo(nPos.x, nPos.y)
           ctx.stroke()
 
+    # Draw control group path
+
     lost = true
     for p in game.getPlanets()
       loc = p.location()
@@ -144,9 +140,35 @@ class UserInterface
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
       #if vis != window.config.visiblity.undiscovered
+      #  r = p.resources()
       #  draw resources
-    #  @drawPlanetStructure(ctx, p)
-    #  @drawPlanetUnits(ctx, p)
+      if p.hasOutpost()
+        if p.resources() > 0
+          SHEET.drawSprite(SpriteNames.OUTPOST_GATHERING, loc.x, loc.y, ctx)
+        else
+          SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
+      else if p.hasStation()
+        if p.isBuilding()
+          switch p._unitConstructing
+            when window.config.units.probe
+              SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, loc.x, loc.y, ctx)
+            when window.config.units.colonyShip
+              SHEET.drawSprite(SpriteNames.COLONY_SHIP_CONSTRUCTION,
+                               loc.x, loc.y, ctx)
+            when window.config.units.attackShip
+              SHEET.drawSprite(SpriteNames.ATTACK_SHIP_CONSTRUCTION,
+                               loc.x, loc.y, ctx)
+            when window.config.units.defenseShip
+              SHEET.drawSprite(SpriteNames.DEFENSE_SHIP_CONSTRUCTION,
+                               loc.x, loc.y, ctx)
+          SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, loc.x, loc.y, ctx)
+        else
+          SHEET.drawSprite(SpriteNames.STATION_NOT_CONSTRUCTING, loc.x, loc.y, ctx)
+
+        if p.resources() > 0
+          SHEET.drawSprite(SpriteNames.STATION_GATHERING, loc.x, loc.y, ctx)
+        else
+          SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
     @unitSelection.draw(ctx, hudCtx)
 
     if lost
@@ -154,24 +176,40 @@ class UserInterface
 
     if @hoveredPlanet
       # if the button is a planet
-      ctx.strokeStyle = window.config.selectionStyle.stroke
-      ctx.lineWidth = window.config.selectionStyle.lineWidth
-      loc = @hoveredPlanet.location()
-      pos = camera.getScreenCoordinates(loc)
-      r = (window.config.planetRadius + window.config.selectionStyle.radius) *
-          camera.getZoom()
-      ctx.beginPath()
-      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
-      ctx.stroke()
       ctx.textAlign = "left"
       ctx.font = window.config.toolTipStyle.font
       ctx.fillStyle = window.config.toolTipStyle.color
       x = @lastMousePos.x + window.config.toolTipStyle.xOffset
       y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+      hasAction = true
       if @unitSelection.total > 0
         ctx.fillText("Move selected units", x, y)
-      else # if it has structure
-        ctx.fillText("Open structure menu", x, y)
+      else if @hoveredPlanet.hasOutpost()
+        # if @outpostMenu.visible and @hoveredPlanet = @selectedPlanet
+        #   ctx.fillText("Clost outpost menu")
+        ctx.fillText("Open outpost menu", x, y)
+      else if @hoveredPlanet.hasStation()
+        # if @stationMenu.visible and @hoveredPlanet = @selectedPlanet
+        #   ctx.fillText("Clost station menu")
+        ctx.fillText("Open station menu", x, y)
+      else if @hoveredPlanet.numShips(window.config.units.colonyShip) > 0
+        # if @colonyMenu.visible and @hoveredPlanet = @selectedPlanet
+        #   ctx.fillText("Clost colony ship menu")
+        ctx.fillText("Open colony ship menu", x, y)
+      else
+        hasAction = false
+
+      if hasAction
+        ctx.strokeStyle = window.config.selectionStyle.stroke
+        ctx.lineWidth = window.config.selectionStyle.lineWidth
+        loc = @hoveredPlanet.location()
+        pos = camera.getScreenCoordinates(loc)
+        r = (window.config.planetRadius + window.config.selectionStyle.radius) *
+             camera.getZoom()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+        ctx.stroke()
+
 
   # The UI expects this to be called when the mouse moves
   #

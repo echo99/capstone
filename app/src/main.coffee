@@ -52,6 +52,7 @@ newMission = (mission) ->
   UI.destroy()
   UI = new UserInterface()
   CurrentMission = new mission()
+  window.onresize()
 
 newGame = (w, h) ->
   game = new Game(w, h)
