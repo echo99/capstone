@@ -63,25 +63,25 @@ class ControlGroup
 
   # Sets the number of attack ships in the ControlGroup.
   #
-  # @param [Integer] number of attack ships.
+  # @param [Integer] ships number of attack ships.
   setAttackShips: (ships) ->
     @_attackShips = ships
 
   # Sets the number of defense ships in the ControlGroup.
   #
-  # @param [Integer] number of defense ships.
+  # @param [Integer] ships number of defense ships.
   setDefenseShips: (ships) ->
     @_defenseShips = ships
 
   # Sets the number of probes in the ControlGroup.
   #
-  # @param [Integer] number of probes.
+  # @param [Integer] ships number of probes.
   setProbes: (ships) ->
     @_probes = ships
 
   # Sets the number of colony ships in the ControlGroup.
   #
-  # @param [Integer] number of colony ships.
+  # @param [Integer] ships number of colony ships.
   setColonies: (ships) ->
     @_colonies = ships
 
@@ -97,7 +97,7 @@ class ControlGroup
 
   # Updates the intended path based on a breadth first search
   #
-  # @param [Planet] Current planet.
+  # @param [Planet] v Current planet.
   updateAi: (v) ->
     console.log("Finding route for control group")
     @_route = []

@@ -197,7 +197,7 @@ class Planet
   # Determines growth and sporing for next turn.
   #
   growPass1: ->
-    if @_fungusStrength >= @_fungusMaximumStrength
+    if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
       # Spore
       for i in [2..@_fungusStrength]
         planet = @_adjacentPlanets[Math.floor(
@@ -208,7 +208,7 @@ class Planet
           # but it should be okay
           planet._fungusArriving++
           @_fungusLeaving++
-    else
+    else if @_fungusStrength < @_fungusMaximumStrength
       # Grow
       @_fungusArriving += if Math.random() >= 0 then 1 else 0
 
@@ -381,7 +381,7 @@ class Planet
 
   # Causes a unit to be built, sets relevant fields.
   #
-  # @param [String] The type of unit to be built.
+  # @param [String] name The type of unit to be built.
   #
   # @throw [Error] If there is no station.
   # @throw [Error] If construction is already under way.
@@ -401,11 +401,11 @@ class Planet
 
   # Creates a control group at the current planet.
   #
-  # @param [Integer] Number of attack ships to add to control group.
-  # @param [Integer] Number of defense ships to add to control group.
-  # @param [Integer] Number of probes to add to control group.
-  # @param [Integer] Number of colony ships to add to control group.
-  # @param [Planet] The control group's intended destination.
+  # @param [Integer] attackShips Number of attack ships to add to control group.
+  # @param [Integer] defenseShips Number of defense ships to add to control group.
+  # @param [Integer] probes Number of probes to add to control group.
+  # @param [Integer] colonies Number of colony ships to add to control group.
+  # @param [Planet] dest The control group's intended destination.
   #
   # @throw [Error]  If there are not enough ships on the planet.
   moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
@@ -436,7 +436,7 @@ class Planet
 
   # Creates a two-way link between this planet and another.
   #
-  # @param [Planet] The planet to connect to @.
+  # @param [Planet] otherPlanet The planet to connect to @.
   addNeighbor: (otherplanet) ->
     @_adjacentPlanets.push(otherplanet)
     otherplanet._adjacentPlanets.push(@)
@@ -445,7 +445,7 @@ class Planet
 
   # Moves a control group to it's next intermediate destination.
   #
-  # @param [ControlGroup] The group to be moved.
+  # @param [ControlGroup] group The group to be moved.
 
   move: (group) ->
     console.log("Moving control group " + group.toString())
@@ -466,7 +466,7 @@ class Planet
 
   # Adds a given group to the current planet
   #
-  # @param [ControlGroup] The group to add.
+  # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
     console.log("planet " + @toString() + " recieving " + group.toString())
     @_controlGroups.push(group)
@@ -474,8 +474,8 @@ class Planet
 
   # Given a chance of success and a number of units, determine one roll.
   #
-  # @param [Double] The chance of success (between 0 and 1)
-  # @param [Integer] The number of units attempting to attack/defend
+  # @param [Double] power The chance of success (between 0 and 1)
+  # @param [Integer] quantity The number of units attempting to attack/defend
   #
   # @return [Integer] The number of units which succeed.
   rollForDamage: (power, quantity) ->
