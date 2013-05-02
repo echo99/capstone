@@ -188,15 +188,16 @@ class Elements.UIElement extends Module
   #   @param [Number] zoom The current zoom
   #
   draw: (ctx, coords=null, zoom=1.0) ->
-    @dirty = false
-    if @_drawFunc
-      if coords is null
-        @_drawFunc(ctx)
-      else
-        @_drawFunc(ctx, coords, zoom)
-    # Draw all children
-    for child in @_children
-      child.draw(ctx, coords, zoom)
+    if @visible
+      @dirty = false
+      if @_drawFunc
+        if coords is null
+          @_drawFunc(ctx)
+        else
+          @_drawFunc(ctx, coords, zoom)
+      # Draw all children
+      for child in @_children
+        child.draw(ctx, coords, zoom)
 
   # Set this element and all child elements to dirty
   #
@@ -908,7 +909,7 @@ class Elements.MessageBox extends Elements.BoxElement
       @_clearBox(ctx)
       @setDirty()
     else if @visible
-      if not @_parent.clickable
+      if not @_parent?.clickable
         @_clearBox(ctx)
       if not @_checkedWrap
         @_wrapText(ctx)
