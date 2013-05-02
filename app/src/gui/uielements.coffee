@@ -119,6 +119,26 @@ class Elements.UIElement extends Module
         return true
     return false
 
+  # Destroy this element by removing references to it and its children.
+  #
+  # NOTE: Calling this method will not garbage collect this object unless you
+  #   manually assign the reference to `null`
+  #
+  destroy: ->
+    @deleteChildren()
+    @_parent?.removeChild(this)
+
+  # Remove all children from this element
+  #
+  deleteChildren: ->
+    children = @_children
+    for child in children
+      @removeChild(child)
+    @_children = []
+    @zIndices = [0]
+    @zIndicesRev = [0]
+    @_childBuckets = {0: []}
+
   # @private Set actual location of this element
   #
   # @param [UIElement] parent
