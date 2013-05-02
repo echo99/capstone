@@ -400,6 +400,7 @@ class Planet
 
 
   # Creates a control group at the current planet.
+  # Does nothing if dest == @.
   #
   # @param [Integer] attackShips Number of attack ships to add to control group.
   # @param [Integer] defenseShips Number of defense ships to add to control group.
@@ -409,6 +410,9 @@ class Planet
   #
   # @throw [Error]  If there are not enough ships on the planet.
   moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
+    # Check for trivial case
+    if dest == @
+      return null
     # check for insufficient ships
     if attackShips > @_attackShips or
        defenseShips > @_defenseShips or
@@ -515,8 +519,6 @@ class Planet
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
-    #if @_route == undefined
-    #  throw new Error "route should not be undefined"
 
 
 root.Planet = Planet
