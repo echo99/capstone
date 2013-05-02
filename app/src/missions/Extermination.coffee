@@ -33,15 +33,8 @@ class Extermination extends Mission
     @Planets.b._outpost = true
     ###
     @Planets.home = game.setup(10)
-    ###
-    console.log("looking for planet")
-    for p in game.getPlanets()
-      if p.numShips(window.config.units.probe) > 0
-        console.log("found")
-        @Planets.home = p
-        break
-    console.log("done searching")
-    ###
+    @Planets.home._station =true
+
     UI.initialize()
     camera.setZoom(0.5)
     camera.setTarget(@Planets.home.location())
