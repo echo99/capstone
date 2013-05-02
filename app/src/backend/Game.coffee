@@ -28,20 +28,20 @@ class Game
     homePlanet.addShips(root.config.units.probe, 1)
     @_planets.push(homePlanet)
     # Generate the rest of the planets.
-    while @_planets.length != @_numplanets
-    if @_planets.length > @_numplanets
+    while @_planets.length != numplanets
+      if @_planets.length > @_numplanets
         throw error "TOO MANY PLANETS OMG"
-    seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
-    deltaX = Math.floor((Math.random() * 2 - 1) *
-                        root.config.minimumPlanetDistance)
-    deltaY = Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
-                        Math.pow(deltaX, 2))
-    newX = seedPlanet.location.x + deltaX
-    newY = seedPlanet.location.y + deltaY
-    newPlanet = new Planet(newX, newY, @newResources(), @newRate())
-    if @isGoodPlanet(newPlanet)
-      @makeAdjacent(newPlanet)
-      @_planets.push(newPlanet)
+      seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
+      deltaX = Math.floor((Math.random() * 2 - 1) *
+                          root.config.minimumPlanetDistance)
+      deltaY = Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
+                          Math.pow(deltaX, 2))
+      newX = seedPlanet.location.x + deltaX
+      newY = seedPlanet.location.y + deltaY
+      newPlanet = new Planet(newX, newY, @newResources(), @newRate())
+      if @isGoodPlanet(newPlanet)
+        @makeAdjacent(newPlanet)
+        @_planets.push(newPlanet)
     @endTurn()
     return homePlanet
 
