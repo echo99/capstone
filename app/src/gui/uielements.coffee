@@ -39,6 +39,7 @@ class Elements.UIElement extends Module
   _clicked: false
   _startPressedOnThis: false
   _debug: false
+  _closing: false
 
   # @private @property [Number] Element ordering rank
   _zIndex: 0
@@ -167,12 +168,33 @@ class Elements.UIElement extends Module
   #
   setDrawFunc: (@_drawFunc) ->
 
+  # Sets the clearing function for this element
+  #
+  # @param [Function] _clearFunc
+  #
+  setClearFunc: (@_clearFunc) ->
+
   # [WIP] Set the positioning of this element. Setting this currently has no effect.
   #
   # @param [String] positioning Either `default` or `center`
   #
   setPositioning: (@positioning) ->
 
+
+
+  # Open this element
+  #
+  open: ->
+    if not @visible
+      @setDirty()
+      @visible = true
+
+  # Close this element
+  #
+  close: ->
+    if @visible
+      @setDirty()
+      @_closing = true
 
 
   # Call the draw function with the passed arguments
@@ -188,7 +210,12 @@ class Elements.UIElement extends Module
   #   @param [Number] zoom The current zoom
   #
   draw: (ctx, coords=null, zoom=1.0) ->
-    if @visible
+    if @_closing
+      @_closing = false
+      @visible = false
+      @clear(ctx, coords, zoom)
+      @setDirty()
+    else if @visible
       @dirty = false
       if @_drawFunc
         if coords is null
@@ -198,6 +225,13 @@ class Elements.UIElement extends Module
       # Draw all children
       for child in @_children
         child.draw(ctx, coords, zoom)
+
+  clear: (ctx, coords=null, zoom=1.0) ->
+    # @dirty = false
+    if coords is null
+      @_clearFunc?(ctx)
+    else
+      @_clearFunc?(ctx, coords, zoom)
 
   # Set this element and all child elements to dirty
   #
@@ -426,7 +460,7 @@ class Elements.UIElement extends Module
     # console.log(@toString() + " mouse up")
     @_clicked = @_pressed and @_hovering
     @_pressed = false
-    console.log(@_clicked)
+    # console.log(@_clicked)
     # Not sure if this is the right place to put this
     # @_startPressedOnThis = false
     @mouseUpHandler?()
@@ -608,7 +642,6 @@ class Elements.Window extends Elements.BoxElement
     @_animating = true
     @setDirty()
     super()
-
 
   # Draw the window
   #
@@ -808,7 +841,7 @@ class Elements.MessageBox extends Elements.BoxElement
     @usingDefaultBtn = false
     @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
     @lines = []
-    @_closing = false
+    # @_closing = false
     @_checkedWrap = false
 
     # console.log("My children: #{@_children}")
@@ -830,14 +863,14 @@ class Elements.MessageBox extends Elements.BoxElement
   _wrapText: (ctx) ->
     ctx.font = config.windowStyle.msgBoxText.font
     textWidth = ctx.measureText(@message).width
-    console.log("Width of #{@message} : #{textWidth}")
+    # console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 4)
     lines = @message.split("\n")
-    console.log(lines)
+    # console.log(lines)
     for line in lines
       if textWidth > allowedWidth
         words = line.split(" ")
-        console.log("Words: #{words}")
+        # console.log("Words: #{words}")
         curline = null
         lastTried = null
         for word in words
@@ -855,7 +888,7 @@ class Elements.MessageBox extends Elements.BoxElement
               curline = null
         if curline isnt null
           @lines.push(curline)
-    console.log(@lines)
+    # console.log(@lines)
     @_checkedWrap = true
 
 
@@ -866,19 +899,19 @@ class Elements.MessageBox extends Elements.BoxElement
   #     @updCallback()
 
 
-  # Open this message box
-  #
-  open: ->
-    if not @visible
-      @setDirty()
-      @visible = true
+  # # Open this message box
+  # #
+  # open: ->
+  #   if not @visible
+  #     @setDirty()
+  #     @visible = true
 
-  # Close this message box
-  #
-  close: ->
-    if @visible
-      @setDirty()
-      @_closing = true
+  # # Close this message box
+  # #
+  # close: ->
+  #   if @visible
+  #     @setDirty()
+  #     @_closing = true
 
 
   # Add a callback to call when the message box updates
@@ -886,14 +919,21 @@ class Elements.MessageBox extends Elements.BoxElement
     @updCallback = callback
 
 
-  # @private Clear this message box from the context
-  #
-  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
-  #
-  _clearBox: (ctx) ->
-    lw = Math.ceil(config.windowStyle.lineWidth / 2)
-    lw2 = lw + lw
-    ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+  # # @private Clear this message box from the context
+  # #
+  # # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  # #
+  # _clearBox: (ctx) ->
+  #   lw = Math.ceil(config.windowStyle.lineWidth / 2)
+  #   lw2 = lw + lw
+  #   ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+
+  # @see Elements.UIElement#clear
+  clear: (ctx) ->
+    if not @_clearFunc?
+      lw = Math.ceil(config.windowStyle.lineWidth / 2)
+      lw2 = lw + lw
+      ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 
 
   # Draw this message box to the canvas context
@@ -906,11 +946,11 @@ class Elements.MessageBox extends Elements.BoxElement
     if @_closing
       @_closing = false
       @visible = false
-      @_clearBox(ctx)
+      @clear(ctx)
       @setDirty()
     else if @visible
       if not @_parent?.clickable
-        @_clearBox(ctx)
+        @clear(ctx)
       if not @_checkedWrap
         @_wrapText(ctx)
       if coords
