@@ -400,6 +400,7 @@ class Planet
 
 
   # Creates a control group at the current planet.
+  # Does nothing if dest == @.
   #
   # @param [Integer] Number of attack ships to add to control group.
   # @param [Integer] Number of defense ships to add to control group.
@@ -409,6 +410,9 @@ class Planet
   #
   # @throw [Error]  If there are not enough ships on the planet.
   moveShips: (attackShips, defenseShips, probes, colonies, dest) ->
+    # Check for trivial case
+    if dest == @
+      return null
     # check for insufficient ships
     if attackShips > @_attackShips or
        defenseShips > @_defenseShips or
