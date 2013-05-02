@@ -147,8 +147,8 @@ class Menu extends Mission
     SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
 
     winStyle = window.config.windowStyle
-    ctx.font = winStyle.defaultText.font
-    ctx.fillStyle = winStyle.defaultText.color
+    ctx.font = winStyle.labelText.font
+    ctx.fillStyle = winStyle.labelText.color
     ctx.textAlign = 'center'
     for p in @Names
       planet = @Planets[p]

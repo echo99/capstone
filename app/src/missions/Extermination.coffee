@@ -10,34 +10,19 @@ class Extermination extends Mission
     #game.setup(10, null)
     #return
     newGame(10000, 10000)
-    @Planets =
-      a: new Planet(0, 0, 50, 1)
-      b: new Planet(300, 450, 70, 3)
-      c: new Planet(300, -450, 25, 2)
+    @home = game.setup(10)
+    @home._station =true
+    @home._availableResources = 30
 
-    ###
-    game.addPlanet(@Planets.a)
-    game.addPlanet(@Planets.b)
-    game.addPlanet(@Planets.c)
-
-    # Add connections to game
-    game.setNeighbors(@Planets.a, @Planets.b)
-    game.setNeighbors(@Planets.a, @Planets.c)
-    game.setNeighbors(@Planets.b, @Planets.c)
-
-    # Add initial units
-    @Planets.a.addShips(window.config.units.probe, 1)
-    @Planets.a._station = true
-    @Planets.a._unitConstructing = window.config.units.colonyShip
-    @Planets.a._turnsToComplete = 5
-    @Planets.b._outpost = true
-    ###
-    @Planets.home = game.setup(10)
-    @Planets.home._station =true
+    # Test stuff
+    @home.getAdjacentPlanets()[0]._outpost = true
+    @home._unitConstructing = window.config.units.attackShip
+    @home._turnsToComplete = window.config.units.attackShip.turns
+    # End test stuff
 
     UI.initialize()
     camera.setZoom(0.5)
-    camera.setTarget(@Planets.home.location())
+    camera.setTarget(@home.location())
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -52,11 +37,10 @@ class Extermination extends Mission
 
   getHomeTarget: ->
     # TODO: come up with smarter target
-    return @Planets.home.location()
-    #return @Planets.a.location()
+    return @home.location()
 
   # @see Mission#onEndTurn
   onEndTurn: ->
     # TODO: check for end game
-    #if @Planets.b.numShips(window.config.units.probe) > 0
-    #  newMission(Menu)
+    if @home.numShips(window.config.units.probe) > 10
+      newMission(Menu)

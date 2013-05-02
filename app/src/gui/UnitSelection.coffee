@@ -221,16 +221,19 @@ class UnitSelection
     ctx.lineJoin = winStyle.lineJoin
     ctx.lineWidth = winStyle.lineWidth
     ctx.font = winStyle.titleText.font
+
     ctx.fillRect(loc.x, loc.y, w, h)
     ctx.strokeRect(loc.x, loc.y, w, h)
+
     ctx.beginPath()
     ctx.moveTo(loc.x, loc.y+23)
     ctx.lineTo(loc.x+w, loc.y+23)
     ctx.stroke()
+
     ctx.fillStyle = winStyle.titleText.color
     ctx.textAlign = 'left'
-    ctx.textBaseline = 'center'
-    ctx.fillText("Selected Units", loc.x+6, loc.y+17)
+    ctx.textBaseline = 'middle'
+    ctx.fillText("Selected Units", loc.x+6, loc.y+13)
     ctx.fillStyle = winStyle.valueText.color
 
     SHEET.drawSprite(SpriteNames.PROBE, loc.x+30, loc.y+50, ctx, false)

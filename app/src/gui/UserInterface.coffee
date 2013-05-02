@@ -16,6 +16,7 @@ class UserInterface
   selectedPlanet: null
   lastMousePos: {x: 0, y: 0}
   unitSelection: null
+  switchedMenus: false
 
   # Creates a new UserInterface
   constructor: () ->
@@ -56,32 +57,38 @@ class UserInterface
     h = style.height
     @stationMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
     @stationMenu.setDrawFunc(@_drawStationMenu)
-    @stationMenu.setClearFunc(@_clearStationMenu)
+    @stationMenu.setClearFunc(@_clearMenu(window.config.stationMenuStyle))
     @stationMenu.visible = false
-    console.log("stationMenu: " + @stationMenu)
     frameElement.addChild(@stationMenu)
 
-  _clearStationMenu: (ctx) =>
-    winStyle = window.config.windowStyle
-    stationStyle = window.config.stationMenuStyle
-    w = @stationMenu.w
-    h = @stationMenu.h
-    loc = {x: @stationMenu.x-w/2, y: @stationMenu.y-h/2}
-    ctx.clearRect(loc.x - winStyle.lineWidth / 2 - 1,
-                  loc.y - winStyle.lineWidth / 2 - 1,
-                  w + winStyle.lineWidth + 2,
-                  h + winStyle.lineWidth + 2)
+    style = window.config.outpostMenuStyle
+    loc = style.location
+    w = style.width
+    h = style.height
+    @outpostMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
+    @outpostMenu.setDrawFunc(@_drawOutpostMenu)
+    @outpostMenu.setClearFunc(@_clearMenu(window.config.outpostMenuStyle))
+    @outpostMenu.visible = false
+    frameElement.addChild(@outpostMenu)
+
+  _clearMenu: (style) =>
+    (ctx) =>
+      winStyle = window.config.windowStyle
+      w = style.width
+      h = style.height
+      ctx.clearRect(style.location.x - winStyle.lineWidth / 2 - 1,
+                    style.location.y - winStyle.lineWidth / 2 - 1,
+                    w + winStyle.lineWidth + 2,
+                    h + winStyle.lineWidth + 2)
 
   _drawStationMenu: (ctx) =>
     winStyle = window.config.windowStyle
     stationStyle = window.config.stationMenuStyle
-    w = @stationMenu.w
-    h = @stationMenu.h
-    loc = {x: @stationMenu.x-w/2, y: @stationMenu.y-h/2}
-    ctx.clearRect(loc.x - winStyle.lineWidth / 2 - 1,
-                  loc.y - winStyle.lineWidth / 2 - 1,
-                  w + winStyle.lineWidth + 2,
-                  h + winStyle.lineWidth + 2)
+    w = stationStyle.width
+    h = stationStyle.height
+    loc = stationStyle.location
+    @_clearMenu(stationStyle)(ctx)
+
     ctx.fillStyle = winStyle.fill
     ctx.strokeStyle = winStyle.stroke
     ctx.lineJoin = winStyle.lineJoin
@@ -111,16 +118,120 @@ class UserInterface
     ctx.lineTo(loc.x+stationStyle.vert1x, loc.y+h)
     ctx.stroke()
 
-    # Draw text
-    #ctx.font = winStyle.titleText.font
-    #ctx.fillStyle = winStyle.titleText.color
-    #ctx.textAlign = 'left'
-    #ctx.textBaseline = 'center'
-    #ctx.fillText("Selected Units", loc.x+6, loc.y+17)
-    #ctx.fillStyle = winStyle.valueText.color
+    # Draw title block
+    ctx.font = winStyle.titleText.font
+    ctx.fillStyle = winStyle.titleText.color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+    x = loc.x+stationStyle.titleLoc.x
+    y = loc.y+stationStyle.titleLoc.y
+    ctx.fillText("Station", x, y)
 
-    # Draw units
-    #SHEET.drawSprite(SpriteNames.PROBE, loc.x+30, loc.y+50, ctx, false)
+    ctx.strokeStyle = winStyle.titleText.color
+    ctx.lineWidth = winStyle.titleText.underlineWidth
+    ctx.beginPath()
+    ctx.moveTo(x, y + winStyle.titleText.height)
+    ctx.lineTo(x + ctx.measureText("Station").width, y + winStyle.titleText.height)
+    ctx.stroke()
+
+    ctx.font = winStyle.defaultText.font
+    ctx.fillStyle = winStyle.defaultText.color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+    x = loc.x+stationStyle.availableLoc.x
+    y = loc.y+stationStyle.availableLoc.y
+    ctx.fillText("Resources avaliable:", x, y)
+
+    # Draw currently buiding block
+    x = loc.x+stationStyle.buildingLoc.x
+    y = loc.y+stationStyle.buildingLoc.y
+    ctx.fillText("Currently building:", x, y)
+
+    # Draw unit blocks
+    @_drawUnitBlock(ctx, "Probe", loc, window.config.units.probe,
+                    stationStyle.probe, SpriteNames.PROBE)
+
+    @_drawUnitBlock(ctx, "Colony Ship", loc, window.config.units.colonyShip,
+                    stationStyle.colony, SpriteNames.COLONY_SHIP)
+
+    @_drawUnitBlock(ctx, "Attack Ship", loc, window.config.units.attackShip,
+                    stationStyle.attack, SpriteNames.ATTACK_SHIP)
+
+    @_drawUnitBlock(ctx, "Defense Ship", loc, window.config.units.defenseShip,
+                    stationStyle.defense, SpriteNames.DEFENSE_SHIP)
+
+    # Draw variables
+    ctx.fillStyle = winStyle.defaultText.value
+    resources = @selectedPlanet.availableResources()
+    x = loc.x+stationStyle.availableLoc.x +
+        ctx.measureText("Resources avaliable:").width + 5
+    y = loc.y+stationStyle.availableLoc.y
+    ctx.fillText(resources, x, y)
+
+    x = loc.x+stationStyle.buildingLoc.x
+    y = loc.y+stationStyle.buildingLoc.y
+    switch @selectedPlanet.buildUnit()
+      when window.config.units.probe
+        text = "Probe"
+        sprite = SpriteNames.PROBE
+      when window.config.units.colonyShip
+        text = "Colony Ship"
+        sprite = SpriteNames.COLONY_SHIP
+      when window.config.units.attackShip
+        text = "Attack Ship"
+        sprite = SpriteNames.ATTACK_SHIP
+      when window.config.units.defenseShip
+        text = "Defense Ship"
+        sprite = SpriteNames.DEFENSE_SHIP
+      else
+        text = ""
+    w = ctx.measureText("Currently building:").width + 5
+    ctx.fillText(text, x + w, y)
+    if text != ""
+      SHEET.drawSprite(sprite, x+w+40, y+35, ctx, false)
+      turns = @selectedPlanet.buildStatus()
+      text = turns + " turn"
+      if turns > 1
+        text += "s"
+      text += " remaining"
+      ctx.fillText(text, x, y+20)
+
+  _drawUnitBlock: (ctx, title, loc, unit, unitConfig, sprite) =>
+    x = loc.x + unitConfig.labelLoc.x
+    y = loc.y + unitConfig.labelLoc.y
+    ctx.fillText(title, x, y)
+    if @selectedPlanet.availableResources() < unit.cost
+      ctx.fillStyle = window.config.windowStyle.defaultText.red
+    x = loc.x + unitConfig.costLoc.x
+    y = loc.y + unitConfig.costLoc.y
+    ctx.fillText("Cost: " + unit.cost, x, y)
+    if @selectedPlanet.availableResources() < unit.cost
+      ctx.fillStyle = window.config.windowStyle.defaultText.color
+    x = loc.x + unitConfig.turnsLoc.x
+    y = loc.y + unitConfig.turnsLoc.y
+    ctx.fillText("Turns: " + unit.turns, x, y)
+    x = loc.x + unitConfig.imgLoc.x
+    y = loc.y + unitConfig.imgLoc.y
+    SHEET.drawSprite(sprite, x, y, ctx, false)
+
+  _drawOutpostMenu: (ctx) =>
+    winStyle = window.config.windowStyle
+    outpostStyle = window.config.outpostMenuStyle
+    w = outpostStyle.width
+    h = outpostStyle.height
+    loc = outpostStyle.location
+    @_clearMenu(outpostStyle)(ctx)
+
+    ctx.fillStyle = winStyle.fill
+    ctx.strokeStyle = winStyle.stroke
+    ctx.lineJoin = winStyle.lineJoin
+    ctx.lineWidth = winStyle.lineWidth
+
+    # Draw background
+    ctx.fillRect(loc.x, loc.y, w, h)
+
+    # Draw frame
+    ctx.strokeRect(loc.x, loc.y, w, h)
 
   initialize: (onlyProbe=false, @moveToDiscovered=true) ->
     @planetButtons = []
@@ -159,16 +270,23 @@ class UserInterface
           @unitSelection.updateSelection(p)
         @unitSelection.deselectAllUnits()
       else
+        @stationMenu.close()
+        @outpostMenu.close()
         if @selectedPlanet == planet
           console.log("closing structure menu for " + planet.toString())
           @selectedPlanet = null
-          @stationMenu.close()
           # TODO: close others
-        else
-          console.log("opening structure menu for " + planet.toString())
+        else if planet.hasStation()
+          console.log("opening station menu for " + planet.toString())
           @selectedPlanet = planet
           @stationMenu.open()
-        @stationMenu.setDirty()
+        else if planet.hasOutpost()
+          console.log("opening outpost menu for " + planet.toString())
+          @selectedPlanet = planet
+          @outpostMenu.open()
+        else
+          @selectedPlanet = null
+        @switchedMenus = true
 
   planetButtonHoverCallback: (planet) =>
     return () =>
@@ -182,8 +300,6 @@ class UserInterface
   # @param [CanvasRenderingContext2D] ctx The game context
   # @param [CanvasRenderingContext2D] hudCtx The hud context
   draw: (ctx, hudCtx) ->
-    # Note: there are alot of things that need to check for hovering and many
-    #       of which draw tool tips if they are
     visited = []
     ctx.strokeStyle = window.config.connectionStyle.normal.stroke
     ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
@@ -230,7 +346,7 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
       else if p.hasStation()
         if p.isBuilding()
-          switch p._unitConstructing
+          switch p.buildUnit()
             when window.config.units.probe
               SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, loc.x, loc.y, ctx)
             when window.config.units.colonyShip
@@ -266,16 +382,18 @@ class UserInterface
       if @unitSelection.total > 0
         ctx.fillText("Move selected units", x, y)
       else if @hoveredPlanet.hasOutpost()
-        # if @outpostMenu.visible and @hoveredPlanet = @selectedPlanet
-        #   ctx.fillText("Clost outpost menu")
-        ctx.fillText("Open outpost menu", x, y)
+        if @outpostMenu.visible and @hoveredPlanet == @selectedPlanet
+          ctx.fillText("Close outpost menu", x, y)
+        else
+          ctx.fillText("Open outpost menu", x, y)
       else if @hoveredPlanet.hasStation()
-        # if @stationMenu.visible and @hoveredPlanet = @selectedPlanet
-        #   ctx.fillText("Clost station menu")
-        ctx.fillText("Open station menu", x, y)
+        if @stationMenu.visible and @hoveredPlanet == @selectedPlanet
+          ctx.fillText("Close station menu", x, y)
+        else
+          ctx.fillText("Open station menu", x, y)
       else if @hoveredPlanet.numShips(window.config.units.colonyShip) > 0
         # if @colonyMenu.visible and @hoveredPlanet = @selectedPlanet
-        #   ctx.fillText("Clost colony ship menu")
+        #   ctx.fillText("Close colony ship menu")
         ctx.fillText("Open colony ship menu", x, y)
       else
         hasAction = false
@@ -291,6 +409,9 @@ class UserInterface
         ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
         ctx.stroke()
 
+    if @switchedMenus
+      @stationMenu.setDirty()
+      @outpostMenu.setDirty()
 
   # The UI expects this to be called when the mouse moves
   #
@@ -310,6 +431,7 @@ class UserInterface
   endTurn: () ->
     for p in game.getPlanets()
       @unitSelection.updateSelection(p)
+    # Reset planet button visiblility
     for b in @planetButtons
       p = b.getProperty("planet")
       vis = p.visibility()
@@ -319,3 +441,5 @@ class UserInterface
         b.visible = false
       else
         b.visible = true
+    if @stationMenu
+      @stationMenu.setDirty()

@@ -19,13 +19,17 @@ root.config =
     lineJoin: "bevel"
     lineWidth: 5
     defaultText:
-      font: "15px Arial"
+      font: "13px Arial"
       color: "rgba(255, 255, 255, 1)"
+      red: "rgba(255, 0, 0, 1)"
+      value: "rgba(255, 255, 0, 1)"
     titleText:
+      height: 15
       font: "15px Arial"
       color: "rgba(255, 255, 255, 1)"
+      underlineWidth: 2
     labelText:
-      font: "20pt Arial"
+      font: "17pt Arial"
       color: "rgba(255, 255, 255, 1)"
     valueText:
       font: "15px Arial"
@@ -75,11 +79,38 @@ root.config =
   stationMenuStyle:
     location: {x: 120, y: 5}
     width: 520
-    height: 150
+    height: 140
     horizLength: 435
     vert1x: 210
     vert2x: 322
     vert3x: 435
+    titleLoc: {x: 10, y: 10}
+    availableLoc: {x: 10, y: 45}
+    buildingLoc: {x: 10, y: 80}
+    probe:
+      labelLoc: {x: 220, y: 10}
+      imgLoc: {x: 220+32/2, y: 10+20+32/2}
+      costLoc: {x: 220+45, y: 10+20}
+      turnsLoc: {x: 220+45, y: 10+20+20}
+    colony:
+      labelLoc: {x: 220, y: 10+70}
+      imgLoc: {x: 220+32/2, y: 10+20+32/2+70}
+      costLoc: {x: 220+45, y: 10+20+70}
+      turnsLoc: {x: 220+45, y: 10+20+20+70}
+    attack:
+      labelLoc: {x: 332, y: 10}
+      imgLoc: {x: 332+32/2, y: 10+20+32/2}
+      costLoc: {x: 332+45, y: 10+20}
+      turnsLoc: {x: 332+45, y: 10+20+20}
+    defense:
+      labelLoc: {x: 332, y: 10+70}
+      imgLoc: {x: 332+32/2, y: 10+20+32/2+70}
+      costLoc: {x: 332+45, y: 10+20+70}
+      turnsLoc: {x: 332+45, y: 10+20+20+70}
+  outpostMenuStyle:
+    location: {x: 120, y: 5}
+    width: 300
+    height: 140
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
