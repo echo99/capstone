@@ -55,8 +55,8 @@ class Planet
   # @return [Double] The distance between this planet and the specified planet.
   #
   distance: (planet) ->
-    oX = planet.location.x
-    oY = planet.location.y
+    oX = planet.location().x
+    oY = planet.location().y
     return Math.sqrt(Math.pow(@_x - oX, 2) + Math.pow(@_y - oY, 2))
 
   # Returns the last-known amount of (unharvested) resources left on the planet.
