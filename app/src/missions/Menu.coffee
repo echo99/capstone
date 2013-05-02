@@ -67,7 +67,8 @@ class Menu extends Mission
     camera.setTarget(@Planets.Home.location())
 
     @_initMenus()
-    game.setup(0, null)
+    game.endTurn()
+    #game.setup(0, null)
 
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)

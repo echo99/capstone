@@ -15,6 +15,7 @@ class Extermination extends Mission
       b: new Planet(300, 450, 70, 3)
       c: new Planet(300, -450, 25, 2)
 
+    ###
     game.addPlanet(@Planets.a)
     game.addPlanet(@Planets.b)
     game.addPlanet(@Planets.c)
@@ -30,12 +31,20 @@ class Extermination extends Mission
     @Planets.a._unitConstructing = window.config.units.colonyShip
     @Planets.a._turnsToComplete = 5
     @Planets.b._outpost = true
-
+    ###
+    @Planets.home = game.setup(10)
+    ###
+    console.log("looking for planet")
+    for p in game.getPlanets()
+      if p.numShips(window.config.units.probe) > 0
+        console.log("found")
+        @Planets.home = p
+        break
+    console.log("done searching")
+    ###
     UI.initialize()
     camera.setZoom(0.5)
-    camera.setTarget(@Planets.a.location())
-
-    game.setup(10, null)
+    camera.setTarget(@Planets.home.location())
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -50,10 +59,11 @@ class Extermination extends Mission
 
   getHomeTarget: ->
     # TODO: come up with smarter target
-    return @Plants.a.location()
+    return @Planets.home.location()
+    #return @Planets.a.location()
 
   # @see Mission#onEndTurn
   onEndTurn: ->
     # TODO: check for end game
-    if @Planets.b.numShips(window.config.units.probe) > 0
-      newMission(Menu)
+    #if @Planets.b.numShips(window.config.units.probe) > 0
+    #  newMission(Menu)
