@@ -57,7 +57,7 @@ class Planet
   distance: (planet) ->
     oX = planet.location.x
     oY = planet.location.y
-    return sqrt(Math.pow(@_x - oX, 2) + Math.pow(@_y - oY, 2))
+    return Math.sqrt(Math.pow(@_x - oX, 2) + Math.pow(@_y - oY, 2))
 
   # Returns the last-known amount of (unharvested) resources left on the planet.
   # This resource count is updated if a probe or outpost/station is on the planet.
