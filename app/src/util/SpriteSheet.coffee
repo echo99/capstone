@@ -81,8 +81,11 @@ class SpriteSheet
               x + sprite.cx*scale, y + sprite.cy*scale, sprite.w*scale,
               sprite.h*scale)
       else
+        x = (0.5 + (x + sprite.cx*scale)) << 0
+        y = (0.5 + (y + sprite.cy*scale)) << 0
+        w = (0.5 + (sprite.w*scale)) << 0
+        h = (0.5 + (sprite.h*scale)) << 0
         ctx.drawImage(@img, sprite.x, sprite.y, sprite.w, sprite.h,
-            x + sprite.cx*scale, y + sprite.cy*scale, sprite.w*scale,
-            sprite.h*scale)
+                      x, y, w, h)
     else
       console.error("No sprite by name of #{name}")

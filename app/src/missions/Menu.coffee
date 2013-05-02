@@ -134,7 +134,7 @@ class Menu extends Mission
     )
 
     menuBox.addChild(startButton)
-    menuBox.close()
+    menuBox.visible = false
     cameraHudFrame.addChild(menuBox)
 
     return menuBox

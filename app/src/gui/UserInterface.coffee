@@ -13,6 +13,7 @@
 class UserInterface
   planetButtons: []
   hoveredPlanet: null
+  selectedPlanet: null
   lastMousePos: {x: 0, y: 0}
   unitSelection: null
 
@@ -48,6 +49,55 @@ class UserInterface
       "Press HOME to return")
     @help.visible = false
     cameraHudFrame.addChild(@help)
+
+    style = window.config.stationMenuStyle
+    loc = style.location
+    w = style.width
+    h = style.height
+    @stationMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
+    @stationMenu.setDrawFunc(@_drawStationMenu)
+    @stationMenu.visible = false
+    console.log("stationMenu: " + @stationMenu)
+    frameElement.addChild(@stationMenu)
+
+  _drawStationMenu: (ctx) =>
+    winStyle = window.config.windowStyle
+    stationStyle = window.config.stationMenuStyle
+    w = @stationMenu.w
+    h = @stationMenu.h
+    loc = {x: @stationMenu.x-w/2, y: @stationMenu.y-h/2}
+    ctx.clearRect(loc.x - winStyle.lineWidth / 2 - 1,
+                  loc.y - winStyle.lineWidth / 2 - 1,
+                  w + winStyle.lineWidth + 2,
+                  h + winStyle.lineWidth + 2)
+    if not @stationMenu.visible then return
+    ctx.fillStyle = winStyle.fill
+    ctx.strokeStyle = winStyle.stroke
+    ctx.lineJoin = winStyle.lineJoin
+    ctx.lineWidth = winStyle.lineWidth
+
+    # Draw background
+    ctx.fillRect(loc.x, loc.y, w, h)
+
+    # Draw frame
+    ctx.strokeRect(loc.x, loc.y, w, h)
+
+    # Draw dividers
+    #ctx.beginPath()
+    #ctx.moveTo(loc.x, loc.y+23)
+    #ctx.lineTo(loc.x+w, loc.y+23)
+    #ctx.stroke()
+
+    # Draw text
+    #ctx.font = winStyle.titleText.font
+    #ctx.fillStyle = winStyle.titleText.color
+    #ctx.textAlign = 'left'
+    #ctx.textBaseline = 'center'
+    #ctx.fillText("Selected Units", loc.x+6, loc.y+17)
+    #ctx.fillStyle = winStyle.valueText.color
+
+    # Draw units
+    #SHEET.drawSprite(SpriteNames.PROBE, loc.x+30, loc.y+50, ctx, false)
 
   initialize: (onlyProbe=false, @moveToDiscovered=true) ->
     @planetButtons = []
@@ -86,8 +136,16 @@ class UserInterface
           @unitSelection.updateSelection(p)
         @unitSelection.deselectAllUnits()
       else
-        console.log("opening structure menu...")
-        console.log(planet.toString())
+        if @selectedPlanet == planet
+          console.log("closing structure menu for " + planet.toString())
+          @selectedPlanet = null
+          @stationMenu.visible = false
+          # TODO: close others
+        else
+          console.log("opening structure menu for " + planet.toString())
+          @selectedPlanet = planet
+          @stationMenu.visible = true
+        @stationMenu.setDirty()
 
   planetButtonHoverCallback: (planet) =>
     return () =>
