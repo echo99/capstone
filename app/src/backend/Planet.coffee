@@ -168,7 +168,7 @@ class Planet
        (state is root.config.visibility.undiscovered)
       @_visibility = state
     else
-      throw error "Invalid Visibility"
+      throw Error "Invalid Visibility"
 
 
   # Immediately adds the specified number of the specified type of ship to
@@ -419,7 +419,7 @@ class Planet
        probes > @_probes or
        colonies > @_colonies
       console.log("Insufficient Ships!!!!")
-      #throw error "Insufficient Ships"
+      #throw Error "Insufficient Ships"
     else
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
