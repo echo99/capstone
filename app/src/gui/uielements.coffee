@@ -49,7 +49,19 @@ class Elements.UIElement extends Module
 
   # Create a new UI element
   #
-  constructor: (@x, @y) ->
+  # @param [Number] x
+  # @param [Number] y
+  # @param [Object] options
+  # @option options [Boolean] visible
+  # @option options [Boolean] clickable
+  # @option options [Number] zIndex
+  #
+  constructor: (@x, @y, options={}) ->
+    {visible, clickable, zIndex} = options
+    @visible = visible if visible?
+    @clickable = clickable if clickable?
+    @_zIndex = zIndex if zIndex?
+
     # @private @property [Array<Elements.UIElement>]
     @_children = []
     # @private @property [Array<Number>]
@@ -374,7 +386,7 @@ class Elements.UIElement extends Module
       for child in @_children
         child.mouseUp() if child._pressed
 
-
+  # [WIP] Call to when element is resized
   resize: ->
     @_onResize()
     for child in @_children
@@ -555,9 +567,10 @@ class Elements.BoxElement extends Elements.UIElement
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] w Width of element
   # @param [Number] h Height of element
+  # @param [Object] options Extra options, see {Elements.UIElement#constructor}
   #
-  constructor: (@x, @y, @w, @h) ->
-    super(@x, @y)
+  constructor: (@x, @y, @w, @h, options={}) ->
+    super(@x, @y, options)
     @cx = -Math.round(@w/2)
     @cy = -Math.round(@h/2)
 
@@ -588,9 +601,10 @@ class Elements.RadialElement extends Elements.UIElement
   # @param [Number] x x-position of center of element relative to parent
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] r Radius of element
+  # @param [Object] options Extra options, see {Elements.UIElement#constructor}
   #
-  constructor: (@x, @y, @r) ->
-    super(@x, @y)
+  constructor: (@x, @y, @r, options={}) ->
+    super(@x, @y, options)
     @r2 = @r*@r
 
   # @see Elements.UIElement#containsPoint
@@ -614,9 +628,10 @@ class Elements.Window extends Elements.BoxElement
   # @param [Number] y y-position of center of element relative to parent
   # @param [Number] w Width of element
   # @param [Number] h Height of element
+  # @param [Object] options Extra options, see {Elements.UIElement#constructor}
   #
-  constructor: (@x, @y, @w, @h) ->
-    super(@x, @y, @w, @h)
+  constructor: (@x, @y, @w, @h, options={}) ->
+    super(@x, @y, @w, @h, options)
     @_backgroundColor = null
     @_fadeFrames = 15
     @_currentAlpha = 0.5
@@ -633,11 +648,13 @@ class Elements.Window extends Elements.BoxElement
   #
   setBackgroundColor: (@_backgroundColor) ->
 
+  # @private Override default onHover function
   _onHover: ->
     @_animating = true
     @setDirty()
     super()
 
+  # @private Override default onMouseOut function
   _onMouseOut: ->
     @_animating = true
     @setDirty()
@@ -827,15 +844,25 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [Number] w The width of the box
   # @param [Number] h The height of the box
   # @param [String] message The message to display in the box
-  # @param [Elements.UIElement] closeBtn
-  # @param [String] textAlign
-  #   Horizontal alignment of the text: `'left'`, `'center'`, `'right'`
-  # @param [String] vAlign
-  #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`
+  # @param [Object] options
+  #   Extra options, see {Elements.UIElement#constructor} for more options
+  # @option options [Elements.UIElement] closeBtn
+  # @option options [String] textAlign
+  #   Horizontal alignment of the text: `'left'`, `'center'`, `'right'`.
+  #   Default: `'center'`
+  # @option options [String] vAlign
+  #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`.
+  #   Default: `'middle'`
   #
-  constructor: (@x, @y, @w, @h, @message, @closeBtn=null, @textAlign='center',
-      @vAlign='middle') ->
-    super(@x, @y, @w, @h)
+  constructor: (@x, @y, @w, @h, @message, options={}) ->
+    # @closeBtn=null, @textAlign='center',
+    #   @vAlign='middle'
+    {closeBtn, textAlign, vAlign} = options
+    @closeBtn = if closeBtn? then closeBtn else null
+    @textAlign = if textAlign? then textAlign else 'center'
+    @vAlign = if vAlign? then vAlign else 'middle'
+    super(@x, @y, @w, @h, options)
+
     if @closeBtn?
       @addChild(@closeBtn)
     @usingDefaultBtn = false
@@ -1106,9 +1133,10 @@ class Elements.Button extends Elements.BoxElement
   # @param [Number] h The height of the box
   # @param [Function] clickHandler (optional) The function to call when this
   #   button is clicked
+  # @param [Object] options Extra options, see {Elements.UIElement#constructor}
   #
-  constructor: (@x, @y, @w, @h, @clickHandler=null) ->
-    super(@x, @y, @w, @h)
+  constructor: (@x, @y, @w, @h, @clickHandler=null, options={}) ->
+    super(@x, @y, @w, @h, options)
 
   # Do something when the user hovers over the button
   #
@@ -1130,9 +1158,10 @@ class Elements.RadialButton extends Elements.RadialElement
   # @param [Number] r Radius of element
   # @param [Function] clickHandler (optional) The function to call when this
   #   button is clicked
+  # @param [Object] options Extra options, see {Elements.UIElement#constructor}
   #
-  constructor: (@x, @y, @r, @clickHandler=null) ->
-    super(@x, @y, @r)
+  constructor: (@x, @y, @r, @clickHandler=null, options=null) ->
+    super(@x, @y, @r, options)
 
   # Do something when the user hovers over the button
   #

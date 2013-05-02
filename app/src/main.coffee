@@ -126,9 +126,9 @@ main = ->
   # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
   #   "This message needs to be wrapped"))
   # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
-  #   "This message is left aligned", 'left'))
+  #   "This message is left aligned", {textAlign:'left'}))
   # frameElement.addChild(new Elements.MessageBox(450, 350, 280, 100,
-  #   "This message is right aligned", 'right'))
+  #   "This message is top aligned", {vAlign:'top'}))
   # frameElement.addChild(new Elements.MessageBox(150, 500, 280, 100,
   #   "This message\nhas a newline"))
   # frameElement.addChild(new Elements.MessageBox(450, 500, 280, 100,
