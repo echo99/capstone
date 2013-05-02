@@ -95,8 +95,20 @@ class UserInterface
 
     # Draw dividers
     ctx.beginPath()
-    ctx.moveTo(loc.x, h/2)
-    ctx.lineTo(loc.x+100, h/2)
+    ctx.moveTo(loc.x, loc.y+h/2)
+    ctx.lineTo(loc.x+stationStyle.horizLength, loc.y+h/2)
+
+    ctx.moveTo(loc.x+stationStyle.vert2x, loc.y)
+    ctx.lineTo(loc.x+stationStyle.vert2x, loc.y+h)
+
+    ctx.moveTo(loc.x+stationStyle.vert3x, loc.y)
+    ctx.lineTo(loc.x+stationStyle.vert3x, loc.y+h)
+    ctx.stroke()
+
+    ctx.lineWidth = winStyle.lineWidth * 2
+    ctx.beginPath()
+    ctx.moveTo(loc.x+stationStyle.vert1x, loc.y)
+    ctx.lineTo(loc.x+stationStyle.vert1x, loc.y+h)
     ctx.stroke()
 
     # Draw text

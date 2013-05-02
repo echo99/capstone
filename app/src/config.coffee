@@ -77,6 +77,9 @@ root.config =
     width: 520
     height: 150
     horizLength: 435
+    vert1x: 210
+    vert2x: 322
+    vert3x: 435
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
