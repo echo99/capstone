@@ -222,6 +222,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
   if not BUILDING
     BUILDING = true
     checkDep ->
+      invoke 'vendcomp'
       console.log(
         "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
       # Try to compile all files individually first, to get a better

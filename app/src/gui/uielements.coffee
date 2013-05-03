@@ -1196,11 +1196,14 @@ class Elements.DOMButton
 
   # Create a new DOM button
   #
-  # @param [AnimatedSprite] sprite The sprite to use for the button
+  # @param [String] state The name of the initial state
+  # @param [AnimatedSprite] sprite The initial sprite to use for the button
   # @param [SpriteSheet] sheet The sprite sheet the sprite belongs to
   #
-  constructor: (@sprite, @sheet) ->
-    spt = @sheet.getSprite(@sprite)
+  constructor: (@state, sprite, @sheet) ->
+    @states = {}
+    @states[state] = sprite
+    spt = @sheet.getSprite(sprite)
     @w = spt.w
     @h = spt.h
     @canvas = document.createElement('canvas')
@@ -1209,8 +1212,8 @@ class Elements.DOMButton
     @canvas.style.cursor = 'pointer'
     @canvas.style.position = 'absolute'
     document.body.appendChild(@canvas)
-    ctx = @canvas.getContext('2d')
-    @sheet.drawSprite(@sprite, Math.round(@w/2), Math.round(@h/2), ctx, false)
+    @ctx = @canvas.getContext('2d')
+    @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
     return this
 
   # Set the top offset of the button. Overrides bottom offset.
@@ -1257,3 +1260,22 @@ class Elements.DOMButton
   setClickHandler: (@callback) ->
     @canvas.addEventListener('mousedown', @callback)
     return this
+
+  # Add a state sprite to the button
+  #
+  # @param [String] state The name of the state
+  # @param [AnimatedSprite] sprite The sprite for this state
+  #
+  addState: (state, sprite) ->
+    @states[state] = sprite
+
+  # Set the state of the button
+  #
+  # @param [String] state State to set the button to
+  #
+  setState: (state) ->
+    if state != @state and state of @states
+      @state = state
+      sprite = @states[state]
+      @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
+

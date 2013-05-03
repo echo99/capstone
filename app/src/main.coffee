@@ -12,6 +12,33 @@
 IMAGE_LOADED = false
 DOM_LOADED = false
 
+manifest = [
+    src: 'assets/audio/empty_space_stage1.ogg'
+    id: 'bgmusic1'
+  ,
+    src: 'assets/audio/empty_space_stage2.ogg'
+    id: 'bgmusic2'
+]
+
+bgmusic = null
+
+numToLoad = manifest.length
+numLoaded = 0
+
+createjs.Sound.addEventListener "loadComplete", ->
+  numLoaded++
+  if numLoaded >= numToLoad
+    # Play music once all sounds have been loaded
+    console.log('Finished loading sounds!')
+    bgmusic = createjs.Sound.play('bgmusic1', createjs.Sound.INTERRUPT_NONE,
+      10, 0, -1, 0.5)
+    # Start it off muted
+    bgmusic.mute(true)
+
+createjs.Sound.registerManifest(manifest)
+
+
+
 # Load image and image data as soon as possible
 SHEET = null
 $.getJSON('assets/images/atlas.json', {}, (data) ->
@@ -189,8 +216,17 @@ main = ->
       sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
   fsCanvas.addEventListener('mousedown', canvasclick)
 
-  muteBtn = new Elements.DOMButton(config.spriteNames.UNMUTED, SHEET)
+  # Set mute button
+  muteBtn = new Elements.DOMButton('muted', config.spriteNames.MUTED, SHEET)
     .setRight(5).setBottom(26)
+  muteBtn.addState('unmuted', config.spriteNames.UNMUTED)
+  muteBtn.setClickHandler ->
+    if bgmusic.getMute()
+      bgmusic.setMute(false)
+      muteBtn.setState('unmuted')
+    else
+      bgmusic.setMute(true)
+      muteBtn.setState('muted')
 
   window.onresize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
