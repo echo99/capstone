@@ -246,6 +246,8 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
                 # console.log()
               invoke 'lint'
               invoke 'doc' if not options['no-doc']
+        else
+          invoke 'lint'
         BUILDING = false
         # else
         #   console.log('Build failed!'.red)
@@ -376,6 +378,8 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
       fail = "x".red
     failCount = 0
     fileFailCount = 0
+    errorCount = 0
+    # errorFileCount = 0
     files = getSourceFilePaths()
     filesToLint = files.length
     files.forEach (filepath) ->
@@ -383,35 +387,43 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
       fs.readFile filepath, (err, data) ->
         filesToLint--
         shortPath = filepath.substr SRC_DIR.length + 1
-        result = coffeelint.lint data.toString(), coffeeLintConfig
-        if result.length
-          fileFailCount++
-          hasError = result.some (res) -> res.level is 'error'
-          level = if hasError then fail else warn
-          console.error "#{level}  #{shortPath}".red
-          for res in result
-            failCount++
-            level = if res.level is 'error' then fail else warn
-            console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
-        else if options.verbose
-          console.log("#{pass}  #{shortPath}".green)
-        if filesToLint == 0
-          # console.log("#{failCount} lint failures")
-          if failCount > 0
-            notify("Build succeeded, but #{failCount} lint errors were " +
-              "found! Please check the terminal for more details.",
-              MessageLevel.ERROR) if WATCHING
-            console.error(("\n#{failCount} lint error(s) found in " +
-              "#{fileFailCount} file(s)!").red.bold)
-            console.error("As a reminder:".grey.underline)
-            console.error("- Indentation is two spaces. No tabs allowed".grey)
-            console.error(("- Maximum line width is " +
-              "#{coffeeLintConfig.max_line_length.value} characters").grey)
-          else
-            notify("Build succeeded. All files passed lint.",
-              MessageLevel.INFO) if WATCHING
-            console.log('No lint errors found!'.green)
-          console.log("") if WATCHING
+        try
+          result = coffeelint.lint data.toString(), coffeeLintConfig
+          if result.length
+            fileFailCount++
+            hasError = result.some (res) -> res.level is 'error'
+            level = if hasError then fail else warn
+            console.error "#{level}  #{shortPath}".red
+            for res in result
+              failCount++
+              level = if res.level is 'error' then fail else warn
+              console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
+          else if options.verbose
+            console.log("#{pass}  #{shortPath}".green)
+          if filesToLint == 0
+            # console.log("#{failCount} lint failures")
+            if failCount > 0
+              notify("Build succeeded, but #{failCount} lint errors were " +
+                "found! Please check the terminal for more details.",
+                MessageLevel.ERROR) if WATCHING
+              console.error("\n")
+              if errorCount > 0
+                console.error(("#{errorCount} syntax error(s) found!").red.bold)
+              console.error(("#{failCount} lint error(s) found in " +
+                "#{fileFailCount} file(s)!").red.bold)
+              console.error("As a reminder:".grey.underline)
+              console.error("- Indentation is two spaces. No tabs allowed".grey)
+              console.error(("- Maximum line width is " +
+                "#{coffeeLintConfig.max_line_length.value} characters").grey)
+            else
+              notify("Build succeeded. All files passed lint.",
+                MessageLevel.INFO) if WATCHING
+              console.log('No lint errors found!'.green)
+            console.log("") if WATCHING
+        catch e
+          errorCount++
+          console.error("#{filepath}: #{e}".red)
+          # return e
 
 task 'doc', 'Document the source code using Codo', (options) ->
   lastResortCodoFix = (cmd, callback=null) ->
