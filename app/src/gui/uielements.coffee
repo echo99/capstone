@@ -873,14 +873,19 @@ class Elements.MessageBox extends Elements.BoxElement
   # @option options [String] vAlign
   #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`.
   #   Default: `'middle'`
+  # @option options [String] font Set the message font
+  # @option options [String] fontColor Set the message color
   #
   constructor: (@x, @y, @w, @h, @message, options={}) ->
     # @closeBtn=null, @textAlign='center',
     #   @vAlign='middle'
-    {closeBtn, textAlign, vAlign} = options
+    {closeBtn, textAlign, vAlign, font, fontColor} = options
     @closeBtn = if closeBtn? then closeBtn else null
     @textAlign = if textAlign? then textAlign else 'center'
     @vAlign = if vAlign? then vAlign else 'middle'
+    @font = if font? then font else config.windowStyle.msgBoxText.font
+    @fontColor = if fontColor? then fontColor else
+      config.windowStyle.msgBoxText.color
     super(@x, @y, @w, @h, options)
 
     if @closeBtn?
@@ -908,7 +913,8 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   _wrapText: (ctx) ->
-    ctx.font = config.windowStyle.msgBoxText.font
+    # ctx.font = config.windowStyle.msgBoxText.font
+    ctx.font = @font
     textWidth = ctx.measureText(@message).width
     # console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 4)
@@ -1033,8 +1039,10 @@ class Elements.MessageBox extends Elements.BoxElement
       # ctx.fillRect(@x, @y, @w, @h)
       ctx.strokeRect(x+cx, y+cy, w, h)
       ctx.fillRect(x+cx, y+cy, w, h)
-      ctx.font = config.windowStyle.msgBoxText.font
-      ctx.fillStyle = config.windowStyle.msgBoxText.color
+      # ctx.font = config.windowStyle.msgBoxText.font
+      ctx.font = @font
+      # ctx.fillStyle = config.windowStyle.msgBoxText.color
+      ctx.fillStyle = @fontColor
       ctx.textAlign = @textAlign
       ctx.textBaseline = @vAlign
       # cx = Math.round(@w/2 + @x)
