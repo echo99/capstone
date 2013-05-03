@@ -1,5 +1,6 @@
 # The main script for the game
 
+#_require util/canvas-context-extended
 #_require util/SpriteSheet
 #_require util/AtlasParser
 #_require missions/Menu
@@ -36,8 +37,6 @@ createjs.Sound.addEventListener "loadComplete", ->
     bgmusic.mute(true)
 
 createjs.Sound.registerManifest(manifest)
-
-
 
 # Load image and image data as soon as possible
 SHEET = null
@@ -139,6 +138,12 @@ main = ->
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
+
+  # console.log(ctx.font)
+  # ctx.setFont({family: 'Arial'})
+  # console.log(ctx.font)
+  # ctx.setFontSizeVal(20)
+  # console.log(ctx.font)
 
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
