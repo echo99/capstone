@@ -363,8 +363,8 @@ class Planet
         @_visibility = root.config.visibility.discovered
     # Check to be sure that we aren't displaying the wrong thing
     if @_visibility == root.config.visibility.visible
-      if @_lastSeenResources != @_resources and @_probes > 0
-        throw new Error "last seen resources don't match but we have a probe."
+      #if @_lastSeenResources != @_resources and @_probes > 0
+      #  throw new Error "last seen resources don't match but we have a probe."
       if @_lastSeenFungus != @_fungusStrength
         throw new Error "last seen fungus dosn't match."
     @checkRepresentationalInvariants()

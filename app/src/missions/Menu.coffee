@@ -19,7 +19,7 @@ class Menu extends Mission
       Home: new Planet(@settings.home.x, @settings.home.y)
       Missions: new Planet(@settings.missions.x, @settings.missions.y)
       Mission1: new Planet(@settings.mission1.x, @settings.mission1.y)
-      Mission2: new Planet(0, -800)
+      Mission2: new Planet(@settings.mission2.x, @settings.mission2.y)
       Mission3: new Planet(400, -750)
       Extermination: new Planet(@settings.extermination.x,
                                 @settings.extermination.y)
@@ -58,11 +58,12 @@ class Menu extends Mission
     # Add probe to Home planet
     @Planets.Home.addShips(window.config.units.probe, 1)
     #@Planets.Missions._attackShips = 23
-    @Planets.Mission1._fungusStrength = 1
+    @Planets.Mission2._fungusStrength = 1
+    @Planets.Mission3._fungusStrength = 1
     #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home
-    UI.initialize(true, false)
+    UI.initialize(true, false, false)
     camera.setZoom(0.5)
     camera.setTarget(@Planets.Home.location())
 
@@ -72,11 +73,14 @@ class Menu extends Mission
 
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)
+    cameraHudFrame.removeChild(@mission2Menu)
     cameraHudFrame.removeChild(@exterminationMenu)
 
   _initMenus: ->
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
       console.log('clicked mission 1 button'))
+    @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
+      console.log('clicked mission 2 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
       console.log('clicked extermination button')
       newMission(Extermination))
@@ -144,8 +148,6 @@ class Menu extends Mission
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
-    SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
-
     winStyle = window.config.windowStyle
     ctx.font = winStyle.labelText.font
     ctx.fillStyle = winStyle.labelText.color
@@ -159,9 +161,7 @@ class Menu extends Mission
         coords = camera.getScreenCoordinates(coords)
         if camera.onScreen(coords)
           ctx.fillText(p, coords.x, coords.y)
-
-    # if the probe is on a planet of interest
-    #   draw prompt to make sure the player wants to play the mission
+    SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 30, ctx, false)
 
   # @see Mission#onMouseMove
   onMouseMove: (x, y) ->
@@ -181,12 +181,12 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-      camera.setTarget(@lastPlanet.location())
       inGroup = false
       for c in @lastPlanet.getControlGroups()
         if c.probes() == 1
           inGroup = true
           break
+      camera.setTarget(@lastPlanet.location())
 
     # NOTE: this assumes that the game handle the mouse click first,
     #       if that's not the case this may have to be done differently
@@ -212,19 +212,27 @@ class Menu extends Mission
           break
       if p.numShips(window.config.units.probe) == 1 or inGroup
         found = true
-        @lastPlanet = p
-        if @lastPlanet == @Planets.Mission1
-          @mission1Menu.visible = true
-        else
-          @mission1Menu.close()
-        if @lastPlanet == @Planets.Extermination
-          @exterminationMenu.visible = true
-        else
-          @exterminationMenu.close()
+        if p.fungusStrength() == 0
+          @lastPlanet = p
+          if @lastPlanet == @Planets.Mission1
+            @mission1Menu.open()
+          else
+            @mission1Menu.close()
+          if @lastPlanet == @Planets.Mission2
+            @mission2Menu.open()
+          else
+            @mission2Menu.close()
+          if @lastPlanet == @Planets.Extermination
+            @exterminationMenu.open()
+          else
+            @exterminationMenu.close()
         break
     if not found
       @lastPlanet._probes = 1
-      camera.setTarget(@lastPlanet.location)
+      camera.setTarget(@lastPlanet.location())
+      game.endTurn()
+      UI.endTurn()
+      CurrentMission.onEndTurn()
     #   for each planet that leaves the menu
     #     if the planet has a probe on it
     #       open prompt for the planet

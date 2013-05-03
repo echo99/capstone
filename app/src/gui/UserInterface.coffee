@@ -233,7 +233,7 @@ class UserInterface
     # Draw frame
     ctx.strokeRect(loc.x, loc.y, w, h)
 
-  initialize: (onlyProbe=false, @moveToDiscovered=true) ->
+  initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
@@ -317,14 +317,14 @@ class UserInterface
           ctx.lineTo(nPos.x, nPos.y)
           ctx.stroke()
 
-    # Draw control group path
-
     lost = true
     for p in game.getPlanets()
       loc = p.location()
-      if camera.onScreen(camera.getScreenCoordinates(loc))
+      pos = camera.getScreenCoordinates(loc)
+      if camera.onScreen(pos)
         lost = false
         @help.close()
+      # Draw planet
       vis = p.visibility()
       if vis == window.config.visibility.discovered
         if p.fungusStrength() > 0
@@ -336,9 +336,47 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
-      #if vis != window.config.visiblity.undiscovered
-      #  r = p.resources()
-      #  draw resources
+      # Draw control groups
+      for g in p.getControlGroups()
+        next = g.next()
+        nextLoc = next.location()
+        vec = {x: nextLoc.x - loc.x, y: nextLoc.y - loc.y}
+        dist = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
+        d = window.config.controlGroupDist * camera.getZoom()
+        cLoc = {x: vec.x / dist * d, y: vec.y / dist * d}
+        ctx.font = window.config.windowStyle.defaultText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.value
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        cLoc = {x: pos.x + cLoc.x, y: pos.y + cLoc.y}
+        ctx.fillText("C", cLoc.x, cLoc.y)
+
+      # Draw resources
+      if @showResources
+        if vis != window.config.visibility.undiscovered
+          r = p.resources()
+          rate = p._rate # TODO: replace with method
+          if r == null
+            r = "?"
+            rate = "?"
+          ctx.font = window.config.windowStyle.defaultText.font
+          if p.numShips(window.config.units.probe) > 0 or
+             p.hasStation() or p.hasOutpost()
+            ctx.fillStyle = window.config.windowStyle.defaultText.value
+          else
+            ctx.fillStyle = window.config.windowStyle.defaultText.color
+          ctx.textAlign = 'left'
+          ctx.textBaseline = 'middle'
+          offset = 60 * camera.getZoom()
+          tRes = "#{r}"
+          tRat = "#{rate}"
+          if camera.getZoom() > window.config.displayCutoff
+            tRes = "Resources: " + tRes
+            tRat = "Rate: " + tRat
+          ctx.fillText(tRes, pos.x+offset, pos.y)
+          ctx.fillText(tRat, pos.x+offset, pos.y+20)
+
+      # Draw structure
       if p.hasOutpost()
         if p.resources() > 0
           SHEET.drawSprite(SpriteNames.OUTPOST_GATHERING, loc.x, loc.y, ctx)

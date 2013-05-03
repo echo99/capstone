@@ -13,6 +13,8 @@ root.config =
   PAN_SPEED_FACTOR: 3
   BG_PAN_SPEED_FACTOR: 50
   DRAG_TYPE: DRAG_TYPES[1]
+  displayCutoff: 0.4
+  controlGroupDist: 100
   windowStyle:
     fill: "rgba(0, 37, 255, 0.5)"
     stroke: "rgba(0, 37, 255, 1)"
@@ -168,13 +170,32 @@ root.config =
         textAlign: 'left'
         vAlign: 'top'
         cancel:
-          x: 200
-          y: 170
+          x: 245
+          y: 185
           w: 60
           h: 20
         start:
-          x: 100
-          y: 170
+          x: 145
+          y: 185
+          w: 101
+          h: 20
+    mission2:
+      x: 0
+      y: -800
+      menu:
+        w: 300
+        h: 200
+        message: "This is the mission 2 message box"
+        textAlign: 'left'
+        vAlign: 'top'
+        cancel:
+          x: 245
+          y: 185
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 185
           w: 101
           h: 20
     extermination:
