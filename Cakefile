@@ -225,13 +225,15 @@ jsSanityCheck = (options, callback) ->
 # Options
 
 option '-v', '--verbose', 'Print out verbose output'
-option '-n', '--no-doc', 'Don\'t document the source files when building'
+option null, '--no-doc', 'Don\'t document the source files when building'
+option null, '--no-rhino', 'Don\'t try to run the script with rhino'
 
 ###############################################################################
 # Tasks
 
 task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
   options['no-doc'] ?= 'no-doc' of options
+  options['no-rhino'] ?= 'no-rhino' of options
   if not BUILDING
     BUILDING = true
     checkDep ->
@@ -257,15 +259,19 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
                 # notify("Build successful!", MessageLevel.INFO) if WATCHING
                 console.log('Build successful!'.green)
                 # console.log()
-              console.log('Doing test run on compiled script...'.yellow)
-              jsSanityCheck options, (passed) ->
-                if passed
-                  console.log('Test passed!'.green)
-                  invoke 'lint'
-                  invoke 'doc' if not options['no-doc']
-                else
-                  notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
-                  console.error('Test run failed!'.red)
+              if options['no-rhino']
+                invoke 'lint'
+                invoke 'doc' if not options['no-doc']
+              else
+                console.log('Doing test run on compiled script...'.yellow)
+                jsSanityCheck options, (passed) ->
+                  if passed
+                    console.log('Test passed!'.green)
+                    invoke 'lint'
+                    invoke 'doc' if not options['no-doc']
+                  else
+                    notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
+                    console.error('Test run failed!'.red)
         else
           invoke 'lint'
         BUILDING = false
