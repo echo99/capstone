@@ -285,6 +285,22 @@ class Elements.UIElement extends Module
   #
   _customDraw: (ctx, coords=null, zoom=1.0) ->
 
+  # Move this element to a new location
+  #
+  # @param [Number] newX
+  # @param [Number] newY
+  #
+  moveTo: (newX, newY) ->
+    if @visible
+      @clear()
+      @setDirty()
+    {x, y} = @getActualLocation(newX, newY)
+    @actX = x
+    @actY = y
+    for child in @_children
+      child.setActualLocation(this)
+
+
   # Clear this element using a clear function
   #
   # @param [CanvasRenderingContext2D] ctx
