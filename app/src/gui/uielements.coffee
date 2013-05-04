@@ -823,7 +823,7 @@ class Elements.Frame extends Elements.UIElement
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
     for clearedChild in @_clearBucket
-      clearedChild.clear(@ctx, coords, zoom) if clearedChild.visible or
+      clearedChild.clear(@ctx) if clearedChild.visible or
         clearedChild._closing
     @_clearBucket = []
     for zIndex in @zIndices
@@ -885,7 +885,7 @@ class Elements.CameraFrame extends Elements.UIElement
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
     for clearedChild in @_clearBucket
-      clearedChild.clear(@ctx, coords, zoom) if clearedChild.visible or
+      clearedChild.clear(@ctx) if clearedChild.visible or
         clearedChild._closing
     @_clearBucket = []
     if @_hasDirtyChildren
