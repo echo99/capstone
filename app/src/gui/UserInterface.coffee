@@ -481,16 +481,16 @@ class UserInterface
       gs = {}
       for g in p.getControlGroups()
         next = g.next()
-        if not gs.next
-          gs.next = {}
-          gs.next.groups = []
-          gs.next.location = next.location()
-          gs.next.prev = p
-        gs.next.groups.push(g)
+        if not gs[next]
+          gs[next] = {}
+          gs[next].groups = []
+          gs[next].location = next.location()
+          gs[next].prev = p
+        gs[next].groups.push(g)
       for g of gs
         nextLoc = gs[g].location
-        groups = gs.next.groups
-        previous = gs.next.prev
+        groups = gs[g].groups
+        previous = gs[g].prev
         planetGameLoc = previous.location()
         vec = {x: nextLoc.x - planetGameLoc.x, y: nextLoc.y - planetGameLoc.y}
         dist = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
@@ -502,12 +502,14 @@ class UserInterface
 
         controlGroup = null # for groupDisplay's reference
 
-        w = window.config.controlGroup.expandedWidth
-        h = window.config.controlGroup.expandedHeight * groups.length +
+        console.log('num: ' + groups.length)
+
+        eW = window.config.controlGroup.expandedWidth
+        eH = window.config.controlGroup.expandedHeight * groups.length +
             window.config.windowStyle.lineWidth * (groups.length - 1)
         groupDisplay = new Elements.BoxElement(controlHudLoc.x+w/2,
                                                controlHudLoc.y+h/2,
-                                               w, h)
+                                               eW, eH)
         clear = (ctx) =>
           winStyle = window.config.windowStyle
           ctx.fillStyle = winStyle.fill
@@ -515,14 +517,11 @@ class UserInterface
           ctx.lineJoin = winStyle.lineJoin
           ctx.lineWidth = winStyle.lineWidth
 
-          w = window.config.controlGroup.expandedWidth
-          h = window.config.controlGroup.expandedHeight
-
-          loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
+          loc = {x: groupDisplay.x-eW/2, y: groupDisplay.y-eH/2}
           ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
                         loc.y - winStyle.lineWidth/2 - 1,
-                        w + winStyle.lineWidth + 2,
-                        h + winStyle.lineWidth + 2,)
+                        eW + winStyle.lineWidth + 2,
+                        eH + winStyle.lineWidth + 2,)
 
         groupDisplay.setClearFunc(clear)
         groupDisplay.setDrawFunc(
@@ -534,16 +533,11 @@ class UserInterface
             ctx.lineJoin = winStyle.lineJoin
             ctx.lineWidth = winStyle.lineWidth
 
-            w = window.config.controlGroup.expandedWidth
-            h = window.config.controlGroup.expandedHeight
-
             loc = camera.getScreenCoordinates(controlGameLoc)
-            #groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
-            groupDisplay.x = loc.x + w/2
-            groupDisplay.y = loc.y + h/2
+            groupDisplay.moveTo(loc.x + eW/2, loc.y + eH/2)
 
-            ctx.fillRect(loc.x, loc.y, w, h)
-            ctx.strokeRect(loc.x, loc.y, w, h)
+            ctx.fillRect(loc.x, loc.y, eW, eH)
+            ctx.strokeRect(loc.x, loc.y, eW, eH)
 
         )
         groupDisplay.setMouseOutHandler(
