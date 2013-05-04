@@ -131,6 +131,23 @@ class UserInterface
     @outpostMenu.visible = false
     frameElement.addChild(@outpostMenu)
 
+    colonyStyle = window.config.colonyMenuStyle
+    loc = colonyStyle.location
+    w = colonyStyle.width
+    h = colonyStyle.height
+    @colonyMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
+    @colonyMenu.setDrawFunc(@_drawColonyMenu)
+    @colonyMenu.setClearFunc(@_clearMenu(colonyStyle))
+
+    x = winStyle.lineWidth / 2
+    y = colonyStyle.horiz1y + winStyle.lineWidth / 2
+    w = (colonyStyle.width - winStyle.lineWidth / 2) - x
+    h = (colonyStyle.height - winStyle.lineWidth / 2) - y
+    outpostButton = @_getStationButton(x, y, w, h, window.config.structures.outpost)
+    @colonyMenu.addChild(outpostButton)
+    @colonyMenu.visible = false
+    frameElement.addChild(@colonyMenu)
+
   _getStationButton: (x, y, w, h, unit) ->
     button = new Elements.Button(x+w/2, y+h/2, w, h)
     button.setProperty("location",
@@ -391,6 +408,31 @@ class UserInterface
     y = loc.y + outpostStyle.availableLoc.y
     ctx.fillText(resources, x, y)
 
+  _drawColonyMenu: (ctx) =>
+    winStyle = window.config.windowStyle
+    colonyStyle = window.config.colonyMenuStyle
+    w = colonyStyle.width
+    h = colonyStyle.height
+    loc = colonyStyle.location
+    @_clearMenu(colonyStyle)(ctx)
+
+    ctx.fillStyle = winStyle.fill
+    ctx.strokeStyle = winStyle.stroke
+    ctx.lineJoin = winStyle.lineJoin
+    ctx.lineWidth = winStyle.lineWidth
+
+    # Draw background
+    ctx.fillRect(loc.x, loc.y, w, h)
+
+    # Draw frame
+    ctx.strokeRect(loc.x, loc.y, w, h)
+
+    # Draw dividers
+    ctx.beginPath()
+    ctx.moveTo(loc.x, loc.y + colonyStyle.horiz1y)
+    ctx.lineTo(loc.x + w, loc.y + colonyStyle.horiz1y)
+    ctx.stroke()
+
   initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
     @planetButtons = []
     for p in game.getPlanets()
@@ -433,6 +475,7 @@ class UserInterface
       else
         @stationMenu.close()
         @outpostMenu.close()
+        @colonyMenu.close()
         if @selectedPlanet == planet
           console.log("closing structure menu for " + planet.toString())
           @selectedPlanet = null
@@ -444,6 +487,10 @@ class UserInterface
           console.log("opening outpost menu for " + planet.toString())
           @selectedPlanet = planet
           @outpostMenu.open()
+        else if planet.numShips(window.config.units.colonyShip) > 0
+          console.log("opening colony menu for " + planet.toString())
+          @selectedPlanet = planet
+          @colonyMenu.open()
         else
           @selectedPlanet = null
         @switchedMenus = true
@@ -576,9 +623,10 @@ class UserInterface
         else
           ctx.fillText("Open station menu", x, y)
       else if @hoveredPlanet.numShips(window.config.units.colonyShip) > 0
-        # if @colonyMenu.visible and @hoveredPlanet = @selectedPlanet
-        #   ctx.fillText("Close colony ship menu")
-        ctx.fillText("Open colony ship menu", x, y)
+        if @colonyMenu.visible and @hoveredPlanet == @selectedPlanet
+          ctx.fillText("Close colony ship menu", x, y)
+        else
+          ctx.fillText("Open colony ship menu", x, y)
       else
         hasAction = false
 
@@ -596,6 +644,14 @@ class UserInterface
     if @switchedMenus
       @stationMenu.setDirty()
       @outpostMenu.setDirty()
+      @colonyMenu.setDirty()
+
+    if drag and not @hoveredPlanet
+      @stationMenu.close()
+      @outpostMenu.close()
+      @colonyMenu.close()
+      @selectedPlanet = null
+
 
   # The UI expects this to be called when the mouse moves
   #
@@ -746,8 +802,13 @@ class UserInterface
         b.visible = true
     if @stationMenu
       @stationMenu.setDirty()
+    if @outpostMenu
+      @outpostMenu.setDirty()
+    if @colonyMenu
+      @colonyMenu.setDirty()
 
   endGame: () ->
     @stationMenu.close()
     @outpostMenu.close()
+    @colonyMenu.close()
     @selectedPlanet = null

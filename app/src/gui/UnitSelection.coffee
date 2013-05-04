@@ -125,7 +125,7 @@ class UnitSelection
     @planetsWithSelectedUnits = []
     @total = 0
     @totalProbes = 0
-    @totalcolonies = 0
+    @totalColonies = 0
     @totalAttacks = 0
     @totalDefenses = 0
     @totalDisplay.dirty = true
