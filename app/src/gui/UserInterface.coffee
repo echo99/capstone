@@ -245,6 +245,8 @@ class UserInterface
       gameFrame.addChild(b)
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
+    @controlGroups = []
+    @_groupDisplays = []
 
   destroy: () ->
     for b in @planetButtons
@@ -266,8 +268,9 @@ class UserInterface
             colony + " colony ships from " +
             "(" + p.location().x + ", " + p.location().y + ")" + " to " +
             "(" + planet.location().x + ", " + planet.location().y + ")")
-            p.moveShips(attack, defense, probe, colony, planet)
+          p.moveShips(attack, defense, probe, colony, planet)
           @unitSelection.updateSelection(p)
+          @updateControlGroups()
         @unitSelection.deselectAllUnits()
       else
         @stationMenu.close()
@@ -336,6 +339,7 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
+      ###
       # Draw control groups
       for g in p.getControlGroups()
         next = g.next()
@@ -350,7 +354,7 @@ class UserInterface
         ctx.textBaseline = 'middle'
         cLoc = {x: pos.x + cLoc.x, y: pos.y + cLoc.y}
         ctx.fillText("C", cLoc.x, cLoc.y)
-
+      ###
       # Draw resources
       if @showResources
         if vis != window.config.visibility.undiscovered
@@ -466,9 +470,134 @@ class UserInterface
   onMouseClick: (x, y) ->
     @unitSelection.onMouseClick(x, y)
 
+  updateControlGroups: () ->
+    for c in @controlGroups
+      gameFrame.removeChild(c)
+    @controlGroups = []
+    for g in @_groupDisplays
+      frameElement.removeChild(g)
+    @_groupDisplays = []
+    for p in game.getPlanets()
+      gs = {}
+      for g in p.getControlGroups()
+        next = g.next()
+        if not gs.next
+          gs.next = {}
+          gs.next.groups = []
+          gs.next.location = next.location()
+          gs.next.prev = p
+        gs.next.groups.push(g)
+      for g of gs
+        nextLoc = gs[g].location
+        groups = gs.next.groups
+        previous = gs.next.prev
+        planetGameLoc = previous.location()
+        vec = {x: nextLoc.x - planetGameLoc.x, y: nextLoc.y - planetGameLoc.y}
+        dist = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
+        d = window.config.controlGroup.distance * camera.getZoom()
+        controlGameLoc =
+          x: vec.x / dist * d + planetGameLoc.x
+          y: vec.y / dist * d + planetGameLoc.y
+        controlHudLoc = camera.getScreenCoordinates(controlGameLoc)
+
+        controlGroup = null # for groupDisplay's reference
+
+        w = window.config.controlGroup.expandedWidth
+        h = window.config.controlGroup.expandedHeight
+        groupDisplay = new Elements.BoxElement(controlHudLoc.x+w/2,
+                                               controlHudLoc.y+h/2,
+                                               w, h * groups.length)
+        clear = (ctx) =>
+          winStyle = window.config.windowStyle
+          ctx.fillStyle = winStyle.fill
+          ctx.strokeStyle = winStyle.stroke
+          ctx.lineJoin = winStyle.lineJoin
+          ctx.lineWidth = winStyle.lineWidth
+
+          w = window.config.controlGroup.expandedWidth
+          h = window.config.controlGroup.expandedHeight
+
+          loc = camera.getScreenCoordinates(controlGameLoc)
+          groupDisplay.x = loc.x + w/2
+          groupDisplay.y = loc.y + h/2
+          ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
+                        loc.y - winStyle.lineWidth/2 - 1,
+                        w + winStyle.lineWidth + 2,
+                        h + winStyle.lineWidth + 2,)
+
+        groupDisplay.setClearFunc(clear)
+        groupDisplay.setDrawFunc(
+          (ctx) =>
+            clear(ctx)
+            winStyle = window.config.windowStyle
+            ctx.fillStyle = winStyle.fill
+            ctx.strokeStyle = winStyle.stroke
+            ctx.lineJoin = winStyle.lineJoin
+            ctx.lineWidth = winStyle.lineWidth
+
+            w = window.config.controlGroup.expandedWidth
+            h = window.config.controlGroup.expandedHeight
+
+            loc = camera.getScreenCoordinates(controlGameLoc)
+            #groupDisplay.x = loc.x + w/2
+            #groupDisplay.y = loc.y + h/2
+
+            ctx.fillRect(loc.x, loc.y, w, h)
+            ctx.strokeRect(loc.x, loc.y, w, h)
+
+        )
+        groupDisplay.setMouseOutHandler(
+          () =>
+            controlGroup.open()
+            groupDisplay.close()
+        )
+
+        w = window.config.controlGroup.collapsedWidth
+        h = window.config.controlGroup.collapsedHeight
+        controlGroup = new Elements.BoxElement(controlGameLoc.x+w/2,
+                                               controlGameLoc.y+h/2, w, h)
+        controlGroup.setHoverHandler(
+          () =>
+            controlGroup.close()
+            groupDisplay.open()
+        )
+        controlGroup.setDrawFunc(
+          (ctx) =>
+            winStyle = window.config.windowStyle
+            ctx.fillStyle = winStyle.fill
+            ctx.strokeStyle = winStyle.stroke
+            ctx.lineJoin = winStyle.lineJoin
+            ctx.lineWidth = winStyle.lineWidth * camera.getZoom()
+
+            w = window.config.controlGroup.collapsedWidth * camera.getZoom()
+            h = window.config.controlGroup.collapsedHeight * camera.getZoom()
+
+            loc = camera.getScreenCoordinates(controlGameLoc)
+
+            ctx.fillRect(loc.x, loc.y, w, h)
+            ctx.strokeRect(loc.x, loc.y, w, h)
+
+            ctx.font = window.config.windowStyle.defaultText.font
+            ctx.fillStyle = window.config.windowStyle.defaultText.value
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            if controlGroup.isHovered()
+              ctx.fillText("Hovered", loc.x, loc.y)
+            else
+              ctx.fillText("C", loc.x, loc.y)
+        )
+        @controlGroups.push(controlGroup)
+        gameFrame.addChild(controlGroup)
+        @_groupDisplays.push(groupDisplay)
+        frameElement.addChild(groupDisplay)
+        groupDisplay.visible = false
+
   endTurn: () ->
+    @updateControlGroups()
+
     for p in game.getPlanets()
       @unitSelection.updateSelection(p)
+
     # Reset planet button visiblility
     for b in @planetButtons
       p = b.getProperty("planet")

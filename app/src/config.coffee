@@ -14,7 +14,6 @@ root.config =
   BG_PAN_SPEED_FACTOR: 50
   DRAG_TYPE: DRAG_TYPES[1]
   displayCutoff: 0.4
-  controlGroupDist: 100
   windowStyle:
     fill: "rgba(0, 37, 255, 0.5)"
     stroke: "rgba(0, 37, 255, 1)"
@@ -58,6 +57,12 @@ root.config =
     unit:
       stroke: "rgba(255, 255, 0, 0.3)"
       lineWidth: 1
+  controlGroup:
+    distance: 300
+    collapsedWidth: 30
+    collapsedHeight: 30
+    expandedWidth: 100
+    expandedHeight: 30
   unitDisplay:
     location: {x: -250, y: -140}
     fill: "rgba(255, 255, 0, 0.5)"
