@@ -114,6 +114,8 @@ class Elements.UIElement extends Module
   # @return [Boolean] Whether or not the child was successfully removed
   #
   removeChild: (elem) ->
+    @setDirty()
+    @_clearBucket.push(elem)
     elem._parent = null
     index = @_children.indexOf(elem)
     if index != -1
@@ -126,8 +128,6 @@ class Elements.UIElement extends Module
         childBucket.splice(index)
         return true
     return false
-    @setDirty()
-    @_clearBucket.push(elem)
 
   # Destroy this element by removing references to it and its children.
   #
