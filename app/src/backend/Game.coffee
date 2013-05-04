@@ -42,6 +42,8 @@ class Game
                           Math.pow(deltaX, 2)))
       newX = seedPlanet.location().x + deltaX
       newY = seedPlanet.location().y + deltaY
+      resources = @newResources()
+      rate = @newRate()
       newPlanet = new Planet(newX, newY, @newResources(), @newRate())
       if @isGoodPlanet(newPlanet)
         @makeAdjacent(newPlanet)
@@ -103,28 +105,34 @@ class Game
   gaussian: (stdev, mean) ->
     ((Math.random() * 2 - 1) *
      (Math.random() * 2 - 1) *
+     (Math.random() * 2 - 1) *
+     (Math.random() * 2 - 1) *
      (Math.random() * 2 - 1)) * stdev + mean
 
   # Returns a new value for a planet's resources according to mean and stdev
   #
   # @return [Integer] A gaussian random amount of resources.
   newResources: ->
-    ret = @gaussian(root.config.resources.meanResources,
-                   root.config.resources.stdevResources)
+    ret = @gaussian(root.config.resources.stdevResources,
+                  root.config.resources.meanResources)
     ret = Math.floor(ret)
-    if ret < 1
-      ret = 1
+    if ret < root.config.resources.minResources
+      ret = root.config.resources.minResources
+    if ret > root.config.resources.maxResources
+      ret = root.config.resources.maxResouces
     return ret
 
   # Returns a new value for a planet's rate according to mean and stdev
   #
   # @return [Integer] A gaussian random amount of resources.
   newRate: ->
-    ret = @gaussian(root.config.resources.meanRate,
-                   root.config.resources.stdevRate)
+    ret = @gaussian(root.config.resources.stdevRate,
+                   root.config.resources.meanRate)
     ret = Math.floor(ret)
-    if ret < 1
-      ret = 1
+    if ret < root.config.resources.minRate
+      ret = root.config.resources.minRate
+    if ret > root.config.resources.maxRate
+      ret = root.config.resources.maxRate
     return ret
 
   # Returns true if the planet is on the map and not too close to others.
