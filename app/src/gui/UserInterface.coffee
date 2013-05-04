@@ -684,8 +684,9 @@ class UserInterface
         )
         groupDisplay.setMouseOutHandler(
           () =>
-            controlGroup.open()
-            groupDisplay.close()
+            if groupDisplay.visible and not controlGroup.visible
+              controlGroup.open()
+              groupDisplay.close()
         )
 
         w = window.config.controlGroup.collapsedWidth
@@ -695,8 +696,9 @@ class UserInterface
         controlGroup.setHoverHandler(
           () =>
             if not drag
-              controlGroup.close()
-              groupDisplay.open()
+              if controlGroup.visible and not groupDisplay.visible
+                controlGroup.close()
+                groupDisplay.open()
         )
         controlGroup.setDrawFunc(
           (ctx) =>
@@ -718,10 +720,7 @@ class UserInterface
             ctx.fillStyle = window.config.windowStyle.defaultText.value
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
-            if controlGroup.isHovered()
-              ctx.fillText("Hovered", loc.x, loc.y)
-            else
-              ctx.fillText("C", loc.x, loc.y)
+            ctx.fillText("C", loc.x, loc.y)
         )
         @controlGroups.push(controlGroup)
         gameFrame.addChild(controlGroup)
