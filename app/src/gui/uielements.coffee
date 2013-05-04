@@ -347,7 +347,6 @@ class Elements.UIElement extends Module
   # @param [UIElement] child
   #
   _handleDirtyChild: (child) ->
-    console.log("HandleDirtyChild called on  #{@toString()} by #{child.toString()}")
     #  and (@_transparent or @_closing)
     @_hasDirtyChildren = true
     if @clickable and not @dirty
