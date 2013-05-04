@@ -503,10 +503,11 @@ class UserInterface
         controlGroup = null # for groupDisplay's reference
 
         w = window.config.controlGroup.expandedWidth
-        h = window.config.controlGroup.expandedHeight
+        h = window.config.controlGroup.expandedHeight * groups.length +
+            window.config.windowStyle.lineWidth * (groups.length - 1)
         groupDisplay = new Elements.BoxElement(controlHudLoc.x+w/2,
                                                controlHudLoc.y+h/2,
-                                               w, h * groups.length)
+                                               w, h)
         clear = (ctx) =>
           winStyle = window.config.windowStyle
           ctx.fillStyle = winStyle.fill
@@ -517,9 +518,7 @@ class UserInterface
           w = window.config.controlGroup.expandedWidth
           h = window.config.controlGroup.expandedHeight
 
-          loc = camera.getScreenCoordinates(controlGameLoc)
-          groupDisplay.x = loc.x + w/2
-          groupDisplay.y = loc.y + h/2
+          loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
           ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
                         loc.y - winStyle.lineWidth/2 - 1,
                         w + winStyle.lineWidth + 2,
@@ -539,8 +538,9 @@ class UserInterface
             h = window.config.controlGroup.expandedHeight
 
             loc = camera.getScreenCoordinates(controlGameLoc)
-            #groupDisplay.x = loc.x + w/2
-            #groupDisplay.y = loc.y + h/2
+            #groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
+            groupDisplay.x = loc.x + w/2
+            groupDisplay.y = loc.y + h/2
 
             ctx.fillRect(loc.x, loc.y, w, h)
             ctx.strokeRect(loc.x, loc.y, w, h)
@@ -558,8 +558,9 @@ class UserInterface
                                                controlGameLoc.y+h/2, w, h)
         controlGroup.setHoverHandler(
           () =>
-            controlGroup.close()
-            groupDisplay.open()
+            if not drag
+              controlGroup.close()
+              groupDisplay.open()
         )
         controlGroup.setDrawFunc(
           (ctx) =>
