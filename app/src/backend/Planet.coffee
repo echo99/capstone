@@ -394,7 +394,7 @@ class Planet
   # @throw [Error] If construction is already under way.
   # @throw [Error] If there are not enough resources.
   build: (name) ->
-    if @_station = false
+    if @_station == false
       throw new Error("Planet has no station to build ships.")
     else if @_unitConstructing != null or @_turnsToComplete != 0
       throw new Error("Planet is already constructing something else.")

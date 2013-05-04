@@ -8,7 +8,6 @@
 #     need it
 #   - Display number of units selected locally. This will also be a button that
 #     toggles selecting all of the unit type.
-#   - Display planet resources. Turn this off for main menu.
 #   - Display control groups
 class UserInterface
   planetButtons: []
@@ -51,13 +50,44 @@ class UserInterface
     @help.visible = false
     cameraHudFrame.addChild(@help)
 
-    style = window.config.stationMenuStyle
-    loc = style.location
-    w = style.width
-    h = style.height
+    winStyle = window.config.windowStyle
+    stationStyle = window.config.stationMenuStyle
+    loc = stationStyle.location
+    w = stationStyle.width
+    h = stationStyle.height
     @stationMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
     @stationMenu.setDrawFunc(@_drawStationMenu)
-    @stationMenu.setClearFunc(@_clearMenu(window.config.stationMenuStyle))
+    @stationMenu.setClearFunc(@_clearMenu(stationStyle))
+
+    stationStyle = window.config.stationMenuStyle
+    x = stationStyle.vert1x + winStyle.lineWidth
+    y = winStyle.lineWidth / 2
+    w = (stationStyle.vert2x - winStyle.lineWidth / 2) - x
+    h = (stationStyle.height / 2 - winStyle.lineWidth / 2) - y
+    probeButton = @_getStationButton(x, y, w, h, window.config.units.probe)
+
+    x = stationStyle.vert1x + winStyle.lineWidth
+    y = stationStyle.height / 2 + winStyle.lineWidth / 2
+    w = (stationStyle.vert2x - winStyle.lineWidth / 2) - x
+    h = (stationStyle.height - winStyle.lineWidth / 2) - y
+    colonyButton = @_getStationButton(x, y, w, h, window.config.units.colonyShip)
+
+    x = stationStyle.vert2x + winStyle.lineWidth / 2
+    y = winStyle.lineWidth / 2
+    w = (stationStyle.vert3x - winStyle.lineWidth / 2) - x
+    h = (stationStyle.height / 2 - winStyle.lineWidth / 2) - y
+    attackButton = @_getStationButton(x, y, w, h, window.config.units.attackShip)
+
+    x = stationStyle.vert2x + winStyle.lineWidth / 2
+    y = stationStyle.height / 2 + winStyle.lineWidth / 2
+    w = (stationStyle.vert3x - winStyle.lineWidth / 2) - x
+    h = (stationStyle.height - winStyle.lineWidth / 2) - y
+    defenseButton = @_getStationButton(x, y, w, h, window.config.units.defenseShip)
+
+    @stationMenu.addChild(probeButton)
+    @stationMenu.addChild(colonyButton)
+    @stationMenu.addChild(attackButton)
+    @stationMenu.addChild(defenseButton)
     @stationMenu.visible = false
     frameElement.addChild(@stationMenu)
 
@@ -70,6 +100,45 @@ class UserInterface
     @outpostMenu.setClearFunc(@_clearMenu(window.config.outpostMenuStyle))
     @outpostMenu.visible = false
     frameElement.addChild(@outpostMenu)
+
+  _getStationButton: (x, y, w, h, unit) ->
+    button = new Elements.Button(x+w/2, y+h/2, w, h)
+    button.setProperty("location",
+      @stationMenu.getActualLocation(button.x, button.y))
+    button.setClickHandler(() =>
+      if @selectedPlanet.availableResources() < unit.cost
+        console.log("Not making " + unit)
+      else if @selectedPlanet.buildUnit() != null
+        console.log("Busy, not making " + unit)
+      else
+        console.log("Makeing " + unit)
+        @selectedPlanet.build(unit)
+    )
+    button.setMouseUpHandler(() =>
+      button.setDirty()
+    )
+    button.setMouseOutHandler(() =>
+      if button.isPressed()
+        button.setDirty()
+    )
+    button.setDrawFunc((ctx) =>
+      loc = button.getProperty("location")
+      if @selectedPlanet.availableResources() < unit.cost
+        ctx.strokeStyle = window.config.unitDisplay.red
+      else if @selectedPlanet.buildUnit() != null
+        ctx.strokeStyle = window.config.unitDisplay.orange
+      else
+        ctx.strokeStyle = window.config.unitDisplay.stroke
+      ctx.lineWidth = window.config.unitDisplay.lineWidth
+      ctx.lineJoin = window.config.unitDisplay.lineJoin
+      x = loc.x
+      y = loc.y
+      w = button.w
+      h = button.h
+      if button.isHovered()
+        ctx.strokeRect(x - w/2, y - h /2, w, h)
+    )
+    return button
 
   _clearMenu: (style) =>
     (ctx) =>
@@ -278,7 +347,6 @@ class UserInterface
         if @selectedPlanet == planet
           console.log("closing structure menu for " + planet.toString())
           @selectedPlanet = null
-          # TODO: close others
         else if planet.hasStation()
           console.log("opening station menu for " + planet.toString())
           @selectedPlanet = planet
@@ -339,27 +407,12 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
-      ###
-      # Draw control groups
-      for g in p.getControlGroups()
-        next = g.next()
-        nextLoc = next.location()
-        vec = {x: nextLoc.x - loc.x, y: nextLoc.y - loc.y}
-        dist = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
-        d = window.config.controlGroupDist * camera.getZoom()
-        cLoc = {x: vec.x / dist * d, y: vec.y / dist * d}
-        ctx.font = window.config.windowStyle.defaultText.font
-        ctx.fillStyle = window.config.windowStyle.defaultText.value
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        cLoc = {x: pos.x + cLoc.x, y: pos.y + cLoc.y}
-        ctx.fillText("C", cLoc.x, cLoc.y)
-      ###
+
       # Draw resources
       if @showResources
         if vis != window.config.visibility.undiscovered
           r = p.resources()
-          rate = p._rate # TODO: replace with method
+          rate = p.rate()
           if r == null
             r = "?"
             rate = "?"
@@ -387,6 +440,7 @@ class UserInterface
         else
           SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
       else if p.hasStation()
+        console.log("has station")
         if p.isBuilding()
           switch p.buildUnit()
             when window.config.units.probe
