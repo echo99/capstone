@@ -82,6 +82,8 @@ class Elements.UIElement extends Module
     @_properties = {}
     @_drawFunc = null
 
+    @_clearBucket = []
+
     @actX = @x
     @actY = @y
     @positioning = 'default'
@@ -124,6 +126,8 @@ class Elements.UIElement extends Module
         childBucket.splice(index)
         return true
     return false
+    @setDirty()
+    @_clearBucket.push(elem)
 
   # Destroy this element by removing references to it and its children.
   #
@@ -252,6 +256,10 @@ class Elements.UIElement extends Module
   #   @param [Boolean] forceDraw Force the element to be redrawn
   #
   draw: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
+    for clearedChild in @_clearBucket
+      clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
+        clearedChild._closing
+    @_clearBucket = []
     if @_closing
       @_closing = false
       @visible = false
@@ -814,6 +822,10 @@ class Elements.Frame extends Elements.UIElement
   # Draw the frame's children
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
+    for clearedChild in @_clearBucket
+      clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
+        clearedChild._closing
+    @_clearBucket = []
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
@@ -872,6 +884,10 @@ class Elements.CameraFrame extends Elements.UIElement
   # Draw the frame's children
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
+    for clearedChild in @_clearBucket
+      clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
+        clearedChild._closing
+    @_clearBucket = []
     if @_hasDirtyChildren
       for zIndex in @zIndices
         children = @_childBuckets[zIndex]
