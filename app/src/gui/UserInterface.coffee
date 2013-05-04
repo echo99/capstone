@@ -47,7 +47,7 @@ class UserInterface
     frameElement.addChild(b)
 
     @help = new Elements.MessageBox(0, 0, 300, 50,
-      "Press HOME to return")
+      "Press HOME to return", {zIndex: 10})
     @help.visible = false
     cameraHudFrame.addChild(@help)
 

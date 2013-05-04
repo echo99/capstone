@@ -40,12 +40,15 @@ class Elements.UIElement extends Module
   _startPressedOnThis: false
   _debug: false
   _closing: false
+  _transparent: true
 
   # @private @property [Number] Element ordering rank
   _zIndex: 0
 
   # @property [Boolean] Flag for if the elemnt needs to be redrawn
   dirty: true
+
+  _hasDirtyChildren: false
 
   # Create a new UI element
   #
@@ -54,13 +57,15 @@ class Elements.UIElement extends Module
   # @param [Object] options
   # @option options [Boolean] visible
   # @option options [Boolean] clickable
+  # @option options [Boolean] transparent
   # @option options [Number] zIndex
   #
   constructor: (@x, @y, options={}) ->
-    {visible, clickable, zIndex} = options
+    {visible, clickable, transparent, zIndex} = options
     @visible = visible if visible?
     @clickable = clickable if clickable?
     @_zIndex = zIndex if zIndex?
+    @_transparent = transparent if transparent?
 
     # @private @property [Array<Elements.UIElement>]
     @_children = []
@@ -217,7 +222,10 @@ class Elements.UIElement extends Module
   # Open this element
   #
   open: ->
+    # console.log("==========================")
+    # console.log(@toString() + " Opened")
     if not @visible
+      # console.log("Called setDirty()")
       @setDirty()
       @visible = true
 
@@ -235,29 +243,54 @@ class Elements.UIElement extends Module
   #   Draw the element
   #   @param [CanvasRenderingContext2D] ctx
   #
-  # @overload draw(ctx, coords, zoom)
+  # @overload draw(ctx, coords, zoom, forceDraw)
   #   Draw the element at the given coordinates and zoom
   #   @param [CanvasRenderingContext2D] ctx
   #   @param [Object] coords The coordinates to draw to
   #   @param [Number] zoom The current zoom
+  #   @param [Boolean] forceDraw Force the element to be redrawn
   #
-  draw: (ctx, coords=null, zoom=1.0) ->
+  draw: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
     if @_closing
       @_closing = false
       @visible = false
       @clear(ctx, coords, zoom)
       @setDirty()
     else if @visible
-      @dirty = false
-      if @_drawFunc
-        if coords is null
-          @_drawFunc(ctx)
-        else
-          @_drawFunc(ctx, coords, zoom)
-      # Draw all children
-      for child in @_children
-        child.draw(ctx, coords, zoom)
+      if @dirty or forceDraw
+        @dirty = false
+        @_customDraw(ctx, coords, zoom)
+        if @_drawFunc
+          if coords is null
+            @_drawFunc(ctx)
+          else
+            @_drawFunc(ctx, coords, zoom)
+        # Draw all children
+        # for child in @_children
+        #   child.draw(ctx, coords, zoom)
+        @_drawChildren(ctx, coords, zoom, forceDraw)
+      else if @_hasDirtyChildren
+        @_drawChildren(ctx, coords, zoom, forceDraw)
+        # for child in @_children
+        #   child.draw(ctx, coords, zoom, forceDraw)
 
+  # @private Draw all children of this element
+  #
+  _drawChildren: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
+    for child in @_children
+      child.draw(ctx, coords, zoom, forceDraw)
+
+  # @private @abstract Custom draw method for each element that is meant to be
+  # overridden
+  #
+  _customDraw: (ctx, coords=null, zoom=1.0) ->
+
+  # Clear this element using a clear function
+  #
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords The coordinates to draw to
+  # @param [Number] zoom The current zoom
+  #
   clear: (ctx, coords=null, zoom=1.0) ->
     # @dirty = false
     if coords is null
@@ -284,9 +317,14 @@ class Elements.UIElement extends Module
   # @param [UIElement] child
   #
   _handleDirtyChild: (child) ->
-    # console.log("HandleDirtyChild called")
+    console.log("HandleDirtyChild called on  #{@toString()} by #{child.toString()}")
+    #  and (@_transparent or @_closing)
+    @_hasDirtyChildren = true
     if @clickable and not @dirty
-      @setDirty()
+      if child._transparent or child._closing
+        @setDirty()
+      else
+        @_parent?._handleDirtyChild(this)
 
   # Call to element to check if it is clicked and executes click handlers if it
   # is
@@ -469,7 +507,7 @@ class Elements.UIElement extends Module
   #
   _onHover: ->
     @hoverHandler?()
-    @setDirty()
+    # @setDirty()
     return CursorType.DEFAULT
 
   # @private Action to perform when an element is no longer being hovered over
@@ -701,15 +739,19 @@ class Elements.Window extends Elements.BoxElement
       ctx.clearRect(@x+@cx, @y+@cy, @w, @h)
       ctx.fillRect(@x+@cx, @y+@cy, @w, @h)
       if @_animateChildren
-        super(ctx)
+        # super(ctx)
+        @_drawChildren(ctx, null, null, true)
         ctx.restore()
       else
         ctx.restore()
-        super(ctx)
+        # super(ctx)
+        @_drawChildren(ctx, null, null, true)
     else
-      super(ctx)
+      # super(ctx)
+      @_drawChildren(ctx, null, null, true)
     if @_animating
       @setDirty()
+    @dirty = false
 
 
 # Frame for holding all elements in the HUD
@@ -753,7 +795,7 @@ class Elements.Frame extends Elements.UIElement
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
-        child.draw(@ctx) if child.dirty
+        child.draw(@ctx) # if child.dirty or child._hasDirtyChildren
 
 
 # Frame for holding all elements that need to be drawn relative to the center
@@ -808,12 +850,13 @@ class Elements.CameraFrame extends Elements.UIElement
   # Draw the frame's children
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
-    for zIndex in @zIndices
-      children = @_childBuckets[zIndex]
-      for child in children
-        # if child.dirty
-        #   console.log("Drawing: " + child)
-        child.draw(@ctx) if child.dirty
+    if @_hasDirtyChildren
+      for zIndex in @zIndices
+        children = @_childBuckets[zIndex]
+        for child in children
+          # if child.dirty
+          #   console.log("Drawing: " + child)
+          child.draw(@ctx, null, null, true)
 
 
 
@@ -846,8 +889,10 @@ class Elements.GameFrame extends Elements.UIElement
       for child in children
         coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
         if @camera.onScreen(coords)
-          child.draw(@ctx, coords, @camera.getZoom())
+          child.draw(@ctx, coords, @camera.getZoom(), true)
 
+
+# A class for holding text
 class Elements.TextElement extends Elements.BoxElement
   # Create a new text element
   #
@@ -925,19 +970,20 @@ class Elements.TextElement extends Elements.BoxElement
       ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 
 
-  # Draw this message box to the canvas context
+  # @private Draw this text element to the canvas context
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   # @param [Object] coords The coordinates to draw to
   # @param [Number] zoom The current zoom
   #
-  draw: (ctx, coords = null, zoom = null) ->
-    if @_closing
-      @_closing = false
-      @visible = false
-      @clear(ctx)
-      @setDirty()
-    else if @visible
+  _customDraw: (ctx, coords = null, zoom = null) ->
+    # if @_closing
+    #   @_closing = false
+    #   @visible = false
+    #   @clear(ctx)
+    #   @setDirty()
+    # else if @visible
+    if true
       if not @_parent?.clickable
         @clear(ctx)
       if not @_checkedWrap
@@ -1148,19 +1194,20 @@ class Elements.MessageBox extends Elements.BoxElement
       ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 
 
-  # Draw this message box to the canvas context
+  # @private Draw this message box to the canvas context
   #
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   # @param [Object] coords The coordinates to draw to
   # @param [Number] zoom The current zoom
   #
-  draw: (ctx, coords = null, zoom = null) ->
-    if @_closing
-      @_closing = false
-      @visible = false
-      @clear(ctx)
-      @setDirty()
-    else if @visible
+  _customDraw: (ctx, coords = null, zoom = null) ->
+    # if @_closing
+    #   @_closing = false
+    #   @visible = false
+    #   @clear(ctx)
+    #   @setDirty()
+    # else if @visible
+    if true
       if not @_parent?.clickable
         @clear(ctx)
       if not @_checkedWrap
