@@ -84,10 +84,33 @@ class UserInterface
     h = (stationStyle.height - winStyle.lineWidth / 2) - y
     defenseButton = @_getStationButton(x, y, w, h, window.config.units.defenseShip)
 
+    x = stationStyle.cancelLoc.x
+    y = stationStyle.cancelLoc.y
+    w = stationStyle.cancelSize.w
+    h = stationStyle.cancelSize.h
+    cancelBuild = new Elements.Button(x, y, w, h)
+    cancelBuild.setProperty("location",
+      @stationMenu.getActualLocation(cancelBuild.x, cancelBuild.y))
+    cancelBuild.setClickHandler(() =>
+      console.log("canceling build")
+    )
+    cancelBuild.setDrawFunc((ctx) =>
+      loc = cancelBuild.getProperty("location")
+      if cancelBuild.isPressed()
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+
     @stationMenu.addChild(probeButton)
     @stationMenu.addChild(colonyButton)
     @stationMenu.addChild(attackButton)
     @stationMenu.addChild(defenseButton)
+    @stationMenu.addChild(cancelBuild)
+    @stationMenu.setProperty("cancelButton", cancelBuild)
+    @stationMenu.setProperty("cancelOpen", false)
     @stationMenu.visible = false
     frameElement.addChild(@stationMenu)
 
@@ -265,6 +288,15 @@ class UserInterface
       text += " remaining"
       ctx.fillText(text, x, y+20)
 
+    if @selectedPlanet.buildUnit()
+      if not @stationMenu.getProperty("cancelOpen")
+        @stationMenu.getProperty("cancelButton").open()
+        @stationMenu.setProperty("cancelOpen", true)
+    else
+      if @stationMenu.getProperty("cancelOpen")
+        @stationMenu.getProperty("cancelButton").close()
+        @stationMenu.setProperty("cancelOpen", false)
+
   _drawUnitBlock: (ctx, title, loc, unit, unitConfig, sprite) =>
     x = loc.x + unitConfig.labelLoc.x
     y = loc.y + unitConfig.labelLoc.y
@@ -440,7 +472,6 @@ class UserInterface
         else
           SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
       else if p.hasStation()
-        console.log("has station")
         if p.isBuilding()
           switch p.buildUnit()
             when window.config.units.probe
@@ -659,3 +690,8 @@ class UserInterface
         b.visible = true
     if @stationMenu
       @stationMenu.setDirty()
+
+  endGame: () ->
+    @stationMenu.close()
+    @outpostMenu.close()
+    @selectedPlanet = null

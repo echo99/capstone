@@ -96,6 +96,8 @@ root.config =
     titleLoc: {x: 10, y: 10}
     availableLoc: {x: 10, y: 45}
     buildingLoc: {x: 10, y: 80}
+    cancelLoc: {x: 60, y: 125}
+    cancelSize: {w: 60, h: 20}
     probe:
       labelLoc: {x: 220, y: 10}
       imgLoc: {x: 220+32/2, y: 10+20+32/2}
@@ -224,7 +226,6 @@ root.config =
           y: 85
           w: 101
           h: 20
-
   units:
     probe:
       cost: 1

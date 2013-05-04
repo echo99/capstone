@@ -101,16 +101,6 @@ class Menu extends Mission
     cancelButton.setClickHandler(() =>
       menuBox.close()
     )
-    cancelButton.setMouseUpHandler(() =>
-      cancelButton.setDirty()
-    )
-    cancelButton.setMouseDownHandler(() =>
-      cancelButton.setDirty()
-    )
-    cancelButton.setMouseOutHandler(() =>
-      if startButton.isPressed()
-        cancelButton.setDirty()
-    )
     cancelButton.setDrawFunc((ctx) =>
       loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
       if cancelButton.isPressed()
@@ -123,16 +113,6 @@ class Menu extends Mission
 
     startButton = new Elements.Button(start.x, start.y, start.w, start.h)
     startButton.setClickHandler(onStart)
-    startButton.setMouseUpHandler(() =>
-      startButton.setDirty()
-    )
-    startButton.setMouseDownHandler(() =>
-      startButton.setDirty()
-    )
-    startButton.setMouseOutHandler(() =>
-      if startButton.isPressed()
-        startButton.setDirty()
-    )
     startButton.setDrawFunc((ctx) =>
       loc = menuBox.getActualLocation(startButton.x, startButton.y)
       if startButton.isPressed()

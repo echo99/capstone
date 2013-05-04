@@ -43,4 +43,5 @@ class Extermination extends Mission
   onEndTurn: ->
     # TODO: check for end game
     if @home.numShips(window.config.units.probe) > 10
+      UI.endGame()
       newMission(Menu)
