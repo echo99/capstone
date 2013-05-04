@@ -305,12 +305,15 @@ main = ->
     CurrentMission.onMouseMove(x, y)
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
+      # Nothing on HUD frame is being hovered over
       pointer = cameraHudFrame.mouseMove(x, y)
       if pointer is null
         pointer = gameFrame.mouseMove(x, y)
       else
         gameFrame.mouseOut()
     else
+      # Something on HUD frame is being hovered over, mouse out of other frames
+      gameFrame.mouseOut()
       cameraHudFrame.mouseOut()
     if pointer isnt null
       # hudCanvas.style.cursor = pointer
@@ -369,6 +372,9 @@ main = ->
 
   # hudCanvas.addEventListener('mouseout', (e) ->
   surface.addEventListener('mouseout', (e) ->
+    # frameElement.mouseOut()
+    # cameraHudFrame.mouseOut()
+    # gameFrame.mouseOut()
     drag = false)
 
   mouseWheelHandler = (e) ->

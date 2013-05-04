@@ -417,8 +417,9 @@ class Elements.UIElement extends Module
               pointerType = pointer
               hoveredChild = true
     else if @_hovering and @visible
-      @_hovering = false
-      @_onMouseOut()
+      # @_hovering = false
+      # @_onMouseOut()
+      @mouseOut()
     return pointerType
 
   # Call when the mouse leaves the element (for times when the event can't be
