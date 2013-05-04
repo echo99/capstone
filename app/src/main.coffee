@@ -172,6 +172,9 @@ main = ->
   win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
   frameElement.addChild(win)
   frameElement.drawChildren()
+  frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
+    "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
+    font: '15px sans-serif'}))
   console.log(frameElement.toString())
 
   msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")

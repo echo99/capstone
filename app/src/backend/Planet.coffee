@@ -67,6 +67,13 @@ class Planet
   resources: ->
     return @_lastSeenResources
 
+  # Returns the resource collection rate of the planet.
+  #
+  # @return [Integer] The planet's rate.
+  #
+  rate: ->
+    return @_rate
+
   # Returns the amount of usable resources on the planet's station,
   # or zero if no station exists.
   #

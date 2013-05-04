@@ -848,6 +848,165 @@ class Elements.GameFrame extends Elements.UIElement
         if @camera.onScreen(coords)
           child.draw(@ctx, coords, @camera.getZoom())
 
+class Elements.TextElement extends Elements.BoxElement
+  # Create a new text element
+  #
+  # @param [Number] x The x-coordinate of the center of the box
+  # @param [Number] y The y-coordinate of the center of the box
+  # @param [Number] w The width of the box
+  # @param [Number] h The height of the box
+  # @param [String] message The message to display in the box
+  # @param [Object] options
+  #   Extra options, see {Elements.UIElement#constructor} for more options
+  # @option options [String] textAlign
+  #   Horizontal alignment of the text: `'left'`, `'center'`, `'right'`.
+  #   Default: `'center'`
+  # @option options [String] vAlign
+  #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`.
+  #   Default: `'middle'`
+  # @option options [String] font Set the message font
+  # @option options [String] fontColor Set the message color
+  #
+  constructor: (@x, @y, @w, @h, @message, options={}) ->
+    {textAlign, vAlign, font, fontColor} = options
+    @closeBtn = if closeBtn? then closeBtn else null
+    @textAlign = if textAlign? then textAlign else 'center'
+    @vAlign = if vAlign? then vAlign else 'middle'
+    @font = if font? then font else config.windowStyle.msgBoxText.font
+    @fontColor = if fontColor? then fontColor else
+      config.windowStyle.msgBoxText.color
+    super(@x, @y, @w, @h, options)
+    @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
+    @lines = []
+    @_checkedWrap = false
+
+
+  # @private Wrap the text for this message box so the message will fit in the box
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  #
+  _wrapText: (ctx) ->
+    # ctx.font = config.windowStyle.msgBoxText.font
+    ctx.font = @font
+    textWidth = ctx.measureText(@message).width
+    # console.log("Width of #{@message} : #{textWidth}")
+    allowedWidth = @w - (config.windowStyle.lineWidth * 4)
+    lines = @message.split("\n")
+    # console.log(lines)
+    for line in lines
+      if textWidth > allowedWidth
+        words = line.split(" ")
+        # console.log("Words: #{words}")
+        curline = null
+        lastTried = null
+        for word in words
+          lastTried = curline
+          if curline is null
+            curline = word
+          else
+            curline += ' ' + word
+          if ctx.measureText(curline).width > allowedWidth
+            if lastTried isnt null
+              @lines.push(lastTried)
+              curline = word
+            else
+              @lines.push(curline)
+              curline = null
+        if curline isnt null
+          @lines.push(curline)
+    # console.log(@lines)
+    @_checkedWrap = true
+
+  # @see Elements.UIElement#clear
+  clear: (ctx) ->
+    if not @_clearFunc?
+      lw = Math.ceil(config.windowStyle.lineWidth / 2)
+      lw2 = lw + lw
+      ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
+
+
+  # Draw this message box to the canvas context
+  #
+  # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
+  # @param [Object] coords The coordinates to draw to
+  # @param [Number] zoom The current zoom
+  #
+  draw: (ctx, coords = null, zoom = null) ->
+    if @_closing
+      @_closing = false
+      @visible = false
+      @clear(ctx)
+      @setDirty()
+    else if @visible
+      if not @_parent?.clickable
+        @clear(ctx)
+      if not @_checkedWrap
+        @_wrapText(ctx)
+      if coords
+        x = coords.x
+        y = coords.y
+      else
+        # x = @x
+        # y = @y
+        x = @actX
+        y = @actY
+      # if zoom
+      #   cx = @cx * zoom
+      #   cy = @cy * zoom
+      #   w = @w * zoom
+      #   h = @h * zoom
+      # else
+      if zoom
+        ctx.save()
+        ctx.translate(x, y)
+        # x = @x
+        # y = @y
+        x = 0
+        y = 0
+        ctx.scale(zoom, zoom)
+      cx = @cx
+      cy = @cy
+      w = @w
+      h = @h
+      ctx.font = @font
+      ctx.fillStyle = @fontColor
+      ctx.textAlign = @textAlign
+      ctx.textBaseline = @vAlign
+
+      lineWidth = config.windowStyle.lineWidth * 2
+      switch @textAlign
+        when 'left'
+          tx = x + cx + lineWidth
+        when 'right'
+          tx = x - cx - lineWidth
+        when 'center'
+          tx = x
+
+      yOffset = (@lines.length-1) * @lineSpacing
+      switch @vAlign
+        when 'top'
+          ty = y + cy + lineWidth
+          yTmp = ty
+        when 'middle'
+          ty = y
+          yTmp = ty - yOffset
+        when 'bottom'
+          ty = y - cy - lineWidth
+          yTmp = ty - yOffset*2
+
+      if @lines.length > 0
+        for line in @lines
+          # ctx.fillText(line, x, yTmp)
+          ctx.fillText(line, tx, yTmp)
+          yTmp += config.windowStyle.msgBoxText.lineWidth
+      else
+        # ctx.fillText(@message, x, y)
+        ctx.fillText(@message, tx, ty)
+
+      if zoom
+        ctx.restore()
+
+      super(ctx, coords, zoom)
 
 # Message box class for displaying messages in the user interface
 #
@@ -873,14 +1032,19 @@ class Elements.MessageBox extends Elements.BoxElement
   # @option options [String] vAlign
   #   Vertical alignment of the text: `'top'`, `'middle'`, `'bottom'`.
   #   Default: `'middle'`
+  # @option options [String] font Set the message font
+  # @option options [String] fontColor Set the message color
   #
   constructor: (@x, @y, @w, @h, @message, options={}) ->
     # @closeBtn=null, @textAlign='center',
     #   @vAlign='middle'
-    {closeBtn, textAlign, vAlign} = options
+    {closeBtn, textAlign, vAlign, font, fontColor} = options
     @closeBtn = if closeBtn? then closeBtn else null
     @textAlign = if textAlign? then textAlign else 'center'
     @vAlign = if vAlign? then vAlign else 'middle'
+    @font = if font? then font else config.windowStyle.msgBoxText.font
+    @fontColor = if fontColor? then fontColor else
+      config.windowStyle.msgBoxText.color
     super(@x, @y, @w, @h, options)
 
     if @closeBtn?
@@ -908,7 +1072,8 @@ class Elements.MessageBox extends Elements.BoxElement
   # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
   #
   _wrapText: (ctx) ->
-    ctx.font = config.windowStyle.msgBoxText.font
+    # ctx.font = config.windowStyle.msgBoxText.font
+    ctx.font = @font
     textWidth = ctx.measureText(@message).width
     # console.log("Width of #{@message} : #{textWidth}")
     allowedWidth = @w - (config.windowStyle.lineWidth * 4)
@@ -1033,8 +1198,10 @@ class Elements.MessageBox extends Elements.BoxElement
       # ctx.fillRect(@x, @y, @w, @h)
       ctx.strokeRect(x+cx, y+cy, w, h)
       ctx.fillRect(x+cx, y+cy, w, h)
-      ctx.font = config.windowStyle.msgBoxText.font
-      ctx.fillStyle = config.windowStyle.msgBoxText.color
+      # ctx.font = config.windowStyle.msgBoxText.font
+      ctx.font = @font
+      # ctx.fillStyle = config.windowStyle.msgBoxText.color
+      ctx.fillStyle = @fontColor
       ctx.textAlign = @textAlign
       ctx.textBaseline = @vAlign
       # cx = Math.round(@w/2 + @x)

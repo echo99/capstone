@@ -266,8 +266,12 @@ root.config =
     homePlanetResources: 40
     homePlanetRate: 2
     meanResources: 20
-    stdevResource: 5
+    stdevResources: 40
+    maxResources: 80
+    minResources: 5
     meanRate: 1
-    stdevRate: .5
+    stdevRate: 4
+    maxRate: 5
+    minRate: 1
 
 config = root.config
