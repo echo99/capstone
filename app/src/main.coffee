@@ -13,6 +13,13 @@
 IMAGE_LOADED = false
 DOM_LOADED = false
 
+BROWSER = BrowserDetect.browser
+Browser =
+  CHROME: 'Chrome'
+  FIREFOX: 'Firefox'
+  IE: 'Explorer'
+
+
 TESTING = window.TESTING?
 # console.log("Testing flag: " + TESTING)
 
@@ -121,7 +128,7 @@ updateCanvases = (frame, canvases...) ->
   for canvas in canvases
     canvas.width = frameWidth
     canvas.height = frameHeight
-  camera.setSize(window.innerWidth, window.innerHeight)
+  camera.setSize(frameWidth, frameHeight)
 
 # The main method
 main = ->

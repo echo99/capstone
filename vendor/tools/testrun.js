@@ -10,6 +10,7 @@ CanvasRenderingContext2D.prototype.measureText = function() {
 CanvasRenderingContext2D.prototype.fillText = function() {};
 CanvasRenderingContext2D.prototype.canvas = {width: 2000, height: 1500};
 window.TESTING = true;
+load('../../public/vendor.js');
 load('../../public/app.js');
 // console.log("Hii!");
 // Envjs.afterScriptLoad = function() {
