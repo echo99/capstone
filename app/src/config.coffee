@@ -120,8 +120,16 @@ root.config =
       turnsLoc: {x: 332+45, y: 10+20+20+70}
   outpostMenuStyle:
     location: {x: 120, y: 5}
-    width: 300
-    height: 140
+    width: 200
+    height: 120
+    titleLoc: {x: 10, y: 10}
+    availableLoc: {x: 10, y: 45}
+    horiz1y: 70
+    upgrade:
+      labelLoc: {x: 10, y: 70+10}
+      costLoc: {x: 10, y: 70+10+20}
+      turnsLoc: {x: 10 + 60, y: 70+10+20}
+      imgLoc: {x: 135, y: 70+10+48}
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])

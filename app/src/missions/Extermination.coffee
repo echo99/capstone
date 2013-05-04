@@ -16,6 +16,7 @@ class Extermination extends Mission
 
     # Test stuff
     @home.getAdjacentPlanets()[0]._outpost = true
+    @home.getAdjacentPlanets()[0]._availableResources = 30
     @home._unitConstructing = window.config.units.attackShip
     @home._turnsToComplete = window.config.units.attackShip.turns
     # End test stuff

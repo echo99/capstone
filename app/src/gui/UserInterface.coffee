@@ -114,13 +114,20 @@ class UserInterface
     @stationMenu.visible = false
     frameElement.addChild(@stationMenu)
 
-    style = window.config.outpostMenuStyle
-    loc = style.location
-    w = style.width
-    h = style.height
+    outpostStyle = window.config.outpostMenuStyle
+    loc = outpostStyle.location
+    w = outpostStyle.width
+    h = outpostStyle.height
     @outpostMenu = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
     @outpostMenu.setDrawFunc(@_drawOutpostMenu)
-    @outpostMenu.setClearFunc(@_clearMenu(window.config.outpostMenuStyle))
+    @outpostMenu.setClearFunc(@_clearMenu(outpostStyle))
+
+    x = winStyle.lineWidth / 2
+    y = outpostStyle.horiz1y + winStyle.lineWidth / 2
+    w = (outpostStyle.width - winStyle.lineWidth / 2) - x
+    h = (outpostStyle.height - winStyle.lineWidth / 2) - y
+    stationButton = @_getStationButton(x, y, w, h, window.config.structures.station)
+    @outpostMenu.addChild(stationButton)
     @outpostMenu.visible = false
     frameElement.addChild(@outpostMenu)
 
@@ -136,13 +143,6 @@ class UserInterface
       else
         console.log("Makeing " + unit)
         @selectedPlanet.build(unit)
-    )
-    button.setMouseUpHandler(() =>
-      button.setDirty()
-    )
-    button.setMouseOutHandler(() =>
-      if button.isPressed()
-        button.setDirty()
     )
     button.setDrawFunc((ctx) =>
       loc = button.getProperty("location")
@@ -334,6 +334,63 @@ class UserInterface
     # Draw frame
     ctx.strokeRect(loc.x, loc.y, w, h)
 
+    # Draw dividers
+    ctx.beginPath()
+    ctx.moveTo(loc.x, loc.y + outpostStyle.horiz1y)
+    ctx.lineTo(loc.x + w, loc.y + outpostStyle.horiz1y)
+    ctx.stroke()
+
+    # Draw title block
+    ctx.font = winStyle.titleText.font
+    ctx.fillStyle = winStyle.titleText.color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+    x = loc.x+outpostStyle.titleLoc.x
+    y = loc.y+outpostStyle.titleLoc.y
+    ctx.fillText("Outpost", x, y)
+
+    ctx.strokeStyle = winStyle.titleText.color
+    ctx.lineWidth = winStyle.titleText.underlineWidth
+    ctx.beginPath()
+    ctx.moveTo(x, y + winStyle.titleText.height)
+    ctx.lineTo(x + ctx.measureText("Outpost").width, y + winStyle.titleText.height)
+    ctx.stroke()
+
+    ctx.font = winStyle.defaultText.font
+    ctx.fillStyle = winStyle.defaultText.color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+    x = loc.x + outpostStyle.availableLoc.x
+    y = loc.y + outpostStyle.availableLoc.y
+    ctx.fillText("Resources avaliable:", x, y)
+
+    station = window.config.structures.station
+    x = loc.x + outpostStyle.upgrade.labelLoc.x
+    y = loc.y + outpostStyle.upgrade.labelLoc.y
+    ctx.fillText("Upgrade to Station", x, y)
+    if @selectedPlanet.availableResources() < station.cost
+      ctx.fillStyle = window.config.windowStyle.defaultText.red
+    x = loc.x + outpostStyle.upgrade.costLoc.x
+    y = loc.y + outpostStyle.upgrade.costLoc.y
+    ctx.fillText("Cost: " + station.cost, x, y)
+    if @selectedPlanet.availableResources() < station.cost
+      ctx.fillStyle = window.config.windowStyle.defaultText.color
+    x = loc.x + outpostStyle.upgrade.turnsLoc.x
+    y = loc.y + outpostStyle.upgrade.turnsLoc.y
+    ctx.fillText("Turns: " + station.turns, x, y)
+    x = loc.x + outpostStyle.upgrade.imgLoc.x
+    y = loc.y + outpostStyle.upgrade.imgLoc.y
+    SHEET.drawSprite(window.config.spriteNames.STATION_NOT_CONSTRUCTING, x, y,
+                     ctx, false, 0.38)
+
+    # Draw variables
+    ctx.fillStyle = winStyle.defaultText.value
+    resources = @selectedPlanet.availableResources()
+    x = loc.x + outpostStyle.availableLoc.x +
+        ctx.measureText("Resources avaliable:").width + 5
+    y = loc.y + outpostStyle.availableLoc.y
+    ctx.fillText(resources, x, y)
+
   initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
     @planetButtons = []
     for p in game.getPlanets()
@@ -460,8 +517,8 @@ class UserInterface
           tRes = "#{r}"
           tRat = "#{rate}"
           if camera.getZoom() > window.config.displayCutoff
-            tRes = "Resources: " + tRes
-            tRat = "Rate: " + tRat
+            tRes = "Resources remaining: " + tRes
+            tRat = "Collection rate: " + tRat
           ctx.fillText(tRes, pos.x+offset, pos.y)
           ctx.fillText(tRat, pos.x+offset, pos.y+20)
 
