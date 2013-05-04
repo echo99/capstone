@@ -13,6 +13,9 @@
 IMAGE_LOADED = false
 DOM_LOADED = false
 
+TESTING = window.TESTING?
+# console.log("Testing flag: " + TESTING)
+
 manifest = [
     src: 'assets/audio/empty_space_stage1.ogg'
     id: 'bgmusic1'
@@ -384,4 +387,7 @@ main = ->
     # Don't forget to update the animation
     AnimatedSprite.drawCounter++
 
-  setInterval draw, 30
+  if TESTING
+    draw()
+  else
+    setInterval draw, 30
