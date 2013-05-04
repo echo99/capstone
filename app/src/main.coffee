@@ -76,6 +76,8 @@ gameFrame = null
 
 CurrentMission = null
 
+drag = false
+
 newMission = (mission) ->
   CurrentMission.destroy()
   UI.destroy()
