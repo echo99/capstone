@@ -301,6 +301,8 @@ class Elements.UIElement extends Module
     {x, y} = @getActualLocation(newX, newY)
     @actX = x
     @actY = y
+    @x = newX
+    @y = newY
     for child in @_children
       child.setActualLocation(this)
 
