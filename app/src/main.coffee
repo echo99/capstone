@@ -13,6 +13,9 @@
 IMAGE_LOADED = false
 DOM_LOADED = false
 
+TESTING = window.TESTING?
+# console.log("Testing flag: " + TESTING)
+
 manifest = [
     src: 'assets/audio/empty_space_stage1.ogg'
     id: 'bgmusic1'
@@ -167,7 +170,7 @@ main = ->
   #   "This message is top right aligned", 'right', 'top'))
   # frameElement.addChild(new Elements.MessageBox(750, 350, 280, 100,
   #   "This message is bottom left aligned", 'left', 'bottom'))
-  win = new Elements.Window(100, 200, 100, 100)
+  win = new Elements.Window(60, 300, 100, 100)
   win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
   win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
   frameElement.addChild(win)
@@ -384,4 +387,7 @@ main = ->
     # Don't forget to update the animation
     AnimatedSprite.drawCounter++
 
-  setInterval draw, 30
+  if TESTING
+    draw()
+  else
+    setInterval draw, 30

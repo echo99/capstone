@@ -108,7 +108,8 @@ class Menu extends Mission
       cancelButton.setDirty()
     )
     cancelButton.setMouseOutHandler(() =>
-      cancelButton.setDirty()
+      if startButton.isPressed()
+        cancelButton.setDirty()
     )
     cancelButton.setDrawFunc((ctx) =>
       loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
@@ -129,7 +130,8 @@ class Menu extends Mission
       startButton.setDirty()
     )
     startButton.setMouseOutHandler(() =>
-      startButton.setDirty()
+      if startButton.isPressed()
+        startButton.setDirty()
     )
     startButton.setDrawFunc((ctx) =>
       loc = menuBox.getActualLocation(startButton.x, startButton.y)

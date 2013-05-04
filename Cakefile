@@ -37,6 +37,8 @@ SRC_DIR = "app#{SLASH}src"
 VENDOR_DIR = "vendor#{SLASH}scripts"
 NODE_DIR = ".#{SLASH}node_modules"
 NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
+RHINO_DIR = "vendor#{SLASH}tools"
+HOME_FROM_RHINO = "..#{SLASH}.."
 # if process.platform == 'win32'
 #   APP_JS = 'public\\app.js'
 #   VENDOR_JS = 'public\\vendor.js'
@@ -206,13 +208,24 @@ notify = (message, msgLvl) ->
       spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
         message]
 
+#
+jsSanityCheck = (options, callback) ->
+  process.chdir(RHINO_DIR)
+  options.verbose ?= 'verbose' of options
+  exec 'java -jar js.jar -opt -1 testrun.js', (err, stdout, stderr) ->
+    console.log(stdout) if stdout and options.verbose
+    console.error(stderr.red) if stderr
+    process.chdir(HOME_FROM_RHINO)
+    if err
+      callback(false)
+    else
+      callback(true)
 
 ###############################################################################
 # Options
 
 option '-v', '--verbose', 'Print out verbose output'
 option '-n', '--no-doc', 'Don\'t document the source files when building'
-
 
 ###############################################################################
 # Tasks
@@ -244,8 +257,15 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
                 # notify("Build successful!", MessageLevel.INFO) if WATCHING
                 console.log('Build successful!'.green)
                 # console.log()
-              invoke 'lint'
-              invoke 'doc' if not options['no-doc']
+              console.log('Doing test run on compiled script...'.yellow)
+              jsSanityCheck options, (passed) ->
+                if passed
+                  console.log('Test passed!'.green)
+                  invoke 'lint'
+                  invoke 'doc' if not options['no-doc']
+                else
+                  notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
+                  console.error('Test run failed!'.red)
         else
           invoke 'lint'
         BUILDING = false
