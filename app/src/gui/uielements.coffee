@@ -41,6 +41,7 @@ class Elements.UIElement extends Module
   _debug: false
   _closing: false
   _transparent: true
+  _moving: false
 
   # @private @property [Number] Element ordering rank
   _zIndex: 0
@@ -258,6 +259,9 @@ class Elements.UIElement extends Module
       @setDirty()
     else if @visible
       if @dirty or forceDraw
+        if @_moving
+          @clear(ctx, coords, zoom)
+          @_moving = false
         @dirty = false
         @_customDraw(ctx, coords, zoom)
         if @_drawFunc
@@ -292,7 +296,7 @@ class Elements.UIElement extends Module
   #
   moveTo: (newX, newY) ->
     if @visible
-      @clear()
+      @_moving = true
       @setDirty()
     {x, y} = @getActualLocation(newX, newY)
     @actX = x
