@@ -143,17 +143,20 @@ class UserInterface
     y = colonyStyle.horiz1y + winStyle.lineWidth / 2
     w = (colonyStyle.width - winStyle.lineWidth / 2) - x
     h = (colonyStyle.height - winStyle.lineWidth / 2) - y
-    outpostButton = @_getStationButton(x, y, w, h, window.config.structures.outpost)
+    outpostButton = @_getStationButton(x, y, w, h, window.config.structures.outpost,
+                                       true)
     @colonyMenu.addChild(outpostButton)
     @colonyMenu.visible = false
     frameElement.addChild(@colonyMenu)
 
-  _getStationButton: (x, y, w, h, unit) ->
+  _getStationButton: (x, y, w, h, unit, probes=false) ->
     button = new Elements.Button(x+w/2, y+h/2, w, h)
     button.setProperty("location",
       @stationMenu.getActualLocation(button.x, button.y))
     button.setClickHandler(() =>
-      if @selectedPlanet.availableResources() < unit.cost
+      if (probes and
+          @selectedPlanet.numShips(window.config.units.probe) < unit.cost) or
+          (not probes and @selectedPlanet.availableResources() < unit.cost)
         console.log("Not making " + unit)
       else if @selectedPlanet.buildUnit() != null
         console.log("Busy, not making " + unit)
@@ -163,7 +166,9 @@ class UserInterface
     )
     button.setDrawFunc((ctx) =>
       loc = button.getProperty("location")
-      if @selectedPlanet.availableResources() < unit.cost
+      if (probes and
+          @selectedPlanet.numShips(window.config.units.probe) < unit.cost) or
+          (not probes and @selectedPlanet.availableResources() < unit.cost)
         ctx.strokeStyle = window.config.unitDisplay.red
       else if @selectedPlanet.buildUnit() != null
         ctx.strokeStyle = window.config.unitDisplay.orange
@@ -381,6 +386,7 @@ class UserInterface
     y = loc.y + outpostStyle.availableLoc.y
     ctx.fillText("Resources avaliable:", x, y)
 
+    # Draw upgrade button
     station = window.config.structures.station
     x = loc.x + outpostStyle.upgrade.labelLoc.x
     y = loc.y + outpostStyle.upgrade.labelLoc.y
@@ -432,6 +438,63 @@ class UserInterface
     ctx.moveTo(loc.x, loc.y + colonyStyle.horiz1y)
     ctx.lineTo(loc.x + w, loc.y + colonyStyle.horiz1y)
     ctx.stroke()
+
+    # Draw title block
+    ctx.font = winStyle.titleText.font
+    ctx.fillStyle = winStyle.titleText.color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+    x = loc.x + colonyStyle.titleLoc.x
+    y = loc.y + colonyStyle.titleLoc.y
+    ctx.fillText("Colony Ship", x, y)
+
+    ctx.strokeStyle = winStyle.titleText.color
+    ctx.lineWidth = winStyle.titleText.underlineWidth
+    ctx.beginPath()
+    ctx.moveTo(x, y + winStyle.titleText.height)
+    ctx.lineTo(x + ctx.measureText("Colony Ship").width,
+               y + winStyle.titleText.height)
+    ctx.stroke()
+
+    ctx.font = winStyle.defaultText.font
+    ctx.fillStyle = winStyle.defaultText.color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+    x = loc.x + colonyStyle.availableLoc.x
+    y = loc.y + colonyStyle.availableLoc.y
+    ctx.fillText("Probes avaliable:", x, y)
+
+    probes = @selectedPlanet.numShips(window.config.units.probe)
+    # Draw upgrade button
+    outpost = window.config.structures.outpost
+    x = loc.x + colonyStyle.upgrade.labelLoc.x
+    y = loc.y + colonyStyle.upgrade.labelLoc.y
+    ctx.fillText("Convert to outpost", x, y)
+    if probes < outpost.cost
+      ctx.fillStyle = window.config.windowStyle.defaultText.red
+    x = loc.x + colonyStyle.upgrade.costLoc.x
+    y = loc.y + colonyStyle.upgrade.costLoc.y
+    cost = "Cost: " + outpost.cost + " probe"
+    if outpost.cost > 1
+      cost += "s"
+    ctx.fillText(cost, x, y)
+
+    ctx.fillStyle = window.config.windowStyle.defaultText.color
+    x = loc.x + colonyStyle.upgrade.turnsLoc.x
+    y = loc.y + colonyStyle.upgrade.turnsLoc.y
+    ctx.fillText("Turns: " + outpost.turns, x, y)
+    x = loc.x + colonyStyle.upgrade.imgLoc.x
+    y = loc.y + colonyStyle.upgrade.imgLoc.y
+    SHEET.drawSprite(window.config.spriteNames.OUTPOST_NOT_GATHERING, x, y,
+                     ctx, false, 0.5)
+
+    # Draw variables
+    ctx.fillStyle = winStyle.defaultText.value
+    x = loc.x + colonyStyle.availableLoc.x +
+        ctx.measureText("Probes avaliable:").width + 5
+    y = loc.y + colonyStyle.availableLoc.y
+    ctx.fillText(probes, x, y)
+
 
   initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
     @planetButtons = []
@@ -651,7 +714,6 @@ class UserInterface
       @outpostMenu.close()
       @colonyMenu.close()
       @selectedPlanet = null
-
 
   # The UI expects this to be called when the mouse moves
   #

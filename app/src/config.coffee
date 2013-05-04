@@ -140,8 +140,8 @@ root.config =
     upgrade:
       labelLoc: {x: 10, y: 70+10}
       costLoc: {x: 10, y: 70+10+20}
-      turnsLoc: {x: 10 + 60, y: 70+10+20}
-      imgLoc: {x: 135, y: 70+10+48}
+      turnsLoc: {x: 10 + 90, y: 70+10+20}
+      imgLoc: {x: 170, y: 70+10+40}
   planetRadius: 64
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
@@ -272,8 +272,8 @@ root.config =
       defense: 0
   structures:
     outpost:
-      cost: 0
-      turns: 0
+      cost: 1
+      turns: 1
       defense: .1
     station:
       cost: 10
