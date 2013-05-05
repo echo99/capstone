@@ -16,7 +16,7 @@ class UserInterface
   lastMousePos: {x: 0, y: 0}
   unitSelection: null
   switchedMenus: false
-  hoveredGroup: false
+  hoveredGroup: null
 
   # Creates a new UserInterface
   constructor: () ->
@@ -588,6 +588,16 @@ class UserInterface
           ctx.lineTo(nPos.x, nPos.y)
           ctx.stroke()
 
+    if @hoveredGroup != null
+      tooltipCtx.textAlign = "left"
+      tooltipCtx.font = window.config.toolTipStyle.font
+      tooltipCtx.fillStyle = window.config.toolTipStyle.color
+      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+      tooltipCtx.fillText("Cancel fleet", x, y)
+      console.log("route: " + @hoveredGroup)
+      @_drawRoute(ctx, @hoveredGroup)
+
     lost = true
     for p in game.getPlanets()
       loc = p.location()
@@ -704,13 +714,6 @@ class UserInterface
         ctx.beginPath()
         ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
         ctx.stroke()
-    else if @hoveredGroup
-      ctx.textAlign = "left"
-      ctx.font = window.config.toolTipStyle.font
-      ctx.fillStyle = window.config.toolTipStyle.color
-      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
-      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
-      ctx.fillText("Cancel fleet", x, y)
 
     if @switchedMenus
       @stationMenu.setDirty()
@@ -722,6 +725,24 @@ class UserInterface
       @outpostMenu.close()
       @colonyMenu.close()
       @selectedPlanet = null
+
+  _drawRoute: (ctx, route) ->
+    start = camera.getScreenCoordinates(route[0].location())
+    finish = camera.getScreenCoordinates(route[route.length - 1].location())
+    ctx.strokeStyle = window.config.controlGroup.pathColor
+    ctx.lineWidth = window.config.controlGroup.pathWidth
+    ctx.beginPath()
+    ctx.moveTo(start.x, start.y)
+    for p in route
+      pos = camera.getScreenCoordinates(p.location())
+      ctx.lineTo(pos.x, pos.y)
+    ctx.stroke()
+
+    r = (window.config.planetRadius + window.config.controlGroup.finishRadius) *
+        camera.getZoom()
+    ctx.beginPath()
+    ctx.arc(finish.x, finish.y, r, 0, 2*Math.PI)
+    ctx.stroke()
 
   # The UI expects this to be called when the mouse moves
   #
@@ -842,8 +863,8 @@ class UserInterface
     button.setClickHandler(() =>
       console.log('click')
     )
-    button.setHoverHandler(() => @hoveredGroup = true)
-    button.setMouseOutHandler(() => @hoveredGroup = false)
+    button.setHoverHandler(() => @hoveredGroup = group.route())
+    button.setMouseOutHandler(() => @hoveredGroup = null)
     button.setDrawFunc((ctx) =>
       center =
         x: groupDisplay.x - groupDisplay.w / 2 + button.x
@@ -962,6 +983,8 @@ class UserInterface
       @outpostMenu.setDirty()
     if @colonyMenu
       @colonyMenu.setDirty()
+
+    @hoveredGroup = null
 
   endGame: () ->
     @stationMenu.close()

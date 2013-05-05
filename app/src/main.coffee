@@ -84,6 +84,7 @@ gameFrame = null
 CurrentMission = null
 
 tooltipCanvas = null
+tooltipCtx = null
 
 drag = false
 
@@ -153,6 +154,7 @@ main = ->
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
+  tooltipCtx = tooltipCanvas.getContext('2d')
 
   # console.log(ctx.font)
   # ctx.setFont({family: 'Arial'})
@@ -399,6 +401,7 @@ main = ->
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
+    tooltipCtx.clearRect(0, 0, camera.width, camera.height)
     UI.draw(ctx, hudCtx)
     CurrentMission.draw(ctx, hudCtx)
     cameraHudFrame.drawChildren()

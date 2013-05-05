@@ -63,7 +63,7 @@ root.config =
     collapsedWidth: 55
     collapsedHeight: 30
     expandedWidth: 80
-    expandedHeight: 45
+    expandedHeight: 46
     button:
       probe:
         imgloc: {x: 10, y: 10}
@@ -81,6 +81,9 @@ root.config =
         imgloc: {x: 50, y: 30}
         txtloc: {x: 65, y: 30}
         scale: 0.5
+    pathColor: "rgba(0, 40, 255, 0.8)"
+    pathWidth: 6
+    finishRadius: 30
   unitDisplay:
     location: {x: -250, y: -140}
     fill: "rgba(255, 255, 0, 0.5)"
