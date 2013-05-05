@@ -617,9 +617,6 @@ class UserInterface
         lost = false
         @help.close()
 
-    if lost
-      @help.open()
-
       # Draw resources
       if @showResources
         if vis != window.config.visibility.undiscovered
@@ -675,31 +672,34 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
     @unitSelection.draw(ctx, hudCtx)
 
+    if lost
+      @help.open()
+
     if @hoveredPlanet
       # if the button is a planet
-      ctx.textAlign = "left"
-      ctx.font = window.config.toolTipStyle.font
-      ctx.fillStyle = window.config.toolTipStyle.color
+      tooltipCtx.textAlign = "left"
+      tooltipCtx.font = window.config.toolTipStyle.font
+      tooltipCtx.fillStyle = window.config.toolTipStyle.color
       x = @lastMousePos.x + window.config.toolTipStyle.xOffset
       y = @lastMousePos.y + window.config.toolTipStyle.yOffset
       hasAction = true
       if @unitSelection.total > 0
-        ctx.fillText("Move selected units", x, y)
+        tooltipCtx.fillText("Move selected units", x, y)
       else if @hoveredPlanet.hasOutpost()
         if @outpostMenu.visible and @hoveredPlanet == @selectedPlanet
-          ctx.fillText("Close outpost menu", x, y)
+          tooltipCtx.fillText("Close outpost menu", x, y)
         else
-          ctx.fillText("Open outpost menu", x, y)
+          tooltipCtx.fillText("Open outpost menu", x, y)
       else if @hoveredPlanet.hasStation()
         if @stationMenu.visible and @hoveredPlanet == @selectedPlanet
-          ctx.fillText("Close station menu", x, y)
+          tooltipCtx.fillText("Close station menu", x, y)
         else
-          ctx.fillText("Open station menu", x, y)
+          tooltipCtx.fillText("Open station menu", x, y)
       else if @hoveredPlanet.numShips(window.config.units.colonyShip) > 0
         if @colonyMenu.visible and @hoveredPlanet == @selectedPlanet
-          ctx.fillText("Close colony ship menu", x, y)
+          tooltipCtx.fillText("Close colony ship menu", x, y)
         else
-          ctx.fillText("Open colony ship menu", x, y)
+          tooltipCtx.fillText("Open colony ship menu", x, y)
       else
         hasAction = false
 
@@ -781,11 +781,12 @@ class UserInterface
         previous = gs[g].prev
         planetGameLoc = previous.location()
         vec = {x: nextLoc.x - planetGameLoc.x, y: nextLoc.y - planetGameLoc.y}
-        dist = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
-        d = window.config.controlGroup.distance * camera.getZoom()
+        length = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
+        dir = {x: vec.x / length, y: vec.y / length}
+        d = window.config.controlGroup.distance
         controlGameLoc =
-          x: Math.floor(vec.x / dist * d + planetGameLoc.x)
-          y: Math.floor(vec.y / dist * d + planetGameLoc.y)
+          x: Math.floor(dir.x * d + planetGameLoc.x)
+          y: Math.floor(dir.y * d + planetGameLoc.y)
         controlHudLoc = camera.getScreenCoordinates(controlGameLoc)
 
         groupDisplay = @_getExpandedDisplay(controlGameLoc, groups)

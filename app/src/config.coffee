@@ -59,7 +59,7 @@ root.config =
       stroke: "rgba(255, 255, 0, 0.3)"
       lineWidth: 1
   controlGroup:
-    distance: 300
+    distance: 150
     collapsedWidth: 55
     collapsedHeight: 30
     expandedWidth: 80
