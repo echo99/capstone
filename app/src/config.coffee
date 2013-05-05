@@ -158,6 +158,8 @@ root.config =
     UNFULL_SCREEN: new AnimatedSprite(['deactivate_full_screen_button.png'])
     MUTED: new AnimatedSprite(['muted_button.png'])
     UNMUTED: new AnimatedSprite(['unmuted_button.png'])
+    CLOSE: new AnimatedSprite(['close_button.png'])
+    FEEDBACK: new AnimatedSprite(['close_button.png'])
     OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
       'outpost_buildings_gathering_2.png'], 20)
     OUTPOST_NOT_GATHERING: new AnimatedSprite(

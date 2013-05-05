@@ -35,6 +35,8 @@ APP_JS = "public#{SLASH}app.js"
 VENDOR_JS = "public#{SLASH}vendor.js"
 SRC_DIR = "app#{SLASH}src"
 VENDOR_DIR = "vendor#{SLASH}scripts"
+VENDOR_STYLES = "vendor#{SLASH}stylesheets"
+VENDOR_CSS = "public#{SLASH}vendor.css"
 NODE_DIR = ".#{SLASH}node_modules"
 NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
 RHINO_DIR = "vendor#{SLASH}tools"
@@ -288,11 +290,25 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   files = fs.readdirSync dir
   for file in files
     contents = fs.readFileSync (dir+'/'+file), 'utf8'
-    scripts += contents
+    scripts += contents + "\n"
     #name = file.replace /\..*/, '' # remove extension
     #templateJs += "window.#{name} = '#{contents}';"
   try
     fs.writeFile VENDOR_JS, scripts
+  catch err
+    console.log(err)
+
+  console.log("Combining vendor styles to #{VENDOR_CSS}".yellow)
+  styles = ''
+  dir = VENDOR_STYLES
+  files = fs.readdirSync dir
+  for file in files
+    contents = fs.readFileSync (dir+'/'+file), 'utf8'
+    styles += contents + "\n"
+    #name = file.replace /\..*/, '' # remove extension
+    #templateJs += "window.#{name} = '#{contents}';"
+  try
+    fs.writeFile VENDOR_CSS, styles
   catch err
     console.log(err)
   # exec 'echo "hi2"'

@@ -157,6 +157,8 @@ main = ->
   # ctx.setFontSizeVal(20)
   # console.log(ctx.font)
 
+  feedback = $('#comments').jqm()
+
   fsCanvas = document.getElementById('fs-button')
   fsCtx = fsCanvas.getContext('2d')
 
@@ -247,6 +249,12 @@ main = ->
     else
       bgmusic.setMute(true)
       muteBtn.setState('muted')
+
+  feedbackBtn = new Elements.DOMButton('feedback',
+    config.spriteNames.FEEDBACK, SHEET).setRight(26).setBottom(5)
+  feedbackBtn.setClickHandler ->
+    feedback.jqmShow()
+
 
   window.onresize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
