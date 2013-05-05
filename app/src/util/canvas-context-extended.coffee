@@ -35,23 +35,23 @@ CanvasRenderingContext2D::_setFont = ->
 
 # Get the font style
 CanvasRenderingContext2D::getFontStyle = ->
-  return @fontStyle if @fontStyle? else null
+  return if @fontStyle? then @fontStyle else null
 
 # Get the font weight
 CanvasRenderingContext2D::getFontWeight = ->
-  return @fontWeight if @fontWeight? else null
+  return if @fontWeight? then @fontWeight else null
 
 # Get the font size value
 CanvasRenderingContext2D::getFontSizeVal = ->
-  return @fontSizeVal if @fontSizeVal? else null
+  return if @fontSizeVal? then @fontSizeVal else null
 
 # Get the font size unit
 CanvasRenderingContext2D::getFontUnit = ->
-  return @fontUnit if @fontUnit? else null
+  return if @fontUnit? then @fontUnit else null
 
 # Get the font family
 CanvasRenderingContext2D::getFontFamily = ->
-  return @fontFamily if @fontFamily? else null
+  return if @fontFamily? then @fontFamily else null
 
 # Set the font style
 CanvasRenderingContext2D::setFontStyle = (@fontStyle) ->
