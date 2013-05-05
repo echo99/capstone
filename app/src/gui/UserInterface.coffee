@@ -601,9 +601,6 @@ class UserInterface
     for p in game.getPlanets()
       loc = p.location()
       pos = camera.getScreenCoordinates(loc)
-      if camera.onScreen(pos)
-        lost = false
-        @help.close()
       # Draw planet
       vis = p.visibility()
       if vis == window.config.visibility.discovered
@@ -616,6 +613,12 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
+      if camera.onScreen(pos) and vis != window.config.visibility.undiscovered
+        lost = false
+        @help.close()
+
+    if lost
+      @help.open()
 
       # Draw resources
       if @showResources
@@ -671,9 +674,6 @@ class UserInterface
         else
           SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
     @unitSelection.draw(ctx, hudCtx)
-
-    if lost
-      @help.open()
 
     if @hoveredPlanet
       # if the button is a planet
