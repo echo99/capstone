@@ -224,6 +224,7 @@ main = ->
 
   btnSpacing = config.buttonSpacing
 
+  # Set fullscreen button
   fullscreenBtn = new Elements.DOMButton('fullscreen',
     config.spriteNames.FULL_SCREEN, SHEET).setRight(btnSpacing)
     .setBottom(btnSpacing)
@@ -251,6 +252,9 @@ main = ->
         body.webkitRequestFullscreen()
       fullscreenBtn.setState('unfullscreen')
       # sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
+  # Disable fullscreen button on IE (since it doesn't support those features)
+  if BROWSER == Browser.IE
+    fullscreenBtn.disable()
 
   # Set mute button
   muteBtn = new Elements.DOMButton('muted', config.spriteNames.MUTED, SHEET)
