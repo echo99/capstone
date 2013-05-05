@@ -83,6 +83,8 @@ gameFrame = null
 
 CurrentMission = null
 
+tooltipCanvas = null
+
 drag = false
 
 newMission = (mission) ->
@@ -137,9 +139,10 @@ main = ->
   bgCanvas = document.getElementById('canvas-bg')
   hudCanvas = document.getElementById('canvas-hud')
   camerahudCanvas = document.getElementById('canvas-camerahud')
+  tooltipCanvas = document.getElementById('canvas-tooltip')
   # Need a better variable name for this
   surface = document.getElementById('surface')
-  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas)
+  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
   # we should just make the bg larger than we'll ever need it to be
   bgCanvas.width = screen.width * 2
   bgCanvas.height = screen.height * 2
@@ -258,7 +261,7 @@ main = ->
 
   window.onresize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas)
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
