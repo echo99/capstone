@@ -179,20 +179,20 @@ main = ->
   #   "This message is top right aligned", 'right', 'top'))
   # frameElement.addChild(new Elements.MessageBox(750, 350, 280, 100,
   #   "This message is bottom left aligned", 'left', 'bottom'))
-  win = new Elements.Window(60, 300, 100, 100)
-  win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
-  win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
-  frameElement.addChild(win)
-  frameElement.drawChildren()
-  frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
-    "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
-    font: '15px sans-serif'}))
-  console.log(frameElement.toString())
+  # win = new Elements.Window(60, 300, 100, 100)
+  # win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
+  # win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
+  # frameElement.addChild(win)
+  # frameElement.drawChildren()
+  # frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
+  #   "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
+  #   font: '15px sans-serif'}))
+  # console.log(frameElement.toString())
 
-  msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
-  msgBox2.setDefaultCloseBtn()
-  msgBox2.setZIndex(1)
-  gameFrame.addChild(msgBox2)
+  # msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
+  # msgBox2.setDefaultCloseBtn()
+  # msgBox2.setZIndex(1)
+  # gameFrame.addChild(msgBox2)
 
   # cameraHudFrame.addChild(new Elements.MessageBox(0, 0, 100, 100, "test"))
 
@@ -305,12 +305,15 @@ main = ->
     CurrentMission.onMouseMove(x, y)
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
+      # Nothing on HUD frame is being hovered over
       pointer = cameraHudFrame.mouseMove(x, y)
       if pointer is null
         pointer = gameFrame.mouseMove(x, y)
       else
         gameFrame.mouseOut()
     else
+      # Something on HUD frame is being hovered over, mouse out of other frames
+      gameFrame.mouseOut()
       cameraHudFrame.mouseOut()
     if pointer isnt null
       # hudCanvas.style.cursor = pointer
@@ -369,6 +372,9 @@ main = ->
 
   # hudCanvas.addEventListener('mouseout', (e) ->
   surface.addEventListener('mouseout', (e) ->
+    # frameElement.mouseOut()
+    # cameraHudFrame.mouseOut()
+    # gameFrame.mouseOut()
     drag = false)
 
   mouseWheelHandler = (e) ->
