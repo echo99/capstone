@@ -10,7 +10,7 @@
 CanvasRenderingContext2D::setFont = (font) ->
   {style, weight, sizeVal, unit, family} = font
   @fontStyle = style if style?
-  @fontWeight = weigth if weight?
+  @fontWeight = weight if weight?
   # @fontSize = size if size?
   @fontSizeVal = sizeVal if sizeVal?
   @fontUnit = unit if unit?
