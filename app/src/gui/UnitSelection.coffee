@@ -81,14 +81,14 @@ class UnitSelection
       updateSelectedPlanets(count)
       @totalDisplay.dirty = true)
 
-    attack_location = {x: location.x, y: location.y+160}
+    attack_location = {x: location.x+160, y: location.y+160}
     @_initUnits(attack_location, units.attacks, planet, (count) =>
       @totalAttacks += count
       @total += count
       updateSelectedPlanets(count)
       @totalDisplay.dirty = true)
 
-    defense_location = {x: location.x, y: location.y+240}
+    defense_location = {x: location.x+160, y: location.y+240}
     @_initUnits(defense_location, units.defenses, planet, (count) =>
       @totalDefenses += count
       @total += count
@@ -179,24 +179,25 @@ class UnitSelection
 
       @_drawPlanetUnits(ctx, p)
 
-      found = @_drawToolTip(ctx, units.probes) or
-              @_drawToolTip(ctx, units.colonies) or
-              @_drawToolTip(ctx, units.attacks) or
-              @_drawToolTip(ctx, units.defenses)
+      found = @_drawToolTip(units.probes) or
+              @_drawToolTip(units.colonies) or
+              @_drawToolTip(units.attacks) or
+              @_drawToolTip(units.defenses)
 
-  _drawToolTip: (ctx, stacks) ->
+  _drawToolTip: (stacks) ->
+    tooltipCtx.textAlign = "left"
+    tooltipCtx.font = window.config.toolTipStyle.font
+    tooltipCtx.fillStyle = window.config.toolTipStyle.color
+
     for row in stacks
       for stack in row
         if stack.isHovered()
-          ctx.textAlign = "left"
-          ctx.font = window.config.toolTipStyle.font
-          ctx.fillStyle = window.config.toolTipStyle.color
           x = @lastMousePos.x + window.config.toolTipStyle.xOffset
           y = @lastMousePos.y + window.config.toolTipStyle.yOffset
           if stack.isSelected()
-            ctx.fillText("Deselect units", x, y)
+            tooltipCtx.fillText("Deselect units", x, y)
           else
-            ctx.fillText("Select units", x, y)
+            tooltipCtx.fillText("Select units", x, y)
           return true
     return false
 
@@ -269,9 +270,24 @@ class UnitSelection
           locX = stack.x
           locY = stack.y
           SHEET.drawSprite(sprite, locX, locY, ctx)
-          ctx.font = win.defaultText.font
-          ctx.fillStyle = win.defaultText.color
-          ctx.textAlign = 'left'
+        x++
+      y++
+      x = 0
+
+  _drawShipNums: (ctx, stacks) ->
+    x = 0
+    y = 0
+    win = window.config.windowStyle
+    dis = window.config.unitDisplay
+    ctx.font = win.defaultText.font
+    ctx.fillStyle = win.defaultText.color
+    ctx.textAlign = 'left'
+    for row in stacks
+      for stack in row
+        count = stack.getCount()
+        if count > 0
+          locX = stack.x
+          locY = stack.y
           offset = window.config.unitDisplay.numberOffset
           coords = camera.getScreenCoordinates(
             {x: locX+offset.x, y: locY+offset.y})
@@ -300,12 +316,11 @@ class UnitSelection
     @_drawShips(ctx, SpriteNames.COLONY_SHIP, units.colonies)
     @_drawShips(ctx, SpriteNames.ATTACK_SHIP, units.attacks)
     @_drawShips(ctx, SpriteNames.DEFENSE_SHIP, units.defenses)
-    #   for each control group
-    #     if control group is hovered over
-    #       draw expanded view
-    #     else
-    #       draw unexpanded view
-    #
+
+    @_drawShipNums(ctx, units.probes)
+    @_drawShipNums(ctx, units.colonies)
+    @_drawShipNums(ctx, units.attacks)
+    @_drawShipNums(ctx, units.defenses)
 
   # Updates the stacks of of the given planet's units
   #

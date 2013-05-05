@@ -8,7 +8,6 @@
 #     need it
 #   - Display number of units selected locally. This will also be a button that
 #     toggles selecting all of the unit type.
-#   - Display control groups
 class UserInterface
   planetButtons: []
   hoveredPlanet: null

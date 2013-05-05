@@ -69,7 +69,6 @@ class Menu extends Mission
 
     @_initMenus()
     game.endTurn()
-    #game.setup(0, null)
 
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)

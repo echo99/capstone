@@ -59,7 +59,7 @@ root.config =
       stroke: "rgba(255, 255, 0, 0.3)"
       lineWidth: 1
   controlGroup:
-    distance: 150
+    distance: 290
     collapsedWidth: 55
     collapsedHeight: 30
     expandedWidth: 80
@@ -85,7 +85,7 @@ root.config =
     pathWidth: 6
     finishRadius: 30
   unitDisplay:
-    location: {x: -250, y: -140}
+    location: {x: -220, y: -70}
     fill: "rgba(255, 255, 0, 0.5)"
     stroke: "rgba(255, 255, 0, 1)"
     red: "rgba(255, 0, 0, 1)"
@@ -96,7 +96,7 @@ root.config =
     height: 32
     spacing: 40
     rows: 2
-    columns: 5
+    columns: 4
     numberOffset: {x: 10, y: 20}
   selectionStyle:
     stroke: "rgba(255, 255, 0, 1)"
