@@ -595,7 +595,6 @@ class UserInterface
       x = @lastMousePos.x + window.config.toolTipStyle.xOffset
       y = @lastMousePos.y + window.config.toolTipStyle.yOffset
       tooltipCtx.fillText("Cancel fleet", x, y)
-      console.log("route: " + @hoveredGroup)
       @_drawRoute(ctx, @hoveredGroup)
 
     lost = true
