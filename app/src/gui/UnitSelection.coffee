@@ -390,9 +390,9 @@ class UnitSelection
   draw: (ctx, hudCtx) ->
     currentZoom = camera.getZoom()
     cutoff = window.window.config.displayCutoff
-    if currentZoom <= cutoff and @lastZoom > cutoff
+    if currentZoom < cutoff and @lastZoom > cutoff
       @_closeAllStacks()
-    else if currentZoom > cutoff and @lastZoom <= cutoff
+    else if currentZoom > cutoff and @lastZoom < cutoff
       @_openAllStacks()
 
     found = false
