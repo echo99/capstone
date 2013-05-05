@@ -16,6 +16,7 @@ class UserInterface
   lastMousePos: {x: 0, y: 0}
   unitSelection: null
   switchedMenus: false
+  hoveredGroup: false
 
   # Creates a new UserInterface
   constructor: () ->
@@ -703,6 +704,13 @@ class UserInterface
         ctx.beginPath()
         ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
         ctx.stroke()
+    else if @hoveredGroup
+      ctx.textAlign = "left"
+      ctx.font = window.config.toolTipStyle.font
+      ctx.fillStyle = window.config.toolTipStyle.color
+      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+      ctx.fillText("Cancel fleet", x, y)
 
     if @switchedMenus
       @stationMenu.setDirty()
@@ -759,10 +767,8 @@ class UserInterface
           x: Math.floor(vec.x / dist * d + planetGameLoc.x)
           y: Math.floor(vec.y / dist * d + planetGameLoc.y)
         controlHudLoc = camera.getScreenCoordinates(controlGameLoc)
-        console.log("control: " + controlHudLoc.x + ", " + controlHudLoc.y)
-        console.log("game: " + controlGameLoc.x + ", " + controlGameLoc.y)
 
-        groupDisplay = @_getExpandedDisplay(controlGameLoc, groups.length)
+        groupDisplay = @_getExpandedDisplay(controlGameLoc, groups)
 
         controlGroup = @_getCollapsedDisplay(controlGameLoc, groupDisplay)
         @_setHandler(groupDisplay, controlGroup)
@@ -773,13 +779,13 @@ class UserInterface
         frameElement.addChild(groupDisplay)
         groupDisplay.visible = false
 
-  _getExpandedDisplay: (controlGameLoc, num_groups) ->
+  _getExpandedDisplay: (controlGameLoc, groups) ->
+    winStyle = window.config.windowStyle
     w = window.config.controlGroup.expandedWidth
-    h = window.config.controlGroup.expandedHeight * num_groups +
-        window.config.windowStyle.lineWidth * (num_groups - 1)
+    h = window.config.controlGroup.expandedHeight * groups.length# +
+        #window.config.windowStyle.lineWidth * (groups.length - 1)
     groupDisplay = new Elements.BoxElement(-1000, -1000, w, h)
     clear = (ctx) =>
-      winStyle = window.config.windowStyle
       ctx.fillStyle = winStyle.fill
       ctx.strokeStyle = winStyle.stroke
       ctx.lineJoin = winStyle.lineJoin
@@ -806,8 +812,86 @@ class UserInterface
 
         ctx.fillRect(loc.x, loc.y, w, h)
         ctx.strokeRect(loc.x, loc.y, w, h)
+
+        offset = 0
+        height = window.config.controlGroup.expandedHeight
+        for g in groups
+          # Draw divider
+          ctx.beginPath()
+          ctx.moveTo(loc.x, loc.y + offset)
+          ctx.lineTo(loc.x + w, loc.y + offset)
+          ctx.stroke()
+          offset += height
     )
+
+    height = window.config.controlGroup.expandedHeight
+    y = height/2
+    winStyle
+    for g in groups
+      button = @_getControlButton(w/2, y,
+                                  w-winStyle.lineWidth, height - winStyle.lineWidth,
+                                  groupDisplay, g)
+      y += height
+      groupDisplay.addChild(button)
     return groupDisplay
+
+  _getControlButton: (x, y, w, h, groupDisplay, group) ->
+    winStyle = window.config.windowStyle
+    settings = window.config.controlGroup.button
+    button = new Elements.Button(x, y, w, h)
+    button.setClickHandler(() =>
+      console.log('click')
+    )
+    button.setHoverHandler(() => @hoveredGroup = true)
+    button.setMouseOutHandler(() => @hoveredGroup = false)
+    button.setDrawFunc((ctx) =>
+      center =
+        x: groupDisplay.x - groupDisplay.w / 2 + button.x
+        y: groupDisplay.y - groupDisplay.h / 2 + button.y
+      topleft =
+        x: center.x - button.w / 2
+        y: center.y - button.h / 2
+
+      SHEET.drawSprite(SpriteNames.PROBE,
+                       topleft.x + settings.probe.imgloc.x,
+                       topleft.y + settings.probe.imgloc.y,
+                       ctx, false, settings.probe.scale)
+      SHEET.drawSprite(SpriteNames.COLONY_SHIP,
+                       topleft.x + settings.colony.imgloc.x,
+                       topleft.y + settings.colony.imgloc.y,
+                       ctx, false, settings.colony.scale)
+      SHEET.drawSprite(SpriteNames.ATTACK_SHIP,
+                       topleft.x + settings.attack.imgloc.x,
+                       topleft.y + settings.attack.imgloc.y,
+                       ctx, false, settings.attack.scale)
+      SHEET.drawSprite(SpriteNames.DEFENSE_SHIP,
+                       topleft.x + settings.defense.imgloc.x,
+                       topleft.y + settings.defense.imgloc.y,
+                       ctx, false, settings.defense.scale)
+
+      ctx.font = winStyle.defaultText.font
+      ctx.fillStyle = winStyle.defaultText.value
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(group.probes(),
+                   topleft.x + settings.probe.txtloc.x,
+                   topleft.y + settings.probe.txtloc.y)
+      ctx.fillText(group.colonies(),
+                   topleft.x + settings.colony.txtloc.x,
+                   topleft.y + settings.colony.txtloc.y)
+      ctx.fillText(group.attackShips(),
+                   topleft.x + settings.attack.txtloc.x,
+                   topleft.y + settings.attack.txtloc.y)
+      ctx.fillText(group.defenseShips(),
+                   topleft.x + settings.defense.txtloc.x,
+                   topleft.y + settings.defense.txtloc.y)
+      ctx.strokeStyle = window.config.unitDisplay.stroke
+      ctx.lineWidth = window.config.unitDisplay.lineWidth
+      ctx.lineJoin = window.config.unitDisplay.lineJoin
+      if button.isHovered()
+        ctx.strokeRect(topleft.x, topleft.y, button.w, button.h)
+    )
+    return button
 
   _setHandler: (groupDisplay, controlGroup) ->
     groupDisplay.setMouseOutHandler(
@@ -816,7 +900,6 @@ class UserInterface
           controlGroup.open()
           groupDisplay.close()
     )
-
 
   _getCollapsedDisplay: (controlGameLoc, groupDisplay) ->
     w = window.config.controlGroup.collapsedWidth
@@ -839,11 +922,13 @@ class UserInterface
         ctx.fillRect(loc.x, loc.y, w, h)
         ctx.strokeRect(loc.x, loc.y, w, h)
 
-        ctx.font = window.config.windowStyle.defaultText.font
-        ctx.fillStyle = window.config.windowStyle.defaultText.value
-        ctx.textAlign = 'center'
+        ctx.setFont(window.config.windowStyle.defaultText.fontObj)
+        ctx.fillStyle = window.config.windowStyle.defaultText.color
+        ctx.textAlign = 'left'
         ctx.textBaseline = 'middle'
-        ctx.fillText("C", loc.x, loc.y)
+        size = ctx.getFontSizeVal()
+        ctx.setFontSizeVal(Math.floor(size * camera.getZoom()))
+        ctx.fillText("Fleets", loc.x + 10 * camera.getZoom(), loc.y + h/2)
     )
     controlGroup.setHoverHandler(
       () =>

@@ -21,6 +21,7 @@ root.config =
     lineWidth: 5
     defaultText:
       font: "13px Arial"
+      fontObj: {sizeVal: 13, unit: "px", family: "Arial"}
       color: "rgba(255, 255, 255, 1)"
       red: "rgba(255, 0, 0, 1)"
       value: "rgba(255, 255, 0, 1)"
@@ -59,10 +60,27 @@ root.config =
       lineWidth: 1
   controlGroup:
     distance: 300
-    collapsedWidth: 30
+    collapsedWidth: 55
     collapsedHeight: 30
-    expandedWidth: 100
-    expandedHeight: 30
+    expandedWidth: 80
+    expandedHeight: 45
+    button:
+      probe:
+        imgloc: {x: 10, y: 10}
+        txtloc: {x: 25, y: 10}
+        scale: 0.5
+      colony:
+        imgloc: {x: 10, y: 30}
+        txtloc: {x: 25, y: 30}
+        scale: 0.5
+      attack:
+        imgloc: {x: 50, y: 10}
+        txtloc: {x: 65, y: 10}
+        scale: 0.5
+      defense:
+        imgloc: {x: 50, y: 30}
+        txtloc: {x: 65, y: 30}
+        scale: 0.5
   unitDisplay:
     location: {x: -250, y: -140}
     fill: "rgba(255, 255, 0, 0.5)"
