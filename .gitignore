@@ -1,6 +1,7 @@
 # Compiled files
 public/app.js
 public/vendor.js
+public/vendor.css
 docs
 doc
 
