@@ -287,7 +287,14 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
   scripts = ''
   dir = VENDOR_DIR
-  files = fs.readdirSync dir
+  # files = fs.readdirSync dir
+  files = [
+    'browserdetect.js',
+    'jquery-1.9.1.min.js',
+    'jqModal.js',
+    'soundjs-0.4.0.min.js',
+    'soundjs.flashplugin-0.4.0.min.js'
+  ]
   for file in files
     contents = fs.readFileSync (dir+'/'+file), 'utf8'
     scripts += contents + "\n"
