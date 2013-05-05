@@ -985,6 +985,8 @@ class UserInterface
 
     @hoveredGroup = null
 
+    @unitSelection.endTurn()
+
   endGame: () ->
     @stationMenu.close()
     @outpostMenu.close()

@@ -25,6 +25,9 @@ root.config =
       color: "rgba(255, 255, 255, 1)"
       red: "rgba(255, 0, 0, 1)"
       value: "rgba(255, 255, 0, 1)"
+    lageText:
+      fontObj: {sizeVal: 20, unit: "px", family: "Arial"}
+      color: "rgba(255, 255, 255, 1)"
     titleText:
       height: 15
       font: "15px Arial"
@@ -98,6 +101,10 @@ root.config =
     rows: 2
     columns: 4
     numberOffset: {x: 10, y: 20}
+    button:
+      offset: {x: -50, y: 16}
+      w: 60
+      h: 25
   selectionStyle:
     stroke: "rgba(255, 255, 0, 1)"
     lineWidth: 2
