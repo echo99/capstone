@@ -756,95 +756,104 @@ class UserInterface
         dist = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
         d = window.config.controlGroup.distance * camera.getZoom()
         controlGameLoc =
-          x: vec.x / dist * d + planetGameLoc.x
-          y: vec.y / dist * d + planetGameLoc.y
+          x: Math.floor(vec.x / dist * d + planetGameLoc.x)
+          y: Math.floor(vec.y / dist * d + planetGameLoc.y)
         controlHudLoc = camera.getScreenCoordinates(controlGameLoc)
+        console.log("control: " + controlHudLoc.x + ", " + controlHudLoc.y)
+        console.log("game: " + controlGameLoc.x + ", " + controlGameLoc.y)
 
-        controlGroup = null # for groupDisplay's reference
+        groupDisplay = @_getExpandedDisplay(controlGameLoc, groups.length)
 
-        console.log('num: ' + groups.length)
+        controlGroup = @_getCollapsedDisplay(controlGameLoc, groupDisplay)
+        @_setHandler(groupDisplay, controlGroup)
 
-        eW = window.config.controlGroup.expandedWidth
-        eH = window.config.controlGroup.expandedHeight * groups.length +
-            window.config.windowStyle.lineWidth * (groups.length - 1)
-        groupDisplay = new Elements.BoxElement(controlHudLoc.x+w/2,
-                                               controlHudLoc.y+h/2,
-                                               eW, eH)
-        clear = (ctx) =>
-          winStyle = window.config.windowStyle
-          ctx.fillStyle = winStyle.fill
-          ctx.strokeStyle = winStyle.stroke
-          ctx.lineJoin = winStyle.lineJoin
-          ctx.lineWidth = winStyle.lineWidth
-
-          loc = {x: groupDisplay.x-eW/2, y: groupDisplay.y-eH/2}
-          ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
-                        loc.y - winStyle.lineWidth/2 - 1,
-                        eW + winStyle.lineWidth + 2,
-                        eH + winStyle.lineWidth + 2,)
-
-        groupDisplay.setClearFunc(clear)
-        groupDisplay.setDrawFunc(
-          (ctx) =>
-            clear(ctx)
-            winStyle = window.config.windowStyle
-            ctx.fillStyle = winStyle.fill
-            ctx.strokeStyle = winStyle.stroke
-            ctx.lineJoin = winStyle.lineJoin
-            ctx.lineWidth = winStyle.lineWidth
-
-            loc = camera.getScreenCoordinates(controlGameLoc)
-            groupDisplay.moveTo(loc.x + eW/2, loc.y + eH/2)
-
-            ctx.fillRect(loc.x, loc.y, eW, eH)
-            ctx.strokeRect(loc.x, loc.y, eW, eH)
-
-        )
-        groupDisplay.setMouseOutHandler(
-          () =>
-            if groupDisplay.visible and not controlGroup.visible
-              controlGroup.open()
-              groupDisplay.close()
-        )
-
-        w = window.config.controlGroup.collapsedWidth
-        h = window.config.controlGroup.collapsedHeight
-        controlGroup = new Elements.BoxElement(controlGameLoc.x+w/2,
-                                               controlGameLoc.y+h/2, w, h)
-        controlGroup.setHoverHandler(
-          () =>
-            if not drag
-              if controlGroup.visible and not groupDisplay.visible
-                controlGroup.close()
-                groupDisplay.open()
-        )
-        controlGroup.setDrawFunc(
-          (ctx) =>
-            winStyle = window.config.windowStyle
-            ctx.fillStyle = winStyle.fill
-            ctx.strokeStyle = winStyle.stroke
-            ctx.lineJoin = winStyle.lineJoin
-            ctx.lineWidth = winStyle.lineWidth * camera.getZoom()
-
-            w = window.config.controlGroup.collapsedWidth * camera.getZoom()
-            h = window.config.controlGroup.collapsedHeight * camera.getZoom()
-
-            loc = camera.getScreenCoordinates(controlGameLoc)
-
-            ctx.fillRect(loc.x, loc.y, w, h)
-            ctx.strokeRect(loc.x, loc.y, w, h)
-
-            ctx.font = window.config.windowStyle.defaultText.font
-            ctx.fillStyle = window.config.windowStyle.defaultText.value
-            ctx.textAlign = 'center'
-            ctx.textBaseline = 'middle'
-            ctx.fillText("C", loc.x, loc.y)
-        )
         @controlGroups.push(controlGroup)
         gameFrame.addChild(controlGroup)
         @_groupDisplays.push(groupDisplay)
         frameElement.addChild(groupDisplay)
         groupDisplay.visible = false
+
+  _getExpandedDisplay: (controlGameLoc, num_groups) ->
+    w = window.config.controlGroup.expandedWidth
+    h = window.config.controlGroup.expandedHeight * num_groups +
+        window.config.windowStyle.lineWidth * (num_groups - 1)
+    groupDisplay = new Elements.BoxElement(-1000, -1000, w, h)
+    clear = (ctx) =>
+      winStyle = window.config.windowStyle
+      ctx.fillStyle = winStyle.fill
+      ctx.strokeStyle = winStyle.stroke
+      ctx.lineJoin = winStyle.lineJoin
+      ctx.lineWidth = winStyle.lineWidth
+
+      loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
+      ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
+                    loc.y - winStyle.lineWidth/2 - 1,
+                    w + winStyle.lineWidth + 2,
+                    h + winStyle.lineWidth + 2,)
+
+    groupDisplay.setClearFunc(clear)
+    groupDisplay.setDrawFunc(
+      (ctx) =>
+        clear(ctx)
+        winStyle = window.config.windowStyle
+        ctx.fillStyle = winStyle.fill
+        ctx.strokeStyle = winStyle.stroke
+        ctx.lineJoin = winStyle.lineJoin
+        ctx.lineWidth = winStyle.lineWidth
+
+        loc = camera.getScreenCoordinates(controlGameLoc)
+        groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
+
+        ctx.fillRect(loc.x, loc.y, w, h)
+        ctx.strokeRect(loc.x, loc.y, w, h)
+    )
+    return groupDisplay
+
+  _setHandler: (groupDisplay, controlGroup) ->
+    groupDisplay.setMouseOutHandler(
+      () =>
+        if groupDisplay.visible and not controlGroup.visible
+          controlGroup.open()
+          groupDisplay.close()
+    )
+
+
+  _getCollapsedDisplay: (controlGameLoc, groupDisplay) ->
+    w = window.config.controlGroup.collapsedWidth
+    h = window.config.controlGroup.collapsedHeight
+    controlGroup = new Elements.BoxElement(controlGameLoc.x+w/2,
+                                           controlGameLoc.y+h/2, w, h)
+    controlGroup.setDrawFunc(
+      (ctx) =>
+        winStyle = window.config.windowStyle
+        ctx.fillStyle = winStyle.fill
+        ctx.strokeStyle = winStyle.stroke
+        ctx.lineJoin = winStyle.lineJoin
+        ctx.lineWidth = winStyle.lineWidth * camera.getZoom()
+
+        w = window.config.controlGroup.collapsedWidth * camera.getZoom()
+        h = window.config.controlGroup.collapsedHeight * camera.getZoom()
+
+        loc = camera.getScreenCoordinates(controlGameLoc)
+
+        ctx.fillRect(loc.x, loc.y, w, h)
+        ctx.strokeRect(loc.x, loc.y, w, h)
+
+        ctx.font = window.config.windowStyle.defaultText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.value
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText("C", loc.x, loc.y)
+    )
+    controlGroup.setHoverHandler(
+      () =>
+        if not drag
+          if controlGroup.visible and not groupDisplay.visible
+            controlGroup.close()
+            groupDisplay.open()
+        )
+
+    return controlGroup
 
   endTurn: () ->
     @updateControlGroups()

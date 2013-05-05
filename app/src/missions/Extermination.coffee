@@ -12,7 +12,7 @@ class Extermination extends Mission
     newGame(10000, 10000)
     @home = game.setup(10)
     @home._station =true
-    @home._availableResources = 30
+    @home._availableResources = 200
 
     # Test stuff
     @home.getAdjacentPlanets()[0]._outpost = true

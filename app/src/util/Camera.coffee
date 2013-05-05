@@ -106,7 +106,7 @@ class Camera
       when @constructor.DragMode.DEFAULT
         return {x: difX + @x + @width / 2, y: difY + @y + @height / 2}
       when @constructor.DragMode.ONE_TO_ONE
-        return {x: difX + @width / 2, y: difY + @height / 2}
+        return {x: Math.floor(difX + @width / 2), y: Math.floor(difY + @height / 2)}
 
   # Takes the given screen coords and returns a new set represting where the
   # given ones appear in the world
