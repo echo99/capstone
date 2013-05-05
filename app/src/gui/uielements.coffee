@@ -833,6 +833,7 @@ class Elements.DOMButton
     document.body.appendChild(@canvas)
     @ctx = @canvas.getContext('2d')
     @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
+    @enabled = true
     return this
 
   # Set the top offset of the button. Overrides bottom offset.
@@ -877,7 +878,8 @@ class Elements.DOMButton
   # @return [Elements.DOMButton] this button
   #
   setClickHandler: (@callback) ->
-    @canvas.addEventListener('mousedown', @callback)
+    if @enabled
+      @canvas.addEventListener('mousedown', @callback)
     return this
 
   # Add a state sprite to the button
@@ -898,3 +900,26 @@ class Elements.DOMButton
       sprite = @states[state]
       @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
 
+  # Enable this button
+  #
+  enable: ->
+    if not @enabled
+      @enabled = true
+      sprite = @states[@state]
+      @ctx.clearRect(0, 0, @canvas.width, @canvas.height)
+      @canvas.style.cursor = 'pointer'
+      @ctx.globalAlpha = 1
+      @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
+      @canvas.addEventListener('mousedown', @callback)
+
+  # Disable this button
+  #
+  disable: ->
+    if @enabled
+      @enabled = false
+      sprite = @states[@state]
+      @ctx.clearRect(0, 0, @canvas.width, @canvas.height)
+      @canvas.style.cursor = 'auto'
+      @ctx.globalAlpha = 0.6
+      @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
+      @canvas.removeEventListener('mousedown', @callback)

@@ -164,6 +164,7 @@ root.config =
       turnsLoc: {x: 10 + 90, y: 70+10+20}
       imgLoc: {x: 170, y: 70+10+40}
   planetRadius: 64
+  buttonSpacing: 5
   spriteNames:
     BACKGROUND: new AnimatedSprite(['starry_background.png'])
     ATTACK_SHIP: new AnimatedSprite(['attack_ship.png'])
