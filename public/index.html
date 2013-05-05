@@ -10,6 +10,14 @@
   <script type="text/javascript" src="app.js"></script>
 </head>
 <body>
+  <div id="fb-root"></div>
+  <script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=103451666527745";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));</script>
   <div id="frame">
     <canvas class="game-canvas" id="canvas-bg"></canvas>
     <canvas class="game-canvas" id="canvas-fg"></canvas>
@@ -20,7 +28,9 @@
   </div>
   <canvas width="16" height="16" id="fs-button"></canvas>
   <div class="jqmWindow" id="comments">
-    This is where our feedback plugin (possibly Facebook comments) will go.
+    Give us your feedback!
+    <hr>
+    <div class="fb-comments" data-href="http://www.cs.washington.edu/education/courses/cse481d/13sp/c481d-f/www/" data-width="470" data-num-posts="10" data-colorscheme="dark"></div>
     <hr>
     <div style="text-align:right; width:100%">
       <a href="#" class="jqmClose">Close</a>
