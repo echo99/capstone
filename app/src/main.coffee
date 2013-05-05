@@ -133,8 +133,11 @@ updateCanvases = (frame, canvases...) ->
     canvas.height = frameHeight
   camera.setSize(frameWidth, frameHeight)
 
-# The main method
+# The main method for the game
 main = ->
+  ##################################################################################
+  # Get all necessary html elements
+
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
   bgCanvas = document.getElementById('canvas-bg')
@@ -163,9 +166,6 @@ main = ->
   # console.log(ctx.font)
 
   feedback = $('#comments').jqm()
-
-  fsCanvas = document.getElementById('fs-button')
-  fsCtx = fsCanvas.getContext('2d')
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
@@ -218,11 +218,19 @@ main = ->
     console.log("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
 
-  sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
 
-  canvasclick = ->
-    # eheight: 619 -> 774 (diff of 155)
-    if document.mozFullScreenElement or document.webkitFullScreenElement
+  ##################################################################################
+  # Create static buttons
+
+  btnSpacing = config.buttonSpacing
+
+  fullscreenBtn = new Elements.DOMButton('fullscreen',
+    config.spriteNames.FULL_SCREEN, SHEET).setRight(btnSpacing)
+    .setBottom(btnSpacing)
+  fullscreenBtn.addState('unfullscreen', config.spriteNames.UNFULL_SCREEN)
+  fullscreenBtn.setClickHandler ->
+    if document.mozFullScreenElement or document.webkitFullScreenElement or
+        document.fullScreenElement
       console.log "Already full screen!"
       if document.cancelFullScreen
         document.cancelFullScreen()
@@ -230,7 +238,8 @@ main = ->
         document.mozCancelFullScreen()
       else if document.webkitCancelFullScreen
         document.webkitCancelFullScreen()
-      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      fullscreenBtn.setState('fullscreen')
     else
       console.log "Not at full screen"
       body = document.body
@@ -240,12 +249,12 @@ main = ->
         body.mozRequestFullScreen()
       else if body.webkitRequestFullscreen
         body.webkitRequestFullscreen()
-      sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
-  fsCanvas.addEventListener('mousedown', canvasclick)
+      fullscreenBtn.setState('unfullscreen')
+      # sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
 
   # Set mute button
   muteBtn = new Elements.DOMButton('muted', config.spriteNames.MUTED, SHEET)
-    .setRight(5).setBottom(26)
+    .setRight(btnSpacing).setBottom(btnSpacing*2 + fullscreenBtn.h)
   muteBtn.addState('unmuted', config.spriteNames.UNMUTED)
   muteBtn.setClickHandler ->
     if bgmusic.getMute()
@@ -255,11 +264,16 @@ main = ->
       bgmusic.setMute(true)
       muteBtn.setState('muted')
 
+  # Set feedback button
   feedbackBtn = new Elements.DOMButton('feedback',
-    config.spriteNames.FEEDBACK, SHEET).setRight(26).setBottom(5)
+    config.spriteNames.FEEDBACK, SHEET).setRight(btnSpacing*2 + fullscreenBtn.w)
+    .setBottom(btnSpacing)
   feedbackBtn.setClickHandler ->
     feedback.jqmShow()
 
+
+  ##################################################################################
+  # Set event handlers
 
   window.onresize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
@@ -272,8 +286,10 @@ main = ->
       surface.style.width = screen.width + 'px'
       surface.style.height = screen.height + 'px'
     if not document.mozFullScreenElement and
-        not document.webkitFullScreenElement
-      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+        not document.webkitFullScreenElement and
+        not document.fullScreenElement
+      # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      fullscreenBtn.setState('fullscreen')
 
     bgCanvas.style.left = (0.5+(canvas.width - bgCanvas.width)/2) << 0 + "px"
     bgCanvas.style.top = (0.5+(canvas.height - bgCanvas.height)/2) << 0 + "px"
@@ -399,6 +415,10 @@ main = ->
 
   document.body.addEventListener('mousewheel', mouseWheelHandler)
 
+
+  ##################################################################################
+  # Draw loop
+
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
     tooltipCtx.clearRect(0, 0, camera.width, camera.height)
@@ -416,6 +436,7 @@ main = ->
     # Don't forget to update the animation
     AnimatedSprite.drawCounter++
 
+  # Only call draw once if testing
   if TESTING
     draw()
   else
