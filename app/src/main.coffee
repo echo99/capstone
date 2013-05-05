@@ -318,7 +318,7 @@ main = ->
   # Catch accidental leaving
   window.onbeforeunload = (e) ->
     # No progress can be lost in the menu
-    if (not CurrentMission instanceof Menu)
+    if (not (CurrentMission instanceof Menu))
       if (not e)
         e = window.event
       e.cancelBubble = true
