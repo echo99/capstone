@@ -206,6 +206,32 @@ root.config =
       ['start_mission_button_hover.png'])
     CANCEL_BUTTON_IDLE: new AnimatedSprite(['cancel_button_idle.png'])
     CANCEL_BUTTON_HOVER: new AnimatedSprite(['cancel_button_hover.png'])
+    RESTART_BUTTON_IDLE: new AnimatedSprite(['restart_button_idle.png'])
+    RESTART_BUTTON_HOVER: new AnimatedSprite(['restart_button_hover.png'])
+    QUIT_BUTTON_IDLE: new AnimatedSprite(['quit_button_idle.png'])
+    QUIT_BUTTON_HOVER: new AnimatedSprite(['quit_button_hover.png'])
+    NEXT_BUTTON_IDLE: new AnimatedSprite(['next_mission_button_idle.png'])
+    NEXT_BUTTON_HOVER: new AnimatedSprite(['next_mission_button_hover.png'])
+  Missions:
+    w: 244
+    h: 60
+    textAlign: 'center'
+    vAlign: 'top'
+    restart:
+      x: 41
+      y: 45
+      w: 63
+      h: 20
+    quit:
+      x: 103
+      y: 45
+      w: 40
+      h: 20
+    next:
+      x: 183
+      y: 45
+      w: 101
+      h: 20
   MainMenu:
     home:
       x: 0

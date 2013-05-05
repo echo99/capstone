@@ -25,6 +25,27 @@ class Extermination extends Mission
     camera.setZoom(0.5)
     camera.setTarget(@home.location())
 
+    @_initMenus()
+
+  destroy: ->
+    cameraHudFrame.removeChild(@victoryMenu)
+    cameraHudFrame.removeChild(@failMenu)
+
+  _initMenus: ->
+    @victoryMenu = @createVictoryMenu(
+      () =>
+        console.log('restart extermination')
+        newMission(Extermination)
+      () =>
+        console.log('to next mission')
+        newMission(Menu)
+    )
+    @failMenu = @createFailMenu(
+      () =>
+        console.log('restart extermination')
+        newMission(Extermination)
+    )
+
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
 
@@ -45,4 +66,7 @@ class Extermination extends Mission
     # TODO: check for end game
     if @home.numShips(window.config.units.probe) > 10
       UI.endGame()
-      newMission(Menu)
+      @victoryMenu.open()
+    if @home.numShips(window.config.units.defenseShip) > 10
+      UI.endGame()
+      @failMenu.open()
