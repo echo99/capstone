@@ -794,6 +794,7 @@ class UserInterface
         @_setHandler(groupDisplay, controlGroup)
 
         @controlGroups.push(controlGroup)
+        controlGroup.setZIndex(100)
         gameFrame.addChild(controlGroup)
         @_groupDisplays.push(groupDisplay)
         frameElement.addChild(groupDisplay)

@@ -102,9 +102,14 @@ root.config =
     columns: 4
     numberOffset: {x: 10, y: 20}
     button:
-      offset: {x: -50, y: 16}
-      w: 60
-      h: 25
+      offset: {x: 50, y: 16}
+      smallLoc: {x: 60/2, y: 25*3/2}
+      smallW: 60
+      smallH: 25
+      bigLoc: {x: 60*3/2, y: 25*3/2}
+      bigW: 80*3
+      bigH: 25*3
+      imgOffset: 70
   selectionStyle:
     stroke: "rgba(255, 255, 0, 1)"
     lineWidth: 2
