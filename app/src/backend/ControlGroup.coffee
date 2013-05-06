@@ -99,22 +99,22 @@ class ControlGroup
   #
   # @param [Planet] v Current planet.
   updateAi: (v) ->
-    console.log("Finding route for control group")
+    #console.log("Finding route for control group")
     @_route = []
     q = []
     seen = []
     q.push([v, null])
     seen.push(v)
-    console.log("q: " + q)
+    #console.log("q: " + q)
     while q.length > 0
       t = q.shift()
-      console.log("t[0] " + t[0])
-      console.log("dest " + @_destination)
-      console.log("t[0] is dest: " + (t[0] is @_destination))
+      #console.log("t[0] " + t[0])
+      #console.log("dest " + @_destination)
+      #console.log("t[0] is dest: " + (t[0] is @_destination))
       if t[0] is @_destination
         current = t
-        console.log("current[0]: " + current[0])
-        console.log("current[1]: " + current[1])
+        #console.log("current[0]: " + current[0])
+        #console.log("current[1]: " + current[1])
         while current[1] != null
           # add element to back of list
           @_route.unshift(current[0])
@@ -126,7 +126,7 @@ class ControlGroup
             not (u.visibility is window.config.visibility.fungus)
           seen.push(u)
           q.push([u, t])
-    console.log("route: " + @_route)
+    #console.log("route: " + @_route)
     return null
 
   # Returns a string representation of this ControlGroup

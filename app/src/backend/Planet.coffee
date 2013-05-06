@@ -200,6 +200,12 @@ class Planet
 
   # UPKEEP #
 
+  
+  # Increases available resources by the rate if there is a structure.
+  gatherResources: ->
+    if @_outpost or @_station
+      @_availableResources += @_rate
+
   # Fungus growth phase 1.
   # Determines growth and sporing for next turn.
   #
@@ -320,9 +326,7 @@ class Planet
   # Moves control groups.
   #
   movementUpkeep1: ->
-    console.log("Moveing control groups for " + @toString())
     @move(group) for group in @_controlGroups
-    console.log("Done moving groups")
 
   # Movement phase 2.
   # Resets all control groups to allow movement again.
@@ -332,12 +336,10 @@ class Planet
     for group in @_controlGroups
       group.resetMoved()
       if group.destination() is @
-        console.log("Group arrived at " + @_x + ", " + @_y)
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
         @_probes += group.probes()
         @_colonies += group.colonies()
-        console.log("removing group: " + group.toString() + " from " + @toString())
         @_controlGroups = @_controlGroups.filter((g) => g != group)
 
   # Visibility upkeep method.
@@ -346,7 +348,11 @@ class Planet
   #
   visibilityUpkeep: ->
     # If it has probes:
-    if @_probes > 0 or @_station or @_outpost
+    if @_probes > 0 or
+       @_attackShips > 0 or
+       @_defenseShips > 0 or
+       @_colonies or
+       @_station or @_outpost
       # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen
         @_hasBeenSeen = true
@@ -370,8 +376,8 @@ class Planet
         @_visibility = root.config.visibility.discovered
     # Check to be sure that we aren't displaying the wrong thing
     if @_visibility == root.config.visibility.visible
-      #if @_lastSeenResources != @_resources and @_probes > 0
-      #  throw new Error "last seen resources don't match but we have a probe."
+      if @_lastSeenResources != @_resources and @_probes > 0
+        throw new Error "last seen resources don't match but we have a probe."
       if @_lastSeenFungus != @_fungusStrength
         throw new Error "last seen fungus dosn't match."
     @checkRepresentationalInvariants()
@@ -380,9 +386,9 @@ class Planet
   # based on currently-known information.
   #
   updateAI: ->
-    console.log("updating control groups in planet " + @toString())
+    #console.log("updating control groups in planet " + @toString())
     group.updateAi(@) for group in @_controlGroups
-    console.log("done updating control groups")
+    #console.log("done updating control groups")
 
   # INGAME COMMANDS #
 
@@ -422,16 +428,15 @@ class Planet
       return null
     # check for insufficient ships
     if attackShips > @_attackShips or
-       defenseShips > @_defenseShips or
-       probes > @_probes or
-       colonies > @_colonies
-      console.log("Insufficient Ships!!!!")
-      #throw Error "Insufficient Ships"
+         defenseShips > @_defenseShips or
+         probes > @_probes or
+         colonies > @_colonies
+      throw Error "Insufficient Ships"
     else
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
                                       probes, colonies, dest)
-      console.log("Created new control group on " + @toString())
+      #console.log("Created new control group on " + @toString())
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips
@@ -439,9 +444,9 @@ class Planet
       @_colonies -= colonies
       controlGroup.updateAi(@)
       # add to planet
-      console.log("Adding control group to planet " + @toString())
+      #console.log("Adding control group to planet " + @toString())
       @_controlGroups.push(controlGroup)
-      console.log("Control groups: " + @_controlGroups)
+      #console.log("Control groups: " + @_controlGroups)
 
   # SETTERS FOR USE BY GAME CLASS #
 
@@ -459,29 +464,17 @@ class Planet
   # @param [ControlGroup] group The group to be moved.
 
   move: (group) ->
-    console.log("Moving control group " + group.toString())
     if not group.moved()
-      console.log("Group has not been moved")
       group.setMoved()
-      console.log("dest is @: " + (group.destination() is @))
-      console.log("dest is group.next: " + (group.destination() is group.next()))
-      console.log("NEXT: " + group.next())
       if !(group.destination() is @)
-        console.log("Group not yet at destination, send to next planet on path")
         group.next().receiveGroup(group)
-        console.log("removing group: " + group.toString() + " from " + @toString())
         @_controlGroups = @_controlGroups.filter((g) => g != group)
-        console.log("new groups: " + @_controlGroups)
-    else
-      console.log("Control group already moved")
 
   # Adds a given group to the current planet
   #
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
-    console.log("planet " + @toString() + " recieving " + group.toString())
     @_controlGroups.push(group)
-    console.log("planet " + @toString() + "'s groups are now " + @_controlGroups)
 
   # Given a chance of success and a number of units, determine one roll.
   #
