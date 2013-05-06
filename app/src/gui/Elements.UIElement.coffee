@@ -316,7 +316,7 @@ class Elements.UIElement extends Module
     @x = newX
     @y = newY
     for child in @_children
-      child.setActualLocation(this)
+      child?.setActualLocation(this)
 
 
   # Clear this element using a clear function
@@ -380,7 +380,7 @@ class Elements.UIElement extends Module
         children = @_childBuckets[zIndex]
         # for child in @_children
         for child in children
-          if child.visible
+          if child?.visible
             # console.log("Checking #{child.name}")
             clickedChild = child.click(relLoc.x, relLoc.y)
             clickedSomething or= clickedChild
@@ -411,13 +411,14 @@ class Elements.UIElement extends Module
         children = @_childBuckets[zIndex]
         # for child in @_children
         for child in children
-          if hoveredChild
-            child.mouseOut()
-          else
-            pointer = child.mouseMove(relLoc.x, relLoc.y)
-            if pointer
-              pointerType = pointer
-              hoveredChild = true
+          if child?
+            if hoveredChild
+              child.mouseOut()
+            else
+              pointer = child.mouseMove(relLoc.x, relLoc.y)
+              if pointer
+                pointerType = pointer
+                hoveredChild = true
     else if @_hovering and @visible
       # @_hovering = false
       # @_onMouseOut()
@@ -431,7 +432,7 @@ class Elements.UIElement extends Module
       @_hovering = false
       @_onMouseOut()
       for child in @_children
-        child.mouseOut()
+        child?.mouseOut()
 
   # Call to element to check if it is being pressed
   #
@@ -453,7 +454,8 @@ class Elements.UIElement extends Module
           # if pressedChild
           #   child.mouseOut()
           # else
-          pressedChild or= child.mouseDown(relLoc.x, relLoc.y)
+          if child?
+            pressedChild or= child.mouseDown(relLoc.x, relLoc.y)
           break if pressedChild
       return (@_pressed and @clickable) or pressedChild
     return false
@@ -476,13 +478,13 @@ class Elements.UIElement extends Module
     if @_pressed
       @_onMouseUp()
       for child in @_children
-        child.mouseUp() if child._pressed
+        child.mouseUp() if child? and child._pressed
 
   # [WIP] Call to when element is resized
   resize: ->
     @_onResize()
     for child in @_children
-      child.mouseUp() if child._pressed
+      child.mouseUp() if child? and child._pressed
 
   # # @private Action to perform when element is hovered over
   # # @abstract
