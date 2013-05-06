@@ -166,6 +166,7 @@ main = ->
   # console.log(ctx.font)
 
   feedback = $('#comments').jqm()
+  feedbackElem = document.getElementById('comments')
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
@@ -275,7 +276,12 @@ main = ->
     config.spriteNames.FEEDBACK, SHEET).setRight(btnSpacing*2 + fullscreenBtn.w)
     .setBottom(btnSpacing)
   feedbackBtn.setClickHandler ->
-    feedback.jqmShow()
+    if BROWSER == Browser.IE
+      feedbackElem.style.display = 'inline-block'
+    try
+      feedback.jqmShow()
+    catch e
+      console.warn(e)
 
 
   ##################################################################################
