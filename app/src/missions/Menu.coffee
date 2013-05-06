@@ -74,7 +74,8 @@ class Menu extends Mission
     cameraHudFrame.removeChild(@mission1Menu)
     cameraHudFrame.removeChild(@mission2Menu)
     cameraHudFrame.removeChild(@exterminationMenu)
-    cameraHudFrame.removeChild(@gameCompleteMenu)
+    if @gameCompleteMenu
+      cameraHudFrame.removeChild(@gameCompleteMenu)
 
   _initMenus: ->
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
@@ -96,19 +97,21 @@ class Menu extends Mission
         loc = @gameCompleteMenu.getActualLocation(close.x, close.y)
         SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
     )
-    @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 100,
-      "Congratulations!\n
-       You've completed all the missions. If you haven't had enough yet be sure to
-       check out Extermination mode. Also, we would love to hear any feedback you
-       might have, let us know by clicking the feedback icon in the lower right.",
+    message = "Congratulations!\n\nYou've completed all the missions. If you "
+    message += "haven't had enough yet be sure to check out Extermination mode. "
+    message += "Also, we would love to hear any feedback you might have, let us "
+    message += "know by clicking the feedback icon in the lower right."
+    @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 120, message
       {
         closeBtn: close,
         textAlign: 'left',
         vAlign: 'top',
         font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
         visible: false
       })
     cameraHudFrame.addChild(@gameCompleteMenu)
+    @gameCompleteMenu.open()
 
   _createMenu: (settings, onStart) ->
     cancel = settings.cancel

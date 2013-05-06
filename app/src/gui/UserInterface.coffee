@@ -675,7 +675,6 @@ class UserInterface
       @help.open()
 
     if @hoveredPlanet
-      # if the button is a planet
       tooltipCtx.textAlign = "left"
       tooltipCtx.font = window.config.toolTipStyle.font
       tooltipCtx.fillStyle = window.config.toolTipStyle.color
@@ -700,6 +699,7 @@ class UserInterface
         else
           tooltipCtx.fillText("Open colony ship menu", x, y)
       else
+        tooltipCtx.fillText("No action available", x, y)
         hasAction = false
 
       if hasAction
