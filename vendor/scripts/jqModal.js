@@ -147,7 +147,7 @@
   var s = 0,
     H = $.jqm.hash,
     A = [],
-    ie6 = (navigator.userAgent.match(/msie 6.\d+/i),
+    ie6 = (navigator.userAgent.match(/msie 6.\d+/i)),
     F = false,
     i = $('<iframe src="javascript:false;document.write(\'\');" class="jqm"></iframe>').css({
       opacity: 0
