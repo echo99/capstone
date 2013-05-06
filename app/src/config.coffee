@@ -42,7 +42,8 @@ root.config =
     msgBoxText:
       font: "18pt Arial"
       color: "rgb(255, 255, 255)"
-      lineWidth: 28
+      lineHeight: 28
+      padding: 5
   toolTipStyle:
     font: "15px Arial"
     color: "rgba(255, 255, 255, 1)"
