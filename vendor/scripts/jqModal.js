@@ -117,7 +117,6 @@
             if (cc) h.w.jqmAddClose($(cc, h.w));
             e(h);
             c.ajaxUpdated = true;
-            console.log(c);
           });
         }
       } else if (cc) h.w.jqmAddClose($(cc, h.w));
@@ -148,7 +147,7 @@
   var s = 0,
     H = $.jqm.hash,
     A = [],
-    ie6 = (navigator.userAgent.match(/msie/i) && navigator.userAgent.match(/6/)),
+    ie6 = (navigator.userAgent.match(/msie 6.\d+/i),
     F = false,
     i = $('<iframe src="javascript:false;document.write(\'\');" class="jqm"></iframe>').css({
       opacity: 0
