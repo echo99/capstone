@@ -803,8 +803,7 @@ class UserInterface
   _getExpandedDisplay: (controlGameLoc, groups) ->
     winStyle = window.config.windowStyle
     w = window.config.controlGroup.expandedWidth
-    h = window.config.controlGroup.expandedHeight * groups.length# +
-        #window.config.windowStyle.lineWidth * (groups.length - 1)
+    h = window.config.controlGroup.expandedHeight * groups.length
     groupDisplay = new Elements.BoxElement(-1000, -1000, w, h)
     clear = (ctx) =>
       ctx.fillStyle = winStyle.fill
