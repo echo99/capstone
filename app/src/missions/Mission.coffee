@@ -1,8 +1,6 @@
 # The Mission class defines a guarenteed layout for each mission. It also
 # defines behavior that is common between or frequently used by missions.
 class Mission
-  #@todo include methods/fields for displaying an end-game screen so that
-  #      it can be shared between all the missions that use it.
   settings: window.config.Missions
 
   # Creates a new mission and sets it up. This should not need to be

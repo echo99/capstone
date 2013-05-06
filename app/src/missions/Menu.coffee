@@ -73,6 +73,7 @@ class Menu extends Mission
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)
     cameraHudFrame.removeChild(@mission2Menu)
+    cameraHudFrame.removeChild(@mission3Menu)
     cameraHudFrame.removeChild(@exterminationMenu)
     if @gameCompleteMenu
       cameraHudFrame.removeChild(@gameCompleteMenu)
@@ -81,11 +82,13 @@ class Menu extends Mission
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
       newMission(Mission1))
     @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
-      console.log('clicked mission 2 button'))
+      console.log('clicked mission 2 button')
+      newMission(Mission1))
     @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
       console.log('clicked mission 3 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
       newMission(Extermination))
+
     if @allMissionsComplete and not @seenGameCompleteMenu
       close = new Elements.Button(500 - 10, 10, 16, 16,
         () =>
@@ -200,16 +203,6 @@ class Menu extends Mission
           break
       camera.setTarget(@lastPlanet.location())
 
-    # NOTE: this assumes that the game handle the mouse click first,
-    #       if that's not the case this may have to be done differently
-    # else if the prompt is being displayed and the mouse is on a button
-    #   if cancel button
-    #     close prompt
-    #   else if play button
-    #     CurrentMission = the mission that the planet goes to
-    #   else
-    #     (other buttons?)
-
   getHomeTarget: ->
     return @lastPlanet.location()
 
@@ -232,9 +225,6 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-    #   for each planet that leaves the menu
-    #     if the planet has a probe on it
-    #       open prompt for the planet
     # Add the probe to the selected units
 
   _checkMissions: (p) ->

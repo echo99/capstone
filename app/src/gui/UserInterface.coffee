@@ -3,11 +3,7 @@
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
 # TODO:
-#   - Deselect all units button
-#   - Menu button, with option for not displaying it because the main menu doesn't
-#     need it
-#   - Display number of units selected locally. This will also be a button that
-#     toggles selecting all of the unit type.
+#   - Deselect all units button (this might not be needed actually
 class UserInterface
   planetButtons: []
   hoveredPlanet: null
@@ -44,7 +40,7 @@ class UserInterface
     )
     b.setZIndex(100)
     frameElement.addChild(b)
-
+    console.log("construct")
     @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return", {zIndex: 10})
     @help.visible = false

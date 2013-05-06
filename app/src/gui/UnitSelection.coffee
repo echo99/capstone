@@ -1,7 +1,5 @@
 
 # Keeps track of and updates the which units are selected
-# TODO:
-#   - Make display change when zoomed out too far
 class UnitSelection
   total: 0
   totalProbes: 0
