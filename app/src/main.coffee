@@ -19,7 +19,6 @@ Browser =
   FIREFOX: 'Firefox'
   IE: 'Explorer'
 
-
 TESTING = window.TESTING?
 DEBUG = true
 # console.log("Testing flag: " + TESTING)
@@ -88,6 +87,25 @@ tooltipCanvas = null
 tooltipCtx = null
 
 drag = false
+
+
+WIN7 = false
+
+determineWin7 = ->
+  console.log(navigator.userAgent)
+  pat = /^\S+ \((.*?)\)/
+  match = navigator.userAgent.match(pat)
+  osStr = match[1]
+  pat = /Windows NT (\d+\.\d+)/
+  match = osStr.match(pat)
+  if match
+    version = match[1]
+    # Windows 7 is Windows NT 6.1
+    if version == '6.1'
+      WIN7 = true
+      console.log('You are using Windows 7')
+
+determineWin7()
 
 newMission = (mission) ->
   CurrentMission.destroy()
@@ -270,7 +288,8 @@ main = ->
       fullscreenBtn.setState('unfullscreen')
       # sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
   # Disable fullscreen button on IE (since it doesn't support those features)
-  if BROWSER == Browser.IE
+  # Also disable on Windows 7 Chrome due to bug
+  if BROWSER == Browser.IE or (WIN7 and BROWSER == Browser.CHROME)
     fullscreenBtn.disable()
 
   # Set mute button
