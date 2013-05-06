@@ -110,7 +110,7 @@ root.config =
       bigLoc: {x: 80*3/2, y: 25*3/2}
       bigW: 80*3
       bigH: 25*3
-      imgOffset: 70
+      imgOffset: 83
   selectionStyle:
     stroke: "rgba(255, 255, 0, 1)"
     lineWidth: 2
