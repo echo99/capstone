@@ -309,12 +309,13 @@ main = ->
     config.spriteNames.FEEDBACK, SHEET).setRight(btnSpacing*2 + fullscreenBtn.w)
     .setBottom(btnSpacing)
   feedbackBtn.setClickHandler ->
-    if BROWSER == Browser.IE
-      feedbackElem.style.display = 'inline-block'
-    try
-      feedback.jqmShow()
-    catch e
-      console.warn(e)
+    feedback.jqmShow()
+    # if BROWSER == Browser.IE
+    #   feedbackElem.style.display = 'inline-block'
+    # try
+    #   feedback.jqmShow()
+    # catch e
+    #   console.warn(e)
 
 
   ##################################################################################

@@ -278,6 +278,7 @@ class UnitSelection
           text = num + "/" + planet.numShips(unit)
           ctx.fillText(text, x, loc.y)
 
+          ctx.fillStyle = window.config.unitDisplay.fill
           ctx.strokeStyle = style.stroke
           ctx.lineJoin = style.lineJoin
           ctx.lineWidth = style.lineWidth
@@ -286,6 +287,8 @@ class UnitSelection
 
           dist = buttonSettings.imgOffset * camera.getZoom()
           zoom = camera.getZoom() * 2
+          if num == planet.numShips(unit)
+            ctx.fillRect(x + (w - h), y, h, h)
           switch unit
             when window.config.units.probe
               SHEET.drawSprite(SpriteNames.PROBE, loc.x+dist, loc.y, ctx, false,
