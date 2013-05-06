@@ -168,7 +168,11 @@ main = ->
   # console.log(ctx.font)
 
   # feedback = $('#comments').jqm()
-  feedback = $('#comments').jqm({ajax:'fbcomments.html',overlay:0});
+  feedback = $('#comments').jqm({
+    ajax: 'fbcomments.html',
+    ajaxUpdate: false,
+    modal: true
+  })
   feedbackElem = document.getElementById('comments')
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,

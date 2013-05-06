@@ -17,6 +17,8 @@
       overlayClass: 'jqmOverlay',
       closeClass: 'jqmClose',
       trigger: '.jqModal',
+      ajaxUpdate: false,
+      ajaxUpdated: false,
       ajax: F,
       ajaxText: '',
       target: F,
@@ -104,15 +106,20 @@
       }
 
       if (c.ajax) {
-        var r = c.target || h.w,
-          u = c.ajax,
-          r = (typeof r == 'string') ? $(r, h.w) : $(r),
-          u = (u.substr(0, 1) == '@') ? $(t).attr(u.substring(1)) : u;
-        r.html(c.ajaxText).load(u, function() {
-          if (c.onLoad) c.onLoad.call(this, h);
-          if (cc) h.w.jqmAddClose($(cc, h.w));
-          e(h);
-        });
+        // console.log(c)
+        if (!c.ajaxUpdate && !c.ajaxUpdated) {
+          var r = c.target || h.w,
+            u = c.ajax,
+            r = (typeof r == 'string') ? $(r, h.w) : $(r),
+            u = (u.substr(0, 1) == '@') ? $(t).attr(u.substring(1)) : u;
+          r.html(c.ajaxText).load(u, function() {
+            if (c.onLoad) c.onLoad.call(this, h);
+            if (cc) h.w.jqmAddClose($(cc, h.w));
+            e(h);
+            c.ajaxUpdated = true;
+            console.log(c);
+          });
+        }
       } else if (cc) h.w.jqmAddClose($(cc, h.w));
 
       if (c.toTop && h.o) h.w.before('<span id="jqmP' + h.w[0]._jqm + '"></span>').insertAfter(h.o);
