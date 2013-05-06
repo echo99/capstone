@@ -198,6 +198,16 @@ class Planet
         @_defenseShips += number
       else throw new Error("Ship type unknown.")
 
+  # Cancels the current building unit.
+  #
+  # @throw [Error] if there is no unit building
+  cancelConstruction: ->
+    if @_unitConstructing == null and @_turnsToComplete == 0
+      throw new Error("Tried to cancel when not constructing")
+    else
+      @_unitConstructing = null
+      @_turnsToComplete = 0
+
   # UPKEEP #
 
   
