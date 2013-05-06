@@ -257,20 +257,21 @@ root.config =
       y: -750
       menu:
         w: 300
-        h: 100
-        message: "Mission 1\n\nGoal: something"
+        h: 140
+        message: "Mission 1\n\nGoal: Rescue the attack ships and eliminate " +
+                 "all fungus in the area. Don't lose your probes."
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
         lineHeight: 19
         cancel:
           x: 245
-          y: 85
+          y: 125
           w: 60
           h: 20
         start:
           x: 145
-          y: 85
+          y: 125
           w: 101
           h: 20
     mission2:

@@ -154,7 +154,7 @@ class UnitSelection
             for stack in row
               if stack.selected and stack.getCount() > 0
                 stack.selected = false
-                callback(-stack.getCnnount())
+                callback(-stack.getCount())
         else
           for row in unitSelection
             for stack in row
@@ -197,10 +197,12 @@ class UnitSelection
     element.setDrawFunc(
       (ctx) =>
         if camera.getZoom() < window.config.displayCutoff
+          #if button.visible
           button.close()
           bigButton.open()
           @_closeAllStacks()
         else
+          #if bigButton.visible
           bigButton.close()
           button.open()
           @_openAllStacks()
@@ -638,7 +640,7 @@ class Stack
     @b = new Elements.Button(x, y, @w, @h, @toggleSelection)
     @b.setHoverHandler(() => @hovered = true)
     @b.setMouseOutHandler(() => @hovered = false)
-    @b.visilbe = false
+    @b.visible = false
     gameFrame.addChild(@b)
 
   destroy: ->
@@ -697,7 +699,7 @@ class Stack
 
   # Adds one to the count of the stack
   addOne: () ->
-    if not @open
+    if not @open and camera.getZoom() > window.config.displayCutoff
       @b.open()
       @open = true
     @count++

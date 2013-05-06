@@ -40,7 +40,6 @@ class UserInterface
     )
     b.setZIndex(100)
     frameElement.addChild(b)
-    console.log("construct")
     @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return", {zIndex: 10})
     @help.visible = false
