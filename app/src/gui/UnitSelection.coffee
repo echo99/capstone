@@ -8,7 +8,6 @@ class UnitSelection
   totalDefenses: 0
   onlyProbe: false
   lastMousePos: {x: 0, y: 0}
-  lastZoom: 0
   planetsWithSelectedUnits: []
   totalDisplay: null
   selectAllHovered: null
@@ -155,7 +154,7 @@ class UnitSelection
             for stack in row
               if stack.selected and stack.getCount() > 0
                 stack.selected = false
-                callback(-stack.getCount())
+                callback(-stack.getCnnount())
         else
           for row in unitSelection
             for stack in row
@@ -200,9 +199,11 @@ class UnitSelection
         if camera.getZoom() < window.config.displayCutoff
           button.close()
           bigButton.open()
+          @_closeAllStacks()
         else
           bigButton.close()
           button.open()
+          @_openAllStacks()
         ###
         loc = camera.getScreenCoordinates({x: element.x, y: element.y})
 
@@ -382,21 +383,15 @@ class UnitSelection
   _openStacks: (stacks) ->
     for row in stacks
       for stack in row
-        stack.b.open()
-        stack.open = true
+        if stack.count > 0
+          stack.b.open()
+          stack.open = true
 
   # Draws the units next to each planet
   #
   # @param [CanvasRenderingContext2D] ctx The game context
   # @param [CanvasRenderingContext2D] hudCtx The hud context
   draw: (ctx, hudCtx) ->
-    currentZoom = camera.getZoom()
-    cutoff = window.window.config.displayCutoff
-    if currentZoom < cutoff and @lastZoom > cutoff
-      @_closeAllStacks()
-    else if currentZoom > cutoff and @lastZoom < cutoff
-      @_openAllStacks()
-
     found = false
     for p in game.getPlanets()
       units = p.unitSelection
@@ -428,8 +423,6 @@ class UnitSelection
         tooltipCtx.fillText("Select/Deselect all attack ships", x, y)
       when window.config.units.defenseShip
         tooltipCtx.fillText("Select/Deselect all defense ships", x, y)
-
-    @lastZoom = currentZoom
 
   _drawToolTip: (stacks) ->
     for row in stacks
@@ -636,7 +629,7 @@ class UnitSelection
 class Stack
   @selected: false
   @hovered: false
-  @open: true
+  @open: false
 
   # Constructs a new stack with a default count of 0
   constructor: (@x, @y, @callback, @planet, @count=0) ->
@@ -645,6 +638,7 @@ class Stack
     @b = new Elements.Button(x, y, @w, @h, @toggleSelection)
     @b.setHoverHandler(() => @hovered = true)
     @b.setMouseOutHandler(() => @hovered = false)
+    @b.visilbe = false
     gameFrame.addChild(@b)
 
   destroy: ->
@@ -661,11 +655,6 @@ class Stack
   # @param [Number] y The y location of the stack
   draw: (ctx) ->
     if not @open then return
-    if @count == 0
-      @b.visible = false
-      return
-    else
-      @b.visible = true
     x = @x - @w / 2
     y = @y - @h / 2
     coords = camera.getScreenCoordinates({x: x, y: y})
@@ -693,6 +682,12 @@ class Stack
   #
   # @param [Number] count the number to set
   setCount: (@count) ->
+    if @count == 0
+      @b.close()
+      @open = false
+    else
+      @b.open()
+      @open = true
 
   # Gets the current count of the stack
   #
@@ -702,6 +697,9 @@ class Stack
 
   # Adds one to the count of the stack
   addOne: () ->
+    if not @open
+      @b.open()
+      @open = true
     @count++
 
   # Test if this stack is selected
