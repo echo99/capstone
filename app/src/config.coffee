@@ -107,7 +107,7 @@ root.config =
       smallLoc: {x: 60/2, y: 25*3/2}
       smallW: 60
       smallH: 25
-      bigLoc: {x: 60*3/2, y: 25*3/2}
+      bigLoc: {x: 80*3/2, y: 25*3/2}
       bigW: 80*3
       bigH: 25*3
       imgOffset: 70

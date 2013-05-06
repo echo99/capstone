@@ -8,12 +8,40 @@ class Mission1 extends Mission
     #game.setup(10, null)
     #return
     newGame(10000, 10000)
+    @home = new Planet(0,0)
+    @home.addShips(window.config.units.probe, 2)
+    game.addPlanet(@home)
+
+    attack1 = new Planet(-1000, -1000)
+    attack1.addShips(window.config.units.attackShip, 2)
+    game.addPlanet(attack1)
+
+    attack2 = new Planet(-1500, 1000)
+    attack2.addShips(window.config.units.attackShip, 4)
+    game.addPlanet(attack2)
+
+    p3 = new Planet(-500, -600)
+    game.addPlanet(p3)
+
+    p5 = new Planet(-600, 600)
+    game.addPlanet(p5)
+
+    p6 = new Planet(-1100, 700)
+    game.addPlanet(p6)
+
+    game.setNeighbors(@home, p3)
+    game.setNeighbors(@home, p5)
+    game.setNeighbors(p3, attack1)
+    game.setNeighbors(p5, p6)
+    game.setNeighbors(p6, attack2)
 
     UI.initialize()
     camera.setZoom(0.5)
-    #camera.setTarget(@home.location())
+    camera.setTarget(@home.location())
 
     @_initMenus()
+
+    game.endTurn()
 
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
@@ -41,7 +69,7 @@ class Mission1 extends Mission
   onMouseClick: (x, y) ->
 
   getHomeTarget: ->
-    return {x: 0, y: 0}
+    return @home.location()
 
   # @see Mission#onEndTurn
   onEndTurn: ->

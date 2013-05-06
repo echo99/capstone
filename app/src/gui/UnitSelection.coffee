@@ -203,6 +203,16 @@ class UnitSelection
         else
           bigButton.close()
           button.open()
+        ###
+        loc = camera.getScreenCoordinates({x: element.x, y: element.y})
+
+        w = element.w * camera.getZoom()
+        h = element.h * camera.getZoom()
+        x = loc.x - w / 2
+        y = loc.y - h / 2
+
+        ctx.strokeRect(x, y, w, h)
+        ###
     )
 
     button.setDrawFunc(
@@ -210,8 +220,6 @@ class UnitSelection
         winStyle = window.config.windowStyle
         style = window.config.unitDisplay
 
-        #loc = camera.getScreenCoordinates(
-        #  {x: button.x, y: button.y})
         loc = camera.getScreenCoordinates(
           element.getActualLocation(button.x, button.y))
 
@@ -228,11 +236,7 @@ class UnitSelection
           ctx.fillStyle = winStyle.lageText.color
 
           size = ctx.getFontSizeVal()
-          scale = buttonSettings.scale
-          #if camera.getZoom() < window.config.displayCutoff
-          #  w = buttonSettings.w * scale
-          #  h = buttonSettings.h * scale
-          #  size *= scale
+
           ctx.setFontSizeVal(Math.floor(size * camera.getZoom()))
 
           text = num + "/" + planet.numShips(unit)
