@@ -100,7 +100,8 @@ determineWin7 = ->
   match = osStr.match(pat)
   if match
     version = match[1]
-    if version == '6.1' or version == '7.0'
+    # Windows 7 is Windows NT 6.1
+    if version == '6.1'
       WIN7 = true
       console.log('You are using Windows 7')
 
