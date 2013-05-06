@@ -63,12 +63,12 @@ class Menu extends Mission
     #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home
-    UI.initialize(true, false, false)
     camera.setZoom(0.5)
     camera.setTarget(@Planets.Home.location())
 
     @_initMenus()
     game.endTurn()
+    UI.initialize(true, false, false)
 
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)

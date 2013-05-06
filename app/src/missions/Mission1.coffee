@@ -20,28 +20,41 @@ class Mission1 extends Mission
     attack2.addShips(window.config.units.attackShip, 4)
     game.addPlanet(attack2)
 
-    p3 = new Planet(-500, -600)
+    p1 = new Planet(0, -800)
+    game.addPlanet(p1)
+
+    p2 = new Planet(400, -500)
+    game.addPlanet(p2)
+
+    p3 = new Planet(-400, -500)
     game.addPlanet(p3)
 
-    p5 = new Planet(-600, 600)
+    p4 = new Planet(300, 450)
+    game.addPlanet(p4)
+
+    p5 = new Planet(-500, 500)
     game.addPlanet(p5)
 
     p6 = new Planet(-1100, 700)
     game.addPlanet(p6)
 
+    game.setNeighbors(@home, p2)
     game.setNeighbors(@home, p3)
+    game.setNeighbors(@home, p4)
     game.setNeighbors(@home, p5)
+    game.setNeighbors(p1, p3)
+    game.setNeighbors(p1, p2)
     game.setNeighbors(p3, attack1)
     game.setNeighbors(p5, p6)
     game.setNeighbors(p6, attack2)
 
-    UI.initialize()
     camera.setZoom(0.5)
     camera.setTarget(@home.location())
 
     @_initMenus()
 
     game.endTurn()
+    UI.initialize()
 
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)

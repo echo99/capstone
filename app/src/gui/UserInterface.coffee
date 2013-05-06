@@ -491,7 +491,8 @@ class UserInterface
     y = loc.y + colonyStyle.availableLoc.y
     ctx.fillText(probes, x, y)
 
-
+  # Must be called after newGame(...) or game.endTurn() for settings to be
+  # correct on first turn.
   initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
     @planetButtons = []
     for p in game.getPlanets()
@@ -501,6 +502,13 @@ class UserInterface
       b.setHoverHandler(@planetButtonHoverCallback(p))
       b.setMouseOutHandler(@planetButtonOutCallback)
       b.setProperty("planet", p)
+      vis = p.visibility()
+      if vis == window.config.visibility.undiscovered or
+         (vis == window.config.visibility.discovered and
+         not @moveToDiscovered)
+        b.visible = false
+      else
+        b.visible = true
       gameFrame.addChild(b)
       @planetButtons.push(b)
     @unitSelection.initialize(onlyProbe)
@@ -962,16 +970,16 @@ class UserInterface
     for p in game.getPlanets()
       @unitSelection.updateSelection(p)
 
-    # Reset planet button visiblility
+    # Reset planet button visibility
     for b in @planetButtons
       p = b.getProperty("planet")
       vis = p.visibility()
       if vis == window.config.visibility.undiscovered or
          (vis == window.config.visibility.discovered and
          not @moveToDiscovered)
-        b.visible = false
+        b.close()
       else
-        b.visible = true
+        b.open()
     if @stationMenu
       @stationMenu.setDirty()
     if @outpostMenu
