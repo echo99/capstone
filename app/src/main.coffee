@@ -19,7 +19,6 @@ Browser =
   FIREFOX: 'Firefox'
   IE: 'Explorer'
 
-
 TESTING = window.TESTING?
 DEBUG = true
 # console.log("Testing flag: " + TESTING)
@@ -88,6 +87,24 @@ tooltipCanvas = null
 tooltipCtx = null
 
 drag = false
+
+
+WIN7 = false
+
+determineWin7 = ->
+  console.log(navigator.userAgent)
+  pat = /^\S+ \((.*?)\)/
+  match = navigator.userAgent.match(pat)
+  osStr = match[1]
+  pat = /Windows NT (\d+\.\d+)/
+  match = osStr.match(pat)
+  if match
+    version = match[1]
+    if version == '6.1' or version == '7.0'
+      WIN7 = true
+      console.log('You are using Windows 7')
+
+determineWin7()
 
 newMission = (mission) ->
   CurrentMission.destroy()
@@ -169,7 +186,7 @@ main = ->
 
   # feedback = $('#comments').jqm()
   feedback = $('#comments').jqm({
-    ajax: 'fbcomments.html',
+    ajax: 'mfbcomments.html',
     ajaxUpdate: false,
     modal: true
   })
