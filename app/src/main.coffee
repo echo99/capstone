@@ -176,9 +176,10 @@ main = ->
   # frameElement.addChild(msgBox)
   # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
   #   "This message needs to be wrapped",
-  #   {textAlign: 'left', lineHeight: 35}))
+  #   {textAlign: 'left', vAlign:'bottom', lineHeight: 35}))
   # frameElement.addChild(new Elements.MessageBox(150, 550, 280, 100,
-  #   "This message is left aligned", {textAlign:'right', padding: 0}))
+  #   "This message is right aligned",
+  #   {textAlign:'right', hPadding: 30, vPadding: 10, vAlign: 'top'}))
   # frameElement.addChild(new Elements.MessageBox(450, 350, 280, 100,
   #   "This message is top aligned", {vAlign:'top'}))
   # frameElement.addChild(new Elements.MessageBox(150, 500, 280, 100,

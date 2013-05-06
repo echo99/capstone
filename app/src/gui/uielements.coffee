@@ -487,12 +487,14 @@ class Elements.MessageBox extends Elements.BoxElement
   # @option options [String] fontColor Set the message color
   # @options option [Number] lineHeight
   #   Height of each line of text (spacing + text height)
-  # @options option [Number] padding Extra space to the left and right of the text
+  # @options option [Number] hPadding Extra space to the left and right of the text
+  # @options option [Number] vPadding Extra space to the top and bottom of the text
   #
   constructor: (@x, @y, @w, @h, @message, options={}) ->
     # @closeBtn=null, @textAlign='center',
     #   @vAlign='middle'
-    {closeBtn, textAlign, vAlign, font, fontColor, lineHeight, padding} = options
+    {closeBtn, textAlign, vAlign, font, fontColor, lineHeight, hPadding, vPadding} =
+      options
     @closeBtn = if closeBtn? then closeBtn else null
     @textAlign = if textAlign? then textAlign else 'center'
     @vAlign = if vAlign? then vAlign else 'middle'
@@ -502,9 +504,13 @@ class Elements.MessageBox extends Elements.BoxElement
     @lineHeight = if lineHeight? then lineHeight else
       config.windowStyle.msgBoxText.lineHeight
     # Add width of border to padding
-    @padding = Math.round(config.windowStyle.lineWidth / 2)
+    @hPadding = Math.round(config.windowStyle.lineWidth / 2)
+    @vPadding = @hPadding
     # Set default padding
-    @padding += if padding? then padding else config.windowStyle.msgBoxText.padding
+    @hPadding += if hPadding? then hPadding else
+      config.windowStyle.msgBoxText.padding
+    @vPadding += if vPadding? then vPadding else
+      config.windowStyle.msgBoxText.padding
     super(@x, @y, @w, @h, options)
 
     if @closeBtn?
@@ -537,7 +543,7 @@ class Elements.MessageBox extends Elements.BoxElement
     textWidth = ctx.measureText(@message).width
     # console.log("Width of #{@message} : #{textWidth}")
     # allowedWidth = @w - (config.windowStyle.lineWidth * 4)
-    allowedWidth = @w - (@padding * 2)
+    allowedWidth = @w - (@hPadding * 2)
     lines = @message.split("\n")
     # console.log(lines)
     for line in lines
@@ -561,7 +567,7 @@ class Elements.MessageBox extends Elements.BoxElement
               curline = null
         if curline isnt null
           @lines.push(curline)
-    console.log(@lines)
+    # console.log(@lines)
     @_checkedWrap = true
 
 
@@ -672,22 +678,24 @@ class Elements.MessageBox extends Elements.BoxElement
 
       switch @textAlign
         when 'left'
-          tx = x + cx + @padding
+          tx = x + cx + @hPadding
         when 'right'
-          tx = x - cx - @padding
+          tx = x - cx - @hPadding
         when 'center'
           tx = x
 
       yOffset = (@lines.length-1) * @lineSpacing
       switch @vAlign
         when 'top'
-          ty = y + cy + @lineHeight
+          # ty = y + cy + @lineHeight
+          ty = y + cy + @vPadding
           yTmp = ty
         when 'middle'
           ty = y
           yTmp = ty - yOffset
         when 'bottom'
-          ty = y - cy - @lineHeight
+          # ty = y - cy - @lineHeight
+          ty = y - cy - @vPadding
           yTmp = ty - yOffset*2
 
       if @lines.length > 0
