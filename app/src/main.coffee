@@ -21,6 +21,7 @@ Browser =
 
 
 TESTING = window.TESTING?
+DEBUG = true
 # console.log("Testing flag: " + TESTING)
 
 manifest = [
@@ -221,6 +222,13 @@ main = ->
     console.log("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
 
+  # Set global variables for debugging
+  if DEBUG
+    window.hudFrame = frameElement
+    window.gameFrame = gameFrame
+    window.cameraHudFrame = cameraHudFrame
+    window.UI = UI
+    window.CurrentMission = CurrentMission
 
   ##################################################################################
   # Create static buttons
