@@ -567,6 +567,8 @@ class Elements.MessageBox extends Elements.BoxElement
               curline = null
         if curline isnt null
           @lines.push(curline)
+      else
+        @lines.push(line)
     # console.log(@lines)
     @_checkedWrap = true
 
