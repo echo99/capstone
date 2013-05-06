@@ -36,6 +36,11 @@ class Mission
   # @param [Number] y The y position of the mouse
   onMouseClick: (x, y) ->
 
+  # Returns the location where the camera should go when HOME is pushed.
+  # This must return something.
+  getHomeTarget: ->
+    return {x: 0, y: 0}
+
   # The mission expects this to be called after the end of a turn
   onEndTurn: ->
 

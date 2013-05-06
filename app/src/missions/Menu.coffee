@@ -8,10 +8,10 @@ class Menu extends Mission
   reset: ->
     # Load user progress
     #   Add fungus to locked mission planets
+    @allMissionsComplete = false
+    @seenGameCompleteMenu = false
     #
     # Create planets:
-    #game.setup(10, null)
-    #return
     newGame(10000, 10000)
     @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
               "Extermination", "Credits"]
@@ -58,8 +58,8 @@ class Menu extends Mission
     # Add probe to Home planet
     @Planets.Home.addShips(window.config.units.probe, 1)
     #@Planets.Missions._attackShips = 23
-    @Planets.Mission2._fungusStrength = 1
-    @Planets.Mission3._fungusStrength = 1
+    @Planets.Mission2._fungusStrength = 0
+    @Planets.Mission3._fungusStrength = 0
     #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home
@@ -79,39 +79,39 @@ class Menu extends Mission
 
   _initMenus: ->
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
-      console.log('clicked mission 1 button'))
+      newMission(Mission1))
     @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
       console.log('clicked mission 2 button'))
     @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
       console.log('clicked mission 3 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
       newMission(Extermination))
-    # if they have never seen this menu before:
-    close = new Elements.Button(500 - 10, 10, 16, 16,
-      () =>
-        @gameCompleteMenu.close()
-        # TODO: and never open again
-    )
-    close.setDrawFunc(
-      (ctx) =>
-        loc = @gameCompleteMenu.getActualLocation(close.x, close.y)
-        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
-    )
-    message = "Congratulations!\n\nYou've completed all the missions. If you "
-    message += "haven't had enough yet be sure to check out Extermination mode. "
-    message += "Also, we would love to hear any feedback you might have, let us "
-    message += "know by clicking the feedback icon in the lower right."
-    @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 120, message
-      {
-        closeBtn: close,
-        textAlign: 'left',
-        vAlign: 'top',
-        font: window.config.windowStyle.defaultText.font,
-        lineHeight: 17
-        visible: false
-      })
-    cameraHudFrame.addChild(@gameCompleteMenu)
-    @gameCompleteMenu.open()
+    if @allMissionsComplete and not @seenGameCompleteMenu
+      close = new Elements.Button(500 - 10, 10, 16, 16,
+        () =>
+          @gameCompleteMenu.close()
+          @seetGameCompleteMenu = true # TODO: override cookie instead
+      )
+      close.setDrawFunc(
+        (ctx) =>
+          loc = @gameCompleteMenu.getActualLocation(close.x, close.y)
+          SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+      )
+      message = "Congratulations!\n\nYou've completed all the missions. If you " +
+                "haven't had enough yet be sure to check out Extermination mode. " +
+                "Also, we would love to hear any feedback you might have, let us " +
+                "know by clicking the feedback icon in the lower right."
+      @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 100, message
+        {
+          closeBtn: close,
+          textAlign: 'left',
+          vAlign: 'top',
+          font: window.config.windowStyle.defaultText.font,
+          lineHeight: 17
+          visible: false
+        })
+      cameraHudFrame.addChild(@gameCompleteMenu)
+      @gameCompleteMenu.open()
 
   _createMenu: (settings, onStart) ->
     cancel = settings.cancel
@@ -124,6 +124,8 @@ class Menu extends Mission
                                         closeBtn: cancelButton,
                                         textAlign: settings.textAlign,
                                         vAlign: settings.vAlign,
+                                        font: settings.font
+                                        lineHeight: settings.lineHeight,
                                         visible: false
                                       })
     cancelButton.setClickHandler(() =>

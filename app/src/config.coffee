@@ -257,18 +257,20 @@ root.config =
       y: -750
       menu:
         w: 300
-        h: 200
-        message: "This is the mission 1 message box"
+        h: 100
+        message: "Mission 1\n\nGoal: something"
         textAlign: 'left'
         vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 19
         cancel:
           x: 245
-          y: 185
+          y: 85
           w: 60
           h: 20
         start:
           x: 145
-          y: 185
+          y: 85
           w: 101
           h: 20
     mission2:
@@ -276,18 +278,20 @@ root.config =
       y: -800
       menu:
         w: 300
-        h: 200
-        message: "This is the mission 2 message box"
+        h: 100
+        message: "Mission 2\n\nGoal:"
         textAlign: 'left'
         vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 19
         cancel:
           x: 245
-          y: 185
+          y: 85
           w: 60
           h: 20
         start:
           x: 145
-          y: 185
+          y: 85
           w: 101
           h: 20
     mission3:
@@ -295,18 +299,20 @@ root.config =
       y: -800
       menu:
         w: 300
-        h: 200
-        message: "This is the mission 3 message box"
+        h: 100
+        message: "Mission 3\n\nGoal:"
         textAlign: 'left'
         vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 19
         cancel:
           x: 245
-          y: 185
+          y: 85
           w: 60
           h: 20
         start:
           x: 145
-          y: 185
+          y: 85
           w: 101
           h: 20
     extermination:
@@ -315,9 +321,12 @@ root.config =
       menu:
         w: 400
         h: 100
-        message: "Exterminate all fungus before it exterminates you."
-        textAlign: 'center'
+        message: "Extermination\n\nGoal: Exterminate all fungus before it " +
+                 "exterminates you."
+        textAlign: 'left'
         vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 15
         cancel:
           x: 345
           y: 85
