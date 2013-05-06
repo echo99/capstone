@@ -186,7 +186,7 @@ main = ->
 
   # feedback = $('#comments').jqm()
   feedback = $('#comments').jqm({
-    ajax: 'mfbcomments.html',
+    ajax: 'fbcomments.html',
     ajaxUpdate: false,
     modal: true
   })
@@ -287,7 +287,8 @@ main = ->
       fullscreenBtn.setState('unfullscreen')
       # sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
   # Disable fullscreen button on IE (since it doesn't support those features)
-  if BROWSER == Browser.IE
+  # Also disable on Windows 7 Chrome due to bug
+  if BROWSER == Browser.IE or (WIN7 and BROWSER == Browser.CHROME)
     fullscreenBtn.disable()
 
   # Set mute button
