@@ -92,7 +92,8 @@ drag = false
 newMission = (mission) ->
   CurrentMission.destroy()
   UI.destroy()
-  UI = new UserInterface()
+  if UI == null
+    UI = new UserInterface()
   CurrentMission = new mission()
   window.onresize()
 
