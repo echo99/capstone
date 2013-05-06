@@ -12,13 +12,33 @@ class Mission1 extends Mission
     @home.addShips(window.config.units.probe, 2)
     game.addPlanet(@home)
 
-    attack1 = new Planet(-1000, -1000)
-    attack1.addShips(window.config.units.attackShip, 2)
-    game.addPlanet(attack1)
+    a1 = new Planet(-1000, -1000)
+    a1.addShips(window.config.units.attackShip, 2)
+    game.addPlanet(a1)
 
-    attack2 = new Planet(-1500, 1000)
-    attack2.addShips(window.config.units.attackShip, 4)
-    game.addPlanet(attack2)
+    a2 = new Planet(-1150, 1250)
+    a2.addShips(window.config.units.attackShip, 4)
+    game.addPlanet(a2)
+
+    f1 = new Planet(-1500, -1300)
+    f1._fungusStrength = 2 #TODO: do this properly
+    game.addPlanet(f1)
+
+    f2 = new Planet(-1950, -100)
+    f2._fungusStrength = 2
+    game.addPlanet(f2)
+
+    f3 = new Planet(-1600, 850)
+    f3._fungusStrength = 2
+    game.addPlanet(f3)
+
+    f4 = new Planet(670, 900)
+    f4._fungusStrength = 2
+    game.addPlanet(f4)
+
+    f5 = new Planet(-850, -50)
+    f5._fungusStrength = 2
+    game.addPlanet(f5)
 
     p1 = new Planet(0, -800)
     game.addPlanet(p1)
@@ -38,15 +58,41 @@ class Mission1 extends Mission
     p6 = new Planet(-1100, 700)
     game.addPlanet(p6)
 
+    p7 = new Planet(-1500, 300)
+    game.addPlanet(p7)
+
+    p8 = new Planet(-1300, -500)
+    game.addPlanet(p8)
+
     game.setNeighbors(@home, p2)
     game.setNeighbors(@home, p3)
     game.setNeighbors(@home, p4)
     game.setNeighbors(@home, p5)
+
+    game.setNeighbors(a1, f1)
+    game.setNeighbors(a1, f5)
+    game.setNeighbors(a1, p3)
+    game.setNeighbors(a1, p8)
+    game.setNeighbors(a2, p6)
+    game.setNeighbors(a2, f3)
+
+    game.setNeighbors(f1, p8)
+    game.setNeighbors(f2, p7)
+    game.setNeighbors(f2, p8)
+    game.setNeighbors(f3, p6)
+    game.setNeighbors(f3, p7)
+    game.setNeighbors(f4, p4)
+    game.setNeighbors(f5, p3)
+    game.setNeighbors(f5, p5)
+    game.setNeighbors(f5, p6)
+    game.setNeighbors(f5, p7)
+    game.setNeighbors(f5, p8)
+
     game.setNeighbors(p1, p3)
     game.setNeighbors(p1, p2)
-    game.setNeighbors(p3, attack1)
     game.setNeighbors(p5, p6)
-    game.setNeighbors(p6, attack2)
+    game.setNeighbors(p6, p7)
+    game.setNeighbors(p7, p8)
 
     camera.setZoom(0.5)
     camera.setTarget(@home.location())
@@ -54,7 +100,7 @@ class Mission1 extends Mission
     @_initMenus()
 
     game.endTurn()
-    UI.initialize()
+    UI.initialize(false, true, false)
 
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
@@ -86,12 +132,20 @@ class Mission1 extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    # TODO: check for end game
-    ###
-    if @home.numShips(window.config.units.probe) > 10
+    hasFungus = false
+    hasProbe = false
+    for p in game.getPlanets()
+      if p.fungusStrength() > 0
+        hasFungus = true
+      if p.numShips(window.config.units.probe) > 0
+        hasProbe = true
+      if p.getControlGroups().length > 0
+        hasProbe = true
+
+    if not hasFungus
+      # TODO: save progress
       UI.endGame()
       @victoryMenu.open()
-    if @home.numShips(window.config.units.defenseShip) > 10
+    else if not hasProbe
       UI.endGame()
       @failMenu.open()
-    ###
