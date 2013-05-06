@@ -87,7 +87,7 @@ class UserInterface
     cancelBuild.setProperty("location",
       @stationMenu.getActualLocation(cancelBuild.x, cancelBuild.y))
     cancelBuild.setClickHandler(() =>
-      console.log("canceling build")
+      @selectedPlanet.cancelConstruction()
     )
     cancelBuild.setDrawFunc((ctx) =>
       loc = cancelBuild.getProperty("location")
