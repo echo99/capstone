@@ -485,23 +485,32 @@ class Elements.MessageBox extends Elements.BoxElement
   #   Default: `'middle'`
   # @option options [String] font Set the message font
   # @option options [String] fontColor Set the message color
+  # @options option [Number] lineHeight
+  #   Height of each line of text (spacing + text height)
+  # @options option [Number] padding Extra space to the left and right of the text
   #
   constructor: (@x, @y, @w, @h, @message, options={}) ->
     # @closeBtn=null, @textAlign='center',
     #   @vAlign='middle'
-    {closeBtn, textAlign, vAlign, font, fontColor} = options
+    {closeBtn, textAlign, vAlign, font, fontColor, lineHeight, padding} = options
     @closeBtn = if closeBtn? then closeBtn else null
     @textAlign = if textAlign? then textAlign else 'center'
     @vAlign = if vAlign? then vAlign else 'middle'
     @font = if font? then font else config.windowStyle.msgBoxText.font
     @fontColor = if fontColor? then fontColor else
       config.windowStyle.msgBoxText.color
+    @lineHeight = if lineHeight? then lineHeight else
+      config.windowStyle.msgBoxText.lineHeight
+    # Add width of border to padding
+    @padding = Math.round(config.windowStyle.lineWidth / 2)
+    # Set default padding
+    @padding += if padding? then padding else config.windowStyle.msgBoxText.padding
     super(@x, @y, @w, @h, options)
 
     if @closeBtn?
       @addChild(@closeBtn)
     @usingDefaultBtn = false
-    @lineSpacing = config.windowStyle.msgBoxText.lineWidth / 2
+    @lineSpacing = @lineHeight / 2
     @lines = []
     # @_closing = false
     @_checkedWrap = false
@@ -527,7 +536,8 @@ class Elements.MessageBox extends Elements.BoxElement
     ctx.font = @font
     textWidth = ctx.measureText(@message).width
     # console.log("Width of #{@message} : #{textWidth}")
-    allowedWidth = @w - (config.windowStyle.lineWidth * 4)
+    # allowedWidth = @w - (config.windowStyle.lineWidth * 4)
+    allowedWidth = @w - (@padding * 2)
     lines = @message.split("\n")
     # console.log(lines)
     for line in lines
@@ -551,7 +561,7 @@ class Elements.MessageBox extends Elements.BoxElement
               curline = null
         if curline isnt null
           @lines.push(curline)
-    # console.log(@lines)
+    console.log(@lines)
     @_checkedWrap = true
 
 
@@ -660,25 +670,24 @@ class Elements.MessageBox extends Elements.BoxElement
       # cy = Math.round(@h/2 + @y)
       # ctx.fillText(@message, cx, cy)
 
-      lineWidth = config.windowStyle.lineWidth * 2
       switch @textAlign
         when 'left'
-          tx = x + cx + lineWidth
+          tx = x + cx + @padding
         when 'right'
-          tx = x - cx - lineWidth
+          tx = x - cx - @padding
         when 'center'
           tx = x
 
       yOffset = (@lines.length-1) * @lineSpacing
       switch @vAlign
         when 'top'
-          ty = y + cy + lineWidth
+          ty = y + cy + @lineHeight
           yTmp = ty
         when 'middle'
           ty = y
           yTmp = ty - yOffset
         when 'bottom'
-          ty = y - cy - lineWidth
+          ty = y - cy - @lineHeight
           yTmp = ty - yOffset*2
 
       if @lines.length > 0
@@ -688,7 +697,7 @@ class Elements.MessageBox extends Elements.BoxElement
         for line in @lines
           # ctx.fillText(line, x, yTmp)
           ctx.fillText(line, tx, yTmp)
-          yTmp += config.windowStyle.msgBoxText.lineWidth
+          yTmp += @lineHeight
       else
         # ctx.fillText(@message, x, y)
         ctx.fillText(@message, tx, ty)
