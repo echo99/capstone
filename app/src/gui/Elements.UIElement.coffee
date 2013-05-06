@@ -92,27 +92,29 @@ class Elements.UIElement extends Module
 
   # Add a child element to this element
   #
-  # @param [UIElement] elem
+  # @param [Elements.UIElement] elem
   #
   addChild: (elem) ->
-    elem._parent = this
-    elem.setActualLocation(this)
-    @_children.push(elem)
-    zIndex = elem._zIndex
-    if zIndex in @zIndices
-      @_childBuckets[zIndex].push(elem)
+    if elem not instanceof Elements.UIElement
+      console.error("#{elem} is not a UIElement")
     else
-      @zIndices.push(zIndex)
-      @zIndices.sort()
-      @zIndicesRev = @zIndices.slice(0)
-      @zIndicesRev.reverse()
-      @_childBuckets[zIndex] = [elem]
-
+      elem._parent = this
+      elem.setActualLocation(this)
+      @_children.push(elem)
+      zIndex = elem._zIndex
+      if zIndex in @zIndices
+        @_childBuckets[zIndex].push(elem)
+      else
+        @zIndices.push(zIndex)
+        @zIndices.sort()
+        @zIndicesRev = @zIndices.slice(0)
+        @zIndicesRev.reverse()
+        @_childBuckets[zIndex] = [elem]
     # @_children.unshift(elem)
 
   # Remove a child element from this element if it exists
   #
-  # @param [UIElement] elem
+  # @param [Elements.UIElement] elem
   # @return [Boolean] Whether or not the child was successfully removed
   #
   removeChild: (elem) ->
@@ -153,7 +155,7 @@ class Elements.UIElement extends Module
 
   # @private Set actual location of this element
   #
-  # @param [UIElement] parent
+  # @param [Elements.UIElement] parent
   #
   setActualLocation: (parent) ->
     {x, y} = parent.getActualLocation(0, 0)
