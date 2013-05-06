@@ -675,7 +675,6 @@ class UserInterface
       @help.open()
 
     if @hoveredPlanet
-      # if the button is a planet
       tooltipCtx.textAlign = "left"
       tooltipCtx.font = window.config.toolTipStyle.font
       tooltipCtx.fillStyle = window.config.toolTipStyle.color
@@ -700,6 +699,7 @@ class UserInterface
         else
           tooltipCtx.fillText("Open colony ship menu", x, y)
       else
+        tooltipCtx.fillText("No action available", x, y)
         hasAction = false
 
       if hasAction
@@ -803,8 +803,7 @@ class UserInterface
   _getExpandedDisplay: (controlGameLoc, groups) ->
     winStyle = window.config.windowStyle
     w = window.config.controlGroup.expandedWidth
-    h = window.config.controlGroup.expandedHeight * groups.length# +
-        #window.config.windowStyle.lineWidth * (groups.length - 1)
+    h = window.config.controlGroup.expandedHeight * groups.length
     groupDisplay = new Elements.BoxElement(-1000, -1000, w, h)
     clear = (ctx) =>
       ctx.fillStyle = winStyle.fill

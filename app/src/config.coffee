@@ -290,6 +290,25 @@ root.config =
           y: 185
           w: 101
           h: 20
+    mission3:
+      x: 0
+      y: -800
+      menu:
+        w: 300
+        h: 200
+        message: "This is the mission 3 message box"
+        textAlign: 'left'
+        vAlign: 'top'
+        cancel:
+          x: 245
+          y: 185
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 185
+          w: 101
+          h: 20
     extermination:
       x: 400
       y: 150

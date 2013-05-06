@@ -74,15 +74,44 @@ class Menu extends Mission
     cameraHudFrame.removeChild(@mission1Menu)
     cameraHudFrame.removeChild(@mission2Menu)
     cameraHudFrame.removeChild(@exterminationMenu)
+    if @gameCompleteMenu
+      cameraHudFrame.removeChild(@gameCompleteMenu)
 
   _initMenus: ->
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
       console.log('clicked mission 1 button'))
     @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
       console.log('clicked mission 2 button'))
+    @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
+      console.log('clicked mission 3 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
-      console.log('clicked extermination button')
       newMission(Extermination))
+    # if they have never seen this menu before:
+    close = new Elements.Button(500 - 10, 10, 16, 16,
+      () =>
+        @gameCompleteMenu.close()
+        # TODO: and never open again
+    )
+    close.setDrawFunc(
+      (ctx) =>
+        loc = @gameCompleteMenu.getActualLocation(close.x, close.y)
+        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+    )
+    message = "Congratulations!\n\nYou've completed all the missions. If you "
+    message += "haven't had enough yet be sure to check out Extermination mode. "
+    message += "Also, we would love to hear any feedback you might have, let us "
+    message += "know by clicking the feedback icon in the lower right."
+    @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 120, message
+      {
+        closeBtn: close,
+        textAlign: 'left',
+        vAlign: 'top',
+        font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
+        visible: false
+      })
+    cameraHudFrame.addChild(@gameCompleteMenu)
+    @gameCompleteMenu.open()
 
   _createMenu: (settings, onStart) ->
     cancel = settings.cancel
@@ -193,20 +222,7 @@ class Menu extends Mission
           break
       if p.numShips(window.config.units.probe) == 1 or inGroup
         found = true
-        if p.fungusStrength() == 0
-          @lastPlanet = p
-          if @lastPlanet == @Planets.Mission1
-            @mission1Menu.open()
-          else
-            @mission1Menu.close()
-          if @lastPlanet == @Planets.Mission2
-            @mission2Menu.open()
-          else
-            @mission2Menu.close()
-          if @lastPlanet == @Planets.Extermination
-            @exterminationMenu.open()
-          else
-            @exterminationMenu.close()
+        @_checkMissions(p)
         break
     if not found
       @lastPlanet._probes = 1
@@ -218,3 +234,23 @@ class Menu extends Mission
     #     if the planet has a probe on it
     #       open prompt for the planet
     # Add the probe to the selected units
+
+  _checkMissions: (p) ->
+    if p.fungusStrength() == 0
+      @lastPlanet = p
+      if @lastPlanet == @Planets.Mission1
+        @mission1Menu.open()
+      else
+        @mission1Menu.close()
+      if @lastPlanet == @Planets.Mission2
+        @mission2Menu.open()
+      else
+        @mission2Menu.close()
+      if @lastPlanet == @Planets.Mission3
+        @mission3Menu.open()
+      else
+        @mission3Menu.close()
+      if @lastPlanet == @Planets.Extermination
+        @exterminationMenu.open()
+      else
+        @exterminationMenu.close()
