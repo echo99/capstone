@@ -58,7 +58,6 @@ class Extermination extends Mission
   onMouseClick: (x, y) ->
 
   getHomeTarget: ->
-    # TODO: come up with smarter target
     return @home.location()
 
   # @see Mission#onEndTurn

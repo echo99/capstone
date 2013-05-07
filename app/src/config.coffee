@@ -247,6 +247,16 @@ root.config =
       y: 45
       w: 101
       h: 20
+    #one:
+    two:
+      startingProbes: 6
+      startingColonyShips: 4
+      startingAttackShips: 10
+      resourceGoal: 50
+    three:
+      startingProbes: 2
+      startingDefenseShips: 10
+      resourceGoal: 20
   MainMenu:
     home:
       x: 0
@@ -261,7 +271,8 @@ root.config =
         w: 300
         h: 140
         message: "Mission 1\n\nGoal: Rescue the attack ships and eliminate " +
-                 "all fungus in the area. Don't lose your probes."
+                 "all fungus in the area. Don't lose all your probes or " +
+                 "attack ships."
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
@@ -368,7 +379,8 @@ root.config =
     fungus:
       attack: .5
       defense: 0
-      growthPerTurn: 1
+      growthPerTurn: 0
+      growthChancePerTurn: 0.5
   structures:
     outpost:
       cost: 1

@@ -699,6 +699,12 @@ class UserInterface
           ctx.fillText(tRes, pos.x+offset, pos.y)
           ctx.fillText(tRat, pos.x+offset, pos.y+20)
 
+      if vis == window.config.visibility.visible and p.fungusStrength() > 0
+        ctx.font = window.config.windowStyle.titleText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.red
+        offset = 60 * camera.getZoom()
+        ctx.fillText(p.fungusStrength(), pos.x+offset, pos.y-offset)
+
       # Draw structure
       if p.hasOutpost()
         if p.resources() > 0
@@ -734,7 +740,6 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
         else if p.buildUnit() == window.config.structures.outpost
           SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
-          SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
 
     @unitSelection.draw(ctx, hudCtx)
 
@@ -1051,7 +1056,7 @@ class UserInterface
     if @stationMenu.visisble
       @stationMenu.setDirty()
     if @outpostMenu.visible
-      if @selectedPlanet.hasStation() #TODO: make sure these work
+      if @selectedPlanet.hasStation()
         @outpostMenu.close()
         @stationMenu.open()
       else

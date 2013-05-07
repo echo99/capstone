@@ -1,28 +1,23 @@
 #_require Mission
 
-class Mission1 extends Mission
+class Mission2 extends Mission
+  settings2: window.config.Missions.two
   # @see Mission#reset
   reset: ->
     # Create planets:
     newGame(10000, 10000)
-    @home = new Planet(0,0)
-    @home.addShips(window.config.units.probe, 2)
+    @home = new Planet(0, 0, 10, 1)
+    @home.addShips(window.config.units.probe, @settings2.startingProbes)
+    @home.addShips(window.config.units.colonyShip, @settings2.startingColonyShips)
+    @home.addShips(window.config.units.attackShip, @settings2.startingAttackShips)
     game.addPlanet(@home)
-
-    a1 = new Planet(-1000, -1000)
-    a1.addShips(window.config.units.attackShip, 2)
-    game.addPlanet(a1)
-
-    a2 = new Planet(-1150, 1250)
-    a2.addShips(window.config.units.attackShip, 4)
-    game.addPlanet(a2)
-
+    ###
     f1 = new Planet(-1500, -1300)
-    #f1.setFungus(1)
+    f1.setFungus(1)
     game.addPlanet(f1)
 
     f2 = new Planet(-1950, -100)
-    #f2.setFungus(1)
+    f2.setFungus(1)
     game.addPlanet(f2)
 
     f3 = new Planet(-1600, 850)
@@ -36,16 +31,16 @@ class Mission1 extends Mission
     f5 = new Planet(-850, -50)
     f5.setFungus(1)
     game.addPlanet(f5)
-
-    p1 = new Planet(0, -800)
+    ###
+    p1 = new Planet(-600, -700, 15, 1)
     game.addPlanet(p1)
 
-    p2 = new Planet(400, -500)
+    p2 = new Planet(700, -300, 5, 1)
     game.addPlanet(p2)
 
-    p3 = new Planet(-400, -500)
+    p3 = new Planet(-200, 800, 10, 1)
     game.addPlanet(p3)
-
+    ###
     p4 = new Planet(300, 450)
     game.addPlanet(p4)
 
@@ -60,19 +55,11 @@ class Mission1 extends Mission
 
     p8 = new Planet(-1300, -500)
     game.addPlanet(p8)
-
+    ###
+    game.setNeighbors(@home, p1)
     game.setNeighbors(@home, p2)
     game.setNeighbors(@home, p3)
-    game.setNeighbors(@home, p4)
-    game.setNeighbors(@home, p5)
-
-    game.setNeighbors(a1, f1)
-    game.setNeighbors(a1, f5)
-    game.setNeighbors(a1, p3)
-    game.setNeighbors(a1, p8)
-    game.setNeighbors(a2, p6)
-    game.setNeighbors(a2, f3)
-
+    ###
     game.setNeighbors(f1, p8)
     game.setNeighbors(f2, p7)
     game.setNeighbors(f2, p8)
@@ -90,14 +77,14 @@ class Mission1 extends Mission
     game.setNeighbors(p5, p6)
     game.setNeighbors(p6, p7)
     game.setNeighbors(p7, p8)
-
+    ###
     camera.setZoom(0.5)
     camera.setTarget(@home.location())
 
     @_initMenus()
 
     game.endTurn()
-    UI.initialize(false, true, false)
+    UI.initialize(false, true, true)
 
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
@@ -106,18 +93,19 @@ class Mission1 extends Mission
   _initMenus: ->
     @victoryMenu = @createVictoryMenu(
       () =>
-        newMission(Mission1)
+        newMission(Mission2)
       () =>
         # TODO: save progress
         newMission(Mission2)
     )
     @failMenu = @createFailMenu(
       () =>
-        newMission(Mission1)
+        newMission(Mission2)
     )
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
+    # TODO: show number of resources gathered
 
   # @see Mission#onMouseMove
   onMouseMove: (x, y) ->
@@ -130,25 +118,28 @@ class Mission1 extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    hasFungus = false
+    totalResources = 0
+    possibleResources = 0
+    hasColonyShip = false
     hasProbe = false
-    hasAttackShips = false
     for p in game.getPlanets()
-      if p.fungusStrength() > 0
-        hasFungus = true
+      if p.hasOutpost()
+        totalResources += p.availableResources()
+        possibleResources += p.resources()
       if p.numShips(window.config.units.probe) > 0
         hasProbe = true
-      if p.numShips(window.config.units.attackShip) > 0
-        hasAttackShips = true
+      if p.numShips(window.config.units.colonyShip) > 0
+        hasColonyShip = true
       for g in p.getControlGroups()
         if g.probes() > 0
           hasProbe = true
-        if g.attackShips() > 0
-          hasAttackShips = true
+        if g.colonyShips() > 0
+          hasColonyShips = true
 
-    if not hasFungus
+    if totalResources >= @settings2.resourceGoal
       UI.endGame()
       @victoryMenu.open()
-    else if not hasProbe or not hasAttackShips
+    else if not (hasColonyShip and hasProbe) and
+            possibleResources + totalResources < @settings2.resourceGoal
       UI.endGame()
       @failMenu.open()

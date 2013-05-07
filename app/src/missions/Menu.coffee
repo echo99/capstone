@@ -83,8 +83,7 @@ class Menu extends Mission
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
       newMission(Mission1))
     @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
-      console.log('clicked mission 2 button')
-      newMission(Mission1))
+      newMission(Mission2))
     @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
       console.log('clicked mission 3 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
