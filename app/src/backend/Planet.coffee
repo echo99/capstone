@@ -335,7 +335,7 @@ class Planet
           #   "+ #{planet._fungusArriving} ?= #{planet._fungusMaximumStrength}"
     else if @_fungusStrength < @_fungusMaximumStrength
       # Grow
-      @_fungusArriving += if Math.random() >=
+      @_fungusArriving += if Math.random() <
           root.config.units.fungus.growthChancePerTurn then 1 else 0
 
   # Fungus growth phase 2.
