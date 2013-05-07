@@ -857,7 +857,7 @@ class UserInterface
           y: Math.floor(dir.y * d + planetGameLoc.y)
         controlHudLoc = camera.getScreenCoordinates(controlGameLoc)
 
-        groupDisplay = @_getExpandedDisplay(controlGameLoc, groups)
+        groupDisplay = @_getExpandedDisplay(controlGameLoc, groups, previous)
 
         controlGroup = @_getCollapsedDisplay(controlGameLoc, groupDisplay)
         @_setHandler(groupDisplay, controlGroup)
@@ -869,7 +869,7 @@ class UserInterface
         frameElement.addChild(groupDisplay)
         groupDisplay.visible = false
 
-  _getExpandedDisplay: (controlGameLoc, groups) ->
+  _getExpandedDisplay: (controlGameLoc, groups, planet) ->
     winStyle = window.config.windowStyle
     w = window.config.controlGroup.expandedWidth
     h = window.config.controlGroup.expandedHeight * groups.length
@@ -919,17 +919,17 @@ class UserInterface
     for g in groups
       button = @_getControlButton(w/2, y,
                                   w-winStyle.lineWidth, height - winStyle.lineWidth,
-                                  groupDisplay, g)
+                                  groupDisplay, g, planet)
       y += height
       groupDisplay.addChild(button)
     return groupDisplay
 
-  _getControlButton: (x, y, w, h, groupDisplay, group) ->
+  _getControlButton: (x, y, w, h, groupDisplay, group, planet) ->
     winStyle = window.config.windowStyle
     settings = window.config.controlGroup.button
     button = new Elements.Button(x, y, w, h)
     button.setClickHandler(() =>
-      console.log('click')
+      planet.cancelControlGroup(group)
     )
     button.setHoverHandler(() => @hoveredGroup = group.route())
     button.setMouseOutHandler(() => @hoveredGroup = null)

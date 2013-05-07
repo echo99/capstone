@@ -21,23 +21,23 @@ class Mission1 extends Mission
     game.addPlanet(a2)
 
     f1 = new Planet(-1500, -1300)
-    f1._fungusStrength = 2 #TODO: do this properly
+    f1.setFungus(2)
     game.addPlanet(f1)
 
     f2 = new Planet(-1950, -100)
-    f2._fungusStrength = 2
+    f2.setFungus(2)
     game.addPlanet(f2)
 
     f3 = new Planet(-1600, 850)
-    f3._fungusStrength = 2
+    f3.setFungus(2)
     game.addPlanet(f3)
 
     f4 = new Planet(670, 900)
-    f4._fungusStrength = 2
+    f4.setFungus(2)
     game.addPlanet(f4)
 
     f5 = new Planet(-850, -50)
-    f5._fungusStrength = 2
+    f5.setFungus(2)
     game.addPlanet(f5)
 
     p1 = new Planet(0, -800)

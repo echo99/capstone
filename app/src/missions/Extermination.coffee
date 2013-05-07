@@ -63,10 +63,15 @@ class Extermination extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    # TODO: check for end game
-    if @home.numShips(window.config.units.probe) > 10
+    hasFungus = false
+    for p in game.getPlanets()
+      if p.fungusStrength() > 0
+        hasFungus = true
+
+    if not hasFungus
       UI.endGame()
       @victoryMenu.open()
-    if @home.numShips(window.config.units.defenseShip) > 10
+
+    if not @home.hasStation()
       UI.endGame()
       @failMenu.open()
