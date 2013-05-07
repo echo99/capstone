@@ -391,6 +391,8 @@ root.config =
     size: 3
   minimumPlanetDistance: 500
   maximumAdjacencyDistance: 800
+  minimumFungusDistance: 1000
+  fungusInitialStrength: 6
   resources:
     homePlanetResources: 40
     homePlanetRate: 2
