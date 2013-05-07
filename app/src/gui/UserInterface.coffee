@@ -166,6 +166,26 @@ class UserInterface
     )
     frameElement.addChild(@turnCounter)
 
+    # TODO: remove when done with beta
+    @beta = new Elements.BoxElement(camera.width - 5, 5, 0, 20)
+    clearBeta = (ctx) =>
+      w = ctx.measureText("Beta").width + 5
+      h = @beta.h
+      x = @beta.x - w
+      y = @beta.y
+      ctx.clearRect(x, y, w, h)
+    @beta.setClearFunc(clearBeta)
+    @beta.setDrawFunc((ctx) =>
+      clearBeta(ctx)
+      @beta.x = camera.width - 5
+      ctx.textAlign = 'right'
+      ctx.textBaseline = 'top'
+      ctx.font = window.config.windowStyle.titleText.font
+      ctx.fillStyle = window.config.windowStyle.titleText.color
+      ctx.fillText("Beta", @beta.x, @beta.y)
+    )
+    frameElement.addChild(@beta)
+
   _getStationButton: (x, y, w, h, unit, probes=false) ->
     button = new Elements.Button(x+w/2, y+h/2, w, h)
     button.setProperty("location",
