@@ -375,11 +375,13 @@ root.config =
       turns: 1
       defense: .1
       isStructure: true
+      sendRate: 5
     station:
       cost: 10
       turns: 3
       defense: .5
       isStructure: true
+      sendRate: 5
     warpGate:
       cost: 7
       turns: 4

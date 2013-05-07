@@ -3,6 +3,8 @@
 if not root?
   root = exports ? window
 
+#_require AI
+
 class ControlGroup
   # Sets the number of each type of ship and destination
   constructor: (@_attackShips,
@@ -10,7 +12,6 @@ class ControlGroup
                 @_probes,
                 @_colonies,
                 @_destination) ->
-    @_id = Math.floor(Math.random() * 1000000)
     @_route = []
     @_hasMoved = false
   
@@ -100,35 +101,7 @@ class ControlGroup
   #
   # @param [Planet] v Current planet.
   updateAi: (v) ->
-    #console.log("Finding route for control group")
-    @_route = []
-    q = []
-    seen = []
-    q.push([v, null])
-    seen.push(v)
-    #console.log("q: " + q)
-    while q.length > 0
-      t = q.shift()
-      #console.log("t[0] " + t[0])
-      #console.log("dest " + @_destination)
-      #console.log("t[0] is dest: " + (t[0] is @_destination))
-      if t[0] is @_destination
-        current = t
-        #console.log("current[0]: " + current[0])
-        #console.log("current[1]: " + current[1])
-        while current[1] != null
-          # add element to back of list
-          @_route.unshift(current[0])
-          current = current[1]
-        break
-      for u in t[0].getAdjacentPlanets()
-        if (not (u in seen)) and
-            not (u.visibility is window.config.visibility.invisible) and
-            not (u.visibility is window.config.visibility.fungus)
-          seen.push(u)
-          q.push([u, t])
-    console.log("group ai updated: " + @_id + " route: " + @_route)
-    return null
+    @_route = AI.getPath(v, @_destination)
 
   # Returns a string representation of this ControlGroup
   # route: [list, of, planets]

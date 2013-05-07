@@ -16,6 +16,7 @@ class Planet
     @_lastSeenFungus = false
     @_hasBeenSeen = false
     @_availableResources = 0
+    @_resourceSendingPathway = []
     @_adjacentPlanets = []
     @_fungusStrength = 0
     @_fungusMaximumStrength = 0
@@ -286,6 +287,27 @@ class Planet
       @_unitConstructing = null
       @_turnsToComplete = 0
 
+  # Begin sending resources to another planet
+  #
+  # @throw [Error] If the planet is invalid or has no structures.
+  # @throw [Error] If there is no path.
+  sendResources: (planet) ->
+    if planet == undefined or planet == null
+      throw new Error("Planet is " + planet + ".")
+    if planet.hasStation() == undefined or
+       planet.hasStation() == null or
+       planet.hasOutpost() == undefined or
+       planet.hasOutpost() == null
+      throw new Error("Planet has invalid state or I hate js.")
+    if !planet.hasStation() and !planet.hasOutpost()
+      throw new Error("Planet has no structure")
+    # There is a valid structure here
+    path = AI.getPath(@, planet)
+    if path is []
+      throw new Error("There is no path between the two planets")
+    # There is a valid path between them
+    
+
   # Cancel control group.
   #
   # @throw [Error] if there is no such control group
@@ -398,11 +420,11 @@ class Planet
     @_probes = 0
     fungusDamage -= @_probes
     # Destroy colony ships last
-    if @_colonyShips >= fungusDamage
-      @_colonyShips -= fungusDamage
+    if @_colonies >= fungusDamage
+      @_colonies -= fungusDamage
       return null
-    @_colonyShips = 0
-    fungusDamage -= @_colonyShips
+    @_colonies = 0
+    fungusDamage -= @_colonies
     # If there is any leftover fungus damage
     # then destroy all structures
     if fungusDamage > 0
@@ -450,7 +472,6 @@ class Planet
   movementUpkeep2: ->
     for group in @_controlGroups
       group.resetMoved()
-      console.log("reset id: " + group._id)
       if group.destination() is @
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
@@ -502,9 +523,7 @@ class Planet
   # based on currently-known information.
   #
   updateAI: ->
-    #console.log("updating control groups in planet " + @toString())
     group.updateAi(@) for group in @_controlGroups
-    #console.log("done updating control groups")
 
   # INGAME COMMANDS #
 
@@ -559,9 +578,7 @@ class Planet
       @_colonies -= colonies
       controlGroup.updateAi(@)
       # add to planet
-      #console.log("Adding control group to planet " + @toString())
       @_controlGroups.push(controlGroup)
-      #console.log("Control groups: " + @_controlGroups)
 
   # SETTERS FOR USE BY GAME CLASS #
 
@@ -580,7 +597,6 @@ class Planet
 
   move: (group) ->
     if !group.moved()
-      console.log("Trying to move: group id: " + group._id)
       group.setMoved()
       if !(group.destination() is @)
         group.next().receiveGroup(group)
@@ -590,8 +606,6 @@ class Planet
   #
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
-    console.log("Planet: " + @toString() + " received id: " + group._id)
-    console.log("groups: " + @_controlGroups)
     @_controlGroups.push(group)
 
   # Given a chance of success and a number of units, determine one roll.
