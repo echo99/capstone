@@ -364,10 +364,10 @@ main = ->
       if (not e)
         e = window.event
       e.cancelBubble = true
-      e.returnValue = "Progress my be lost, are you sure you want to leave?"
       if (e.stopPropagation)
         e.stopPropagation()
         e.preventDefault()
+        return "Warning: Progress my be lost."
 
   prevPos = {x: 0, y: 0}
   drag = false
