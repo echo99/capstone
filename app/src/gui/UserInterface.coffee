@@ -98,7 +98,7 @@ class UserInterface
         SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
                          loc.x, loc.y, ctx, false)
     )
-
+    cancelBuild.visible = false
     @stationMenu.addChild(probeButton)
     @stationMenu.addChild(colonyButton)
     @stationMenu.addChild(attackButton)
