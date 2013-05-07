@@ -349,6 +349,7 @@ class Planet
   # Recalculates maximum fungus strength on each planet.
   growPass3: ->
     if @_fungusStrength > 0
+      @_fungusMaximumStrength += 1
       for planet in @_adjacentPlanets
         planet._fungusMaximumStrength += 1
 
