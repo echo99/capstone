@@ -930,6 +930,9 @@ class UserInterface
     button = new Elements.Button(x, y, w, h)
     button.setClickHandler(() =>
       planet.cancelControlGroup(group)
+      @updateControlGroups()
+      @unitSelection.updateSelection(planet)
+      @hoveredGroup = null
     )
     button.setHoverHandler(() => @hoveredGroup = group.route())
     button.setMouseOutHandler(() => @hoveredGroup = null)

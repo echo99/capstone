@@ -247,7 +247,7 @@ class Planet
                     " station: " + @_station +
                     " outpost: " + @_outpost)
 
-      
+
   # Builds station sacrificeing outpost and resources
   #
   # @throw [Error] if there is no outpost or insufficient resources.
@@ -291,7 +291,7 @@ class Planet
   # @throw [Error] if there is no such control group
   cancelControlGroup:(group) ->
     if group in @_controlGroups
-      @_controlGroups = @controlGroups.filter((g) => g != group)
+      @_controlGroups = @_controlGroups.filter((g) => g != group)
       @_attackShips += group.attackShips()
       @_defenseShips += group.defenseShips()
       @_colonies += group.colonies()
@@ -301,7 +301,7 @@ class Planet
 
   # UPKEEP #
 
-  
+
   # Increases available resources and decreases resources by the rate
   # if there is a structure.
   gatherResources: ->
