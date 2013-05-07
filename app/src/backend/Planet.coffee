@@ -199,6 +199,10 @@ class Planet
         @_defenseShips += number
       else throw new Error("Ship type unknown.")
 
+  # Sets fungus strength
+  setFungus: (amount) ->
+    @_fungusStrength = amount
+
   # Adds a station
   #
   # @throw [Error] if there is already a station.
@@ -440,6 +444,7 @@ class Planet
   movementUpkeep2: ->
     for group in @_controlGroups
       group.resetMoved()
+      console.log("reset id: " + group._id)
       if group.destination() is @
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
@@ -541,7 +546,7 @@ class Planet
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
                                       probes, colonies, dest)
-      #console.log("Created new control group on " + @toString())
+      console.log("Created new control group on " + @toString() + " id: " + controlGroup._id)
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips
@@ -569,7 +574,8 @@ class Planet
   # @param [ControlGroup] group The group to be moved.
 
   move: (group) ->
-    if not group.moved()
+    if !group.moved()
+      console.log("Trying to move: group id: " + group._id)
       group.setMoved()
       if !(group.destination() is @)
         group.next().receiveGroup(group)
@@ -579,6 +585,8 @@ class Planet
   #
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
+    console.log("Planet: " + @toString() + " received id: " + group._id)
+    console.log("groups: " + @_controlGroups)
     @_controlGroups.push(group)
 
   # Given a chance of success and a number of units, determine one roll.

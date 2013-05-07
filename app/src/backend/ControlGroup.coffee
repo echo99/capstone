@@ -10,6 +10,7 @@ class ControlGroup
                 @_probes,
                 @_colonies,
                 @_destination) ->
+    @_id = Math.floor(Math.random() * 1000000)
     @_route = []
     @_hasMoved = false
   
@@ -87,11 +88,11 @@ class ControlGroup
 
   # Sets the moved flag to true.
   setMoved: ->
-    @_moved = true
+    @_hasMoved = true
 
   # Sets the moved flag to false.
   resetMoved: ->
-    @_moved = false
+    @_hasMoved = false
 
   # ARTIFICIAL INTELLIGENCE #
 
@@ -126,7 +127,7 @@ class ControlGroup
             not (u.visibility is window.config.visibility.fungus)
           seen.push(u)
           q.push([u, t])
-    #console.log("route: " + @_route)
+    console.log("group ai updated: " + @_id + " route: " + @_route)
     return null
 
   # Returns a string representation of this ControlGroup
@@ -134,6 +135,6 @@ class ControlGroup
   #
   # @return [String] A string representing this ControlGroup.
   toString: ->
-    return "ControlGroup(route: [#{@_route}])"
+    return "ControlGroup(id: [#{@_id}] route: [#{@_route}])"
 
 root.ControlGroup = ControlGroup
