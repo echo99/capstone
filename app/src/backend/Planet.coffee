@@ -339,7 +339,7 @@ class Planet
     if @_fungusStrength > 0
       @_fungusStrength += root.config.units.fungus.growthPerTurn
     if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
-        @_probes + @_colonies > 0 or @_outpost or @_station
+        @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
       null # No sporing or growing.
     else if @_fungusStrength >= @_fungusMaximumStrength and
         @_adjacentPlanets.length > 0

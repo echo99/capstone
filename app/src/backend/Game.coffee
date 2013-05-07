@@ -2,7 +2,8 @@
 
 class Game
   # Set the height and width of the game world
-  constructor: (@_height, @_width) ->
+  # Determine whether fungus should grow or not.
+  constructor: (@_height, @_width, @_noGrow = false) ->
     @_maxX = @_width /2
     @_minX = 0 - (@_width / 2)
     @_maxY = @_height / 2
