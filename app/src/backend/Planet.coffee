@@ -320,7 +320,7 @@ class Planet
       null # No sporing or growing.
     else if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
       # Spore
-      for i in [2..@_fungusStrength]
+      for i in [Math.min(@_fungusStrength, 2)..@_fungusStrength]
         planet = @_adjacentPlanets[Math.floor(
           Math.random() * @_adjacentPlanets.length)]
         if planet._fungusStrength - planet._fungusLeaving +
