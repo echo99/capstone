@@ -290,8 +290,12 @@ class Planet
   #
   # @throw [Error] if there is no such control group
   cancelControlGroup:(group) ->
-    if @_controlGroups.contains(group)
-      @_controlGroups = @controlGroups.filter(group)
+    if group in @_controlGroups
+      @_controlGroups = @controlGroups.filter((g) => g != group)
+      @_attackShips += group.attackShips()
+      @_defenseShips += group.defenseShips()
+      @_colonies += group.colonies()
+      @_probes += group.probes()
     else
       throw new Error("Tried to remove control group that doesn't exist")
 
@@ -310,6 +314,8 @@ class Planet
   # Determines growth and sporing for next turn.
   #
   growPass1: ->
+    if @_fungusStrength > 0
+      @_fungusStrength += root.config.units.fungus.growthPerTurn
     if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
       # Spore
       for i in [2..@_fungusStrength]
@@ -546,7 +552,6 @@ class Planet
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
                                       probes, colonies, dest)
-      console.log("Created new control group on " + @toString() + " id: " + controlGroup._id)
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips

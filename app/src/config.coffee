@@ -368,6 +368,7 @@ root.config =
     fungus:
       attack: .5
       defense: 0
+      growthPerTurn: 1
   structures:
     outpost:
       cost: 1
