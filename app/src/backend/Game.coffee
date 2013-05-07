@@ -98,6 +98,7 @@ class Game
     planet.gatherResources() for planet in @_planets
     planet.growPass1() for planet in @_planets
     planet.growPass2() for planet in @_planets
+    planet.growPass3() for planet in @_planets
     planet.movementUpkeep1() for planet in @_planets
     planet.movementUpkeep2() for planet in @_planets
     planet.updateAI() for planet in @_planets

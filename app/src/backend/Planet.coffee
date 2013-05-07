@@ -316,7 +316,9 @@ class Planet
   growPass1: ->
     if @_fungusStrength > 0
       @_fungusStrength += root.config.units.fungus.growthPerTurn
-    if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
+    if @_fungusStrength == 0
+      null # No sporing or growing.
+    else if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
       # Spore
       for i in [2..@_fungusStrength]
         planet = @_adjacentPlanets[Math.floor(
@@ -329,16 +331,26 @@ class Planet
           @_fungusLeaving++
     else if @_fungusStrength < @_fungusMaximumStrength
       # Grow
-      @_fungusArriving += if Math.random() >= 0 then 1 else 0
+      @_fungusArriving += if Math.random() >= root.config.units.fungus.growthChancePerTurn then 1 else 0
 
   # Fungus growth phase 2.
   # Applies fungus changes determined from pass 1.
+  # Resets the "maximum fungus strength on this planet" counter
+  # in preparation for phase 3.
   #
   growPass2: ->
     @_fungusStrength -= @_fungusLeaving
     @_fungusLeaving = 0
     @_fungusStrength += @_fungusArriving
     @_fungusArriving = 0
+    @_fungusMaximumStrength = 0
+
+  # Fungus growth phase 3.
+  # Recalculates maximum fungus strength on each planet.
+  growPass3: ->
+    if @_fungusStrength > 0
+      for planet in @_adjacentPlanets
+        planet._fungusMaximumStrength += 1
 
   # Resolves combat between player/fungus on a planet.
   #
