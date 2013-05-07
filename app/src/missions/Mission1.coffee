@@ -18,11 +18,11 @@ class Mission1 extends Mission
     game.addPlanet(a2)
 
     f1 = new Planet(-1500, -1300)
-    f1.setFungus(1)
+    #f1.setFungus(1)
     game.addPlanet(f1)
 
     f2 = new Planet(-1950, -100)
-    f2.setFungus(1)
+    #f2.setFungus(1)
     game.addPlanet(f2)
 
     f3 = new Planet(-1600, 850)
