@@ -62,7 +62,8 @@ class Planet
   # Returns the last-known amount of (unharvested) resources left on the planet.
   # This resource count is updated if a probe or outpost/station is on the planet.
   #
-  # @return [Integer] The last-known count of (unharvested) resources left on the planet.
+  # @return [Integer] The last-known count of (unharvested) resources
+  # left on the planet.
   #
   resources: ->
     return @_lastSeenResources
@@ -198,6 +199,62 @@ class Planet
         @_defenseShips += number
       else throw new Error("Ship type unknown.")
 
+  # Adds a station
+  #
+  # @throw [Error] if there is already a station.
+  addStation: ->
+    if !@_station and !@_outpost
+      @_station = true
+    else
+      throw new Error("Attempting to build a station where a building exists")
+
+  # Adds an outpost
+  #
+  # @throw [Error] if there is already an outpost.
+  addOutpost: ->
+    if !@_station and !@_outpost
+      @_outpost = true
+    else
+      throw new Error("Attempting to build an outpost where a building exists")
+
+  # Removes all buildings
+  #
+  # @throw [Error] if there are not buildings.
+  removeStructures: ->
+    if @_station or @_outpost
+      @_station = false
+      @_outpost = false
+    else
+      throw new Error("Attempting to remove building that ain't there")
+
+  # Builds outpost sacrificing a probe and a colony ship.
+  #
+  # @throw [Error] if there is insufficient ships or a building already.
+  buildOutpost: ->
+    if !@_station and !@_outpost and @_probes > 0 and @_colonies > 0
+      @_outpost = true
+      @_probes -= 1
+      @_colonies -= 1
+    else
+      throw new Error("Invalid outpost construction -" +
+                    " probes: " + @_probes +
+                    " colonies: " + @_colonies +
+                    " station: " + @_station +
+                    " outpost: " + @_outpost)
+      
+  # Builds station sacrificeing outpost and resources
+  #
+  # @throw [Error] if there is no outpost or insufficient resources
+  buildStation: ->
+    if !@_station and @_availableResources > root.config.structures.station.cost
+      @_station = true
+      @_availableResources -= root.config.structures.station.cost
+    else
+      throw new Error("Invalid outpost construction -" +
+                    " resources: " + @_availableResources +
+                    " station: " + @_station +
+                    " outpost: " + @_outpost)
+
   # Cancels the current building unit.
   #
   # @throw [Error] if there is no unit building
@@ -211,10 +268,13 @@ class Planet
   # UPKEEP #
 
   
-  # Increases available resources by the rate if there is a structure.
+  # Increases available resources and decreases resources by the rate
+  # if there is a structure.
   gatherResources: ->
     if @_outpost or @_station
-      @_availableResources += @_rate
+      if @_resources > 0
+        @_availableResources += @_rate
+        @_resources -= @_rate
 
   # Fungus growth phase 1.
   # Determines growth and sporing for next turn.
@@ -529,6 +589,8 @@ class Planet
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
+    if @_station and @_outpost
+      throw new Error "station AND outpost"
 
 
 root.Planet = Planet
