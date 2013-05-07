@@ -11,10 +11,10 @@ class Extermination extends Mission
     #return
     newGame(10000, 10000)
     @home = game.setup(10)
-    @home._station =true
+    @home.addStation()
 
     # Test stuff
-    @home.getAdjacentPlanets()[0]._outpost = true
+    @home.getAdjacentPlanets()[0].addOutpost()
     @home.addShips(window.config.units.probe, 8)
     @home.addShips(window.config.units.colonyShip, 10)
     @home.addShips(window.config.units.attackShip, 10)

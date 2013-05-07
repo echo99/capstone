@@ -206,6 +206,8 @@ root.config =
       ['station_buildings_not_gathering.png'])
     STATION_CONSTRUCTING: new AnimatedSprite(['station_constructing.png'])
     STATION_NOT_CONSTRUCTING: new AnimatedSprite(['station_not_constructing.png'])
+    STATION_CONSTRUCTION: new AnimatedSprite(['station_construction.png'])
+    OUTPOST_CONSTRUCTION: new AnimatedSprite(['outpost_construction.png'])
     PROBE_CONSTRUCTION: new AnimatedSprite(['probe_construction.png'])
     COLONY_SHIP_CONSTRUCTION: new AnimatedSprite(['colony_ship_construction.png'])
     ATTACK_SHIP_CONSTRUCTION: new AnimatedSprite(['attack_ship_construction.png'])

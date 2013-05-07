@@ -12,6 +12,7 @@ class UserInterface
   unitSelection: null
   switchedMenus: false
   hoveredGroup: null
+  turns: 0
 
   # Creates a new UserInterface
   constructor: () ->
@@ -121,8 +122,9 @@ class UserInterface
     y = outpostStyle.horiz1y + winStyle.lineWidth / 2
     w = (outpostStyle.width - winStyle.lineWidth / 2) - x
     h = (outpostStyle.height - winStyle.lineWidth / 2) - y
-    stationButton = @_getStationButton(x, y, w, h, window.config.structures.station)
-    @outpostMenu.addChild(stationButton)
+    @stationButton = @_getStationButton(x, y, w, h,
+                                        window.config.structures.station)
+    @outpostMenu.addChild(@stationButton)
     @outpostMenu.visible = false
     frameElement.addChild(@outpostMenu)
 
@@ -138,11 +140,31 @@ class UserInterface
     y = colonyStyle.horiz1y + winStyle.lineWidth / 2
     w = (colonyStyle.width - winStyle.lineWidth / 2) - x
     h = (colonyStyle.height - winStyle.lineWidth / 2) - y
-    outpostButton = @_getStationButton(x, y, w, h, window.config.structures.outpost,
-                                       true)
-    @colonyMenu.addChild(outpostButton)
+    @outpostButton = @_getStationButton(x, y, w, h,
+                                       window.config.structures.outpost, true)
+    @colonyMenu.addChild(@outpostButton)
     @colonyMenu.visible = false
     frameElement.addChild(@colonyMenu)
+
+    @turnCounter = new Elements.BoxElement(90, camera.height + 5 - 20/2, 20, 20)
+    clear = (ctx) =>
+      w = @turnCounter.w
+      h = @turnCounter.h
+      x = @turnCounter.x - w / 2
+      y = @turnCounter.y - h / 2
+      ctx.clearRect(x, y, w, h)
+
+    @turnCounter.setClearFunc(clear)
+    @turnCounter.setDrawFunc((ctx) =>
+      clear(ctx)
+      @turnCounter.y = camera.height-5-10
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.font = window.config.windowStyle.defaultText.font
+      ctx.fillStyle = window.config.windowStyle.defaultText.color
+      ctx.fillText(@turns, @turnCounter.x, @turnCounter.y)
+    )
+    frameElement.addChild(@turnCounter)
 
   _getStationButton: (x, y, w, h, unit, probes=false) ->
     button = new Elements.Button(x+w/2, y+h/2, w, h)
@@ -156,8 +178,15 @@ class UserInterface
       else if @selectedPlanet.buildUnit() != null
         console.log("Busy, not making " + unit)
       else
-        console.log("Makeing " + unit)
-        @selectedPlanet.build(unit)
+        if unit == window.config.structures.station
+          console.log("making station")
+          # TODO: build
+          #@selectedPlanet.buildStation()
+        else if unit == window.config.structures.outpost
+          console.log("making outpost")
+          #@selectedPlanet.buildOutpost()
+        else
+          @selectedPlanet.build(unit)
     )
     button.setDrawFunc((ctx) =>
       loc = button.getProperty("location")
@@ -381,25 +410,36 @@ class UserInterface
     y = loc.y + outpostStyle.availableLoc.y
     ctx.fillText("Resources avaliable:", x, y)
 
-    # Draw upgrade button
-    station = window.config.structures.station
     x = loc.x + outpostStyle.upgrade.labelLoc.x
     y = loc.y + outpostStyle.upgrade.labelLoc.y
-    ctx.fillText("Upgrade to Station", x, y)
-    if @selectedPlanet.availableResources() < station.cost
-      ctx.fillStyle = window.config.windowStyle.defaultText.red
-    x = loc.x + outpostStyle.upgrade.costLoc.x
-    y = loc.y + outpostStyle.upgrade.costLoc.y
-    ctx.fillText("Cost: " + station.cost, x, y)
-    if @selectedPlanet.availableResources() < station.cost
-      ctx.fillStyle = window.config.windowStyle.defaultText.color
-    x = loc.x + outpostStyle.upgrade.turnsLoc.x
-    y = loc.y + outpostStyle.upgrade.turnsLoc.y
-    ctx.fillText("Turns: " + station.turns, x, y)
-    x = loc.x + outpostStyle.upgrade.imgLoc.x
-    y = loc.y + outpostStyle.upgrade.imgLoc.y
-    SHEET.drawSprite(window.config.spriteNames.STATION_NOT_CONSTRUCTING, x, y,
-                     ctx, false, 0.38)
+
+    # Draw upgrade button
+    if @selectedPlanet.isBuilding() and
+       @selectedPlanet.buildUnit == window.config.structures.station
+      if @stationButton.visible
+        @stationButton.close()
+      ctx.fillStyle = winStyle.defaultText.value
+      turns = @selectedPlanet.buildStatus()
+      ctx.fillText("Turns remaining until station: " + turns, x, y+20)
+    else
+      if not @stationButton.visible
+        @stationButton.open()
+      station = window.config.structures.station
+      ctx.fillText("Upgrade to Station", x, y)
+      if @selectedPlanet.availableResources() < station.cost
+        ctx.fillStyle = window.config.windowStyle.defaultText.red
+      x = loc.x + outpostStyle.upgrade.costLoc.x
+      y = loc.y + outpostStyle.upgrade.costLoc.y
+      ctx.fillText("Cost: " + station.cost, x, y)
+      if @selectedPlanet.availableResources() < station.cost
+        ctx.fillStyle = window.config.windowStyle.defaultText.color
+      x = loc.x + outpostStyle.upgrade.turnsLoc.x
+      y = loc.y + outpostStyle.upgrade.turnsLoc.y
+      ctx.fillText("Turns: " + station.turns, x, y)
+      x = loc.x + outpostStyle.upgrade.imgLoc.x
+      y = loc.y + outpostStyle.upgrade.imgLoc.y
+      SHEET.drawSprite(window.config.spriteNames.STATION_NOT_CONSTRUCTING, x, y,
+                       ctx, false, 0.38)
 
     # Draw variables
     ctx.fillStyle = winStyle.defaultText.value
@@ -460,28 +500,40 @@ class UserInterface
     ctx.fillText("Probes avaliable:", x, y)
 
     probes = @selectedPlanet.numShips(window.config.units.probe)
-    # Draw upgrade button
-    outpost = window.config.structures.outpost
+
     x = loc.x + colonyStyle.upgrade.labelLoc.x
     y = loc.y + colonyStyle.upgrade.labelLoc.y
-    ctx.fillText("Convert to outpost", x, y)
-    if probes < outpost.cost
-      ctx.fillStyle = window.config.windowStyle.defaultText.red
-    x = loc.x + colonyStyle.upgrade.costLoc.x
-    y = loc.y + colonyStyle.upgrade.costLoc.y
-    cost = "Cost: " + outpost.cost + " probe"
-    if outpost.cost > 1
-      cost += "s"
-    ctx.fillText(cost, x, y)
 
-    ctx.fillStyle = window.config.windowStyle.defaultText.color
-    x = loc.x + colonyStyle.upgrade.turnsLoc.x
-    y = loc.y + colonyStyle.upgrade.turnsLoc.y
-    ctx.fillText("Turns: " + outpost.turns, x, y)
-    x = loc.x + colonyStyle.upgrade.imgLoc.x
-    y = loc.y + colonyStyle.upgrade.imgLoc.y
-    SHEET.drawSprite(window.config.spriteNames.OUTPOST_NOT_GATHERING, x, y,
-                     ctx, false, 0.5)
+    # Draw upgrade button
+    if @selectedPlanet.isBuilding() and
+       @selectedPlanet.buildUnit == window.config.structures.outpost
+      if @outpostButton.visible
+        @outpostButton.close()
+      ctx.fillStyle = winStyle.defaultText.value
+      turns = @selectedPlanet.buildStatus()
+      ctx.fillText("Turns remaining until outpost: " + turns, x, y+20)
+    else
+      if not @outpostButton.visible
+        @outpostButton.open()
+      outpost = window.config.structures.outpost
+      ctx.fillText("Convert to outpost", x, y)
+      if probes < outpost.cost
+        ctx.fillStyle = window.config.windowStyle.defaultText.red
+      x = loc.x + colonyStyle.upgrade.costLoc.x
+      y = loc.y + colonyStyle.upgrade.costLoc.y
+      cost = "Cost: " + outpost.cost + " probe"
+      if outpost.cost > 1
+        cost += "s"
+      ctx.fillText(cost, x, y)
+
+      ctx.fillStyle = window.config.windowStyle.defaultText.color
+      x = loc.x + colonyStyle.upgrade.turnsLoc.x
+      y = loc.y + colonyStyle.upgrade.turnsLoc.y
+      ctx.fillText("Turns: " + outpost.turns, x, y)
+      x = loc.x + colonyStyle.upgrade.imgLoc.x
+      y = loc.y + colonyStyle.upgrade.imgLoc.y
+      SHEET.drawSprite(window.config.spriteNames.OUTPOST_NOT_GATHERING, x, y,
+                       ctx, false, 0.5)
 
     # Draw variables
     ctx.fillStyle = winStyle.defaultText.value
@@ -493,6 +545,7 @@ class UserInterface
   # Must be called after newGame(...) or game.endTurn() for settings to be
   # correct on first turn.
   initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
+    @turns = 0
     @planetButtons = []
     for p in game.getPlanets()
       pos = p.location()
@@ -646,25 +699,30 @@ class UserInterface
 
       # Draw structure
       if p.hasOutpost()
-        if p.resources() > 0
+        if p.isBuilding() and p.buildUnit() == window.config.structures.outpost
+          SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
+        else if p.resources() > 0
           SHEET.drawSprite(SpriteNames.OUTPOST_GATHERING, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
       else if p.hasStation()
         if p.isBuilding()
-          switch p.buildUnit()
-            when window.config.units.probe
-              SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, loc.x, loc.y, ctx)
-            when window.config.units.colonyShip
-              SHEET.drawSprite(SpriteNames.COLONY_SHIP_CONSTRUCTION,
-                               loc.x, loc.y, ctx)
-            when window.config.units.attackShip
-              SHEET.drawSprite(SpriteNames.ATTACK_SHIP_CONSTRUCTION,
-                               loc.x, loc.y, ctx)
-            when window.config.units.defenseShip
-              SHEET.drawSprite(SpriteNames.DEFENSE_SHIP_CONSTRUCTION,
-                               loc.x, loc.y, ctx)
-          SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, loc.x, loc.y, ctx)
+          if p.buildUnit() == window.config.structures.station
+            SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTION, loc.x, loc.y, ctx)
+          else
+            switch p.buildUnit()
+              when window.config.units.probe
+                SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, loc.x, loc.y, ctx)
+              when window.config.units.colonyShip
+                SHEET.drawSprite(SpriteNames.COLONY_SHIP_CONSTRUCTION,
+                                 loc.x, loc.y, ctx)
+              when window.config.units.attackShip
+                SHEET.drawSprite(SpriteNames.ATTACK_SHIP_CONSTRUCTION,
+                                 loc.x, loc.y, ctx)
+              when window.config.units.defenseShip
+                SHEET.drawSprite(SpriteNames.DEFENSE_SHIP_CONSTRUCTION,
+                                 loc.x, loc.y, ctx)
+            SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.STATION_NOT_CONSTRUCTING, loc.x, loc.y, ctx)
 
@@ -979,16 +1037,27 @@ class UserInterface
         b.close()
       else
         b.open()
-    if @stationMenu
+    if @stationMenu.visisble
       @stationMenu.setDirty()
-    if @outpostMenu
-      @outpostMenu.setDirty()
-    if @colonyMenu
-      @colonyMenu.setDirty()
+    if @outpostMenu.visible
+      if @selectedPlanet.hasStation() #TODO: make sure these work
+        @outpostMenu.close()
+        @stationMenu.open()
+      else
+        @outpostMenu.setDirty()
+    if @colonyMenu.visible
+      if @selectedPlanet.hasOutpost()
+        @colonyMenu.close()
+        @outpostMenu.open()
+      else
+        @colonyMenu.setDirty()
 
     @hoveredGroup = null
 
     @unitSelection.endTurn()
+
+    @turns++
+    @turnCounter.setDirty()
 
   endGame: () ->
     @stationMenu.close()
