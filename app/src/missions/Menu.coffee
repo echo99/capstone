@@ -253,7 +253,8 @@ class Menu extends Mission
         @_checkMissions(p)
         break
     if not found
-      @lastPlanet._probes = 1
+      @Planets.Missions.addShips(window.config.units.probe, 1)
+      @lastPlanet = @Planets.Missions
       camera.setTarget(@lastPlanet.location())
       game.endTurn()
       UI.endTurn()
@@ -261,8 +262,8 @@ class Menu extends Mission
     # Add the probe to the selected units
 
   _checkMissions: (p) ->
+    @lastPlanet = p
     if p.fungusStrength() == 0
-      @lastPlanet = p
       if @lastPlanet == @Planets.Mission1
         @mission1Menu.open()
       else
