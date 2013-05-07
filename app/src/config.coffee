@@ -9,7 +9,7 @@ if exports?
 DRAG_TYPES = ['DEFAULT', 'ONE_TO_ONE']
 
 root.config =
-  ZOOM_SPEED: 0.02
+  ZOOM_SPEED: 0.04
   PAN_SPEED_FACTOR: 3
   BG_PAN_SPEED_FACTOR: 50
   DRAG_TYPE: DRAG_TYPES[1]
@@ -206,6 +206,8 @@ root.config =
       ['station_buildings_not_gathering.png'])
     STATION_CONSTRUCTING: new AnimatedSprite(['station_constructing.png'])
     STATION_NOT_CONSTRUCTING: new AnimatedSprite(['station_not_constructing.png'])
+    STATION_CONSTRUCTION: new AnimatedSprite(['station_construction.png'])
+    OUTPOST_CONSTRUCTION: new AnimatedSprite(['outpost_construction.png'])
     PROBE_CONSTRUCTION: new AnimatedSprite(['probe_construction.png'])
     COLONY_SHIP_CONSTRUCTION: new AnimatedSprite(['colony_ship_construction.png'])
     ATTACK_SHIP_CONSTRUCTION: new AnimatedSprite(['attack_ship_construction.png'])
@@ -344,37 +346,45 @@ root.config =
       turns: 1
       attack: .1
       defense: .1
+      isStructure: false
     colonyShip:
       cost: 3
       turns: 1
       attack: .1
       defense: .1
+      isStructure: false
     attackShip:
       cost: 4
       turns: 2
       attack: .5
       defense: 0
+      isStructure: false
     defenseShip:
       cost: 3
       turns: 1
       attack: 0
       defense: .5
+      isStructure: false
     fungus:
       attack: .5
       defense: 0
+      growthPerTurn: 1
   structures:
     outpost:
       cost: 1
       turns: 1
       defense: .1
+      isStructure: true
     station:
       cost: 10
       turns: 3
       defense: .5
+      isStructure: true
     warpGate:
       cost: 7
       turns: 4
       defense: .1
+      isStructure: true
   visibility:
     visible: 0
     discovered: 1
@@ -382,6 +392,8 @@ root.config =
     size: 3
   minimumPlanetDistance: 500
   maximumAdjacencyDistance: 800
+  minimumFungusDistance: 1000
+  fungusInitialStrength: 6
   resources:
     homePlanetResources: 40
     homePlanetRate: 2

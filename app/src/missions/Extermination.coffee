@@ -11,12 +11,10 @@ class Extermination extends Mission
     #return
     newGame(10000, 10000)
     @home = game.setup(10)
-    @home._station =true
-    @home._availableResources = 200
+    @home.addStation()
 
     # Test stuff
-    @home.getAdjacentPlanets()[0]._outpost = true
-    @home.getAdjacentPlanets()[0]._availableResources = 30
+    @home.getAdjacentPlanets()[0].addOutpost()
     @home.addShips(window.config.units.probe, 8)
     @home.addShips(window.config.units.colonyShip, 10)
     @home.addShips(window.config.units.attackShip, 10)
@@ -65,10 +63,15 @@ class Extermination extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    # TODO: check for end game
-    if @home.numShips(window.config.units.probe) > 10
+    hasFungus = false
+    for p in game.getPlanets()
+      if p.fungusStrength() > 0
+        hasFungus = true
+
+    if not hasFungus
       UI.endGame()
       @victoryMenu.open()
-    if @home.numShips(window.config.units.defenseShip) > 10
+
+    if not @home.hasStation()
       UI.endGame()
       @failMenu.open()

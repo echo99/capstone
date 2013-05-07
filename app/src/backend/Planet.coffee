@@ -62,7 +62,8 @@ class Planet
   # Returns the last-known amount of (unharvested) resources left on the planet.
   # This resource count is updated if a probe or outpost/station is on the planet.
   #
-  # @return [Integer] The last-known count of (unharvested) resources left on the planet.
+  # @return [Integer] The last-known count of (unharvested) resources
+  # left on the planet.
   #
   resources: ->
     return @_lastSeenResources
@@ -198,6 +199,83 @@ class Planet
         @_defenseShips += number
       else throw new Error("Ship type unknown.")
 
+  # Sets fungus strength
+  setFungus: (amount) ->
+    @_fungusStrength = amount
+
+  # Adds a station
+  #
+  # @throw [Error] if there is already a station.
+  addStation: ->
+    if !@_station and !@_outpost
+      @_station = true
+    else
+      throw new Error("Attempting to build a station where a building exists")
+
+  # Adds an outpost
+  #
+  # @throw [Error] if there is already an outpost.
+  addOutpost: ->
+    if !@_station and !@_outpost
+      @_outpost = true
+    else
+      throw new Error("Attempting to build an outpost where a building exists")
+
+  # Removes all buildings
+  #
+  # @throw [Error] if there are not buildings.
+  removeStructures: ->
+    if @_station or @_outpost
+      @_station = false
+      @_outpost = false
+    else
+      throw new Error("Attempting to remove building that ain't there")
+
+  # Builds outpost sacrificing a probe and a colony ship.
+  #
+  # @throw [Error] if there is insufficient ships or a building already.
+  scheduleOutpost: ->
+    if !@_station and !@_outpost and @_probes > 0 and @_colonies > 0
+      @_unitConstructing = root.config.structures.outpost
+      @_turnsToComplete = root.config.structures.outpost.turns
+      @_probes -= 1
+      @_colonies -= 1
+    else
+      throw new Error("Invalid outpost construction -" +
+                    " probes: " + @_probes +
+                    " colonies: " + @_colonies +
+                    " station: " + @_station +
+                    " outpost: " + @_outpost)
+
+
+  # Builds station sacrificeing outpost and resources
+  #
+  # @throw [Error] if there is no outpost or insufficient resources.
+  scheduleStation: ->
+    if !@_station and @_availableResources >= root.config.structures.station.cost
+      @_unitConstructing = root.config.structures.station
+      @_turnsToComplete = root.config.structures.station.turns
+      @_availableResources -= root.config.structures.station.cost
+      @_outpost = false
+    else
+      throw new Error("Invalid outpost construction -" +
+                    " resources: " + @_availableResources +
+                    " station: " + @_station +
+                    " outpost: " + @_outpost)
+
+  # Build unit
+  #
+  # @throw [Error] if the unit is not valid or there is not enough resources.
+  scheduleUnit: (unit) ->
+    if isStructure == undefined
+      throw new Error("This is not a unit.")
+    if isStructure
+      throw new Error("This is a structure.")
+    if unit.cost > @_availableResources
+      throw new Error("Not enough resources to build a " + unit)
+    @_unitConstructing = unit
+    @_turnsToComplete = unit.turns
+
   # Cancels the current building unit.
   #
   # @throw [Error] if there is no unit building
@@ -208,18 +286,36 @@ class Planet
       @_unitConstructing = null
       @_turnsToComplete = 0
 
+  # Cancel control group.
+  #
+  # @throw [Error] if there is no such control group
+  cancelControlGroup:(group) ->
+    if group in @_controlGroups
+      @_controlGroups = @_controlGroups.filter((g) => g != group)
+      @_attackShips += group.attackShips()
+      @_defenseShips += group.defenseShips()
+      @_colonies += group.colonies()
+      @_probes += group.probes()
+    else
+      throw new Error("Tried to remove control group that doesn't exist")
+
   # UPKEEP #
 
-  
-  # Increases available resources by the rate if there is a structure.
+
+  # Increases available resources and decreases resources by the rate
+  # if there is a structure.
   gatherResources: ->
     if @_outpost or @_station
-      @_availableResources += @_rate
+      if @_resources > 0
+        @_availableResources += @_rate
+        @_resources -= @_rate
 
   # Fungus growth phase 1.
   # Determines growth and sporing for next turn.
   #
   growPass1: ->
+    if @_fungusStrength > 0
+      @_fungusStrength += root.config.units.fungus.growthPerTurn
     if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
       # Spore
       for i in [2..@_fungusStrength]
@@ -324,13 +420,22 @@ class Planet
       @_turnsToComplete--
       if @_turnsToComplete == 0
         unit = @_unitConstructing
+        if unit.isStructure == undefined
+          throw new Error("Invalid unit, not of buildable type")
         @_unitConstructing = null
-        switch unit
-          when root.config.units.probe then @_probes++
-          when root.config.units.colonyShip then @_colonies++
-          when root.config.units.attackShip then @_attackShips++
-          when root.config.units.defenseShip then @_defenseShips++
-          else throw new Error("Ship type unknown.")
+        if unit.isStructure
+          switch unit
+            when root.config.structures.outpost then @_outpost = true
+            when root.config.structures.station then @_station = true
+            when root.config.structures.warpgate then @_warpgate = true
+            else throw new Error("Invalid structure, it ain't one.")
+        else
+          switch unit
+            when root.config.units.probe then @_probes++
+            when root.config.units.colonyShip then @_colonies++
+            when root.config.units.attackShip then @_attackShips++
+            when root.config.units.defenseShip then @_defenseShips++
+            else throw new Error("Ship type unknown.")
 
   # Movement phase 1.
   # Moves control groups.
@@ -345,6 +450,7 @@ class Planet
   movementUpkeep2: ->
     for group in @_controlGroups
       group.resetMoved()
+      console.log("reset id: " + group._id)
       if group.destination() is @
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
@@ -446,7 +552,6 @@ class Planet
       # generate control group
       controlGroup = new ControlGroup(attackShips, defenseShips,
                                       probes, colonies, dest)
-      #console.log("Created new control group on " + @toString())
       # update planet
       @_attackShips -= attackShips
       @_defenseShips -= defenseShips
@@ -474,7 +579,8 @@ class Planet
   # @param [ControlGroup] group The group to be moved.
 
   move: (group) ->
-    if not group.moved()
+    if !group.moved()
+      console.log("Trying to move: group id: " + group._id)
       group.setMoved()
       if !(group.destination() is @)
         group.next().receiveGroup(group)
@@ -484,6 +590,8 @@ class Planet
   #
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
+    console.log("Planet: " + @toString() + " received id: " + group._id)
+    console.log("groups: " + @_controlGroups)
     @_controlGroups.push(group)
 
   # Given a chance of success and a number of units, determine one roll.
@@ -529,6 +637,7 @@ class Planet
     if @_visibility == root.config.visibility.undiscovered and
        @_hasBeenSeen != false
       throw new Error "seen planet is undiscovered"
-
+    if @_station and @_outpost
+      throw new Error "station AND outpost"
 
 root.Planet = Planet

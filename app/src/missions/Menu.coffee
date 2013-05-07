@@ -75,6 +75,7 @@ class Menu extends Mission
     cameraHudFrame.removeChild(@mission2Menu)
     cameraHudFrame.removeChild(@mission3Menu)
     cameraHudFrame.removeChild(@exterminationMenu)
+    cameraHudFrame.removeChild(@creditsMenu)
     if @gameCompleteMenu
       cameraHudFrame.removeChild(@gameCompleteMenu)
 
@@ -89,11 +90,41 @@ class Menu extends Mission
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
       newMission(Extermination))
 
+    c = new Elements.Button(200 - 10, 10, 16, 16,
+      () =>
+        @creditsMenu.close()
+    )
+    c.setDrawFunc(
+      (ctx) =>
+        loc = @creditsMenu.getActualLocation(c.x, c.y)
+        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+    )
+    message = "Credits\n\n" +
+              "Design and Programming:\n" +
+              "    Erik Chou\n" +
+              "    Brandon Edgren\n" +
+              "    Ian Johnson\n" +
+              "    Raymond Zhang\n\n" +
+              "Art:\n" +
+              "    Brandon Edgren\n\n" +
+              "Sound:\n" +
+              "    Erik Chou"
+    @creditsMenu = new Elements.MessageBox(0, 0, 200, 250, message,
+      {
+        closeBtn: c,
+        textAlign: 'left',
+        vAlign: 'top',
+        font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
+        visible: false
+      })
+    cameraHudFrame.addChild(@creditsMenu)
+
     if @allMissionsComplete and not @seenGameCompleteMenu
       close = new Elements.Button(500 - 10, 10, 16, 16,
         () =>
           @gameCompleteMenu.close()
-          @seetGameCompleteMenu = true # TODO: override cookie instead
+          @seenGameCompleteMenu = true # TODO: override cookie instead
       )
       close.setDrawFunc(
         (ctx) =>
@@ -104,7 +135,7 @@ class Menu extends Mission
                 "haven't had enough yet be sure to check out Extermination mode. " +
                 "Also, we would love to hear any feedback you might have, let us " +
                 "know by clicking the feedback icon in the lower right."
-      @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 100, message
+      @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 100, message,
         {
           closeBtn: close,
           textAlign: 'left',
@@ -246,3 +277,7 @@ class Menu extends Mission
         @exterminationMenu.open()
       else
         @exterminationMenu.close()
+      if @lastPlanet == @Planets.Credits
+        @creditsMenu.open()
+      else
+        @creditsMenu.close()
