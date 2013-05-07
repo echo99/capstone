@@ -581,12 +581,6 @@ class UserInterface
           defense = @unitSelection.getNumberOfDefenses(p)
           probe = @unitSelection.getNumberOfProbes(p)
           colony = @unitSelection.getNumberOfColonies(p)
-          console.log("moving " + attack + " attack ships, " +
-            defense + " defense ships, " +
-            probe + " probes, " +
-            colony + " colony ships from " +
-            "(" + p.location().x + ", " + p.location().y + ")" + " to " +
-            "(" + planet.location().x + ", " + planet.location().y + ")")
           p.moveShips(attack, defense, probe, colony, planet)
           @unitSelection.updateSelection(p)
           @updateControlGroups()
@@ -596,18 +590,14 @@ class UserInterface
         @outpostMenu.close()
         @colonyMenu.close()
         if @selectedPlanet == planet
-          console.log("closing structure menu for " + planet.toString())
           @selectedPlanet = null
         else if planet.hasStation()
-          console.log("opening station menu for " + planet.toString())
           @selectedPlanet = planet
           @stationMenu.open()
         else if planet.hasOutpost()
-          console.log("opening outpost menu for " + planet.toString())
           @selectedPlanet = planet
           @outpostMenu.open()
         else if planet.numShips(window.config.units.colonyShip) > 0
-          console.log("opening colony menu for " + planet.toString())
           @selectedPlanet = planet
           @colonyMenu.open()
         else
