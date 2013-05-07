@@ -53,8 +53,21 @@ run:
     cake
 
 
-Conventions
------------
+Running
+-------
+Now that you've compiled the code, you probably want to try running it. There
+are two options to do so:
+
+1) Open `public/index.html` in any browser. For Chrome, you will have to
+   disable web security to open local web files.
+
+2) Run `coffee server.coffee` from the root of the repository. This will start
+   a node server. Once it starts, you can open `http://localhost:8080` in any
+   browser to view the main page.
+
+
+Coding Conventions
+------------------
 Basically, just check for lint problems as you are working on your files. The
 Cakefile has been set up so that it will check for problems each time your code
 passes the syntax checker. Other than that, document your code as well as you
@@ -64,7 +77,7 @@ can so that others can understand how to use your APIs or what you are doing.
 We are using two spaces to indent. *DO NOT USE TABS!!!*
 
 ### Line Width
-80 characters max per line. This helps keep code readable especially on small
+85 characters max per line. This helps keep code readable especially on small
 screens, or for putting code side-by-side.
 
 ### Documentation
@@ -91,6 +104,7 @@ class Animal
   getName: ->
     return @name
 ```
+
 
 IDEs and Plugins
 ----------------

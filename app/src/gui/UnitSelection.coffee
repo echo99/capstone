@@ -1,7 +1,5 @@
 
 # Keeps track of and updates the which units are selected
-# TODO:
-#   - Make display change when zoomed out too far
 class UnitSelection
   total: 0
   totalProbes: 0
@@ -12,6 +10,7 @@ class UnitSelection
   lastMousePos: {x: 0, y: 0}
   planetsWithSelectedUnits: []
   totalDisplay: null
+  selectAllHovered: null
 
   #constructor: ->
 
@@ -57,6 +56,7 @@ class UnitSelection
     location = {x: loc.x + pLoc.x, y: loc.y + pLoc.y}
 
     units = {probes: [], colonies: [], attacks: [], defenses: []}
+    unitButtons = {probe: null, colony: null, attack: null, defense: null}
 
     updateSelectedPlanets = (count) =>
       planet.selectedUnits += count
@@ -67,35 +67,68 @@ class UnitSelection
         if planet not in @planetsWithSelectedUnits
           @planetsWithSelectedUnits.push(planet)
 
-    probe_location = location
-    @_initUnits(probe_location, units.probes, planet, (count) =>
+    probeCallback = (count) =>
       @totalProbes += count
       @total += count
       updateSelectedPlanets(count)
-      @totalDisplay.dirty = true)
+      @totalDisplay.dirty = true
 
-    colony_location = {x: location.x, y: location.y+80}
-    @_initUnits(colony_location, units.colonies, planet, (count) =>
+    probe_location = location
+    @_initUnits(probe_location, units.probes, planet, probeCallback)
+    unitButtons.probe = @_getUnitButton(probe_location,
+                                        window.config.units.probe,
+                                        units.probes,
+                                        planet,
+                                        probeCallback)
+    gameFrame.addChild(unitButtons.probe)
+
+    colonyCallback = (count) =>
       @totalColonies += count
       @total += count
       updateSelectedPlanets(count)
-      @totalDisplay.dirty = true)
+      @totalDisplay.dirty = true
 
-    attack_location = {x: location.x, y: location.y+160}
-    @_initUnits(attack_location, units.attacks, planet, (count) =>
+    colony_location = {x: location.x, y: location.y+80}
+    @_initUnits(colony_location, units.colonies, planet, colonyCallback)
+    unitButtons.colony = @_getUnitButton(colony_location,
+                                         window.config.units.colonyShip,
+                                         units.colonies,
+                                         planet,
+                                         colonyCallback)
+    gameFrame.addChild(unitButtons.colony)
+
+    attackCallback =  (count) =>
       @totalAttacks += count
       @total += count
       updateSelectedPlanets(count)
-      @totalDisplay.dirty = true)
+      @totalDisplay.dirty = true
 
-    defense_location = {x: location.x, y: location.y+240}
-    @_initUnits(defense_location, units.defenses, planet, (count) =>
+    attack_location = {x: location.x+160, y: location.y+160}
+    @_initUnits(attack_location, units.attacks, planet, attackCallback)
+    unitButtons.attack = @_getUnitButton(attack_location,
+                                         window.config.units.attackShip,
+                                         units.attacks,
+                                         planet,
+                                         attackCallback)
+    gameFrame.addChild(unitButtons.attack)
+
+    defenseCallback = (count) =>
       @totalDefenses += count
       @total += count
       updateSelectedPlanets(count)
-      @totalDisplay.dirty = true)
+      @totalDisplay.dirty = true
+
+    defense_location = {x: location.x+160, y: location.y+240}
+    @_initUnits(defense_location, units.defenses, planet, defenseCallback)
+    unitButtons.defense = @_getUnitButton(defense_location,
+                                          window.config.units.defenseShip,
+                                          units.defenses,
+                                          planet,
+                                          defenseCallback)
+    gameFrame.addChild(unitButtons.defense)
 
     planet.unitSelection = units
+    planet.unitButtons = unitButtons
     planet.selectedUnits = 0
 
   # Initalizes on set of ships in the data structure that tracks
@@ -108,6 +141,172 @@ class UnitSelection
         locX = location.x + space * col
         locY = location.y + space * row
         stacks[row].push(new Stack(locX, locY, callback, planet))
+
+  _getUnitButton: (location, unit, unitSelection, planet, callback) ->
+    buttonSettings = window.config.unitDisplay.button
+    button = new Elements.Button(
+      buttonSettings.smallLoc.x, buttonSettings.smallLoc.y,
+      buttonSettings.smallW, buttonSettings.smallH,
+      () =>
+        if @_countUnits(unitSelection) ==
+           planet.numShips(unit)
+          for row in unitSelection
+            for stack in row
+              if stack.selected and stack.getCount() > 0
+                stack.selected = false
+                callback(-stack.getCount())
+        else
+          for row in unitSelection
+            for stack in row
+              if not stack.selected and stack.getCount() > 0
+                stack.selected = true
+                callback(stack.getCount())
+    )
+    button.setHoverHandler(
+      () => @selectAllHover = unit)
+    button.setMouseOutHandler(() => @selectAllHover = null)
+
+    bigButton = new Elements.Button(
+      buttonSettings.bigLoc.x, buttonSettings.bigLoc.y,
+      buttonSettings.bigW, buttonSettings.bigH,
+      () =>
+        if @_countUnits(unitSelection) ==
+           planet.numShips(unit)
+          for row in unitSelection
+            for stack in row
+              if stack.selected and stack.getCount() > 0
+                stack.selected = false
+                callback(-stack.getCount())
+        else
+          for row in unitSelection
+            for stack in row
+              if not stack.selected and stack.getCount() > 0
+                stack.selected = true
+                callback(stack.getCount())
+    )
+    bigButton.setHoverHandler(
+      () => @selectAllHover = unit)
+    bigButton.setMouseOutHandler(() => @selectAllHover = null)
+
+    element = new Elements.BoxElement(
+      location.x + buttonSettings.offset.x,
+      location.y + buttonSettings.offset.y,
+      buttonSettings.bigW,
+      buttonSettings.bigH
+      )
+    element.setDrawFunc(
+      (ctx) =>
+        if camera.getZoom() < window.config.displayCutoff
+          #if button.visible
+          button.close()
+          bigButton.open()
+          @_closeAllStacks()
+        else
+          #if bigButton.visible
+          bigButton.close()
+          button.open()
+          @_openAllStacks()
+        ###
+        loc = camera.getScreenCoordinates({x: element.x, y: element.y})
+
+        w = element.w * camera.getZoom()
+        h = element.h * camera.getZoom()
+        x = loc.x - w / 2
+        y = loc.y - h / 2
+
+        ctx.strokeRect(x, y, w, h)
+        ###
+    )
+
+    button.setDrawFunc(
+      (ctx) =>
+        winStyle = window.config.windowStyle
+        style = window.config.unitDisplay
+
+        loc = camera.getScreenCoordinates(
+          element.getActualLocation(button.x, button.y))
+
+        if camera.onScreen(loc)
+          w = button.w * camera.getZoom()
+          h = button.h * camera.getZoom()
+          x = loc.x - w / 2
+          y = loc.y - h / 2
+
+          num = @_countUnits(unitSelection)
+          ctx.setFont(window.config.windowStyle.lageText.fontObj)
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillStyle = winStyle.lageText.color
+
+          size = ctx.getFontSizeVal()
+
+          ctx.setFontSizeVal(Math.floor(size * camera.getZoom()))
+
+          text = num + "/" + planet.numShips(unit)
+          ctx.fillText(text, loc.x, loc.y)
+
+          ctx.strokeStyle = style.stroke
+          ctx.lineJoin = style.lineJoin
+          ctx.lineWidth = style.lineWidth
+          if button.isHovered()
+            ctx.strokeRect(x, y, w, h)
+    )
+
+    bigButton.setDrawFunc(
+      (ctx) =>
+        winStyle = window.config.windowStyle
+        style = window.config.unitDisplay
+
+        loc = camera.getScreenCoordinates(
+          element.getActualLocation(bigButton.x, bigButton.y))
+
+        if camera.onScreen(loc)
+          w = bigButton.w * camera.getZoom()
+          h = bigButton.h * camera.getZoom()
+          x = loc.x - w / 2
+          y = loc.y - h / 2
+
+          num = @_countUnits(unitSelection)
+          ctx.setFont(window.config.windowStyle.lageText.fontObj)
+          ctx.textAlign = 'left'
+          ctx.textBaseline = 'middle'
+          ctx.fillStyle = winStyle.lageText.color
+
+          size = ctx.getFontSizeVal()
+          ctx.setFontSizeVal(Math.floor(size * 3 * camera.getZoom()))
+
+          text = num + "/" + planet.numShips(unit)
+          ctx.fillText(text, x, loc.y)
+
+          ctx.fillStyle = window.config.unitDisplay.fill
+          ctx.strokeStyle = style.stroke
+          ctx.lineJoin = style.lineJoin
+          ctx.lineWidth = style.lineWidth
+          if bigButton.isHovered()
+            ctx.strokeRect(x, y, w, h)
+
+          dist = buttonSettings.imgOffset * camera.getZoom()
+          zoom = camera.getZoom() * 2
+          if num == planet.numShips(unit)
+            ctx.fillRect(x + (w - h), y, h, h)
+          switch unit
+            when window.config.units.probe
+              SHEET.drawSprite(SpriteNames.PROBE, loc.x+dist, loc.y, ctx, false,
+                               zoom)
+            when window.config.units.colonyShip
+              SHEET.drawSprite(SpriteNames.COLONY_SHIP, loc.x+dist, loc.y, ctx,
+                               false, zoom)
+            when window.config.units.attackShip
+              SHEET.drawSprite(SpriteNames.ATTACK_SHIP, loc.x+dist, loc.y, ctx,
+                               false, zoom)
+            when window.config.units.defenseShip
+              SHEET.drawSprite(SpriteNames.DEFENSE_SHIP, loc.x+dist, loc.y, ctx,
+                               false, zoom)
+    )
+    bigButton.visible = false
+    element.addChild(button)
+    element.addChild(bigButton)
+    return element
 
   _clearStacks: (stacks) ->
     for row in stacks
@@ -125,7 +324,7 @@ class UnitSelection
     @planetsWithSelectedUnits = []
     @total = 0
     @totalProbes = 0
-    @totalcolonies = 0
+    @totalColonies = 0
     @totalAttacks = 0
     @totalDefenses = 0
     @totalDisplay.dirty = true
@@ -164,6 +363,35 @@ class UnitSelection
   # @param [Number] y The y position of the mouse
   onMouseClick: (x, y) ->
 
+  _closeAllStacks: () ->
+    for p in game.getPlanets()
+      units = p.unitSelection
+      @_closeStacks(units.probes)
+      @_closeStacks(units.colonies)
+      @_closeStacks(units.attacks)
+      @_closeStacks(units.defenses)
+
+  _closeStacks: (stacks) ->
+    for row in stacks
+      for stack in row
+        stack.b.close()
+        stack.open = false
+
+  _openAllStacks: () ->
+    for p in game.getPlanets()
+      units = p.unitSelection
+      @_openStacks(units.probes)
+      @_openStacks(units.colonies)
+      @_openStacks(units.attacks)
+      @_openStacks(units.defenses)
+
+  _openStacks: (stacks) ->
+    for row in stacks
+      for stack in row
+        if stack.count > 0
+          stack.b.open()
+          stack.open = true
+
   # Draws the units next to each planet
   #
   # @param [CanvasRenderingContext2D] ctx The game context
@@ -179,24 +407,38 @@ class UnitSelection
 
       @_drawPlanetUnits(ctx, p)
 
-      found = @_drawToolTip(ctx, units.probes) or
-              @_drawToolTip(ctx, units.colonies) or
-              @_drawToolTip(ctx, units.attacks) or
-              @_drawToolTip(ctx, units.defenses)
+      tooltipCtx.textAlign = "left"
+      tooltipCtx.font = window.config.toolTipStyle.font
+      tooltipCtx.fillStyle = window.config.toolTipStyle.color
 
-  _drawToolTip: (ctx, stacks) ->
+      found = @_drawToolTip(units.probes) or
+              @_drawToolTip(units.colonies) or
+              @_drawToolTip(units.attacks) or
+              @_drawToolTip(units.defenses)
+
+    x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+    y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+
+    switch @selectAllHover
+      when window.config.units.probe
+        tooltipCtx.fillText("Select/Deselect all probes", x, y)
+      when window.config.units.colonyShip
+        tooltipCtx.fillText("Select/Deselect all colony ships", x, y)
+      when window.config.units.attackShip
+        tooltipCtx.fillText("Select/Deselect all attack ships", x, y)
+      when window.config.units.defenseShip
+        tooltipCtx.fillText("Select/Deselect all defense ships", x, y)
+
+  _drawToolTip: (stacks) ->
     for row in stacks
       for stack in row
         if stack.isHovered()
-          ctx.textAlign = "left"
-          ctx.font = window.config.toolTipStyle.font
-          ctx.fillStyle = window.config.toolTipStyle.color
           x = @lastMousePos.x + window.config.toolTipStyle.xOffset
           y = @lastMousePos.y + window.config.toolTipStyle.yOffset
           if stack.isSelected()
-            ctx.fillText("Deselect units", x, y)
+            tooltipCtx.fillText("Deselect units", x, y)
           else
-            ctx.fillText("Select units", x, y)
+            tooltipCtx.fillText("Select units", x, y)
           return true
     return false
 
@@ -221,16 +463,19 @@ class UnitSelection
     ctx.lineJoin = winStyle.lineJoin
     ctx.lineWidth = winStyle.lineWidth
     ctx.font = winStyle.titleText.font
+
     ctx.fillRect(loc.x, loc.y, w, h)
     ctx.strokeRect(loc.x, loc.y, w, h)
+
     ctx.beginPath()
     ctx.moveTo(loc.x, loc.y+23)
     ctx.lineTo(loc.x+w, loc.y+23)
     ctx.stroke()
+
     ctx.fillStyle = winStyle.titleText.color
     ctx.textAlign = 'left'
-    ctx.textBaseline = 'center'
-    ctx.fillText("Selected Units", loc.x+6, loc.y+17)
+    ctx.textBaseline = 'middle'
+    ctx.fillText("Selected Units", loc.x+6, loc.y+13)
     ctx.fillStyle = winStyle.valueText.color
 
     SHEET.drawSprite(SpriteNames.PROBE, loc.x+30, loc.y+50, ctx, false)
@@ -261,14 +506,31 @@ class UnitSelection
     dis = window.config.unitDisplay
     for row in stacks
       for stack in row
+        if not stack.open then continue
         count = stack.getCount()
         if count > 0
           locX = stack.x
           locY = stack.y
           SHEET.drawSprite(sprite, locX, locY, ctx)
-          ctx.font = win.defaultText.font
-          ctx.fillStyle = win.defaultText.color
-          ctx.textAlign = 'left'
+        x++
+      y++
+      x = 0
+
+  _drawShipNums: (ctx, stacks) ->
+    x = 0
+    y = 0
+    win = window.config.windowStyle
+    dis = window.config.unitDisplay
+    ctx.font = win.defaultText.font
+    ctx.fillStyle = win.defaultText.color
+    ctx.textAlign = 'left'
+    for row in stacks
+      for stack in row
+        if not stack.open then continue
+        count = stack.getCount()
+        if count > 0
+          locX = stack.x
+          locY = stack.y
           offset = window.config.unitDisplay.numberOffset
           coords = camera.getScreenCoordinates(
             {x: locX+offset.x, y: locY+offset.y})
@@ -297,12 +559,14 @@ class UnitSelection
     @_drawShips(ctx, SpriteNames.COLONY_SHIP, units.colonies)
     @_drawShips(ctx, SpriteNames.ATTACK_SHIP, units.attacks)
     @_drawShips(ctx, SpriteNames.DEFENSE_SHIP, units.defenses)
-    #   for each control group
-    #     if control group is hovered over
-    #       draw expanded view
-    #     else
-    #       draw unexpanded view
-    #
+
+    @_drawShipNums(ctx, units.probes)
+    @_drawShipNums(ctx, units.colonies)
+    @_drawShipNums(ctx, units.attacks)
+    @_drawShipNums(ctx, units.defenses)
+
+  endTurn: () ->
+    @deselectAllUnits()
 
   # Updates the stacks of of the given planet's units
   #
@@ -311,9 +575,25 @@ class UnitSelection
     units = planet.unitSelection
     names = window.config.units
     @_allocate(units.probes, planet.numShips(names.probe))
+    if planet.numShips(names.probe) == 0
+      planet.unitButtons.probe.close()
+    else
+      planet.unitButtons.probe.open()
     @_allocate(units.colonies, planet.numShips(names.colonyShip))
+    if planet.numShips(names.colonyShip) == 0
+      planet.unitButtons.colony.close()
+    else
+      planet.unitButtons.colony.open()
     @_allocate(units.attacks, planet.numShips(names.attackShip))
+    if planet.numShips(names.attackShip) == 0
+      planet.unitButtons.attack.close()
+    else
+      planet.unitButtons.attack.open()
     @_allocate(units.defenses, planet.numShips(names.defenseShip))
+    if planet.numShips(names.defenseShip) == 0
+      planet.unitButtons.defense.close()
+    else
+      planet.unitButtons.defense.open()
 
   # Distributes the number givin into the given list of stacks
   #
@@ -354,6 +634,7 @@ class UnitSelection
 class Stack
   @selected: false
   @hovered: false
+  @open: false
 
   # Constructs a new stack with a default count of 0
   constructor: (@x, @y, @callback, @planet, @count=0) ->
@@ -362,6 +643,7 @@ class Stack
     @b = new Elements.Button(x, y, @w, @h, @toggleSelection)
     @b.setHoverHandler(() => @hovered = true)
     @b.setMouseOutHandler(() => @hovered = false)
+    @b.visible = false
     gameFrame.addChild(@b)
 
   destroy: ->
@@ -377,11 +659,7 @@ class Stack
   # @param [Number] x The x location of the stack
   # @param [Number] y The y location of the stack
   draw: (ctx) ->
-    if @count == 0
-      @b.visible = false
-      return
-    else
-      @b.visible = true
+    if not @open then return
     x = @x - @w / 2
     y = @y - @h / 2
     coords = camera.getScreenCoordinates({x: x, y: y})
@@ -409,6 +687,12 @@ class Stack
   #
   # @param [Number] count the number to set
   setCount: (@count) ->
+    if @count == 0
+      @b.close()
+      @open = false
+    else
+      @b.open()
+      @open = true
 
   # Gets the current count of the stack
   #
@@ -418,6 +702,9 @@ class Stack
 
   # Adds one to the count of the stack
   addOne: () ->
+    if not @open and camera.getZoom() > window.config.displayCutoff
+      @b.open()
+      @open = true
     @count++
 
   # Test if this stack is selected

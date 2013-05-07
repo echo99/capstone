@@ -35,8 +35,12 @@ APP_JS = "public#{SLASH}app.js"
 VENDOR_JS = "public#{SLASH}vendor.js"
 SRC_DIR = "app#{SLASH}src"
 VENDOR_DIR = "vendor#{SLASH}scripts"
+VENDOR_STYLES = "vendor#{SLASH}stylesheets"
+VENDOR_CSS = "public#{SLASH}vendor.css"
 NODE_DIR = ".#{SLASH}node_modules"
 NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
+RHINO_DIR = "vendor#{SLASH}tools"
+HOME_FROM_RHINO = "..#{SLASH}.."
 # if process.platform == 'win32'
 #   APP_JS = 'public\\app.js'
 #   VENDOR_JS = 'public\\vendor.js'
@@ -206,22 +210,36 @@ notify = (message, msgLvl) ->
       spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
         message]
 
+#
+jsSanityCheck = (options, callback) ->
+  process.chdir(RHINO_DIR)
+  options.verbose ?= 'verbose' of options
+  exec 'java -jar js.jar -opt -1 testrun.js', (err, stdout, stderr) ->
+    console.log(stdout) if stdout and options.verbose
+    console.error(stderr.red) if stderr
+    process.chdir(HOME_FROM_RHINO)
+    if err
+      callback(false)
+    else
+      callback(true)
 
 ###############################################################################
 # Options
 
 option '-v', '--verbose', 'Print out verbose output'
-option '-n', '--no-doc', 'Don\'t document the source files when building'
-
+option null, '--no-doc', 'Don\'t document the source files when building'
+option null, '--no-rhino', 'Don\'t try to run the script with rhino'
 
 ###############################################################################
 # Tasks
 
 task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
   options['no-doc'] ?= 'no-doc' of options
+  options['no-rhino'] ?= 'no-rhino' of options
   if not BUILDING
     BUILDING = true
     checkDep ->
+      invoke 'vendcomp'
       console.log(
         "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
       # Try to compile all files individually first, to get a better
@@ -243,8 +261,21 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
                 # notify("Build successful!", MessageLevel.INFO) if WATCHING
                 console.log('Build successful!'.green)
                 # console.log()
-              invoke 'lint'
-              invoke 'doc' if not options['no-doc']
+              if options['no-rhino']
+                invoke 'lint'
+                invoke 'doc' if not options['no-doc']
+              else
+                console.log('Doing test run on compiled script...'.yellow)
+                jsSanityCheck options, (passed) ->
+                  if passed
+                    console.log('Test passed!'.green)
+                    invoke 'lint'
+                    invoke 'doc' if not options['no-doc']
+                  else
+                    notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
+                    console.error('Test run failed!'.red)
+        else
+          invoke 'lint'
         BUILDING = false
         # else
         #   console.log('Build failed!'.red)
@@ -256,14 +287,35 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
   scripts = ''
   dir = VENDOR_DIR
-  files = fs.readdirSync dir
+  # files = fs.readdirSync dir
+  files = [
+    'browserdetect.js',
+    'jquery-1.9.1.min.js',
+    'jqModal.js',
+    'soundjs-0.4.0.min.js',
+    'soundjs.flashplugin-0.4.0.min.js'
+  ]
   for file in files
     contents = fs.readFileSync (dir+'/'+file), 'utf8'
-    scripts += contents
+    scripts += contents + "\n"
     #name = file.replace /\..*/, '' # remove extension
     #templateJs += "window.#{name} = '#{contents}';"
   try
     fs.writeFile VENDOR_JS, scripts
+  catch err
+    console.log(err)
+
+  console.log("Combining vendor styles to #{VENDOR_CSS}".yellow)
+  styles = ''
+  dir = VENDOR_STYLES
+  files = fs.readdirSync dir
+  for file in files
+    contents = fs.readFileSync (dir+'/'+file), 'utf8'
+    styles += contents + "\n"
+    #name = file.replace /\..*/, '' # remove extension
+    #templateJs += "window.#{name} = '#{contents}';"
+  try
+    fs.writeFile VENDOR_CSS, styles
   catch err
     console.log(err)
   # exec 'echo "hi2"'
@@ -375,6 +427,8 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
       fail = "x".red
     failCount = 0
     fileFailCount = 0
+    errorCount = 0
+    # errorFileCount = 0
     files = getSourceFilePaths()
     filesToLint = files.length
     files.forEach (filepath) ->
@@ -382,35 +436,43 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
       fs.readFile filepath, (err, data) ->
         filesToLint--
         shortPath = filepath.substr SRC_DIR.length + 1
-        result = coffeelint.lint data.toString(), coffeeLintConfig
-        if result.length
-          fileFailCount++
-          hasError = result.some (res) -> res.level is 'error'
-          level = if hasError then fail else warn
-          console.error "#{level}  #{shortPath}".red
-          for res in result
-            failCount++
-            level = if res.level is 'error' then fail else warn
-            console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
-        else if options.verbose
-          console.log("#{pass}  #{shortPath}".green)
-        if filesToLint == 0
-          # console.log("#{failCount} lint failures")
-          if failCount > 0
-            notify("Build succeeded, but #{failCount} lint errors were " +
-              "found! Please check the terminal for more details.",
-              MessageLevel.ERROR) if WATCHING
-            console.error(("\n#{failCount} lint error(s) found in " +
-              "#{fileFailCount} file(s)!").red.bold)
-            console.error("As a reminder:".grey.underline)
-            console.error("- Indentation is two spaces. No tabs allowed".grey)
-            console.error(("- Maximum line width is " +
-              "#{coffeeLintConfig.max_line_length.value} characters").grey)
-          else
-            notify("Build succeeded. All files passed lint.",
-              MessageLevel.INFO) if WATCHING
-            console.log('No lint errors found!'.green)
-          console.log("") if WATCHING
+        try
+          result = coffeelint.lint data.toString(), coffeeLintConfig
+          if result.length
+            fileFailCount++
+            hasError = result.some (res) -> res.level is 'error'
+            level = if hasError then fail else warn
+            console.error "#{level}  #{shortPath}".red
+            for res in result
+              failCount++
+              level = if res.level is 'error' then fail else warn
+              console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
+          else if options.verbose
+            console.log("#{pass}  #{shortPath}".green)
+          if filesToLint == 0
+            # console.log("#{failCount} lint failures")
+            if failCount > 0
+              notify("Build succeeded, but #{failCount} lint errors were " +
+                "found! Please check the terminal for more details.",
+                MessageLevel.ERROR) if WATCHING
+              console.error("\n")
+              if errorCount > 0
+                console.error(("#{errorCount} syntax error(s) found!").red.bold)
+              console.error(("#{failCount} lint error(s) found in " +
+                "#{fileFailCount} file(s)!").red.bold)
+              console.error("As a reminder:".grey.underline)
+              console.error("- Indentation is two spaces. No tabs allowed".grey)
+              console.error(("- Maximum line width is " +
+                "#{coffeeLintConfig.max_line_length.value} characters").grey)
+            else
+              notify("Build succeeded. All files passed lint.",
+                MessageLevel.INFO) if WATCHING
+              console.log('No lint errors found!'.green)
+            console.log("") if WATCHING
+        catch e
+          errorCount++
+          console.error("#{filepath}: #{e}".red)
+          # return e
 
 task 'doc', 'Document the source code using Codo', (options) ->
   lastResortCodoFix = (cmd, callback=null) ->

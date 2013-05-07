@@ -73,7 +73,7 @@ class SpriteSheet
         trans = camera.getScreenCoordinates({x: x, y: y})
         x = (0.5 + trans.x) << 0
         y = (0.5 + trans.y) << 0
-        scale = camera.zoom
+        scale *= camera.zoom
         # TODO: change bound check so it checks for sprite collision with
         #       the camera rectangle, not whether the center collides
         if camera.onScreen(trans)

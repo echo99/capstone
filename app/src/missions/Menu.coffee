@@ -8,10 +8,10 @@ class Menu extends Mission
   reset: ->
     # Load user progress
     #   Add fungus to locked mission planets
+    @allMissionsComplete = false
+    @seenGameCompleteMenu = false
     #
     # Create planets:
-    #game.setup(10, null)
-    #return
     newGame(10000, 10000)
     @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
               "Extermination", "Credits"]
@@ -19,7 +19,7 @@ class Menu extends Mission
       Home: new Planet(@settings.home.x, @settings.home.y)
       Missions: new Planet(@settings.missions.x, @settings.missions.y)
       Mission1: new Planet(@settings.mission1.x, @settings.mission1.y)
-      Mission2: new Planet(0, -800)
+      Mission2: new Planet(@settings.mission2.x, @settings.mission2.y)
       Mission3: new Planet(400, -750)
       Extermination: new Planet(@settings.extermination.x,
                                 @settings.extermination.y)
@@ -58,27 +58,94 @@ class Menu extends Mission
     # Add probe to Home planet
     @Planets.Home.addShips(window.config.units.probe, 1)
     #@Planets.Missions._attackShips = 23
-    @Planets.Mission1._fungusStrength = 1
+    @Planets.Mission2._fungusStrength = 0
+    @Planets.Mission3._fungusStrength = 0
     #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home
-    UI.initialize(true, false)
     camera.setZoom(0.5)
     camera.setTarget(@Planets.Home.location())
 
     @_initMenus()
-    game.setup(0, null)
+    game.endTurn()
+    UI.initialize(true, false, false)
 
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)
+    cameraHudFrame.removeChild(@mission2Menu)
+    cameraHudFrame.removeChild(@mission3Menu)
     cameraHudFrame.removeChild(@exterminationMenu)
+    cameraHudFrame.removeChild(@creditsMenu)
+    if @gameCompleteMenu
+      cameraHudFrame.removeChild(@gameCompleteMenu)
 
   _initMenus: ->
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
-      console.log('clicked mission 1 button'))
+      newMission(Mission1))
+    @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
+      console.log('clicked mission 2 button')
+      newMission(Mission1))
+    @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
+      console.log('clicked mission 3 button'))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
-      console.log('clicked extermination button')
       newMission(Extermination))
+
+    c = new Elements.Button(200 - 10, 10, 16, 16,
+      () =>
+        @creditsMenu.close()
+    )
+    c.setDrawFunc(
+      (ctx) =>
+        loc = @creditsMenu.getActualLocation(c.x, c.y)
+        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+    )
+    message = "Credits\n\n" +
+              "Design and Programming:\n" +
+              "    Erik Chou\n" +
+              "    Brandon Edgren\n" +
+              "    Ian Johnson\n" +
+              "    Raymond Zhang\n\n" +
+              "Art:\n" +
+              "    Brandon Edgren\n\n" +
+              "Sound:\n" +
+              "    Erik Chou"
+    @creditsMenu = new Elements.MessageBox(0, 0, 200, 250, message,
+      {
+        closeBtn: c,
+        textAlign: 'left',
+        vAlign: 'top',
+        font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
+        visible: false
+      })
+    cameraHudFrame.addChild(@creditsMenu)
+
+    if @allMissionsComplete and not @seenGameCompleteMenu
+      close = new Elements.Button(500 - 10, 10, 16, 16,
+        () =>
+          @gameCompleteMenu.close()
+          @seenGameCompleteMenu = true # TODO: override cookie instead
+      )
+      close.setDrawFunc(
+        (ctx) =>
+          loc = @gameCompleteMenu.getActualLocation(close.x, close.y)
+          SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+      )
+      message = "Congratulations!\n\nYou've completed all the missions. If you " +
+                "haven't had enough yet be sure to check out Extermination mode. " +
+                "Also, we would love to hear any feedback you might have, let us " +
+                "know by clicking the feedback icon in the lower right."
+      @gameCompleteMenu = new Elements.MessageBox(0, 0, 500, 100, message,
+        {
+          closeBtn: close,
+          textAlign: 'left',
+          vAlign: 'top',
+          font: window.config.windowStyle.defaultText.font,
+          lineHeight: 17
+          visible: false
+        })
+      cameraHudFrame.addChild(@gameCompleteMenu)
+      @gameCompleteMenu.open()
 
   _createMenu: (settings, onStart) ->
     cancel = settings.cancel
@@ -87,20 +154,16 @@ class Menu extends Mission
     menuBox = new Elements.MessageBox(0, 0,
                                       settings.w, settings.h,
                                       settings.message,
-                                      cancelButton,
-                                      settings.textAlign,
-                                      settings.vAlign)
+                                      {
+                                        closeBtn: cancelButton,
+                                        textAlign: settings.textAlign,
+                                        vAlign: settings.vAlign,
+                                        font: settings.font
+                                        lineHeight: settings.lineHeight,
+                                        visible: false
+                                      })
     cancelButton.setClickHandler(() =>
       menuBox.close()
-    )
-    cancelButton.setMouseUpHandler(() =>
-      cancelButton.setDirty()
-    )
-    cancelButton.setMouseDownHandler(() =>
-      cancelButton.setDirty()
-    )
-    cancelButton.setMouseOutHandler(() =>
-      cancelButton.setDirty()
     )
     cancelButton.setDrawFunc((ctx) =>
       loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
@@ -114,15 +177,6 @@ class Menu extends Mission
 
     startButton = new Elements.Button(start.x, start.y, start.w, start.h)
     startButton.setClickHandler(onStart)
-    startButton.setMouseUpHandler(() =>
-      startButton.setDirty()
-    )
-    startButton.setMouseDownHandler(() =>
-      startButton.setDirty()
-    )
-    startButton.setMouseOutHandler(() =>
-      startButton.setDirty()
-    )
     startButton.setDrawFunc((ctx) =>
       loc = menuBox.getActualLocation(startButton.x, startButton.y)
       if startButton.isPressed()
@@ -134,18 +188,15 @@ class Menu extends Mission
     )
 
     menuBox.addChild(startButton)
-    menuBox.visible = false
     cameraHudFrame.addChild(menuBox)
 
     return menuBox
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
-    SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 75, ctx, false)
-
     winStyle = window.config.windowStyle
-    ctx.font = winStyle.defaultText.font
-    ctx.fillStyle = winStyle.defaultText.color
+    ctx.font = winStyle.labelText.font
+    ctx.fillStyle = winStyle.labelText.color
     ctx.textAlign = 'center'
     for p in @Names
       planet = @Planets[p]
@@ -156,9 +207,7 @@ class Menu extends Mission
         coords = camera.getScreenCoordinates(coords)
         if camera.onScreen(coords)
           ctx.fillText(p, coords.x, coords.y)
-
-    # if the probe is on a planet of interest
-    #   draw prompt to make sure the player wants to play the mission
+    SHEET.drawSprite(SpriteNames.TITLE, camera.width/2, 30, ctx, false)
 
   # @see Mission#onMouseMove
   onMouseMove: (x, y) ->
@@ -178,22 +227,12 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-      camera.setTarget(@lastPlanet.location())
       inGroup = false
       for c in @lastPlanet.getControlGroups()
         if c.probes() == 1
           inGroup = true
           break
-
-    # NOTE: this assumes that the game handle the mouse click first,
-    #       if that's not the case this may have to be done differently
-    # else if the prompt is being displayed and the mouse is on a button
-    #   if cancel button
-    #     close prompt
-    #   else if play button
-    #     CurrentMission = the mission that the planet goes to
-    #   else
-    #     (other buttons?)
+      camera.setTarget(@lastPlanet.location())
 
   getHomeTarget: ->
     return @lastPlanet.location()
@@ -209,20 +248,36 @@ class Menu extends Mission
           break
       if p.numShips(window.config.units.probe) == 1 or inGroup
         found = true
-        @lastPlanet = p
-        if @lastPlanet == @Planets.Mission1
-          @mission1Menu.visible = true
-        else
-          @mission1Menu.close()
-        if @lastPlanet == @Planets.Extermination
-          @exterminationMenu.visible = true
-        else
-          @exterminationMenu.close()
+        @_checkMissions(p)
         break
     if not found
       @lastPlanet._probes = 1
-      camera.setTarget(@lastPlanet.location)
-    #   for each planet that leaves the menu
-    #     if the planet has a probe on it
-    #       open prompt for the planet
+      camera.setTarget(@lastPlanet.location())
+      game.endTurn()
+      UI.endTurn()
+      CurrentMission.onEndTurn()
     # Add the probe to the selected units
+
+  _checkMissions: (p) ->
+    if p.fungusStrength() == 0
+      @lastPlanet = p
+      if @lastPlanet == @Planets.Mission1
+        @mission1Menu.open()
+      else
+        @mission1Menu.close()
+      if @lastPlanet == @Planets.Mission2
+        @mission2Menu.open()
+      else
+        @mission2Menu.close()
+      if @lastPlanet == @Planets.Mission3
+        @mission3Menu.open()
+      else
+        @mission3Menu.close()
+      if @lastPlanet == @Planets.Extermination
+        @exterminationMenu.open()
+      else
+        @exterminationMenu.close()
+      if @lastPlanet == @Planets.Credits
+        @creditsMenu.open()
+      else
+        @creditsMenu.close()

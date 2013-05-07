@@ -1,5 +1,6 @@
 # The main script for the game
 
+#_require util/canvas-context-extended
 #_require util/SpriteSheet
 #_require util/AtlasParser
 #_require missions/Menu
@@ -11,6 +12,41 @@
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
 DOM_LOADED = false
+
+BROWSER = BrowserDetect.browser
+Browser =
+  CHROME: 'Chrome'
+  FIREFOX: 'Firefox'
+  IE: 'Explorer'
+
+TESTING = window.TESTING?
+DEBUG = true
+# console.log("Testing flag: " + TESTING)
+
+manifest = [
+    src: 'assets/audio/empty_space_stage1.ogg'
+    id: 'bgmusic1'
+  ,
+    src: 'assets/audio/empty_space_stage2.ogg'
+    id: 'bgmusic2'
+]
+
+bgmusic = null
+
+numToLoad = manifest.length
+numLoaded = 0
+
+createjs.Sound.addEventListener "loadComplete", ->
+  numLoaded++
+  if numLoaded >= numToLoad
+    # Play music once all sounds have been loaded
+    console.log('Finished loading sounds!')
+    bgmusic = createjs.Sound.play('bgmusic1', createjs.Sound.INTERRUPT_NONE,
+      10, 0, -1, 0.5)
+    # Start it off muted
+    bgmusic.mute(true)
+
+createjs.Sound.registerManifest(manifest)
 
 # Load image and image data as soon as possible
 SHEET = null
@@ -47,10 +83,35 @@ gameFrame = null
 
 CurrentMission = null
 
+tooltipCanvas = null
+tooltipCtx = null
+
+drag = false
+
+
+WIN7 = false
+
+determineWin7 = ->
+  console.log(navigator.userAgent)
+  pat = /^\S+ \((.*?)\)/
+  match = navigator.userAgent.match(pat)
+  osStr = match[1]
+  pat = /Windows NT (\d+\.\d+)/
+  match = osStr.match(pat)
+  if match
+    version = match[1]
+    # Windows 7 is Windows NT 6.1
+    if version == '6.1'
+      WIN7 = true
+      console.log('You are using Windows 7')
+
+determineWin7()
+
 newMission = (mission) ->
   CurrentMission.destroy()
   UI.destroy()
-  UI = new UserInterface()
+  if UI == null
+    UI = new UserInterface()
   CurrentMission = new mission()
   window.onresize()
 
@@ -90,18 +151,22 @@ updateCanvases = (frame, canvases...) ->
   for canvas in canvases
     canvas.width = frameWidth
     canvas.height = frameHeight
-  camera.setSize(window.innerWidth, window.innerHeight)
+  camera.setSize(frameWidth, frameHeight)
 
-# The main method
+# The main method for the game
 main = ->
+  ##################################################################################
+  # Get all necessary html elements
+
   frame = document.getElementById('frame')
   canvas = document.getElementById('canvas-fg')
   bgCanvas = document.getElementById('canvas-bg')
   hudCanvas = document.getElementById('canvas-hud')
   camerahudCanvas = document.getElementById('canvas-camerahud')
+  tooltipCanvas = document.getElementById('canvas-tooltip')
   # Need a better variable name for this
   surface = document.getElementById('surface')
-  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas)
+  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
   # we should just make the bg larger than we'll ever need it to be
   bgCanvas.width = screen.width * 2
   bgCanvas.height = screen.height * 2
@@ -112,9 +177,21 @@ main = ->
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
+  tooltipCtx = tooltipCanvas.getContext('2d')
 
-  fsCanvas = document.getElementById('fs-button')
-  fsCtx = fsCanvas.getContext('2d')
+  # console.log(ctx.font)
+  # ctx.setFont({family: 'Arial'})
+  # console.log(ctx.font)
+  # ctx.setFontSizeVal(20)
+  # console.log(ctx.font)
+
+  # feedback = $('#comments').jqm()
+  feedback = $('#comments').jqm({
+    ajax: 'fbcomments.html',
+    ajaxUpdate: false,
+    modal: true
+  })
+  feedbackElem = document.getElementById('comments')
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
@@ -124,28 +201,33 @@ main = ->
   # msgBox = new Elements.MessageBox(60, 300, 100, 100, "HUD", hudCtx)
   # frameElement.addChild(msgBox)
   # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
-  #   "This message needs to be wrapped"))
-  # frameElement.addChild(new Elements.MessageBox(150, 350, 280, 100,
-  #   "This message is left aligned", 'left'))
+  #   "This message needs to be wrapped",
+  #   {textAlign: 'left', vAlign:'bottom', lineHeight: 35}))
+  # frameElement.addChild(new Elements.MessageBox(150, 550, 280, 100,
+  #   "This message is right aligned",
+  #   {textAlign:'right', hPadding: 30, vPadding: 10, vAlign: 'top'}))
   # frameElement.addChild(new Elements.MessageBox(450, 350, 280, 100,
-  #   "This message is right aligned", 'right'))
+  #   "This message is top aligned", {vAlign:'top'}))
   # frameElement.addChild(new Elements.MessageBox(150, 500, 280, 100,
   #   "This message\nhas a newline"))
   # frameElement.addChild(new Elements.MessageBox(450, 500, 280, 100,
   #   "This message is top right aligned", 'right', 'top'))
   # frameElement.addChild(new Elements.MessageBox(750, 350, 280, 100,
   #   "This message is bottom left aligned", 'left', 'bottom'))
-  win = new Elements.Window(100, 200, 100, 100)
-  win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
-  win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
-  frameElement.addChild(win)
-  frameElement.drawChildren()
-  console.log(frameElement.toString())
+  # win = new Elements.Window(60, 300, 100, 100)
+  # win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
+  # win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
+  # frameElement.addChild(win)
+  # frameElement.drawChildren()
+  # frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
+  #   "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
+  #   font: '15px sans-serif'}))
+  # console.log(frameElement.toString())
 
-  msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
-  msgBox2.setDefaultCloseBtn()
-  msgBox2.setZIndex(1)
-  gameFrame.addChild(msgBox2)
+  # msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
+  # msgBox2.setDefaultCloseBtn()
+  # msgBox2.setZIndex(1)
+  # gameFrame.addChild(msgBox2)
 
   # cameraHudFrame.addChild(new Elements.MessageBox(0, 0, 100, 100, "test"))
 
@@ -164,11 +246,27 @@ main = ->
     console.log("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
 
-  sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+  # Set global variables for debugging
+  if DEBUG
+    window.hudFrame = frameElement
+    window.gameFrame = gameFrame
+    window.cameraHudFrame = cameraHudFrame
+    window.UI = UI
+    window.CurrentMission = CurrentMission
 
-  canvasclick = ->
-    # eheight: 619 -> 774 (diff of 155)
-    if document.mozFullScreenElement or document.webkitFullScreenElement
+  ##################################################################################
+  # Create static buttons
+
+  btnSpacing = config.buttonSpacing
+
+  # Set fullscreen button
+  fullscreenBtn = new Elements.DOMButton('fullscreen',
+    config.spriteNames.FULL_SCREEN, SHEET).setRight(btnSpacing)
+    .setBottom(btnSpacing)
+  fullscreenBtn.addState('unfullscreen', config.spriteNames.UNFULL_SCREEN)
+  fullscreenBtn.setClickHandler ->
+    if document.mozFullScreenElement or document.webkitFullscreenElement or
+        document.fullScreenElement
       console.log "Already full screen!"
       if document.cancelFullScreen
         document.cancelFullScreen()
@@ -176,7 +274,8 @@ main = ->
         document.mozCancelFullScreen()
       else if document.webkitCancelFullScreen
         document.webkitCancelFullScreen()
-      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      fullscreenBtn.setState('fullscreen')
     else
       console.log "Not at full screen"
       body = document.body
@@ -186,15 +285,45 @@ main = ->
         body.mozRequestFullScreen()
       else if body.webkitRequestFullscreen
         body.webkitRequestFullscreen()
-      sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
-  fsCanvas.addEventListener('mousedown', canvasclick)
+      fullscreenBtn.setState('unfullscreen')
+      # sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
+  # Disable fullscreen button on IE (since it doesn't support those features)
+  # Also disable on Windows 7 Chrome due to bug
+  if BROWSER == Browser.IE or (WIN7 and BROWSER == Browser.CHROME)
+    fullscreenBtn.disable()
 
-  muteBtn = new Elements.DOMButton(config.spriteNames.UNMUTED, SHEET)
-    .setRight(5).setBottom(26)
+  # Set mute button
+  muteBtn = new Elements.DOMButton('muted', config.spriteNames.MUTED, SHEET)
+    .setRight(btnSpacing).setBottom(btnSpacing*2 + fullscreenBtn.h)
+  muteBtn.addState('unmuted', config.spriteNames.UNMUTED)
+  muteBtn.setClickHandler ->
+    if bgmusic.getMute()
+      bgmusic.setMute(false)
+      muteBtn.setState('unmuted')
+    else
+      bgmusic.setMute(true)
+      muteBtn.setState('muted')
+
+  # Set feedback button
+  feedbackBtn = new Elements.DOMButton('feedback',
+    config.spriteNames.FEEDBACK, SHEET).setRight(btnSpacing*2 + fullscreenBtn.w)
+    .setBottom(btnSpacing)
+  feedbackBtn.setClickHandler ->
+    feedback.jqmShow()
+    # if BROWSER == Browser.IE
+    #   feedbackElem.style.display = 'inline-block'
+    # try
+    #   feedback.jqmShow()
+    # catch e
+    #   console.warn(e)
+
+
+  ##################################################################################
+  # Set event handlers
 
   window.onresize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas)
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
@@ -203,8 +332,10 @@ main = ->
       surface.style.width = screen.width + 'px'
       surface.style.height = screen.height + 'px'
     if not document.mozFullScreenElement and
-        not document.webkitFullScreenElement
-      sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+        not document.webkitFullscreenElement and
+        not document.fullScreenElement
+      # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      fullscreenBtn.setState('fullscreen')
 
     bgCanvas.style.left = (0.5+(canvas.width - bgCanvas.width)/2) << 0 + "px"
     bgCanvas.style.top = (0.5+(canvas.height - bgCanvas.height)/2) << 0 + "px"
@@ -229,14 +360,14 @@ main = ->
   # Catch accidental leaving
   window.onbeforeunload = (e) ->
     # No progress can be lost in the menu
-    if (not CurrentMission instanceof Menu)
+    if (not (CurrentMission instanceof Menu))
       if (not e)
         e = window.event
       e.cancelBubble = true
-      e.returnValue = "Progress my be lost, are you sure you want to leave?"
       if (e.stopPropagation)
         e.stopPropagation()
         e.preventDefault()
+        return "Warning: Progress my be lost."
 
   prevPos = {x: 0, y: 0}
   drag = false
@@ -249,12 +380,15 @@ main = ->
     CurrentMission.onMouseMove(x, y)
     pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
+      # Nothing on HUD frame is being hovered over
       pointer = cameraHudFrame.mouseMove(x, y)
       if pointer is null
         pointer = gameFrame.mouseMove(x, y)
       else
         gameFrame.mouseOut()
     else
+      # Something on HUD frame is being hovered over, mouse out of other frames
+      gameFrame.mouseOut()
       cameraHudFrame.mouseOut()
     if pointer isnt null
       # hudCanvas.style.cursor = pointer
@@ -313,6 +447,9 @@ main = ->
 
   # hudCanvas.addEventListener('mouseout', (e) ->
   surface.addEventListener('mouseout', (e) ->
+    # frameElement.mouseOut()
+    # cameraHudFrame.mouseOut()
+    # gameFrame.mouseOut()
     drag = false)
 
   mouseWheelHandler = (e) ->
@@ -324,8 +461,13 @@ main = ->
 
   document.body.addEventListener('mousewheel', mouseWheelHandler)
 
+
+  ##################################################################################
+  # Draw loop
+
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
+    tooltipCtx.clearRect(0, 0, camera.width, camera.height)
     UI.draw(ctx, hudCtx)
     CurrentMission.draw(ctx, hudCtx)
     cameraHudFrame.drawChildren()
@@ -340,4 +482,8 @@ main = ->
     # Don't forget to update the animation
     AnimatedSprite.drawCounter++
 
-  setInterval draw, 30
+  # Only call draw once if testing
+  if TESTING
+    draw()
+  else
+    setInterval draw, 30

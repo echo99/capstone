@@ -3,42 +3,60 @@
 class Game
   # Set the height and width of the game world
   constructor: (@_height, @_width) ->
+    @_maxX = @_width /2
+    @_minX = 0 - (@_width / 2)
+    @_maxY = @_height / 2
+    @_minY = 0 - (@_height /2)
     @_planets = []
 
   # GAME MANIPULATION #
 
-  # Setup the mission, either by accepting a passed graph or by generating one.
+  # Setup the mission by generating a graph.
   #
-  # @param [Integer] The number of planets to generate if generating.
-  # @param [Array of Planets] The graph to use if a custom mission else null.
-  setup: (@_numplanets = 0, planets = null) ->
-    if planets isnt null
-      @_planets = planets
-    else if @_numplanets != 0
-      # Generate home planet.
-      homePlanetX = Math.floor(Math.random() * @_width)
-      homePlanetY = Math.floor(Math.random() * @_height)
-      homePlanet = new Planet(homePlanetX,
-                              homePlanetY,
-                              root.config.resources.homePlanetResources,
-                              root.config.resources.homePlanetRate)
-      homePlanet.addShips(root.config.units.probe, 1)
-      # Generate the rest of the planets.
-      while @_planets.length != @_numplanets
-        if @_planets.length > @_numplanets
-          throw error "TOO MANY PLANETS OMG"
-        seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
-        deltaX = Math.floor((Math.random() * 2 - 1) *
-                            root.config.minimumPlanetDistance)
-        deltaY = Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
-                           Math.pow(deltaX, 2))
-        newX = seedPlanet.location.x + deltaX
-        newY = seedPlanet.location.y + deltaY
-        newPlanet = new Planet(newX, newY, @newResources(), @newRate())
-        if @isGoodPlanet(newPlanet)
-          @makeAdjacent(newPlanet)
-          @_planets.push(newPlanet)
+  # @param [Integer] numplanets The positive integer number of planets to generate.
+  #
+  # @return [Planet] The home planet.
+  #
+  # @throw [Error] If the number of planets is not positive.
+  setup: (numplanets = 0) ->
+    # Sanitize inputs
+    if numplanets < 1
+      throw Error "Not positive number of planets requested."
+    # Generate home planet.
+    homePlanetX = Math.floor((Math.random() * 2 - 1) * @_maxX)
+    homePlanetY = Math.floor((Math.random() * 2 - 1) * @_maxY)
+    homePlanet = new Planet(homePlanetX,
+                            homePlanetY,
+                            root.config.resources.homePlanetResources,
+                            root.config.resources.homePlanetRate)
+    homePlanet.addShips(root.config.units.probe, 1)
+    @_planets.push(homePlanet)
+    # Generate the rest of the planets.
+    while @_planets.length != numplanets
+      if @_planets.length > @_numplanets
+        throw Error "TOO MANY PLANETS OMG"
+      seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
+      deltaX = Math.floor((Math.random() * 2 - 1) *
+                          root.config.minimumPlanetDistance)
+      deltaY = Math.floor(Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
+                          Math.pow(deltaX, 2)))
+      newX = seedPlanet.location().x + deltaX
+      newY = seedPlanet.location().y + deltaY
+      resources = @newResources()
+      rate = @newRate()
+      newPlanet = new Planet(newX, newY, @newResources(), @newRate())
+      if @isGoodPlanet(newPlanet)
+        @makeAdjacent(newPlanet)
+        @_planets.push(newPlanet)
+    placedFungus = false
+    while !placedFungus
+      fungusPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
+      if fungusPlanet.distance(homePlanet) >= root.config.minimumFungusDistance
+        placedFungus = true
+        fungusPlanet.setFungus(root.config.fungusInitialStrength)
+      
     @endTurn()
+    return homePlanet
 
   # Replaces current graph with the specified.
   #
@@ -77,6 +95,7 @@ class Game
 
   # Does all required upkeep for the end of the turn.
   endTurn: ->
+    planet.gatherResources() for planet in @_planets
     planet.growPass1() for planet in @_planets
     planet.growPass2() for planet in @_planets
     planet.movementUpkeep1() for planet in @_planets
@@ -94,28 +113,34 @@ class Game
   gaussian: (stdev, mean) ->
     ((Math.random() * 2 - 1) *
      (Math.random() * 2 - 1) *
+     (Math.random() * 2 - 1) *
+     (Math.random() * 2 - 1) *
      (Math.random() * 2 - 1)) * stdev + mean
 
   # Returns a new value for a planet's resources according to mean and stdev
   #
   # @return [Integer] A gaussian random amount of resources.
   newResources: ->
-    ret = @gaussian(root.config.resources.meanResources,
-                   root.config.resources.stdevResources)
+    ret = @gaussian(root.config.resources.stdevResources,
+                  root.config.resources.meanResources)
     ret = Math.floor(ret)
-    if ret < 1
-      ret = 1
+    if ret < root.config.resources.minResources
+      ret = root.config.resources.minResources
+    if ret > root.config.resources.maxResources
+      ret = root.config.resources.maxResouces
     return ret
 
   # Returns a new value for a planet's rate according to mean and stdev
   #
   # @return [Integer] A gaussian random amount of resources.
   newRate: ->
-    ret = @gaussian(root.config.resources.meanRate,
-                   root.config.resources.stdevRate)
+    ret = @gaussian(root.config.resources.stdevRate,
+                   root.config.resources.meanRate)
     ret = Math.floor(ret)
-    if ret < 1
-      ret = 1
+    if ret < root.config.resources.minRate
+      ret = root.config.resources.minRate
+    if ret > root.config.resources.maxRate
+      ret = root.config.resources.maxRate
     return ret
 
   # Returns true if the planet is on the map and not too close to others.

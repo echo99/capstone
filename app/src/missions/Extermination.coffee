@@ -10,32 +10,41 @@ class Extermination extends Mission
     #game.setup(10, null)
     #return
     newGame(10000, 10000)
-    @Planets =
-      a: new Planet(0, 0, 50, 1)
-      b: new Planet(300, 450, 70, 3)
-      c: new Planet(300, -450, 25, 2)
+    @home = game.setup(10)
+    @home.addStation()
 
-    game.addPlanet(@Planets.a)
-    game.addPlanet(@Planets.b)
-    game.addPlanet(@Planets.c)
-
-    # Add connections to game
-    game.setNeighbors(@Planets.a, @Planets.b)
-    game.setNeighbors(@Planets.a, @Planets.c)
-    game.setNeighbors(@Planets.b, @Planets.c)
-
-    # Add initial units
-    @Planets.a.addShips(window.config.units.probe, 1)
-    @Planets.a._station = true
-    @Planets.a._unitConstructing = window.config.units.colonyShip
-    @Planets.a._turnsToComplete = 5
-    @Planets.b._outpost = true
+    # Test stuff
+    @home.getAdjacentPlanets()[0].addOutpost()
+    @home.addShips(window.config.units.probe, 8)
+    @home.addShips(window.config.units.colonyShip, 10)
+    @home.addShips(window.config.units.attackShip, 10)
+    @home.addShips(window.config.units.defenseShip, 10)
+    # End test stuff
 
     UI.initialize()
     camera.setZoom(0.5)
-    camera.setTarget(@Planets.a.location())
+    camera.setTarget(@home.location())
 
-    game.setup(10, null)
+    @_initMenus()
+
+  destroy: ->
+    cameraHudFrame.removeChild(@victoryMenu)
+    cameraHudFrame.removeChild(@failMenu)
+
+  _initMenus: ->
+    @victoryMenu = @createVictoryMenu(
+      () =>
+        console.log('restart extermination')
+        newMission(Extermination)
+      () =>
+        console.log('to next mission')
+        newMission(Menu)
+    )
+    @failMenu = @createFailMenu(
+      () =>
+        console.log('restart extermination')
+        newMission(Extermination)
+    )
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -49,11 +58,19 @@ class Extermination extends Mission
   onMouseClick: (x, y) ->
 
   getHomeTarget: ->
-    # TODO: come up with smarter target
-    return @Plants.a.location()
+    return @home.location()
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    # TODO: check for end game
-    if @Planets.b.numShips(window.config.units.probe) > 0
-      newMission(Menu)
+    hasFungus = false
+    for p in game.getPlanets()
+      if p.fungusStrength() > 0
+        hasFungus = true
+
+    if not hasFungus
+      UI.endGame()
+      @victoryMenu.open()
+
+    if not @home.hasStation()
+      UI.endGame()
+      @failMenu.open()

@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 body {
   background-color: #333;
   padding: 0;
@@ -14,12 +16,6 @@ body {
   user-select: none;
   outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: inline-block;
-  width: 600px;
-  height: 400px;
 }
 
 #frame {
@@ -33,35 +29,19 @@ body {
   overflow: hidden;
 }
 
-#canvas-bg {
+.game-canvas {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+#canvas-bg {
   z-index: -1;
 }
 
 #canvas-fg {
-/*  position: absolute;
-  top: 0px;
-  left: 0px;*/
-}
-
-#canvas-hud {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-#canvas-camerahud {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-#hud {
-  position: absolute;
-  top: 0;
-  left: 0;
+  /* Make this canvas position relative to that the div won't collapse */
+  position: relative;
 }
 
 #fs-button {
@@ -69,4 +49,31 @@ body {
   right: 5px;
   bottom: 5px;
   cursor:pointer;
+}
+
+.jqmWindow {
+    position: fixed;
+    top: 25%;
+    left: 50%;
+    
+    margin-left: -315px;
+    width: 600px;
+    
+    /*background-color: #EEE;*/
+    background-color: #333;
+    /*color: #333;*/
+    color: #EEE;
+    font-weight: bold;
+    border: 1px solid #222;
+    padding: 12px;
+}
+
+.jqmWindow a {
+  color: #DDF;
+  text-decoration: none;
+}
+
+.jqmWindow a:hover {
+  color: #CCE;
+  text-decoration: none;
 }

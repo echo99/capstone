@@ -10,6 +10,7 @@ class ControlGroup
                 @_probes,
                 @_colonies,
                 @_destination) ->
+    @_id = Math.floor(Math.random() * 1000000)
     @_route = []
     @_hasMoved = false
   
@@ -96,11 +97,11 @@ class ControlGroup
 
   # Sets the moved flag to true.
   setMoved: ->
-    @_moved = true
+    @_hasMoved = true
 
   # Sets the moved flag to false.
   resetMoved: ->
-    @_moved = false
+    @_hasMoved = false
 
   # ARTIFICIAL INTELLIGENCE #
 
@@ -108,22 +109,22 @@ class ControlGroup
   #
   # @param [Planet] v Current planet.
   updateAi: (v) ->
-    console.log("Finding route for control group")
+    #console.log("Finding route for control group")
     @_route = []
     q = []
     seen = []
     q.push([v, null])
     seen.push(v)
-    console.log("q: " + q)
+    #console.log("q: " + q)
     while q.length > 0
       t = q.shift()
-      console.log("t[0] " + t[0])
-      console.log("dest " + @_destination)
-      console.log("t[0] is dest: " + (t[0] is @_destination))
+      #console.log("t[0] " + t[0])
+      #console.log("dest " + @_destination)
+      #console.log("t[0] is dest: " + (t[0] is @_destination))
       if t[0] is @_destination
         current = t
-        console.log("current[0]: " + current[0])
-        console.log("current[1]: " + current[1])
+        #console.log("current[0]: " + current[0])
+        #console.log("current[1]: " + current[1])
         while current[1] != null
           # add element to back of list
           @_route.unshift(current[0])
@@ -135,7 +136,7 @@ class ControlGroup
             not (u.visibility is window.config.visibility.fungus)
           seen.push(u)
           q.push([u, t])
-    console.log("route: " + @_route)
+    console.log("group ai updated: " + @_id + " route: " + @_route)
     return null
 
   # Returns a string representation of this ControlGroup
@@ -143,6 +144,6 @@ class ControlGroup
   #
   # @return [String] A string representing this ControlGroup.
   toString: ->
-    return "ControlGroup(route: [#{@_route}])"
+    return "ControlGroup(id: [#{@_id}] route: [#{@_route}])"
 
 root.ControlGroup = ControlGroup
