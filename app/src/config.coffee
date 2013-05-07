@@ -261,7 +261,8 @@ root.config =
         w: 300
         h: 140
         message: "Mission 1\n\nGoal: Rescue the attack ships and eliminate " +
-                 "all fungus in the area. Don't lose your probes."
+                 "all fungus in the area. Don't lose all your probes or " +
+                 "attack ships."
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"

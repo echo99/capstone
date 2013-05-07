@@ -21,23 +21,23 @@ class Mission1 extends Mission
     game.addPlanet(a2)
 
     f1 = new Planet(-1500, -1300)
-    f1.setFungus(2)
+    f1.setFungus(1)
     game.addPlanet(f1)
 
     f2 = new Planet(-1950, -100)
-    f2.setFungus(2)
+    f2.setFungus(1)
     game.addPlanet(f2)
 
     f3 = new Planet(-1600, 850)
-    f3.setFungus(2)
+    f3.setFungus(1)
     game.addPlanet(f3)
 
     f4 = new Planet(670, 900)
-    f4.setFungus(2)
+    f4.setFungus(1)
     game.addPlanet(f4)
 
     f5 = new Planet(-850, -50)
-    f5.setFungus(2)
+    f5.setFungus(1)
     game.addPlanet(f5)
 
     p1 = new Planet(0, -800)
@@ -134,18 +134,26 @@ class Mission1 extends Mission
   onEndTurn: ->
     hasFungus = false
     hasProbe = false
+    hasAttackShips = false
     for p in game.getPlanets()
       if p.fungusStrength() > 0
         hasFungus = true
       if p.numShips(window.config.units.probe) > 0
         hasProbe = true
-      if p.getControlGroups().length > 0
-        hasProbe = true
+      if p.numShips(window.config.units.attackShip) > 0
+        hasAttackShips = true
+      for g in p.getControlGroups()
+        if g.probes() > 0
+          hasProbe = true
+        if g.attackShips() > 0
+          hasAttackShips = true
 
     if not hasFungus
       # TODO: save progress
       UI.endGame()
       @victoryMenu.open()
-    else if not hasProbe
+    else if not hasProbe or not hasAttackShips
+      console.log("has probe: " + hasProbe)
+      console.log("has attack ships: " + hasAttackShips)
       UI.endGame()
       @failMenu.open()

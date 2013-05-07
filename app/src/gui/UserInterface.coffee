@@ -1051,7 +1051,7 @@ class UserInterface
     if @stationMenu.visisble
       @stationMenu.setDirty()
     if @outpostMenu.visible
-      if @selectedPlanet.hasStation() #TODO: make sure these work
+      if @selectedPlanet.hasStation()
         @outpostMenu.close()
         @stationMenu.open()
       else
