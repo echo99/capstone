@@ -265,7 +265,7 @@ main = ->
     .setBottom(btnSpacing)
   fullscreenBtn.addState('unfullscreen', config.spriteNames.UNFULL_SCREEN)
   fullscreenBtn.setClickHandler ->
-    if document.mozFullScreenElement or document.webkitFullScreenElement or
+    if document.mozFullScreenElement or document.webkitFullscreenElement or
         document.fullScreenElement
       console.log "Already full screen!"
       if document.cancelFullScreen
@@ -332,7 +332,7 @@ main = ->
       surface.style.width = screen.width + 'px'
       surface.style.height = screen.height + 'px'
     if not document.mozFullScreenElement and
-        not document.webkitFullScreenElement and
+        not document.webkitFullscreenElement and
         not document.fullScreenElement
       # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
       fullscreenBtn.setState('fullscreen')
