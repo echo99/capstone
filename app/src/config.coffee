@@ -247,6 +247,16 @@ root.config =
       y: 45
       w: 101
       h: 20
+    #one:
+    two:
+      startingProbes: 6
+      startingColonyShips: 4
+      startingAttackShips: 10
+      resourceGoal: 50
+    three:
+      startingProbes: 2
+      startingDefenseShips: 10
+      resourceGoal: 20
   MainMenu:
     home:
       x: 0
