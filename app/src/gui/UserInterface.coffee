@@ -146,7 +146,7 @@ class UserInterface
     @colonyMenu.visible = false
     frameElement.addChild(@colonyMenu)
 
-    @turnCounter = new Elements.BoxElement(90, camera.height + 5 - 20/2, 20, 20)
+    @turnCounter = new Elements.BoxElement(100, camera.height + 5 - 20/2, 30, 20)
     clear = (ctx) =>
       w = @turnCounter.w
       h = @turnCounter.h

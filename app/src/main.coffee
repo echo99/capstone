@@ -115,8 +115,8 @@ newMission = (mission) ->
   CurrentMission = new mission()
   window.onresize()
 
-newGame = (w, h) ->
-  game = new Game(w, h)
+newGame = (w, h, move) ->
+  game = new Game(w, h, move)
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->

@@ -8,11 +8,15 @@ class Menu extends Mission
   reset: ->
     # Load user progress
     #   Add fungus to locked mission planets
+    progress = localStorage["progress"]
+    console.log('progress: ' + progress)
+    if not progress
+      progress = 1
+      localStorage["progress"] = 1
     @allMissionsComplete = false
     @seenGameCompleteMenu = false
-    #
     # Create planets:
-    newGame(10000, 10000)
+    newGame(10000, 10000, true)
     @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
               "Extermination", "Credits"]
     @Planets =
@@ -34,6 +38,12 @@ class Menu extends Mission
     @Planets.Extermination.setVisibility(window.config.visibility.discovered)
     @Planets.Credits.setVisibility(window.config.visibility.discovered)
 
+    if progress < 2
+      @Planets.Mission2.setFungus(1)
+    if progress < 3
+      console.log('adding fungus')
+      @Planets.Mission3.setFungus(1)
+
     # Add planets to game
     game.addPlanet(@Planets.Home)
     game.addPlanet(@Planets.Missions)
@@ -51,15 +61,9 @@ class Menu extends Mission
     game.setNeighbors(@Planets.Missions, @Planets.Mission2)
     game.setNeighbors(@Planets.Missions, @Planets.Mission3)
 
-    # Planets that leave the menu:
-    #   Mission 1, etc
-    #   Small, Medium, Large
-
     # Add probe to Home planet
     @Planets.Home.addShips(window.config.units.probe, 1)
     #@Planets.Missions._attackShips = 23
-    @Planets.Mission2._fungusStrength = 0
-    @Planets.Mission3._fungusStrength = 0
     #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home

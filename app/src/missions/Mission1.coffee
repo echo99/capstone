@@ -108,7 +108,6 @@ class Mission1 extends Mission
       () =>
         newMission(Mission1)
       () =>
-        # TODO: save progress
         newMission(Mission2)
     )
     @failMenu = @createFailMenu(
@@ -147,6 +146,10 @@ class Mission1 extends Mission
           hasAttackShips = true
 
     if not hasFungus
+      current = localStorage["progress"]
+      console.log('m1 progress: ' + current)
+      if current < 2
+        localStorage["progress"] = 2
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or not hasAttackShips
