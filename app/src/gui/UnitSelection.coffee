@@ -576,8 +576,10 @@ class UnitSelection
     names = window.config.units
     @_allocate(units.probes, planet.numShips(names.probe))
     if planet.numShips(names.probe) == 0
+      console.log('no probes')
       planet.unitButtons.probe.close()
     else
+      console.log('probes')
       planet.unitButtons.probe.open()
     @_allocate(units.colonies, planet.numShips(names.colonyShip))
     if planet.numShips(names.colonyShip) == 0

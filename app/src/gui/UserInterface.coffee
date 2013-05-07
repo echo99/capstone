@@ -180,11 +180,12 @@ class UserInterface
       else
         if unit == window.config.structures.station
           console.log("making station")
-          # TODO: build
-          #@selectedPlanet.buildStation()
+          @selectedPlanet.scheduleStation()
         else if unit == window.config.structures.outpost
           console.log("making outpost")
-          #@selectedPlanet.buildOutpost()
+          @selectedPlanet.scheduleOutpost()
+          if probes
+            @unitSelection.updateSelection(@selectedPlanet)
         else
           @selectedPlanet.build(unit)
     )
@@ -415,7 +416,7 @@ class UserInterface
 
     # Draw upgrade button
     if @selectedPlanet.isBuilding() and
-       @selectedPlanet.buildUnit == window.config.structures.station
+       @selectedPlanet.buildUnit() == window.config.structures.station
       if @stationButton.visible
         @stationButton.close()
       ctx.fillStyle = winStyle.defaultText.value
@@ -506,7 +507,7 @@ class UserInterface
 
     # Draw upgrade button
     if @selectedPlanet.isBuilding() and
-       @selectedPlanet.buildUnit == window.config.structures.outpost
+       @selectedPlanet.buildUnit() == window.config.structures.outpost
       if @outpostButton.visible
         @outpostButton.close()
       ctx.fillStyle = winStyle.defaultText.value
@@ -586,21 +587,32 @@ class UserInterface
           @updateControlGroups()
         @unitSelection.deselectAllUnits()
       else
-        @stationMenu.close()
-        @outpostMenu.close()
-        @colonyMenu.close()
         if @selectedPlanet == planet
+          @stationMenu.close()
+          @outpostMenu.close()
+          @colonyMenu.close()
           @selectedPlanet = null
         else if planet.hasStation()
           @selectedPlanet = planet
           @stationMenu.open()
-        else if planet.hasOutpost()
+          @outpostMenu.close()
+          @colonyMenu.close()
+        else if planet.hasOutpost() or
+                planet.buildUnit() == window.config.structures.station
           @selectedPlanet = planet
           @outpostMenu.open()
-        else if planet.numShips(window.config.units.colonyShip) > 0
+          @stationMenu.close()
+          @colonyMenu.close()
+        else if planet.numShips(window.config.units.colonyShip) > 0 or
+                planet.buildUnit() == window.config.structures.outpost
           @selectedPlanet = planet
           @colonyMenu.open()
+          @stationMenu.close()
+          @outpostMenu.close()
         else
+          @stationMenu.close()
+          @outpostMenu.close()
+          @colonyMenu.close()
           @selectedPlanet = null
         @switchedMenus = true
 
@@ -689,30 +701,25 @@ class UserInterface
 
       # Draw structure
       if p.hasOutpost()
-        if p.isBuilding() and p.buildUnit() == window.config.structures.outpost
-          SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
-        else if p.resources() > 0
+        if p.resources() > 0
           SHEET.drawSprite(SpriteNames.OUTPOST_GATHERING, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
       else if p.hasStation()
         if p.isBuilding()
-          if p.buildUnit() == window.config.structures.station
-            SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTION, loc.x, loc.y, ctx)
-          else
-            switch p.buildUnit()
-              when window.config.units.probe
-                SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, loc.x, loc.y, ctx)
-              when window.config.units.colonyShip
-                SHEET.drawSprite(SpriteNames.COLONY_SHIP_CONSTRUCTION,
-                                 loc.x, loc.y, ctx)
-              when window.config.units.attackShip
-                SHEET.drawSprite(SpriteNames.ATTACK_SHIP_CONSTRUCTION,
-                                 loc.x, loc.y, ctx)
-              when window.config.units.defenseShip
-                SHEET.drawSprite(SpriteNames.DEFENSE_SHIP_CONSTRUCTION,
-                                 loc.x, loc.y, ctx)
-            SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, loc.x, loc.y, ctx)
+          switch p.buildUnit()
+            when window.config.units.probe
+              SHEET.drawSprite(SpriteNames.PROBE_CONSTRUCTION, loc.x, loc.y, ctx)
+            when window.config.units.colonyShip
+              SHEET.drawSprite(SpriteNames.COLONY_SHIP_CONSTRUCTION,
+                               loc.x, loc.y, ctx)
+            when window.config.units.attackShip
+              SHEET.drawSprite(SpriteNames.ATTACK_SHIP_CONSTRUCTION,
+                               loc.x, loc.y, ctx)
+            when window.config.units.defenseShip
+              SHEET.drawSprite(SpriteNames.DEFENSE_SHIP_CONSTRUCTION,
+                               loc.x, loc.y, ctx)
+          SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTING, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.STATION_NOT_CONSTRUCTING, loc.x, loc.y, ctx)
 
@@ -720,6 +727,15 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.STATION_GATHERING, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
+
+      if p.isBuilding()
+        if p.buildUnit() == window.config.structures.station
+          SHEET.drawSprite(SpriteNames.STATION_CONSTRUCTION, loc.x, loc.y, ctx)
+          SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
+        else if p.buildUnit() == window.config.structures.outpost
+          SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
+          SHEET.drawSprite(SpriteNames.OUTPOST_NOT_GATHERING, loc.x, loc.y, ctx)
+
     @unitSelection.draw(ctx, hudCtx)
 
     if lost
@@ -734,7 +750,8 @@ class UserInterface
       hasAction = true
       if @unitSelection.total > 0
         tooltipCtx.fillText("Move selected units", x, y)
-      else if @hoveredPlanet.hasOutpost()
+      else if @hoveredPlanet.hasOutpost() or
+              @hoveredPlanet.buildUnit() == window.config.structures.station
         if @outpostMenu.visible and @hoveredPlanet == @selectedPlanet
           tooltipCtx.fillText("Close outpost menu", x, y)
         else
@@ -744,7 +761,8 @@ class UserInterface
           tooltipCtx.fillText("Close station menu", x, y)
         else
           tooltipCtx.fillText("Open station menu", x, y)
-      else if @hoveredPlanet.numShips(window.config.units.colonyShip) > 0
+      else if @hoveredPlanet.numShips(window.config.units.colonyShip) > 0 or
+              @hoveredPlanet.buildUnit() == window.config.structures.outpost
         if @colonyMenu.visible and @hoveredPlanet == @selectedPlanet
           tooltipCtx.fillText("Close colony ship menu", x, y)
         else
