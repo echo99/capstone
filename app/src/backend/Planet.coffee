@@ -316,9 +316,11 @@ class Planet
   growPass1: ->
     if @_fungusStrength > 0
       @_fungusStrength += root.config.units.fungus.growthPerTurn
-    if @_fungusStrength == 0
+    if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
+        @_probes + @_colonies > 0 or @_outpost or @_station
       null # No sporing or growing.
-    else if @_fungusStrength >= @_fungusMaximumStrength and @_adjacentPlanets.length > 0
+    else if @_fungusStrength >= @_fungusMaximumStrength and
+        @_adjacentPlanets.length > 0
       # Spore
       for i in [Math.min(@_fungusStrength, 2)..@_fungusStrength]
         planet = @_adjacentPlanets[Math.floor(
@@ -329,9 +331,12 @@ class Planet
           # but it should be okay
           planet._fungusArriving++
           @_fungusLeaving++
+          # console.log "#{planet._fungusStrength} - #{planet._fungusLeaving} " +
+          #   "+ #{planet._fungusArriving} ?= #{planet._fungusMaximumStrength}"
     else if @_fungusStrength < @_fungusMaximumStrength
       # Grow
-      @_fungusArriving += if Math.random() >= root.config.units.fungus.growthChancePerTurn then 1 else 0
+      @_fungusArriving += if Math.random() >=
+          root.config.units.fungus.growthChancePerTurn then 1 else 0
 
   # Fungus growth phase 2.
   # Applies fungus changes determined from pass 1.
@@ -652,5 +657,11 @@ class Planet
       throw new Error "seen planet is undiscovered"
     if @_station and @_outpost
       throw new Error "station AND outpost"
+    expectedFungusMaximumStrength = if @_fungusStrength > 0 then 1 else 0
+    (expectedFungusMaximumStrength +=
+      (if planet._fungusStrength > 0 then 1 else 0)) for planet in @_adjacentPlanets
+    if @_fungusMaximumStrength != expectedFungusMaximumStrength
+      throw new Error "Fungus maximum strength is not correct!"
+    # console.log "#{@_fungusStrength} / #{@_fungusMaximumStrength}"
 
 root.Planet = Planet

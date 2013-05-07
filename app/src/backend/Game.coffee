@@ -96,15 +96,18 @@ class Game
   # Does all required upkeep for the end of the turn.
   endTurn: ->
     planet.gatherResources() for planet in @_planets
-    planet.growPass1() for planet in @_planets
-    planet.growPass2() for planet in @_planets
-    planet.growPass3() for planet in @_planets
     planet.movementUpkeep1() for planet in @_planets
     planet.movementUpkeep2() for planet in @_planets
     planet.updateAI() for planet in @_planets
     planet.resolveCombat() for planet in @_planets
+    planet._fungusMaximumStrength = 0 for planet in @_planets
+    planet.growPass3() for planet in @_planets
+    planet.growPass1() for planet in @_planets
+    planet.growPass2() for planet in @_planets
+    planet.growPass3() for planet in @_planets
     planet.buildUpkeep() for planet in @_planets
     planet.visibilityUpkeep() for planet in @_planets
+    planet.checkRepresentationalInvariants() for planet in @_planets
 
   # Helper Functions #
 
