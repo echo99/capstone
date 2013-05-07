@@ -41,7 +41,6 @@ class Menu extends Mission
     if progress < 2
       @Planets.Mission2.setFungus(1)
     if progress < 3
-      console.log('adding fungus')
       @Planets.Mission3.setFungus(1)
 
     # Add planets to game

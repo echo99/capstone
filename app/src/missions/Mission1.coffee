@@ -1,6 +1,8 @@
 #_require Mission
 
 class Mission1 extends Mission
+  foundA1 = false
+  foundA2 = false
   # @see Mission#reset
   reset: ->
     # Create planets:
@@ -9,13 +11,11 @@ class Mission1 extends Mission
     @home.addShips(window.config.units.probe, 2)
     game.addPlanet(@home)
 
-    a1 = new Planet(-1000, -1000)
-    a1.addShips(window.config.units.attackShip, 2)
-    game.addPlanet(a1)
+    @a1 = new Planet(-1000, -1000)
+    game.addPlanet(@a1)
 
-    a2 = new Planet(-1150, 1250)
-    a2.addShips(window.config.units.attackShip, 4)
-    game.addPlanet(a2)
+    @a2 = new Planet(-1150, 1250)
+    game.addPlanet(@a2)
 
     f1 = new Planet(-1500, -1300)
     #f1.setFungus(1)
@@ -66,12 +66,12 @@ class Mission1 extends Mission
     game.setNeighbors(@home, p4)
     game.setNeighbors(@home, p5)
 
-    game.setNeighbors(a1, f1)
-    game.setNeighbors(a1, f5)
-    game.setNeighbors(a1, p3)
-    game.setNeighbors(a1, p8)
-    game.setNeighbors(a2, p6)
-    game.setNeighbors(a2, f3)
+    game.setNeighbors(@a1, f1)
+    game.setNeighbors(@a1, f5)
+    game.setNeighbors(@a1, p3)
+    game.setNeighbors(@a1, p8)
+    game.setNeighbors(@a2, p6)
+    game.setNeighbors(@a2, f3)
 
     game.setNeighbors(f1, p8)
     game.setNeighbors(f2, p7)
@@ -129,6 +129,13 @@ class Mission1 extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
+    if @a1.visibility() == window.config.visibility.visible and not @foundA1
+      @foundA1 = true
+      @a1.addShips(window.config.units.attackShip, 2)
+    if @a2.visibility() == window.config.visibility.visible and not @foundA2
+      @foundA2 = true
+      @a2.addShips(window.config.units.attackShip, 4)
+
     hasFungus = false
     hasProbe = false
     hasAttackShips = false
@@ -152,6 +159,6 @@ class Mission1 extends Mission
         localStorage["progress"] = 2
       UI.endGame()
       @victoryMenu.open()
-    else if not hasProbe or not hasAttackShips
+    else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
       UI.endGame()
       @failMenu.open()

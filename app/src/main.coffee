@@ -69,6 +69,10 @@ $ ->
 KeyCodes =
   HOME: 36  # for repositioning the camera
   SPACE: 32 # for advancing the turn
+  PLUS: 187 # zoom in
+  MINUS: 189 # zoom out
+  ADD: 107 # zoom in
+  SUB: 109 # zoom out
 
 SpriteNames = window.config.spriteNames
 
@@ -353,8 +357,15 @@ main = ->
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
       game.endTurn()
-      UI.endTurn()
       CurrentMission.onEndTurn()
+      UI.endTurn()
+    else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+      nz = camera.getZoom() + window.config.ZOOM_SPEED
+      console.log('zoom in to ' + nz)
+      camera.setZoom(nz)
+    else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+      nz = camera.getZoom() - window.config.ZOOM_SPEED
+      camera.setZoom(nz)
   )
 
   # Catch accidental leaving
