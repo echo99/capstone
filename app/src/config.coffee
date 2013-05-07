@@ -346,21 +346,25 @@ root.config =
       turns: 1
       attack: .1
       defense: .1
+      isStructure: false
     colonyShip:
       cost: 3
       turns: 1
       attack: .1
       defense: .1
+      isStructure: false
     attackShip:
       cost: 4
       turns: 2
       attack: .5
       defense: 0
+      isStructure: false
     defenseShip:
       cost: 3
       turns: 1
       attack: 0
       defense: .5
+      isStructure: false
     fungus:
       attack: .5
       defense: 0
@@ -369,14 +373,17 @@ root.config =
       cost: 1
       turns: 1
       defense: .1
+      isStructure: true
     station:
       cost: 10
       turns: 3
       defense: .5
+      isStructure: true
     warpGate:
       cost: 7
       turns: 4
       defense: .1
+      isStructure: true
   visibility:
     visible: 0
     discovered: 1

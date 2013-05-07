@@ -230,9 +230,10 @@ class Planet
   # Builds outpost sacrificing a probe and a colony ship.
   #
   # @throw [Error] if there is insufficient ships or a building already.
-  buildOutpost: ->
+  scheduleOutpost: ->
     if !@_station and !@_outpost and @_probes > 0 and @_colonies > 0
-      @_outpost = true
+      @_unitConstructing = root.config.structures.outpost
+      @_turnsToComplete = root.config.structures.outpost.turns
       @_probes -= 1
       @_colonies -= 1
     else
@@ -241,19 +242,35 @@ class Planet
                     " colonies: " + @_colonies +
                     " station: " + @_station +
                     " outpost: " + @_outpost)
+
       
   # Builds station sacrificeing outpost and resources
   #
-  # @throw [Error] if there is no outpost or insufficient resources
-  buildStation: ->
-    if !@_station and @_availableResources > root.config.structures.station.cost
-      @_station = true
+  # @throw [Error] if there is no outpost or insufficient resources.
+  scheduleStation: ->
+    if !@_station and @_availableResources >= root.config.structures.station.cost
+      @_unitConstructing = root.config.structures.station
+      @_turnsToComplete = root.config.structures.station.turns
       @_availableResources -= root.config.structures.station.cost
+      @_outpost = false
     else
       throw new Error("Invalid outpost construction -" +
                     " resources: " + @_availableResources +
                     " station: " + @_station +
                     " outpost: " + @_outpost)
+
+  # Build unit
+  #
+  # @throw [Error] if the unit is not valid or there is not enough resources.
+  scheduleUnit: (unit) ->
+    if isStructure == undefined
+      throw new Error("This is not a unit.")
+    if isStructure
+      throw new Error("This is a structure.")
+    if unit.cost > @_availableResources
+      throw new Error("Not enough resources to build a " + unit)
+    @_unitConstructing = unit
+    @_turnsToComplete = unit.turns
 
   # Cancels the current building unit.
   #
@@ -264,6 +281,15 @@ class Planet
     else
       @_unitConstructing = null
       @_turnsToComplete = 0
+
+  # Cancel control group.
+  #
+  # @throw [Error] if there is no such control group
+  cancelControlGroup:(group) ->
+    if @_controlGroups.contains(group)
+      @_controlGroups = @controlGroups.filter(group)
+    else
+      throw new Error("Tried to remove control group that doesn't exist")
 
   # UPKEEP #
 
@@ -384,13 +410,22 @@ class Planet
       @_turnsToComplete--
       if @_turnsToComplete == 0
         unit = @_unitConstructing
+        if unit.isStructure == undefined
+          throw new Error("Invalid unit, not of buildable type")
         @_unitConstructing = null
-        switch unit
-          when root.config.units.probe then @_probes++
-          when root.config.units.colonyShip then @_colonies++
-          when root.config.units.attackShip then @_attackShips++
-          when root.config.units.defenseShip then @_defenseShips++
-          else throw new Error("Ship type unknown.")
+        if unit.isStructure
+          switch unit
+            when root.config.structures.outpost then @_outpost = true
+            when root.config.structures.station then @_station = true
+            when root.config.structures.warpgate then @_warpgate = true
+            else throw new Error("Invalid structure, it ain't one.")
+        else
+          switch unit
+            when root.config.units.probe then @_probes++
+            when root.config.units.colonyShip then @_colonies++
+            when root.config.units.attackShip then @_attackShips++
+            when root.config.units.defenseShip then @_defenseShips++
+            else throw new Error("Ship type unknown.")
 
   # Movement phase 1.
   # Moves control groups.
@@ -591,6 +626,5 @@ class Planet
       throw new Error "seen planet is undiscovered"
     if @_station and @_outpost
       throw new Error "station AND outpost"
-
 
 root.Planet = Planet
