@@ -79,9 +79,11 @@ class Extermination extends Mission
         break
 
     if not hasFungus
+      ga('set', 'metric2', 1)
       UI.endGame()
       @victoryMenu.open()
 
     if not @home.hasStation()
+      ga('set', 'metric3', 1)
       UI.endGame()
       @failMenu.open()

@@ -156,6 +156,7 @@ class Mission1 extends Mission
       current = localStorage["progress"]
       if current < 2
         localStorage["progress"] = 2
+      ga('set', 'metric1', 1)
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
