@@ -4,17 +4,21 @@
 # This mission acts as our games main menu
 class Menu extends Mission
   settings: window.config.MainMenu
+  numMissions: 1
   # @see Mission#reset
   reset: ->
     # Load user progress
     #   Add fungus to locked mission planets
-    progress = localStorage["progress"]
-    console.log('progress: ' + progress)
-    if not progress
-      progress = 1
+    @progress = localStorage["progress"]
+    if not @progress
+      @progress = 1
       localStorage["progress"] = 1
-    @allMissionsComplete = false
-    @seenGameCompleteMenu = false
+    @seenGameComplete = localStorage["complete"]
+    if not @seenGameComplete
+      @seenGameComplete = false
+      console.log('org: ' + @seenGameComplete)
+      localStorage["complete"] = false
+
     # Create planets:
     newGame(10000, 10000, true)
     @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
@@ -38,9 +42,9 @@ class Menu extends Mission
     @Planets.Extermination.setVisibility(window.config.visibility.discovered)
     @Planets.Credits.setVisibility(window.config.visibility.discovered)
 
-    if progress < 2
+    if @progress < 2
       @Planets.Mission2.setFungus(1)
-    if progress < 3
+    if @progress < 3
       @Planets.Mission3.setFungus(1)
 
     # Add planets to game
@@ -122,11 +126,13 @@ class Menu extends Mission
       })
     cameraHudFrame.addChild(@creditsMenu)
 
-    if @allMissionsComplete and not @seenGameCompleteMenu
+    if @progress > @numMissions and @seenGameComplete == 'false'
+      console.log("creating menu")
       close = new Elements.Button(500 - 10, 10, 16, 16,
         () =>
           @gameCompleteMenu.close()
-          @seenGameCompleteMenu = true # TODO: override cookie instead
+          @seenGameComplete = true
+          localStorage["complete"] = true
       )
       close.setDrawFunc(
         (ctx) =>

@@ -26,7 +26,7 @@ class Mission1 extends Mission
     game.addPlanet(f2)
 
     f3 = new Planet(-1600, 850)
-    f3.setFungus(1)
+    #f3.setFungus(1)
     game.addPlanet(f3)
 
     f4 = new Planet(670, 900)
@@ -154,7 +154,6 @@ class Mission1 extends Mission
 
     if not hasFungus
       current = localStorage["progress"]
-      console.log('m1 progress: ' + current)
       if current < 2
         localStorage["progress"] = 2
       UI.endGame()
