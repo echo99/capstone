@@ -6,10 +6,10 @@ class Extermination extends Mission
 
   # @see Mission#reset
   reset: ->
-    # Create planets:
-    #game.setup(10, null)
-    #return
+    @gameEnded = false
     newGame(10000, 10000)
+
+    # Create planets:
     @home = game.setup(30)
     @home.addStation()
 
@@ -79,25 +79,29 @@ class Extermination extends Mission
         break
 
     if not hasFungus
-      ga('send', {
-        'hitType': 'event',
-        'eventCategory': 'Mission',
-        'eventAction': 'Victory',
-        'eventLabel': 'Extermination',
-        'dimension1': 'Extermination',
-        'metric5': 1
-      })
+      if not @gameEnded
+        ga('send', {
+          'hitType': 'event',
+          'eventCategory': 'Mission',
+          'eventAction': 'Victory',
+          'eventLabel': 'Extermination',
+          'dimension1': 'Extermination',
+          'metric5': 1
+        })
+      @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
 
-    if not @home.hasStation()
-      ga('send', {
-        'hitType': 'event',
-        'eventCategory': 'Mission',
-        'eventAction': 'Fail',
-        'eventLabel': 'Extermination',
-        'dimension1': 'Extermination',
-        'metric6': 1
-      })
+    if not hasAnything
+      if not @gameEnded
+        ga('send', {
+          'hitType': 'event',
+          'eventCategory': 'Mission',
+          'eventAction': 'Fail',
+          'eventLabel': 'Extermination',
+          'dimension1': 'Extermination',
+          'metric6': 1
+        })
+      @gameEnded = true
       UI.endGame()
       @failMenu.open()

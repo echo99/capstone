@@ -5,6 +5,7 @@ class Mission1 extends Mission
   foundA2 = false
   # @see Mission#reset
   reset: ->
+    @gameEnded = false
     # Create planets:
     newGame(10000, 10000)
     @home = new Planet(0,0)
@@ -156,24 +157,28 @@ class Mission1 extends Mission
       current = localStorage["progress"]
       if current < 2
         localStorage["progress"] = 2
-      ga('send', {
-        'hitType': 'event',
-        'eventCategory': 'Mission',
-        'eventAction': 'Victory',
-        'eventLabel': 'Mission 1',
-        'dimension1': 'Mission 1',
-        'metric5': 1
-      })
+      if not @gameEnded
+        ga('send', {
+          'hitType': 'event',
+          'eventCategory': 'Mission',
+          'eventAction': 'Victory',
+          'eventLabel': 'Mission 1',
+          'dimension1': 'Mission 1',
+          'metric5': 1
+        })
+      @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
-      ga('send', {
-        'hitType': 'event',
-        'eventCategory': 'Mission',
-        'eventAction': 'Fail'
-        'eventLabel': 'Mission 1'
-        'dimension1': 'Mission 1',
-        'metric6': 1
-      })
+      if not @gameEnded
+        ga('send', {
+          'hitType': 'event',
+          'eventCategory': 'Mission',
+          'eventAction': 'Fail'
+          'eventLabel': 'Mission 1'
+          'dimension1': 'Mission 1',
+          'metric6': 1
+        })
+      @gameEnded = true
       UI.endGame()
       @failMenu.open()

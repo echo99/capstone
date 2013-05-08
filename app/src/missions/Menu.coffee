@@ -16,7 +16,6 @@ class Menu extends Mission
     @seenGameComplete = localStorage["complete"]
     if not @seenGameComplete
       @seenGameComplete = false
-      console.log('org: ' + @seenGameComplete)
       localStorage["complete"] = false
 
     # Create planets:
