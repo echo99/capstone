@@ -124,7 +124,81 @@ class UserInterface
     h = (outpostStyle.height - winStyle.lineWidth / 2) - y
     @stationButton = @_getStationButton(x, y, w, h,
                                         window.config.structures.station)
+    x = outpostStyle.cancelLoc.x
+    y = outpostStyle.cancelLoc.y
+    w = outpostStyle.cancelSize.w
+    h = outpostStyle.cancelSize.h
+    cancelConstS = new Elements.Button(x, y, w, h)
+    cancelConstS.setProperty("location",
+      @outpostMenu.getActualLocation(cancelConstS.x, cancelConstS.y))
+    cancelConstS.setClickHandler(() =>
+      console.log("cancel station upgrade not yet implemented")
+      @selectedPlanet.cancelConstruction()
+    )
+    cancelConstS.setDrawFunc((ctx) =>
+      loc = cancelConstS.getProperty("location")
+      if cancelConstS.isPressed()
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    cancelConstS.visible = false
+
+    x = outpostStyle.sendLoc.x
+    y = outpostStyle.sendLoc.y
+    w = outpostStyle.sendSize.w
+    h = outpostStyle.sendSize.h
+    outpostSend = new Elements.Button(x, y, w, h)
+    outpostSend.setProperty("location",
+      @outpostMenu.getActualLocation(outpostSend.x, outpostSend.y))
+    outpostSend.setClickHandler(() =>
+      console.log('sending resources not yet implemented')
+      @selectedPlanet.sending = true
+    )
+    outpostSend.setDrawFunc((ctx) =>
+      loc = outpostSend.getProperty("location")
+      if outpostSend.isPressed()
+        SHEET.drawSprite(SpriteNames.SEND_RESOURCES_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.SEND_RESOURCES_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    outpostSend.visible = true
+
+    x = outpostStyle.stopLoc.x
+    y = outpostStyle.stopLoc.y
+    w = outpostStyle.stopSize.w
+    h = outpostStyle.stopSize.h
+    outpostStop = new Elements.Button(x, y, w, h)
+    outpostStop.setProperty("location",
+      @outpostMenu.getActualLocation(outpostStop.x, outpostStop.y))
+    outpostStop.setClickHandler(() =>
+      console.log('stop sending resources not yet implemented')
+      @selectedPlanet.sending = false
+    )
+    outpostStop.setDrawFunc((ctx) =>
+      loc = outpostStop.getProperty("location")
+      if outpostStop.isPressed()
+        SHEET.drawSprite(SpriteNames.STOP_SENDING_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.STOP_SENDING_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    outpostStop.visible = false
     @outpostMenu.addChild(@stationButton)
+    @outpostMenu.addChild(cancelConstS)
+    @outpostMenu.addChild(outpostSend)
+    @outpostMenu.addChild(outpostStop)
+    @outpostMenu.setProperty("cancelButton", cancelConstS)
+    @outpostMenu.setProperty("cancelOpen", false)
+    @outpostMenu.setProperty("sendButton", outpostSend)
+    @outpostMenu.setProperty("sendOpen", true)
+    @outpostMenu.setProperty("stopButton", outpostStop)
+    @outpostMenu.setProperty("stopOpen", true)
     @outpostMenu.visible = false
     frameElement.addChild(@outpostMenu)
 
@@ -469,6 +543,35 @@ class UserInterface
         ctx.measureText("Resources avaliable:").width + 5
     y = loc.y + outpostStyle.availableLoc.y
     ctx.fillText(resources, x, y)
+
+    if @selectedPlanet.buildUnit()
+      if not @outpostMenu.getProperty("cancelOpen")
+        @outpostMenu.getProperty("cancelButton").open()
+        @outpostMenu.setProperty("cancelOpen", true)
+    else
+      if @outpostMenu.getProperty("cancelOpen")
+        @outpostMenu.getProperty("cancelButton").close()
+        @outpostMenu.setProperty("cancelOpen", false)
+
+    if @selectedPlanet.buildUnit()
+      if @outpostMenu.getProperty("sendOpen")
+        @outpostMenu.getProperty("sendButton").close()
+        @outpostMenu.setProperty("sendOpen", false)
+      if @outpostMenu.getProperty("stopOpen")
+        @outpostMenu.getProperty("stopButton").close()
+        @outpostMenu.setProperty("stopOpen", false)
+    else if @selectedPlanet.sending
+      if @outpostMenu.getProperty("sendOpen")
+        @outpostMenu.getProperty("sendButton").close()
+        @outpostMenu.setProperty("sendOpen", false)
+        @outpostMenu.getProperty("stopButton").open()
+        @outpostMenu.setProperty("stopOpen", true)
+    else
+      if not @outpostMenu.getProperty("sendOpen")
+        @outpostMenu.getProperty("sendButton").open()
+        @outpostMenu.setProperty("sendOpen", true)
+        @outpostMenu.getProperty("stopButton").close()
+        @outpostMenu.setProperty("stopOpen", false)
 
   _drawColonyMenu: (ctx) =>
     winStyle = window.config.windowStyle
@@ -1098,6 +1201,18 @@ class UserInterface
         @outpostMenu.open()
       else
         @colonyMenu.setDirty()
+
+    if @selectedPlanet
+      if not @selectedPlanet.hasStation() and @stationMenu.visible
+        @stationMenu.close()
+        @selectedPlanet = null
+      else if not @selectedPlanet.hasOutpost() and @outpostMenu.visible
+        @outpostMenu.close()
+        @selectedPlanet = null
+      else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
+              @colonyMenu.visible
+        @colonyMenu.close()
+        @selectedPlanet = null
 
     @hoveredGroup = null
 

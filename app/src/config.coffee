@@ -164,6 +164,12 @@ root.config =
       costLoc: {x: 10, y: 70+10+20}
       turnsLoc: {x: 10 + 60, y: 70+10+20}
       imgLoc: {x: 135, y: 70+10+48}
+    cancelLoc: {x: 60, y: 90}
+    cancelSize: {w: 60, h: 20}
+    sendLoc: {x: 130, y: 20}
+    sendSize: {w: 125, h: 20}
+    stopLoc: {x: 130, y: 20}
+    stopSize: {w: 106, h: 20}
   colonyMenuStyle:
     location: {x: 120, y: 5}
     width: 200
@@ -227,6 +233,14 @@ root.config =
     QUIT_BUTTON_HOVER: new AnimatedSprite(['quit_button_hover.png'])
     NEXT_BUTTON_IDLE: new AnimatedSprite(['next_mission_button_idle.png'])
     NEXT_BUTTON_HOVER: new AnimatedSprite(['next_mission_button_hover.png'])
+    SEND_RESOURCES_BUTTON_IDLE: new AnimatedSprite(
+      ['send_resources_button_idle.png'])
+    SEND_RESOURCES_BUTTON_HOVER: new AnimatedSprite(
+      ['send_resources_button_hover.png'])
+    STOP_SENDING_BUTTON_IDLE: new AnimatedSprite(
+      ['stop_sending_button_idle.png'])
+    STOP_SENDING_BUTTON_HOVER: new AnimatedSprite(
+      ['stop_sending_button_hover.png'])
   Missions:
     w: 244
     h: 60

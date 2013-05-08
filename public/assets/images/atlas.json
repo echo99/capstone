@@ -2,43 +2,43 @@
 
 "activate_full_screen_button.png" :
 {
-	"frame": {"x":312,"y":1076,"w":16,"h":16},
+	"frame": {"x":488,"y":1056,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "attack_ship.png" :
 {
-	"frame": {"x":488,"y":1029,"w":32,"h":30},
+	"frame": {"x":479,"y":546,"w":32,"h":30},
 	"spriteSourceSize": {"x":0,"y":1,"w":32,"h":30},
 	"sourceSize": {"w":32,"h":32}
 },
 "attack_ship_construction.png" :
 {
-	"frame": {"x":479,"y":548,"w":32,"h":30},
+	"frame": {"x":479,"y":514,"w":32,"h":30},
 	"spriteSourceSize": {"x":192,"y":28,"w":32,"h":30},
 	"sourceSize": {"w":256,"h":256}
 },
 "cancel_button_hover.png" :
 {
-	"frame": {"x":455,"y":985,"w":60,"h":20},
+	"frame": {"x":455,"y":978,"w":60,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":20},
 	"sourceSize": {"w":60,"h":20}
 },
 "cancel_button_idle.png" :
 {
-	"frame": {"x":455,"y":963,"w":60,"h":20},
+	"frame": {"x":455,"y":956,"w":60,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":20},
 	"sourceSize": {"w":60,"h":20}
 },
 "close_button.png" :
 {
-	"frame": {"x":294,"y":1076,"w":16,"h":16},
+	"frame": {"x":506,"y":1056,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "colony_ship.png" :
 {
-	"frame": {"x":499,"y":680,"w":30,"h":32},
+	"frame": {"x":491,"y":782,"w":30,"h":32},
 	"spriteSourceSize": {"x":1,"y":0,"w":30,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
@@ -50,13 +50,13 @@
 },
 "deactivate_full_screen_button.png" :
 {
-	"frame": {"x":366,"y":1076,"w":16,"h":16},
+	"frame": {"x":508,"y":1074,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "defense_ship.png" :
 {
-	"frame": {"x":488,"y":1061,"w":30,"h":32},
+	"frame": {"x":488,"y":1022,"w":30,"h":32},
 	"spriteSourceSize": {"x":1,"y":0,"w":30,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
@@ -68,25 +68,25 @@
 },
 "end_turn_button_hover.png" :
 {
-	"frame": {"x":388,"y":816,"w":73,"h":20},
+	"frame": {"x":388,"y":838,"w":73,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":73,"h":20},
 	"sourceSize": {"w":73,"h":20}
 },
 "end_turn_button_idle.png" :
 {
-	"frame": {"x":388,"y":838,"w":73,"h":20},
+	"frame": {"x":388,"y":816,"w":73,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":73,"h":20},
 	"sourceSize": {"w":73,"h":20}
 },
 "feedback_button_hover.png" :
 {
-	"frame": {"x":348,"y":1076,"w":16,"h":16},
+	"frame": {"x":507,"y":1000,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "feedback_button_idle.png" :
 {
-	"frame": {"x":258,"y":1076,"w":16,"h":16},
+	"frame": {"x":465,"y":748,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
@@ -98,49 +98,49 @@
 },
 "menu_button_idle.png" :
 {
-	"frame": {"x":455,"y":1007,"w":50,"h":20},
+	"frame": {"x":455,"y":1000,"w":50,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":20},
 	"sourceSize": {"w":50,"h":20}
 },
 "muted_button.png" :
 {
-	"frame": {"x":276,"y":1076,"w":16,"h":16},
+	"frame": {"x":507,"y":602,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "next_mission_button_hover.png" :
 {
-	"frame": {"x":385,"y":1032,"w":101,"h":20},
+	"frame": {"x":388,"y":794,"w":101,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":101,"h":20},
 	"sourceSize": {"w":101,"h":20}
 },
 "next_mission_button_idle.png" :
 {
-	"frame": {"x":388,"y":794,"w":101,"h":20},
+	"frame": {"x":385,"y":1032,"w":101,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":101,"h":20},
 	"sourceSize": {"w":101,"h":20}
 },
 "outpost_buildings_gathering_1.png" :
 {
-	"frame": {"x":455,"y":860,"w":65,"h":57},
+	"frame": {"x":388,"y":971,"w":65,"h":57},
 	"spriteSourceSize": {"x":99,"y":45,"w":65,"h":57},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_buildings_gathering_2.png" :
 {
-	"frame": {"x":398,"y":707,"w":65,"h":57},
+	"frame": {"x":398,"y":648,"w":65,"h":57},
 	"spriteSourceSize": {"x":99,"y":45,"w":65,"h":57},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_buildings_not_gathering.png" :
 {
-	"frame": {"x":398,"y":580,"w":65,"h":57},
+	"frame": {"x":388,"y":860,"w":65,"h":57},
 	"spriteSourceSize": {"x":99,"y":45,"w":65,"h":57},
 	"sourceSize": {"w":256,"h":256}
 },
 "outpost_construction.png" :
 {
-	"frame": {"x":398,"y":639,"w":65,"h":66},
+	"frame": {"x":398,"y":580,"w":65,"h":66},
 	"spriteSourceSize": {"x":99,"y":36,"w":65,"h":66},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -170,37 +170,37 @@
 },
 "probe.png" :
 {
-	"frame": {"x":499,"y":714,"w":26,"h":32},
+	"frame": {"x":499,"y":712,"w":26,"h":32},
 	"spriteSourceSize": {"x":3,"y":0,"w":26,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "probe_construction.png" :
 {
-	"frame": {"x":384,"y":1076,"w":8,"h":16},
+	"frame": {"x":508,"y":1092,"w":8,"h":16},
 	"spriteSourceSize": {"x":204,"y":36,"w":8,"h":16},
 	"sourceSize": {"w":256,"h":256}
 },
 "quit_button_hover.png" :
 {
-	"frame": {"x":465,"y":624,"w":40,"h":20},
+	"frame": {"x":465,"y":602,"w":40,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":20},
 	"sourceSize": {"w":40,"h":20}
 },
 "quit_button_idle.png" :
 {
-	"frame": {"x":465,"y":602,"w":40,"h":20},
+	"frame": {"x":465,"y":624,"w":40,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":20},
 	"sourceSize": {"w":40,"h":20}
 },
 "restart_button_hover.png" :
 {
-	"frame": {"x":455,"y":941,"w":63,"h":20},
+	"frame": {"x":455,"y":912,"w":63,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":20},
 	"sourceSize": {"w":63,"h":20}
 },
 "restart_button_idle.png" :
 {
-	"frame": {"x":455,"y":919,"w":63,"h":20},
+	"frame": {"x":455,"y":934,"w":63,"h":20},
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":20},
 	"sourceSize": {"w":63,"h":20}
 },
@@ -236,25 +236,25 @@
 },
 "station_buildings_gathering_1.png" :
 {
-	"frame": {"x":388,"y":964,"w":65,"h":50},
+	"frame": {"x":455,"y":860,"w":65,"h":50},
 	"spriteSourceSize": {"x":99,"y":52,"w":65,"h":50},
 	"sourceSize": {"w":256,"h":256}
 },
 "station_buildings_gathering_2.png" :
 {
-	"frame": {"x":388,"y":912,"w":65,"h":50},
+	"frame": {"x":398,"y":707,"w":65,"h":50},
 	"spriteSourceSize": {"x":99,"y":52,"w":65,"h":50},
 	"sourceSize": {"w":256,"h":256}
 },
 "station_buildings_not_gathering.png" :
 {
-	"frame": {"x":388,"y":860,"w":65,"h":50},
+	"frame": {"x":388,"y":919,"w":65,"h":50},
 	"spriteSourceSize": {"x":99,"y":52,"w":65,"h":50},
 	"sourceSize": {"w":256,"h":256}
 },
 "station_constructing.png" :
 {
-	"frame": {"x":258,"y":676,"w":138,"h":94},
+	"frame": {"x":258,"y":580,"w":138,"h":94},
 	"spriteSourceSize": {"x":117,"y":0,"w":138,"h":94},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -266,9 +266,21 @@
 },
 "station_not_constructing.png" :
 {
-	"frame": {"x":258,"y":580,"w":138,"h":94},
+	"frame": {"x":258,"y":676,"w":138,"h":94},
 	"spriteSourceSize": {"x":117,"y":0,"w":138,"h":94},
 	"sourceSize": {"w":256,"h":256}
+},
+"stop_sending_button_hover.png" :
+{
+	"frame": {"x":366,"y":1076,"w":106,"h":20},
+	"spriteSourceSize": {"x":0,"y":0,"w":106,"h":20},
+	"sourceSize": {"w":106,"h":20}
+},
+"stop_sending_button_idle.png" :
+{
+	"frame": {"x":258,"y":1076,"w":106,"h":20},
+	"spriteSourceSize": {"x":0,"y":0,"w":106,"h":20},
+	"sourceSize": {"w":106,"h":20}
 },
 "title.png" :
 {
@@ -278,25 +290,25 @@
 },
 "unmuted_button.png" :
 {
-	"frame": {"x":330,"y":1076,"w":16,"h":16},
+	"frame": {"x":507,"y":620,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "warp_gate_1.png" :
 {
-	"frame": {"x":479,"y":514,"w":32,"h":32},
+	"frame": {"x":465,"y":680,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "warp_gate_2.png" :
 {
-	"frame": {"x":465,"y":680,"w":32,"h":32},
+	"frame": {"x":465,"y":646,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
 "warp_gate_3.png" :
 {
-	"frame": {"x":465,"y":646,"w":32,"h":32},
+	"frame": {"x":474,"y":1076,"w":32,"h":32},
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
@@ -308,13 +320,13 @@
 },
 "warp_gate_construction.png" :
 {
-	"frame": {"x":491,"y":782,"w":30,"h":30},
+	"frame": {"x":499,"y":680,"w":30,"h":30},
 	"spriteSourceSize": {"x":193,"y":29,"w":30,"h":30},
 	"sourceSize": {"w":256,"h":256}
 }
 
 },
 "meta": {
-	"size": {"w":531,"h":1096}
+	"size": {"w":531,"h":1110}
 }
 }

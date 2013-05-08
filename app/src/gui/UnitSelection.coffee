@@ -197,25 +197,13 @@ class UnitSelection
     element.setDrawFunc(
       (ctx) =>
         if camera.getZoom() < window.config.displayCutoff
-          #if button.visible
           button.close()
           bigButton.open()
           @_closeAllStacks()
         else
-          #if bigButton.visible
           bigButton.close()
           button.open()
           @_openAllStacks()
-        ###
-        loc = camera.getScreenCoordinates({x: element.x, y: element.y})
-
-        w = element.w * camera.getZoom()
-        h = element.h * camera.getZoom()
-        x = loc.x - w / 2
-        y = loc.y - h / 2
-
-        ctx.strokeRect(x, y, w, h)
-        ###
     )
 
     button.setDrawFunc(
