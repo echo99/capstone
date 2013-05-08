@@ -2,7 +2,7 @@ AI =
   # Finds a path based on a breadth first search
   #
   # @param [Planet] v Current planet.
-  getPath:(start, finish) ->
+  getPath:(start, finish, avoidFungus = false) ->
     route = []
     q = []
     seen = []
@@ -19,7 +19,8 @@ AI =
         break
       for u in t[0].getAdjacentPlanets()
         if !(u in seen) and
-           u.visibility() != root.config.visibility.undiscovered
+           u.visibility() != root.config.visibility.undiscovered and
+           (!u.fungusOnPlanet or !avoidFungus)
           seen.push(u)
           q.push([u, t])
     return route

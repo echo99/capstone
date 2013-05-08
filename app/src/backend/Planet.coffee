@@ -6,6 +6,7 @@ if exports?
   root.config = config
 
 #_require ControlGroup
+#_require ResourceCarrier
 
 # Defines a class to represent planets
 #
@@ -29,8 +30,11 @@ class Planet
     @_outpost = false
     @_station = false
     @_controlGroups = []
+    @_resourceCarriers = []
     @_unitConstructing = null
     @_turnsToComplete = 0
+    @_sendingResourcesTo = null
+    @_sendingUnitsTo = null
     @_visibility = root.config.visibility.undiscovered
 
   # GETTERS #
@@ -113,6 +117,19 @@ class Planet
   #
   fungusStrength: ->
     return @_fungusStrength
+
+  # True if there is a unit or structure on the planet
+  #
+  # @return [Boolean] True if any humans around.
+  humansOnPlanet: ->
+    @_station or @_outpost or
+    @_probes > 0 or @_attackShips > 0 or @_defenseShips > 0 or @_colonies > 0
+
+  # True if there is fungus on the planet
+  #
+  # @return [Boolean] True if any fungus around.
+  fungusOnPlanet: ->
+    @_fungusStrength > 0
 
   # Returns whether the planet has an outpost.
   #
@@ -302,11 +319,34 @@ class Planet
     if !planet.hasStation() and !planet.hasOutpost()
       throw new Error("Planet has no structure")
     # There is a valid structure here
+    path = AI.getPath(@, planet, true)
+    if path is []
+      throw new Error("There is no path between the two planets")
+    # There is a valid path between them
+    @_sendingResourcesTo = planet
+
+  # Stop sending resources to another planet
+  #
+  # @throw [Error] If we are not sending yet.
+  stopSendingResources: ->
+    if @_sendingResourcesTo == null
+      throw new Error("Tried to cancel sending resources, no such job.")
+    @_sendingResourcesTo = null
+
+  sendUnits: (planet) ->
     path = AI.getPath(@, planet)
     if path is []
       throw new Error("There is no path between the two planets")
     # There is a valid path between them
-    
+    @_sendingUnitsTo = planet
+
+  # Stop sending ships to another planet
+  #
+  # @throw [Error] If we are not sending yet.
+  stopSendingUnits: ->
+    if @_sendingUnitsTo == null
+      throw new Error("Tried to cancel sending ships, no such job.")
+    @_sendingUnitsTo = null
 
   # Cancel control group.
   #
@@ -383,6 +423,8 @@ class Planet
   # Resolves combat between player/fungus on a planet.
   #
   resolveCombat: ->
+    if !@humansOnPlanet() or !@fungusOnPlanet()
+      return
     fungusDamage = 0
     humanDamage = 0
     fungusDefense = 0
@@ -407,6 +449,10 @@ class Planet
     humanDefense += @rollForDamage(root.config.units.colonyShip.defense,
                                    @_colonyShips)
     humanDefense += @rollForDamage(root.config.units.probe.defense, @_probes)
+    console.log("Fungus rolled " + fungusDamage + "damage")
+    console.log("Humans rolled " + humanDefense + "defense")
+    console.log("Humans rolled " + humanDamage + "damage")
+    console.log("Fungus rolled " + fungusDefense + "defense")
     # Apply defensive ratings to damage
     fungusDamage -= humanDefense
     humanDamage -= fungusDefense
@@ -414,6 +460,8 @@ class Planet
       fungusDamage = 0
     if humanDamage < 0
       humanDamage = 0
+    console.log(fungusDamage + " damage to humans")
+    console.log(humanDamage + " damage to fungus")
     # Destroy units
     if @_fungusStrength >= humanDamage
       @_fungusStrength -= humanDamage
@@ -476,12 +524,43 @@ class Planet
             when root.config.units.attackShip then @_attackShips++
             when root.config.units.defenseShip then @_defenseShips++
             else throw new Error("Ship type unknown.")
+          if @_sendingUnitsTo != null
+            switch unit
+              when root.config.units.probe
+                moveShips(0, 0, 1, 0, @_sendingUnitsTo)
+              when root.config.units.colonyShip
+                moveShips(0, 0, 0, 1, @_sendingUnitsTo)
+              when root.config.units.attackShip
+                moveShips(1, 0, 0, 0, @_sendingUnitsTo)
+              when root.config.units.defenseShip
+                moveShips(0, 1, 0, 0, @_sendingUnitsTo)
+              else throw new Error("Ship type unknown.")
+
+  # Create new resource carriers if sending and can afford it.
+  # If there is not currently a path without fungus then stops sending.
+  #
+  resourceSendingUpkeep: ->
+    if @_sendingResourcesTo == null
+      return
+    path = AI.getPath(@, @_sendingResourcesTo, true)
+    if path is []
+      @_sendingResourcesTo = null
+      return
+    # We are sending resources
+    rate = root.config.resources.sendRate
+    if @_availableResources < rate
+      rate = @_availableResources
+    @_availableResources -= rate
+    carrier = new ResourceCarrier(rate, @_sendingResourcesTo)
+    carrier.updateAI(@)
+    @_resourceCarriers.push(carrier)
 
   # Movement phase 1.
   # Moves control groups.
   #
   movementUpkeep1: ->
     @move(group) for group in @_controlGroups
+    @send(carrier) for carrier in @_resourceCarriers
 
   # Movement phase 2.
   # Resets all control groups to allow movement again.
@@ -496,6 +575,11 @@ class Planet
         @_probes += group.probes()
         @_colonies += group.colonies()
         @_controlGroups = @_controlGroups.filter((g) => g != group)
+    for carrier in @_resourceCarriers
+      console.log(@_resourceCarriers)
+      carrier.resetMoved()
+      if carrier.destination() is @
+        @_availableResources += carrier.amount()
 
   # Visibility upkeep method.
   # Updates visibility status and last-known values to reflect planet
@@ -620,11 +704,28 @@ class Planet
         group.next().receiveGroup(group)
         @_controlGroups = @_controlGroups.filter((g) => g != group)
 
+  # Moves a resource carrier to it's next intermediate destination.
+  #
+  # @param [ResourceCarrier] carrier The carrier to be moved.
+
+  send: (carrier) ->
+    if !carrier.moved()
+      carrier.setMoved()
+      if !(carrier.destination() is @)
+        carrier.next().receiveCarrier(carrier)
+        @_controlcarriers = @_controlCarriers.filter((c) => c != carrier)
+
   # Adds a given group to the current planet
   #
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
     @_controlGroups.push(group)
+
+  # Adds a given carrier to the current planet
+  #
+  # @param [ResourceCarrier] carrier The carrier to add.
+  receiveCarrier: (carrier) ->
+    @_resourceCarriers.push(carrier)
 
   # Given a chance of success and a number of units, determine one roll.
   #
@@ -636,7 +737,7 @@ class Planet
     total = 0
     for x in [0...quantity] by 1
       roll = Math.random()
-      if roll >= power
+      if roll < power
         total++
     return total
 

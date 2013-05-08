@@ -97,6 +97,7 @@ class Game
   # Does all required upkeep for the end of the turn.
   endTurn: ->
     planet.gatherResources() for planet in @_planets
+    planet.resourceSendingUpkeep() for planet in @_planets
     planet.movementUpkeep1() for planet in @_planets
     planet.movementUpkeep2() for planet in @_planets
     planet.updateAI() for planet in @_planets
@@ -109,6 +110,7 @@ class Game
     planet.buildUpkeep() for planet in @_planets
     planet.visibilityUpkeep() for planet in @_planets
     planet.checkRepresentationalInvariants() for planet in @_planets
+    console.log("--------------------------------------")
 
   # Helper Functions #
 

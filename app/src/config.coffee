@@ -419,5 +419,6 @@ root.config =
     stdevRate: 4
     maxRate: 5
     minRate: 1
+    sendRate: 5
 
 config = root.config
