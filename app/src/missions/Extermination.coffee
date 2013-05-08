@@ -79,11 +79,25 @@ class Extermination extends Mission
         break
 
     if not hasFungus
-      ga('set', 'metric2', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Mission',
+        'eventAction': 'Victory',
+        'eventLabel': 'Extermination',
+        'dimension1': 'Extermination',
+        'metric5': 1
+      })
       UI.endGame()
       @victoryMenu.open()
 
     if not @home.hasStation()
-      ga('set', 'metric3', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Mission',
+        'eventAction': 'Fail',
+        'eventLabel': 'Extermination',
+        'dimension1': 'Extermination',
+        'metric6': 1
+      })
       UI.endGame()
       @failMenu.open()

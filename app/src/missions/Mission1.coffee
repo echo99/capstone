@@ -22,7 +22,7 @@ class Mission1 extends Mission
     game.addPlanet(f1)
 
     f2 = new Planet(-1950, -100)
-    #f2.setFungus(1)
+    f2.setFungus(1)
     game.addPlanet(f2)
 
     f3 = new Planet(-1600, 850)
@@ -34,7 +34,7 @@ class Mission1 extends Mission
     game.addPlanet(f4)
 
     f5 = new Planet(-850, -50)
-    f5.setFungus(1)
+    #f5.setFungus(1)
     game.addPlanet(f5)
 
     p1 = new Planet(0, -800)
@@ -156,9 +156,24 @@ class Mission1 extends Mission
       current = localStorage["progress"]
       if current < 2
         localStorage["progress"] = 2
-      ga('set', 'metric1', 1)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Mission',
+        'eventAction': 'Victory',
+        'eventLabel': 'Mission 1',
+        'dimension1': 'Mission 1',
+        'metric5': 1
+      })
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
+      ga('send', {
+        'hitType': 'event',
+        'eventCategory': 'Mission',
+        'eventAction': 'Fail'
+        'eventLabel': 'Mission 1'
+        'dimension1': 'Mission 1',
+        'metric6': 1
+      })
       UI.endGame()
       @failMenu.open()
