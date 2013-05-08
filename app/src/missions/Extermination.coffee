@@ -10,15 +10,15 @@ class Extermination extends Mission
     #game.setup(10, null)
     #return
     newGame(10000, 10000)
-    @home = game.setup(10)
+    @home = game.setup(30)
     @home.addStation()
 
     # Test stuff
-    @home.getAdjacentPlanets()[0].addOutpost()
-    @home.addShips(window.config.units.probe, 8)
-    @home.addShips(window.config.units.colonyShip, 10)
-    @home.addShips(window.config.units.attackShip, 10)
-    @home.addShips(window.config.units.defenseShip, 10)
+    #@home.getAdjacentPlanets()[0].addOutpost()
+    #@home.addShips(window.config.units.probe, 8)
+    #@home.addShips(window.config.units.colonyShip, 10)
+    #@home.addShips(window.config.units.attackShip, 10)
+    #@home.addShips(window.config.units.defenseShip, 10)
     # End test stuff
 
     UI.initialize()
@@ -66,6 +66,17 @@ class Extermination extends Mission
     for p in game.getPlanets()
       if p.fungusStrength() > 0
         hasFungus = true
+
+    hasAnything = false
+    for p in game.getPlanets()
+      if p.getControlGroups().length > 0 or
+         p.hasStation() or p.hasOutpost() or
+         p.numShips(window.config.units.probe) > 0 or
+         p.numShips(window.config.units.colonyShip) > 0 or
+         p.numShips(window.config.units.attackShip) > 0 or
+         p.numShips(window.config.units.defenseShip) > 0
+        hasAnything = true
+        break
 
     if not hasFungus
       UI.endGame()

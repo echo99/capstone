@@ -807,6 +807,17 @@ class UserInterface
         ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
         ctx.stroke()
 
+    if @selectedPlanet
+      ctx.strokeStyle = window.config.selectionStyle.stroke
+      ctx.lineWidth = window.config.selectionStyle.lineWidth
+      loc = @selectedPlanet.location()
+      pos = camera.getScreenCoordinates(loc)
+      r = (window.config.planetRadius + window.config.selectionStyle.radius) *
+           camera.getZoom()
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+      ctx.stroke()
+
     if @switchedMenus
       @stationMenu.setDirty()
       @outpostMenu.setDirty()
@@ -1094,6 +1105,8 @@ class UserInterface
 
     @turns++
     @turnCounter.setDirty()
+
+    # TODO: damage display
 
   endGame: () ->
     @stationMenu.close()
