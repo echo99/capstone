@@ -25,7 +25,7 @@ main = ->
         response.writeHeader 404,
           'Content-Type': 'text/plain'
         response.write '404 Not Found\n'
-        reponse.end()
+        response.end()
       else
         fs.readFile fullPath, 'binary', (err, file) ->
           if err
