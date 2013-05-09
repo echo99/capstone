@@ -104,7 +104,7 @@ class Extermination extends Mission
           'hitType': 'timing',
           'timingCategory': 'Misson',
           'timingVar': 'Victory',
-          'timingValue': getMinutes(@endTime - @startTime),
+          'timingValue': @endTime - @startTime,
           'timingLabel': 'Extermination'
         })
       @gameEnded = true
@@ -126,7 +126,7 @@ class Extermination extends Mission
           'hitType': 'timing',
           'timingCategory': 'Misson',
           'timingVar': 'Fail',
-          'timingValue': getMinutes(@endTime - @startTime),
+          'timingValue': @endTime - @startTime,
           'timingLabel': 'Extermination'
         })
       @gameEnded = true

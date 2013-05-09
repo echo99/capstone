@@ -230,6 +230,13 @@ class Menu extends Mission
       if c.probes() == 1
         inGroup = true
         break
+
+    if inGroup
+      game.endTurn()
+      UI.endTurn()
+      CurrentMission.onEndTurn()
+      camera.setTarget(@lastPlanet.location())
+    ###
     while inGroup#@lastPlanet.numShips(window.config.units.probe) == 0 or inGroup
       game.endTurn()
       UI.endTurn()
@@ -240,6 +247,7 @@ class Menu extends Mission
           inGroup = true
           break
       camera.setTarget(@lastPlanet.location())
+    ###
 
   getHomeTarget: ->
     return @lastPlanet.location()
@@ -264,7 +272,6 @@ class Menu extends Mission
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
-    # Add the probe to the selected units
 
   _checkMissions: (p) ->
     @lastPlanet = p
