@@ -6,6 +6,15 @@ class Mission1 extends Mission
   # @see Mission#reset
   reset: ->
     @gameEnded = false
+    ga('send', {
+      'hitType': 'event',
+      'eventCategory': 'Mission',
+      'eventAction': 'Start'
+      'eventLabel': 'Mission 1'
+      'dimension1': 'Mission 1',
+      'metric1': 1
+    })
+
     # Create planets:
     newGame(10000, 10000)
     @home = new Planet(0,0)
@@ -100,6 +109,8 @@ class Mission1 extends Mission
     game.endTurn()
     UI.initialize(false, true, false)
 
+    @startTime = currentTime()
+
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
@@ -158,6 +169,7 @@ class Mission1 extends Mission
       if current < 2
         localStorage["progress"] = 2
       if not @gameEnded
+        @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission',
@@ -166,11 +178,19 @@ class Mission1 extends Mission
           'dimension1': 'Mission 1',
           'metric5': 1
         })
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': 'Misson',
+          'timingVar': 'Victory',
+          'timingValue': getMinutes(@endTime - @startTime),
+          'timingLabel': 'Mission 1'
+        })
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
       if not @gameEnded
+        @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission',
@@ -178,6 +198,13 @@ class Mission1 extends Mission
           'eventLabel': 'Mission 1'
           'dimension1': 'Mission 1',
           'metric6': 1
+        })
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': 'Misson',
+          'timingVar': 'Fail',
+          'timingValue': getMinutes(@endTime - @startTime),
+          'timingLabel': 'Mission 1'
         })
       @gameEnded = true
       UI.endGame()

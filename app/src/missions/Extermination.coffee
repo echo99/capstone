@@ -7,6 +7,15 @@ class Extermination extends Mission
   # @see Mission#reset
   reset: ->
     @gameEnded = false
+    ga('send', {
+      'hitType': 'event',
+      'eventCategory': 'Mission',
+      'eventAction': 'Start'
+      'eventLabel': 'Extermination'
+      'dimension1': 'Extermination',
+      'metric1': 1
+    })
+
     newGame(10000, 10000)
 
     # Create planets:
@@ -26,6 +35,8 @@ class Extermination extends Mission
     camera.setTarget(@home.location())
 
     @_initMenus()
+
+    @startTime = currentTime()
 
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
@@ -80,6 +91,7 @@ class Extermination extends Mission
 
     if not hasFungus
       if not @gameEnded
+        @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission',
@@ -88,12 +100,20 @@ class Extermination extends Mission
           'dimension1': 'Extermination',
           'metric5': 1
         })
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': 'Misson',
+          'timingVar': 'Victory',
+          'timingValue': getMinutes(@endTime - @startTime),
+          'timingLabel': 'Extermination'
+        })
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
 
     if not hasAnything
       if not @gameEnded
+        @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission',
@@ -101,6 +121,13 @@ class Extermination extends Mission
           'eventLabel': 'Extermination',
           'dimension1': 'Extermination',
           'metric6': 1
+        })
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': 'Misson',
+          'timingVar': 'Fail',
+          'timingValue': getMinutes(@endTime - @startTime),
+          'timingLabel': 'Extermination'
         })
       @gameEnded = true
       UI.endGame()

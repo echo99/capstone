@@ -74,6 +74,14 @@ KeyCodes =
   ADD: 107 # zoom in
   SUB: 109 # zoom out
 
+currentTime = ->
+  new Date().getTime()
+
+getMinutes = (ms) ->
+  return (ms / 1000) / 60
+
+gameStart = currentTime()
+
 SpriteNames = window.config.spriteNames
 
 frameElement = null

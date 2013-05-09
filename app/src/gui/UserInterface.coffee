@@ -698,6 +698,10 @@ class UserInterface
       gameFrame.removeChild(b)
     @planetButtons = []
     @unitSelection.destroy()
+    for c in @controlGroups
+      c.destroy()
+    for g in @_groupDisplays
+      g.destroy()
 
   planetButtonCallback: (planet) =>
     return () =>
