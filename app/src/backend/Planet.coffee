@@ -348,13 +348,17 @@ class Planet
   #
   # @return [Planet] First planet in supply chain.
   nextSend: ->
-    if @_nextSend == null
+    if @_sendingResourcesTo == null
+      return null
+    console.log("next send initial " + @_nextSend)
+    if @_nextSend == null or @_nextSend == undefined
       path = AI.getPath(@, @_sendingResourcesTo)
       if path == []
         @_nextSend = null
         @_sendingResourcesTo = null
       else
         @_nextSend = path[0]
+    console.log("next send " + @_nextSend)
     return @_nextSend
 
   # Sends units to given planet
@@ -567,7 +571,6 @@ class Planet
   # If there is not currently a path without fungus then stops sending.
   #
   resourceSendingUpkeep: ->
-    @_nextSend = null
     if @_sendingResourcesTo == null
       return
     if !@_outpost and !@_station
@@ -610,6 +613,7 @@ class Planet
       console.log(@ + " " + carrier.toString())
       carrier.resetMoved()
       if carrier.destination() is @
+        console.log("disassembling carrier: " + carrier)
         @_availableResources += carrier.amount()
         @_resourceCarriers= @_resourceCarriers.filter((c) => c != carrier)
 
@@ -618,6 +622,7 @@ class Planet
   # visibility.
   #
   visibilityUpkeep: ->
+    @_nextSend = null
     # If it has probes:
     if @_probes > 0 or
        @_attackShips > 0 or
@@ -658,6 +663,7 @@ class Planet
   #
   updateAI: ->
     group.updateAi(@) for group in @_controlGroups
+    carrier.updateAi(@) for carrier in @_resourceCarriers
 
   # INGAME COMMANDS #
 
@@ -741,6 +747,7 @@ class Planet
   # @param [ResourceCarrier] carrier The carrier to be moved.
 
   send: (carrier) ->
+    console.log("Planet:" + @ + " sending carrier: " + carrier)
     if !carrier.moved()
       carrier.setMoved()
       if !(carrier.destination() is @)
@@ -757,6 +764,7 @@ class Planet
   #
   # @param [ResourceCarrier] carrier The carrier to add.
   receiveCarrier: (carrier) ->
+    console.log("Planet:" + @ + " receiving carrier: " + carrier)
     @_resourceCarriers.push(carrier)
 
   # Given a chance of success and a number of units, determine one roll.
