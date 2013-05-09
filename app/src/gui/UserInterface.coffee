@@ -700,6 +700,12 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
+      s = planet.location()
+      e = {x: s.x, y: s.y - 500}
+      m = new MovingElement(s, e, 5,
+        (ctx, loc) =>
+          ctx.fillRect(loc.x, loc.y, 20, 20)
+      )
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -1247,3 +1253,36 @@ class UserInterface
     @colonyMenu.close()
     @selectedPlanet = null
     @lookingToSendResources = false
+
+class MovingElement
+  constructor: (start, @end, @speed, @drawFunc) ->
+    @distanceMoved = 0
+    @current = start
+    vec = {x: @end.x - start.x, y: @end.y - start.y}
+    console.log('vec: ' + vec.x + ", " + vec.y)
+    @length = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
+    console.log("length: " + @length)
+    @dir = {x: vec.x / @length * @speed, y: vec.y / @length * @speed}
+    @element = new Elements.BoxElement(@current.x, @current.y, 0, 0)
+    @element.setDrawFunc(@draw)
+    @element.setClearFunc(@clear)
+    @element.visible = true
+    gameFrame.addChild(@element)
+
+  draw: (ctx) =>
+    loc =
+      x: Math.floor(@current.x)
+      y: Math.floor(@current.y)
+    @drawFunc(ctx, camera.getScreenCoordinates(loc))
+
+    @current.x += @dir.x
+    @current.y += @dir.y
+
+    @element.moveTo(@current.x, @current.y)
+
+    @distanceMoved += @speed
+    if @distanceMoved > @length
+      console.log("destroy")
+      console.log(@distanceMoved + ", " + @length)
+      #gameFrame.removeChild(@element)
+      @element.destroy()
