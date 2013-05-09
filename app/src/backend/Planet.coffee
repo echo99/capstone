@@ -37,6 +37,19 @@ class Planet
     @_sendingUnitsTo = null
     @_nextSend = null
     @_visibility = root.config.visibility.undiscovered
+    @_combatReport = {
+      fungusDamage: 0
+      fungusDefense: 0
+      humanDamage: 0
+      humanDefense: 0
+      fungusLost: 0
+      attackShipsLost: 0
+      defenseShipsLost: 0
+      probesLost: 0
+      coloniesLost: 0
+      outpostLost: false
+      stationLost: false
+    }
 
   # GETTERS #
 
@@ -184,6 +197,13 @@ class Planet
       return false
     else
       return true
+
+  # Returns the combat report for the last turn.
+  #
+  # @return [] A representation of the combat that
+  #            occured on the last turn for this planet.
+  getCombatReport: ->
+    return @_combatReport
 
   # SETTERS FOR USE BY GUI #
 
@@ -348,13 +368,17 @@ class Planet
   #
   # @return [Planet] First planet in supply chain.
   nextSend: ->
-    if @_nextSend == null
+    if @_sendingResourcesTo == null
+      return null
+    console.log("next send initial " + @_nextSend)
+    if @_nextSend == null or @_nextSend == undefined
       path = AI.getPath(@, @_sendingResourcesTo)
       if path == []
         @_nextSend = null
         @_sendingResourcesTo = null
       else
         @_nextSend = path[0]
+    console.log("next send " + @_nextSend)
     return @_nextSend
 
   # Sends units to given planet
@@ -450,6 +474,19 @@ class Planet
   # Resolves combat between player/fungus on a planet.
   #
   resolveCombat: ->
+    @_combatReport = {
+      fungusDamage: 0
+      fungusDefense: 0
+      humanDamage: 0
+      humanDefense: 0
+      fungusLost: 0
+      attackShipsLost: 0
+      defenseShipsLost: 0
+      probesLost: 0
+      coloniesLost: 0
+      outpostLost: false
+      stationLost: false
+    }
     if !@humansOnPlanet() or !@fungusOnPlanet()
       return
     fungusDamage = 0
@@ -459,6 +496,7 @@ class Planet
     # Roll for damage
     fungusDamage += @rollForDamage(root.config.units.fungus.attack,
                                    @_fungusStrength)
+    @_combatReport.fungusDamage = fungusDamage
     humanDamage += @rollForDamage(root.config.units.attackShip.attack,
                                   @_attackShips)
     humanDamage += @rollForDamage(root.config.units.defenseShip.attack,
@@ -466,9 +504,11 @@ class Planet
     humanDamage += @rollForDamage(root.config.units.colonyShip.attack,
                                   @_colonyShips)
     humanDamage += @rollForDamage(root.config.units.probe.attack, @_probes)
+    @_combatReport.humanDamage = humanDamage
     # Roll for defense rating
     fungusDefense += @rollForDamage(root.config.units.fungus.defense,
                                     @_fungusStrength)
+    @_combatReport.fungusDefense = fungusDefense
     humanDefense += @rollForDamage(root.config.units.attackShip.defense,
                                    @_attackShips)
     humanDefense += @rollForDamage(root.config.units.defenseShip.defense,
@@ -476,6 +516,7 @@ class Planet
     humanDefense += @rollForDamage(root.config.units.colonyShip.defense,
                                    @_colonyShips)
     humanDefense += @rollForDamage(root.config.units.probe.defense, @_probes)
+    @_combatReport.humanDefense = humanDefense
     console.log("Fungus rolled " + fungusDamage + "damage")
     console.log("Humans rolled " + humanDefense + "defense")
     console.log("Humans rolled " + humanDamage + "damage")
@@ -490,28 +531,33 @@ class Planet
     console.log(fungusDamage + " damage to humans")
     console.log(humanDamage + " damage to fungus")
     # Destroy units
+    @_combatReport.fungusLost = Math.min(@_fungusStrength, humanDamage)
     if @_fungusStrength >= humanDamage
       @_fungusStrength -= humanDamage
     else
       @_fungusStrength = 0
     # Destroy attack ships first
+    @_combatReport.attackShipsLost = Math.min(@_attackShips, fungusDamage)
     if @_attackShips >= fungusDamage
       @_attackShips -= fungusDamage
       return null
     @_attackShips = 0
     fungusDamage -= @_attackShips
+    @_combatReport.defenseShipsLost = Math.min(@_defenseShips, fungusDamage)
     # Destroy defense ships second
     if @_defenseShips >= fungusDamage
       @_defenseShips -= fungusDamage
       return null
     @_defenseShips = 0
     fungusDamage -= @_defenseShips
+    @_combatReport.probesLost = Math.min(@_probes, fungusDamage)
     # Destroy probes third
     if @_probes >= fungusDamage
       @_probes -= fungusDamage
       return null
     @_probes = 0
     fungusDamage -= @_probes
+    @_combatReport.coloniesLost = Math.min(@_colonies, fungusDamage)
     # Destroy colony ships last
     if @_colonies >= fungusDamage
       @_colonies -= fungusDamage
@@ -521,6 +567,8 @@ class Planet
     # If there is any leftover fungus damage
     # then destroy all structures
     if fungusDamage > 0
+      @_combatReport.outpostLost = @_outpost
+      @_combatReport.stationLost = @_station
       @_station = false
       @_outpost = false
       @_turnsToComplete = 0
@@ -567,7 +615,6 @@ class Planet
   # If there is not currently a path without fungus then stops sending.
   #
   resourceSendingUpkeep: ->
-    @_nextSend = null
     if @_sendingResourcesTo == null
       return
     if !@_outpost and !@_station
@@ -610,6 +657,7 @@ class Planet
       console.log(@ + " " + carrier.toString())
       carrier.resetMoved()
       if carrier.destination() is @
+        console.log("disassembling carrier: " + carrier)
         @_availableResources += carrier.amount()
         @_resourceCarriers= @_resourceCarriers.filter((c) => c != carrier)
 
@@ -618,6 +666,7 @@ class Planet
   # visibility.
   #
   visibilityUpkeep: ->
+    @_nextSend = null
     # If it has probes:
     if @_probes > 0 or
        @_attackShips > 0 or
@@ -658,6 +707,7 @@ class Planet
   #
   updateAI: ->
     group.updateAi(@) for group in @_controlGroups
+    carrier.updateAi(@) for carrier in @_resourceCarriers
 
   # INGAME COMMANDS #
 
@@ -741,6 +791,7 @@ class Planet
   # @param [ResourceCarrier] carrier The carrier to be moved.
 
   send: (carrier) ->
+    console.log("Planet:" + @ + " sending carrier: " + carrier)
     if !carrier.moved()
       carrier.setMoved()
       if !(carrier.destination() is @)
@@ -757,6 +808,7 @@ class Planet
   #
   # @param [ResourceCarrier] carrier The carrier to add.
   receiveCarrier: (carrier) ->
+    console.log("Planet:" + @ + " receiving carrier: " + carrier)
     @_resourceCarriers.push(carrier)
 
   # Given a chance of success and a number of units, determine one roll.
