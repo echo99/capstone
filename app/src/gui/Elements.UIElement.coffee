@@ -120,18 +120,22 @@ class Elements.UIElement extends Module
   # @return [Boolean] Whether or not the child was successfully removed
   #
   removeChild: (elem) ->
+    console.log("Removing child #{elem.toString()} from #{@toString()}") if @_debug
     @setDirty()
     @_clearBucket.push(elem)
     elem._parent = null
+    # console.log("Before: " + @_children.length)
     index = @_children.indexOf(elem)
+    # console.log("Index: " + index)
     if index != -1
-      @_children.splice(index)
+      @_children.splice(index, 1)
+    # console.log("After: " + @_children.length)
     zIndex = elem._zIndex
     if zIndex of @_childBuckets
       childBucket = @_childBuckets[zIndex]
       index = childBucket.indexOf(elem)
       if index != -1
-        childBucket.splice(index)
+        childBucket.splice(index, 1)
         return true
     return false
 
@@ -141,7 +145,7 @@ class Elements.UIElement extends Module
   #   manually assign the reference to `null`
   #
   destroy: ->
-    console.log("Destroy called on " + @toString())
+    # console.log("Destroy called on " + @toString())
     @deleteChildren()
     @_parent?.removeChild(this)
 
@@ -635,7 +639,7 @@ class Elements.UIElement extends Module
       console.log(childBucket)
       index = childBucket.indexOf(child)
       if index != -1
-        childBucket.splice(index)
+        childBucket.splice(index, 1)
     zIndex = child._zIndex
     if zIndex in @zIndices
       @_childBuckets[zIndex].push(child)

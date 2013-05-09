@@ -288,6 +288,10 @@ class Elements.GameFrame extends Elements.UIElement
 
   # Draw the frame's children if they are on the screen
   drawChildren: ->
+    for clearedChild in @_clearBucket
+      clearedChild.clear(@ctx) if clearedChild.visible or
+        clearedChild._closing
+    @_clearBucket = []
     # console.log("GameFrame's drawChildren called!")
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
