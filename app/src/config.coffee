@@ -52,6 +52,7 @@ root.config =
   carrierStyle:
     speed: 5
     delay: 30
+    radius: 5
     color: "rgba(0, 255, 255, 1)"
   connectionStyle:
     normal:

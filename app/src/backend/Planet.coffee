@@ -348,7 +348,7 @@ class Planet
   #
   # @return [Planet] First planet in supply chain.
   nextSend: ->
-    if nextSend == null
+    if @_nextSend == null
       @_nextSend = AI.getPath(@, @_sendResourcesTo)[0]
     return @_nextSend
 
