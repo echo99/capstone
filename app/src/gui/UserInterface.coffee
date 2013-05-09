@@ -772,9 +772,9 @@ class UserInterface
       pos = camera.getScreenCoordinates(p.location())
       visited.push(p)
       for neighbor in p.getAdjacentPlanets()
-        if neighbor not in visited and
+        if cheat or (neighbor not in visited and
            p.visibility() != window.config.visibility.undiscovered and
-           neighbor.visibility() != window.config.visibility.undiscovered
+           neighbor.visibility() != window.config.visibility.undiscovered)
           # draw connection to the neighbor
           nPos = camera.getScreenCoordinates(neighbor.location())
           ctx.beginPath()
@@ -807,6 +807,11 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
+      else if cheat
+        if p.fungusStrength() > 0
+          SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE_FUNGUS, loc.x, loc.y, ctx)
+        else
+          SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
       if camera.onScreen(pos) and vis != window.config.visibility.undiscovered
         lost = false
         @help.close()

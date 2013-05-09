@@ -133,7 +133,7 @@ class Mission2 extends Mission
       for g in p.getControlGroups()
         if g.probes() > 0
           hasProbe = true
-        if g.colonyShips() > 0
+        if g.colonies() > 0
           hasColonyShips = true
 
     if totalResources >= @settings2.resourceGoal
