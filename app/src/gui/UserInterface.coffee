@@ -700,12 +700,14 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
+      ###
       s = planet.location()
       e = {x: s.x, y: s.y - 500}
       m = new MovingElement(s, e, 5,
         (ctx, loc) =>
           ctx.fillRect(loc.x, loc.y, 20, 20)
       )
+      ###
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
