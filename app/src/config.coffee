@@ -54,6 +54,22 @@ root.config =
     delay: 10
     radius: 7
     color: "rgba(0, 255, 255, 1)"
+  combatStyle:
+    good:
+      fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
+      color: "rgba(0, 255, 0, 1)"
+      speed: 0.5
+      distance: -200
+    bad:
+      fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
+      color: "rgba(255, 0, 0, 1)"
+      speed: 0.5
+      distance: -200
+    fungusLoc: {x: 0, y: 0}
+    probeLoc: {x: -230, y: -90}
+    colonyLoc: {x: -230, y: -10}
+    attackLoc: {x: -80, y: 70}
+    defenseLoc: {x: -80, y: 150}
   connectionStyle:
     normal:
       stroke: "rgba(128, 128, 128, 0.5)"

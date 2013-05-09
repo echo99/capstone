@@ -15,6 +15,7 @@ class UserInterface
   turns: 0
   lookingToSendResources: false
   carrierCount: 0
+  movingElements: []
 
   # Creates a new UserInterface
   constructor: () ->
@@ -703,6 +704,9 @@ class UserInterface
     for g in @_groupDisplays
       g.destroy()
 
+    for e in @movingElements
+      e.destroy()
+
   planetButtonCallback: (planet) =>
     return () =>
       console.log('number carriers: ' + planet._resourceCarriers.length)
@@ -843,6 +847,8 @@ class UserInterface
 
       if vis == window.config.visibility.visible and p.fungusStrength() > 0
         ctx.font = window.config.windowStyle.titleText.font
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'middle'
         ctx.fillStyle = window.config.windowStyle.defaultText.red
         offset = 60 * camera.getZoom()
         ctx.fillText(p.fungusStrength(), pos.x+offset, pos.y-offset)
@@ -887,27 +893,29 @@ class UserInterface
       if next and @carrierCount == 0
         s = p.location()
         e = next.location()
-        m = new MovingElement(s, e, window.config.carrierStyle.speed
+        @movingElements.push(new MovingElement(s, e,
+          window.config.carrierStyle.speed,
           (ctx, loc) =>
             ctx.fillStyle = window.config.carrierStyle.color
             ctx.beginPath()
             r = window.config.carrierStyle.radius * camera.getZoom()
             ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI)
             ctx.fill()
-        )
+        ))
 
       for c in p._resourceCarriers
         if @carrierCount == 0
           s = p.location()
           e = c.next().location()
-          m = new MovingElement(s, e, window.config.carrierStyle.speed
+          @movingElements.push(new MovingElement(s, e,
+            window.config.carrierStyle.speed,
             (ctx, loc) =>
               ctx.fillStyle = window.config.carrierStyle.color
               ctx.beginPath()
               r = window.config.carrierStyle.radius * camera.getZoom()
               ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI)
               ctx.fill()
-          )
+          ))
 
     @carrierCount = (@carrierCount + 1) % window.config.carrierStyle.delay
 
@@ -1278,7 +1286,66 @@ class UserInterface
 
     @lookingToSendResources = false
 
-    # TODO: damage display
+    combatStyle = window.config.combatStyle
+    for p in game.getPlanets()
+      report = p.getCombatReport()
+      #vis = p.visibility()
+      if (p.fungusOnPlanet() or report.fungusLost) and
+         (p.humansOnPlanet() or report.probesLost or
+                                report.coloniesLost or
+                                report.attackShipsLost or
+                                report.defenseShipsLost)
+         #vis == window.config.visibility.visible
+        pLoc = p.location()
+
+        s = {x: pLoc.x + combatStyle.fungusLoc.x,
+        y: pLoc.y + combatStyle.fungusLoc.y}
+        e = {x: s.x, y: s.y + combatStyle.good.distance}
+        @movingElements.push(new MovingElement(s, e, combatStyle.good.speed,
+          @_getDrawDamage(-report.fungusLost, combatStyle.good)))
+
+        if p.numShips(window.config.units.probe) > 0 or report.probesLost > 0
+          s = {x: pLoc.x + combatStyle.probeLoc.x,
+          y: pLoc.y + combatStyle.probeLoc.y}
+          e = {x: s.x + combatStyle.bad.distance, y: s.y}
+          @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
+            @_getDrawDamage(-report.probesLost, combatStyle.bad)))
+
+        if p.numShips(window.config.units.colonyShip) > 0 or report.coloniesLost > 0
+          s = {x: pLoc.x + combatStyle.colonyLoc.x,
+          y: pLoc.y + combatStyle.colonyLoc.y}
+          e = {x: s.x + combatStyle.bad.distance, y: s.y}
+          @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
+            @_getDrawDamage(-report.coloniesLost, combatStyle.bad)))
+
+        if p.numShips(window.config.units.attackShip) > 0 or
+           report.attackShipsLost > 0
+          s = {x: pLoc.x + combatStyle.attackLoc.x,
+          y: pLoc.y + combatStyle.attackLoc.y}
+          e = {x: s.x + combatStyle.bad.distance, y: s.y}
+          @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
+            @_getDrawDamage(-report.attackShipsLost, combatStyle.bad)))
+
+        if p.numShips(window.config.units.defenseShip) > 0 or
+           report.defenseShipsLost > 0
+          s = {x: pLoc.x + combatStyle.defenseLoc.x,
+          y: pLoc.y + combatStyle.defenseLoc.y}
+          e = {x: s.x + combatStyle.bad.distance, y: s.y}
+          @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
+            @_getDrawDamage(-report.defenseShipsLost, combatStyle.bad)))
+
+  _getDrawDamage: (damage, style) ->
+    text = ""
+    if damage > 0
+      text += "+" + damage
+    else
+      text += damage
+    return (ctx, loc) =>
+      ctx.setFont(style.fontObj)
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = style.color
+      ctx.fillText(text, loc.x, loc.y)
 
   endGame: () ->
     @stationMenu.close()
@@ -1313,4 +1380,8 @@ class MovingElement
 
     @distanceMoved += @speed
     if @distanceMoved > @length
-      @element.destroy()
+      @destroy()
+
+  destroy: ->
+    @element.destroy()
+    UI.movingElements = UI.movingElements.filter((e) => e != @)
