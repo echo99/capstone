@@ -292,9 +292,10 @@ class Elements.GameFrame extends Elements.UIElement
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
-        coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
-        if @camera.onScreen(coords)
-          child.draw(@ctx, coords, @camera.getZoom(), true)
+        if child?
+          coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
+          if @camera.onScreen(coords)
+            child.draw(@ctx, coords, @camera.getZoom(), true)
 
 
 # A class for holding text

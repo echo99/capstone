@@ -25,6 +25,8 @@ if exports?
 #
 # TODO:
 # - Figure what to do about duplicate child references
+# - Delay actual removing of children until after drawing to eliminate bugs due to
+#   removing while drawing
 #
 class Elements.UIElement extends Module
   # @property [Boolean] Flag for if element is visible
@@ -139,6 +141,7 @@ class Elements.UIElement extends Module
   #   manually assign the reference to `null`
   #
   destroy: ->
+    console.log("Destroy called on " + @toString())
     @deleteChildren()
     @_parent?.removeChild(this)
 
@@ -287,6 +290,7 @@ class Elements.UIElement extends Module
         @_drawChildren(ctx, coords, zoom, forceDraw)
       else if @_hasDirtyChildren
         @_drawChildren(ctx, coords, zoom, forceDraw)
+      @_hasDirtyChildren = false
         # for child in @_children
         #   child.draw(ctx, coords, zoom, forceDraw)
 
@@ -294,7 +298,7 @@ class Elements.UIElement extends Module
   #
   _drawChildren: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
     for child in @_children
-      child.draw(ctx, coords, zoom, forceDraw)
+      child?.draw(ctx, coords, zoom, forceDraw)
 
   # @private @abstract Custom draw method for each element that is meant to be
   # overridden
