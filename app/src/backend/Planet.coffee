@@ -348,8 +348,13 @@ class Planet
   #
   # @return [Planet] First planet in supply chain.
   nextSend: ->
-    if nextSend == null
-      @_nextSend = AI.getPath(@, @_sendResourcesTo)[0]
+    if @_nextSend == null
+      path = AI.getPath(@, @_sendResourcesTo)
+      if path == []
+        @_nextSend = null
+        @_sendingResourcesTo = null
+      else
+        @_nextSend = path[0]
     return @_nextSend
 
   # Sends units to given planet
@@ -602,7 +607,7 @@ class Planet
         @_colonies += group.colonies()
         @_controlGroups = @_controlGroups.filter((g) => g != group)
     for carrier in @_resourceCarriers
-      console.log(carrier.toString())
+      console.log(@ + " " + carrier.toString())
       carrier.resetMoved()
       if carrier.destination() is @
         @_availableResources += carrier.amount()

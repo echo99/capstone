@@ -58,7 +58,7 @@ class ResourceCarrier
   #
   # @return [String] String representation of the carrier.
   toString: ->
-    "amount: " + @_amount + "destination: " + @_destination
+    "amount: " + @_amount + " destination: " + @_destination
 
   # ARTIFICIAL INTELLIGENCE #
 
