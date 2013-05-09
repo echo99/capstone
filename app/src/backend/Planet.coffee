@@ -552,7 +552,7 @@ class Planet
       rate = @_availableResources
     @_availableResources -= rate
     carrier = new ResourceCarrier(rate, @_sendingResourcesTo)
-    carrier.updateAI(@)
+    carrier.updateAi(@)
     @_resourceCarriers.push(carrier)
 
   # Movement phase 1.

@@ -13,6 +13,7 @@ class UserInterface
   switchedMenus: false
   hoveredGroup: null
   turns: 0
+  lookingToSendResources: false
 
   # Creates a new UserInterface
   constructor: () ->
@@ -156,6 +157,7 @@ class UserInterface
     outpostSend.setClickHandler(() =>
       console.log('sending resources not yet implemented')
       @selectedPlanet.sending = true
+      @lookingToSendResources = true
     )
     outpostSend.setDrawFunc((ctx) =>
       loc = outpostSend.getProperty("location")
@@ -178,6 +180,9 @@ class UserInterface
     outpostStop.setClickHandler(() =>
       console.log('stop sending resources not yet implemented')
       @selectedPlanet.sending = false
+      if not @lookingToSendResources
+        @selectedPlanet.stopSendingResources()
+      @lookingToSendResources = false
     )
     outpostStop.setDrawFunc((ctx) =>
       loc = outpostStop.getProperty("location")
@@ -268,15 +273,11 @@ class UserInterface
       if (probes and
           @selectedPlanet.numShips(window.config.units.probe) < unit.cost) or
           (not probes and @selectedPlanet.availableResources() < unit.cost)
-        console.log("Not making " + unit)
       else if @selectedPlanet.buildUnit() != null
-        console.log("Busy, not making " + unit)
       else
         if unit == window.config.structures.station
-          console.log("making station")
           @selectedPlanet.scheduleStation()
         else if unit == window.config.structures.outpost
-          console.log("making outpost")
           @selectedPlanet.scheduleOutpost()
           if probes
             @unitSelection.updateSelection(@selectedPlanet)
@@ -709,16 +710,22 @@ class UserInterface
           @unitSelection.updateSelection(p)
           @updateControlGroups()
         @unitSelection.deselectAllUnits()
+      else if @lookingToSendResources
+        if planet.hasStation() or planet.hasOutpost() and @selectedPlanet != planet
+          @selectedPlanet.sendResources(planet)
+          @lookingToSendResources = false
       else
         if @selectedPlanet == planet
           @stationMenu.close()
           @outpostMenu.close()
+          @lookingToSendResources = false
           @colonyMenu.close()
           @selectedPlanet = null
         else if planet.hasStation()
           @selectedPlanet = planet
           @stationMenu.open()
           @outpostMenu.close()
+          @lookingToSendResources = false
           @colonyMenu.close()
         else if planet.hasOutpost() or
                 planet.buildUnit() == window.config.structures.station
@@ -735,6 +742,7 @@ class UserInterface
         else
           @stationMenu.close()
           @outpostMenu.close()
+          @lookingToSendResources = false
           @colonyMenu.close()
           @selectedPlanet = null
         @switchedMenus = true
@@ -869,14 +877,20 @@ class UserInterface
     if lost
       @help.open()
 
+    x = @lastMousePos.x + window.config.toolTipStyle.xOffset
+    y = @lastMousePos.y + window.config.toolTipStyle.yOffset
+    tooltipCtx.textAlign = "left"
+    tooltipCtx.font = window.config.toolTipStyle.font
+    tooltipCtx.fillStyle = window.config.toolTipStyle.color
     if @hoveredPlanet
-      tooltipCtx.textAlign = "left"
-      tooltipCtx.font = window.config.toolTipStyle.font
-      tooltipCtx.fillStyle = window.config.toolTipStyle.color
-      x = @lastMousePos.x + window.config.toolTipStyle.xOffset
-      y = @lastMousePos.y + window.config.toolTipStyle.yOffset
       hasAction = true
-      if @unitSelection.total > 0
+      if @lookingToSendResources
+        if @hoveredPlanet.hasStation() or @hoveredPlanet.hasOutpost() and
+           @hoveredPlanet != @selectedPlanet
+          tooltipCtx.fillText("Valid destination", x, y)
+        else
+          tooltipCtx.fillText("Invalid destination", x, y)
+      else if @unitSelection.total > 0
         tooltipCtx.fillText("Move selected units", x, y)
       else if @hoveredPlanet.hasOutpost() or
               @hoveredPlanet.buildUnit() == window.config.structures.station
@@ -909,6 +923,8 @@ class UserInterface
         ctx.beginPath()
         ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
         ctx.stroke()
+    else if @lookingToSendResources
+      tooltipCtx.fillText("Select planet with station or outpost", x, y)
 
     if @selectedPlanet
       ctx.strokeStyle = window.config.selectionStyle.stroke
@@ -926,7 +942,7 @@ class UserInterface
       @outpostMenu.setDirty()
       @colonyMenu.setDirty()
 
-    if drag and not @hoveredPlanet
+    if drag and not @hoveredPlanet and not @lookingToSendResources
       @stationMenu.close()
       @outpostMenu.close()
       @colonyMenu.close()
@@ -1205,14 +1221,14 @@ class UserInterface
     if @selectedPlanet
       if not @selectedPlanet.hasStation() and @stationMenu.visible
         @stationMenu.close()
-        @selectedPlanet = null
+        #@selectedPlanet = null
       else if not @selectedPlanet.hasOutpost() and @outpostMenu.visible
         @outpostMenu.close()
-        @selectedPlanet = null
+        #@selectedPlanet = null
       else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
               @colonyMenu.visible
         @colonyMenu.close()
-        @selectedPlanet = null
+        #@selectedPlanet = null
 
     @hoveredGroup = null
 
@@ -1221,6 +1237,8 @@ class UserInterface
     @turns++
     @turnCounter.setDirty()
 
+    @lookingToSendResources = false
+
     # TODO: damage display
 
   endGame: () ->
@@ -1228,3 +1246,4 @@ class UserInterface
     @outpostMenu.close()
     @colonyMenu.close()
     @selectedPlanet = null
+    @lookingToSendResources = false
