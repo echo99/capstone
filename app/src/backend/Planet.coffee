@@ -301,6 +301,10 @@ class Planet
     if @_unitConstructing == null and @_turnsToComplete == 0
       throw new Error("Tried to cancel when not constructing")
     else
+      if @_unitConstructing == root.config.structures.outpost
+        @_probes++
+        @_colonies++
+      @_availableResources += @_unitConstructing.cost
       @_unitConstructing = null
       @_turnsToComplete = 0
 
@@ -547,12 +551,12 @@ class Planet
       @_sendingResourcesTo = null
       return
     # We are sending resources
-    rate = root.config.resources.sendRate
-    if @_availableResources < rate
-      rate = @_availableResources
+    amount = root.config.resources.sendRate
+    if @_availableResources < amount
+      amount = @_availableResources
     else
-    @_availableResources -= rate
-    carrier = new ResourceCarrier(rate, @_sendingResourcesTo)
+    @_availableResources -= amount
+    carrier = new ResourceCarrier(amount, @_sendingResourcesTo)
     carrier.updateAi(@)
     @_resourceCarriers.push(carrier)
 
@@ -580,7 +584,7 @@ class Planet
       carrier.resetMoved()
       if carrier.destination() is @
         @_availableResources += carrier.amount()
-        @_availableResources = @_availableResources.filter((c) => c != carrier)
+        @_resourceCarriers= @_resourceCarriers.filter((c) => c != carrier)
 
   # Visibility upkeep method.
   # Updates visibility status and last-known values to reflect planet
