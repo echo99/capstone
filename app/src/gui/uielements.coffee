@@ -189,10 +189,11 @@ class Elements.Frame extends Elements.UIElement
   # Draw the frame's children
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
-    for clearedChild in @_clearBucket
-      clearedChild.clear(@ctx) if clearedChild.visible or
-        clearedChild._closing
-    @_clearBucket = []
+    # for clearedChild in @_removeQueue
+    #   clearedChild.clear(@ctx) if clearedChild.visible or
+    #     clearedChild._closing
+    # @_removeQueue = []
+    @_emptyRemoveQueue(@ctx)
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]
       for child in children
@@ -251,10 +252,11 @@ class Elements.CameraFrame extends Elements.UIElement
   # Draw the frame's children
   drawChildren: ->
     # console.log("Frame's drawChildren called!")
-    for clearedChild in @_clearBucket
-      clearedChild.clear(@ctx) if clearedChild.visible or
-        clearedChild._closing
-    @_clearBucket = []
+    # for clearedChild in @_removeQueue
+    #   clearedChild.clear(@ctx) if clearedChild.visible or
+    #     clearedChild._closing
+    # @_removeQueue = []
+    @_emptyRemoveQueue(@ctx)
     if @_hasDirtyChildren
       for zIndex in @zIndices
         children = @_childBuckets[zIndex]
@@ -288,10 +290,11 @@ class Elements.GameFrame extends Elements.UIElement
 
   # Draw the frame's children if they are on the screen
   drawChildren: ->
-    for clearedChild in @_clearBucket
-      clearedChild.clear(@ctx) if clearedChild.visible or
-        clearedChild._closing
-    @_clearBucket = []
+    # for clearedChild in @_removeQueue
+    #   clearedChild.clear(@ctx) if clearedChild.visible or
+    #     clearedChild._closing
+    # @_removeQueue = []
+    @_emptyRemoveQueue(@ctx)
     # console.log("GameFrame's drawChildren called!")
     for zIndex in @zIndices
       children = @_childBuckets[zIndex]

@@ -46,6 +46,7 @@ class Elements.UIElement extends Module
   _closing: false
   _transparent: true
   _moving: false
+  _removed: false
 
   # @private @property [Number] Element ordering rank
   _zIndex: 0
@@ -86,7 +87,7 @@ class Elements.UIElement extends Module
     @_properties = {}
     @_drawFunc = null
 
-    @_clearBucket = []
+    @_removeQueue = []
 
     @actX = @x
     @actY = @y
@@ -114,7 +115,8 @@ class Elements.UIElement extends Module
         @_childBuckets[zIndex] = [elem]
     # @_children.unshift(elem)
 
-  # Remove a child element from this element if it exists
+  # Remove a child element from this element if it exists. The children are added
+  # to a queue to be removed after they are all cleared
   #
   # @param [Elements.UIElement] elem
   # @return [Boolean] Whether or not the child was successfully removed
@@ -122,18 +124,52 @@ class Elements.UIElement extends Module
   removeChild: (elem) ->
     console.log("Removing child #{elem.toString()} from #{@toString()}") if @_debug
     @setDirty()
-    @_clearBucket.push(elem)
-    elem._parent = null
+    @_removeQueue.push(elem)
+    # elem.visible = false
+    elem._removed = true
+    return elem in @_children
+    # elem._parent = null
+    # # console.log("Before: " + @_children.length)
+    # index = @_children.indexOf(elem)
+    # # console.log("Index: " + index)
+    # if index != -1
+    #   @_children.splice(index, 1)
+    # # console.log("After: " + @_children.length)
+    # zIndex = elem._zIndex
+    # if zIndex of @_childBuckets
+    #   childBucket = @_childBuckets[zIndex]
+    #   index = childBucket.indexOf(elem)
+    #   if index != -1
+    #     childBucket.splice(index, 1)
+    #     return true
+    # return false
+
+  # @private Clear and delete all children in the remove queue
+  #
+  _emptyRemoveQueue: (ctx, coords=null, zoom=null) ->
+    for clearedChild in @_removeQueue
+      clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
+        clearedChild._closing
+    for child in @_removeQueue
+      @_deleteChild(child)
+    @_removeQueue = []
+
+  # @private Actually remove the child from this element's children list
+  #
+  # @param [Elements.UIElement] elem
+  #
+  _deleteChild: (child) ->
+    child._parent = null
     # console.log("Before: " + @_children.length)
-    index = @_children.indexOf(elem)
+    index = @_children.indexOf(child)
     # console.log("Index: " + index)
     if index != -1
       @_children.splice(index, 1)
     # console.log("After: " + @_children.length)
-    zIndex = elem._zIndex
+    zIndex = child._zIndex
     if zIndex of @_childBuckets
       childBucket = @_childBuckets[zIndex]
-      index = childBucket.indexOf(elem)
+      index = childBucket.indexOf(child)
       if index != -1
         childBucket.splice(index, 1)
         return true
@@ -267,10 +303,7 @@ class Elements.UIElement extends Module
   #   @param [Boolean] forceDraw Force the element to be redrawn
   #
   draw: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
-    for clearedChild in @_clearBucket
-      clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
-        clearedChild._closing
-    @_clearBucket = []
+    @_emptyRemoveQueue(ctx)
     if @_closing
       @_closing = false
       @visible = false
@@ -302,7 +335,8 @@ class Elements.UIElement extends Module
   #
   _drawChildren: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
     for child in @_children
-      child?.draw(ctx, coords, zoom, forceDraw)
+      if child? and not child._removed
+        child.draw(ctx, coords, zoom, forceDraw)
 
   # @private @abstract Custom draw method for each element that is meant to be
   # overridden
@@ -388,7 +422,7 @@ class Elements.UIElement extends Module
         children = @_childBuckets[zIndex]
         # for child in @_children
         for child in children
-          if child?.visible
+          if child?.visible and not child._removed
             # console.log("Checking #{child.name}")
             clickedChild = child.click(relLoc.x, relLoc.y)
             clickedSomething or= clickedChild
@@ -419,7 +453,7 @@ class Elements.UIElement extends Module
         children = @_childBuckets[zIndex]
         # for child in @_children
         for child in children
-          if child?
+          if child? and not child._removed
             if hoveredChild
               child.mouseOut()
             else
@@ -440,7 +474,8 @@ class Elements.UIElement extends Module
       @_hovering = false
       @_onMouseOut()
       for child in @_children
-        child?.mouseOut()
+        if child? and not child._removed
+          child.mouseOut()
 
   # Call to element to check if it is being pressed
   #
@@ -462,7 +497,7 @@ class Elements.UIElement extends Module
           # if pressedChild
           #   child.mouseOut()
           # else
-          if child?
+          if child? and not child._removed
             pressedChild or= child.mouseDown(relLoc.x, relLoc.y)
           break if pressedChild
       return (@_pressed and @clickable) or pressedChild
