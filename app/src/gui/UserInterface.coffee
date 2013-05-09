@@ -875,8 +875,7 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
 
       next = p.nextSend()
-      if next
-        console.log('next: ' + next.toString())
+      if next and @carrierCount == 0
         s = p.location()
         e = next.location()
         m = new MovingElement(s, e, window.config.carrierStyle.speed

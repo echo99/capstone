@@ -29,6 +29,10 @@ class UnitSelection
       @_destroyStacks(units.colonies)
       @_destroyStacks(units.attacks)
       @_destroyStacks(units.defenses)
+      p.unitButtons.probe.close()
+      p.unitButtons.colony.close()
+      p.unitButtons.attack.close()
+      p.unitButtons.defense.close()
     frameElement.removeChild(@totalDisplay)
 
   _destroyStacks: (stacks) ->
@@ -148,8 +152,7 @@ class UnitSelection
       buttonSettings.smallLoc.x, buttonSettings.smallLoc.y,
       buttonSettings.smallW, buttonSettings.smallH,
       () =>
-        if @_countUnits(unitSelection) ==
-           planet.numShips(unit)
+        if @_countUnits(unitSelection) == planet.numShips(unit)
           for row in unitSelection
             for stack in row
               if stack.selected and stack.getCount() > 0
@@ -170,8 +173,7 @@ class UnitSelection
       buttonSettings.bigLoc.x, buttonSettings.bigLoc.y,
       buttonSettings.bigW, buttonSettings.bigH,
       () =>
-        if @_countUnits(unitSelection) ==
-           planet.numShips(unit)
+        if @_countUnits(unitSelection) == planet.numShips(unit)
           for row in unitSelection
             for stack in row
               if stack.selected and stack.getCount() > 0
@@ -635,6 +637,7 @@ class Stack
     gameFrame.addChild(@b)
 
   destroy: ->
+    @count = 0
     gameFrame.removeChild(@b)
 
   clear: ->
