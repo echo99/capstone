@@ -701,6 +701,7 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
+      console.log('number carriers: ' + planet._resourceCarriers.length)
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -873,16 +874,33 @@ class UserInterface
         else if p.buildUnit() == window.config.structures.outpost
           SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
 
+      next = p.nextSend()
+      if next
+        console.log('next: ' + next.toString())
+        s = p.location()
+        e = next.location()
+        m = new MovingElement(s, e, window.config.carrierStyle.speed
+          (ctx, loc) =>
+            ctx.fillStyle = window.config.carrierStyle.color
+            ctx.beginPath()
+            r = window.config.carrierStyle.radius * camera.getZoom()
+            ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI)
+            ctx.fill()
+        )
+
       for c in p._resourceCarriers
-        if @carrierCount == 0 and c.route().length >= 2
-          console.log('route: ' + c.route())
+        if @carrierCount == 0
           s = p.location()
-          e = c.route()[1].location()
-          console.log('new: ' + s.x + ", " + s.y + " -> " + e.x + ", " + e.y)
+          e = c.next().location()
+          if c.route().length >= 2
+            e = c.route()[1].location()
           m = new MovingElement(s, e, window.config.carrierStyle.speed
             (ctx, loc) =>
               ctx.fillStyle = window.config.carrierStyle.color
-              ctx.fillRect(loc.x - 5, loc.y - 5, 10, 10)
+              ctx.beginPath()
+              r = window.config.carrierStyle.radius * camera.getZoom()
+              ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI)
+              ctx.fill()
           )
 
     @carrierCount = (@carrierCount + 1) % window.config.carrierStyle.delay
