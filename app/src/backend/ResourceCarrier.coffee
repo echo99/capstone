@@ -54,6 +54,12 @@ class ResourceCarrier
   resetMoved: ->
     @_hasMoved = false
 
+  # String representation
+  #
+  # @return [String] String representation of the carrier.
+  toString: ->
+    "amount: " + @_amount + "destination: " + @_destination
+
   # ARTIFICIAL INTELLIGENCE #
 
   # Updates the intended path based on a breadth first search

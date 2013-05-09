@@ -35,6 +35,7 @@ class Planet
     @_turnsToComplete = 0
     @_sendingResourcesTo = null
     @_sendingUnitsTo = null
+    @_nextSend = null
     @_visibility = root.config.visibility.undiscovered
 
   # GETTERS #
@@ -337,6 +338,23 @@ class Planet
       throw new Error("Tried to cancel sending resources, no such job.")
     @_sendingResourcesTo = null
 
+  # Returns the planet we are sending resources to.
+  #
+  # @return [Planet] Last planet in supply chain.
+  sendingResourcesTo: ->
+    @_sendingResourcesTo
+
+  # Returns the first planet to send resources to.
+  #
+  # @return [Planet] First planet in supply chain.
+  nextSend: ->
+    if nextSend == null
+      @_nextSend = AI.getPath(@, @_sendResourcesTo)[0]
+    return @_nextSend
+
+  # Sends units to given planet
+  #
+  # @throw [Error] If there is no immediate path.
   sendUnits: (planet) ->
     path = AI.getPath(@, planet)
     if path is []
@@ -544,7 +562,11 @@ class Planet
   # If there is not currently a path without fungus then stops sending.
   #
   resourceSendingUpkeep: ->
+    @_nextSend = null
     if @_sendingResourcesTo == null
+      return
+    if !@_outpost and !@_station
+      @_sendingResourcesTo = null
       return
     path = AI.getPath(@, @_sendingResourcesTo, true)
     if path is []
@@ -554,7 +576,6 @@ class Planet
     amount = root.config.resources.sendRate
     if @_availableResources < amount
       amount = @_availableResources
-    else
     @_availableResources -= amount
     carrier = new ResourceCarrier(amount, @_sendingResourcesTo)
     carrier.updateAi(@)
@@ -581,6 +602,7 @@ class Planet
         @_colonies += group.colonies()
         @_controlGroups = @_controlGroups.filter((g) => g != group)
     for carrier in @_resourceCarriers
+      console.log(carrier.toString())
       carrier.resetMoved()
       if carrier.destination() is @
         @_availableResources += carrier.amount()
