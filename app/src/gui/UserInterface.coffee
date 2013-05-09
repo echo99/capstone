@@ -900,8 +900,6 @@ class UserInterface
         if @carrierCount == 0
           s = p.location()
           e = c.next().location()
-          if c.route().length >= 2
-            e = c.route()[1].location()
           m = new MovingElement(s, e, window.config.carrierStyle.speed
             (ctx, loc) =>
               ctx.fillStyle = window.config.carrierStyle.color
