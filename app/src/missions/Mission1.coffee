@@ -114,6 +114,8 @@ class Mission1 extends Mission
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
+    cameraHudFrame.removeChild(@optionsMenu)
+    frameElement.removeChild(@menuButton)
 
   _initMenus: ->
     @victoryMenu = @createVictoryMenu(
@@ -126,6 +128,11 @@ class Mission1 extends Mission
       () =>
         newMission(Mission1)
     )
+    @optionsMenu = @createOptionMenu(
+      () =>
+        newMission(Mission1)
+    )
+    @menuButton = @createMenuButton(@optionsMenu)
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->

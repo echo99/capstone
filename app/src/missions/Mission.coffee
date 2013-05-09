@@ -42,6 +42,17 @@ class Mission
   # The mission expects this to be called after the end of a turn
   onEndTurn: ->
 
+  createOptionMenu: (onRestart) ->
+    menuBox = @_getMenuBox("Menu", @settings.w, @settings.h,
+                           @settings.textAlign, @settings.vAlign)
+    @_attachRestartButton(menuBox, onRestart)
+    @_attachQuitButton(menuBox)
+    @_attachCloseButton(menuBox)
+
+    cameraHudFrame.addChild(menuBox)
+
+    return menuBox
+
   createVictoryMenu: (onRestart, onNextMission) ->
     menuBox = @_getMenuBox("Victory!", @settings.w, @settings.h,
                            @settings.textAlign, @settings.vAlign)
@@ -65,9 +76,10 @@ class Mission
 
     return menuBox
 
-  _getMenuBox: (message, w, h, ta, va) ->
+  _getMenuBox: (message, w, h, ta, va, close=null) ->
     return new Elements.MessageBox(0, 0, w, h, message,
                                    {
+                                     closeBtn: close
                                      textAlign: ta,
                                      vAlign: va,
                                      visible: false
@@ -120,3 +132,42 @@ class Mission
     )
 
     menu.addChild(nextButton)
+
+  _attachCloseButton: (menu) ->
+    close = @settings.close
+    closeButton = new Elements.Button(close.x, close.y, close.w, close.h)
+    closeButton.setClickHandler(() => menu.close())
+    closeButton.setDrawFunc((ctx) =>
+      loc = menu.getActualLocation(closeButton.x, closeButton.y)
+      SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+    )
+
+    menu.addChild(closeButton)
+    return closeButton
+
+  createMenuButton: (theMenu) ->
+    menu = @settings.menu
+    x = camera.width - menu.w / 2 - 5
+    y = menu.h / 2 + 5
+    menuButton = new Elements.Button(x, y, menu.w, menu.h)
+    menuButton.setClickHandler(() =>
+      console.log('vis: ' + theMenu.visible)
+      if theMenu.visible
+        theMenu.close()
+      else
+        theMenu.open()
+    )
+    menuButton.setMouseUpHandler(() => menuButton.setDirty())
+    menuButton.setMouseDownHandler(() => menuButton.setDirty())
+    menuButton.setMouseOutHandler(() => menuButton.setDirty())
+    menuButton.setDrawFunc((ctx) =>
+      loc = {x: menuButton.x, y: menuButton.y}
+      if menuButton.isPressed()
+        SHEET.drawSprite(SpriteNames.MENU_BUTTON_HOVER, loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.MENU_BUTTON_IDLE, loc.x, loc.y, ctx, false)
+    )
+
+    frameElement.addChild(menuButton)
+
+    return menuButton

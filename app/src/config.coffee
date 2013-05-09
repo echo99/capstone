@@ -50,9 +50,9 @@ root.config =
     xOffset: 15
     yOffset: 30
   carrierStyle:
-    speed: 5
-    delay: 30
-    radius: 5
+    speed: 10
+    delay: 10
+    radius: 7
     color: "rgba(0, 255, 255, 1)"
   connectionStyle:
     normal:
@@ -246,6 +246,8 @@ root.config =
       ['stop_sending_button_idle.png'])
     STOP_SENDING_BUTTON_HOVER: new AnimatedSprite(
       ['stop_sending_button_hover.png'])
+    MENU_BUTTON_IDLE: new AnimatedSprite(['menu_button_idle.png'])
+    MENU_BUTTON_HOVER: new AnimatedSprite(['menu_button_hover.png'])
   Missions:
     w: 244
     h: 60
@@ -265,6 +267,14 @@ root.config =
       x: 183
       y: 45
       w: 101
+      h: 20
+    close:
+      x: 232
+      y: 12
+      w: 16
+      h: 16
+    menu:
+      w: 50
       h: 20
     #one:
     two:

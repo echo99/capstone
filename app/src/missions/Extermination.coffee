@@ -41,6 +41,8 @@ class Extermination extends Mission
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
+    cameraHudFrame.removeChild(@optionsMenu)
+    frameElement.removeChild(@menuButton)
 
   _initMenus: ->
     @victoryMenu = @createVictoryMenu(
@@ -56,6 +58,11 @@ class Extermination extends Mission
         console.log('restart extermination')
         newMission(Extermination)
     )
+    @optionsMenu = @createOptionMenu(
+      () =>
+        newMission(Extermination)
+    )
+    @menuButton = @createMenuButton(@optionsMenu)
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->

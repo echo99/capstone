@@ -247,7 +247,7 @@ class UserInterface
     frameElement.addChild(@turnCounter)
 
     # TODO: remove when done with beta
-    @beta = new Elements.BoxElement(camera.width - 5, 5, 0, 20)
+    @beta = new Elements.BoxElement(camera.width - 5, 25, 0, 20)
     clearBeta = (ctx) =>
       w = ctx.measureText("Beta").width + 5
       h = @beta.h
