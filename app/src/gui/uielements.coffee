@@ -301,8 +301,8 @@ class Elements.GameFrame extends Elements.UIElement
       for child in children
         if child?
           coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
-          if @camera.onScreen(coords)
-            child.draw(@ctx, coords, @camera.getZoom(), true)
+          # if @camera.onScreen(coords)
+          child.draw(@ctx, coords, @camera.getZoom(), true)
 
 
 # A class for holding text
