@@ -399,7 +399,7 @@ root.config =
       attack: .5
       defense: 0
       growthPerTurn: 0
-      growthChancePerTurn: 0.5
+      growthChancePerTurn: 0.2
   structures:
     outpost:
       cost: 1
@@ -425,17 +425,18 @@ root.config =
     size: 3
   minimumPlanetDistance: 500
   maximumAdjacencyDistance: 800
-  minimumFungusDistance: 1000
-  fungusInitialStrength: 6
+  minimumFungusDistance: 5000
+  fungusInitialStrength: 1
+  numberOfPlanetsInExterminate: 100
   resources:
     homePlanetResources: 40
     homePlanetRate: 2
-    meanResources: 20
-    stdevResources: 40
+    meanResources: 30
+    stdevResources: 90
     maxResources: 80
     minResources: 5
     meanRate: 1
-    stdevRate: 4
+    stdevRate: 15
     maxRate: 5
     minRate: 1
     sendRate: 5

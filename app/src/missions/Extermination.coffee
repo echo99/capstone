@@ -19,7 +19,7 @@ class Extermination extends Mission
     newGame(10000, 10000)
 
     # Create planets:
-    @home = game.setup(30)
+    @home = game.setup(root.config.numberOfPlanetsInExterminate)
     @home.addStation()
 
     # Test stuff
