@@ -49,6 +49,10 @@ root.config =
     color: "rgba(255, 255, 255, 1)"
     xOffset: 15
     yOffset: 30
+  carrierStyle:
+    speed: 5
+    delay: 30
+    color: "rgba(0, 255, 255, 1)"
   connectionStyle:
     normal:
       stroke: "rgba(128, 128, 128, 0.5)"

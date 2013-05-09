@@ -14,6 +14,7 @@ class UserInterface
   hoveredGroup: null
   turns: 0
   lookingToSendResources: false
+  carrierCount: 0
 
   # Creates a new UserInterface
   constructor: () ->
@@ -700,14 +701,6 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
-      ###
-      s = planet.location()
-      e = {x: s.x, y: s.y - 500}
-      m = new MovingElement(s, e, 5,
-        (ctx, loc) =>
-          ctx.fillRect(loc.x, loc.y, 20, 20)
-      )
-      ###
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -879,6 +872,20 @@ class UserInterface
           SHEET.drawSprite(SpriteNames.STATION_NOT_GATHERING, loc.x, loc.y, ctx)
         else if p.buildUnit() == window.config.structures.outpost
           SHEET.drawSprite(SpriteNames.OUTPOST_CONSTRUCTION, loc.x, loc.y, ctx)
+
+      for c in p._resourceCarriers
+        if @carrierCount == 0 and c.route().length >= 2
+          console.log('route: ' + c.route())
+          s = p.location()
+          e = c.route()[1].location()
+          console.log('new: ' + s.x + ", " + s.y + " -> " + e.x + ", " + e.y)
+          m = new MovingElement(s, e, window.config.carrierStyle.speed
+            (ctx, loc) =>
+              ctx.fillStyle = window.config.carrierStyle.color
+              ctx.fillRect(loc.x - 5, loc.y - 5, 10, 10)
+          )
+
+    @carrierCount = (@carrierCount + 1) % window.config.carrierStyle.delay
 
     @unitSelection.draw(ctx, hudCtx)
 
@@ -1261,9 +1268,7 @@ class MovingElement
     @distanceMoved = 0
     @current = start
     vec = {x: @end.x - start.x, y: @end.y - start.y}
-    console.log('vec: ' + vec.x + ", " + vec.y)
     @length = Math.sqrt(vec.x*vec.x + vec.y*vec.y)
-    console.log("length: " + @length)
     @dir = {x: vec.x / @length * @speed, y: vec.y / @length * @speed}
     @element = new Elements.BoxElement(@current.x, @current.y, 0, 0)
     @element.setDrawFunc(@draw)
@@ -1284,7 +1289,4 @@ class MovingElement
 
     @distanceMoved += @speed
     if @distanceMoved > @length
-      console.log("destroy")
-      console.log(@distanceMoved + ", " + @length)
-      #gameFrame.removeChild(@element)
       @element.destroy()
