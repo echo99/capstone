@@ -287,8 +287,8 @@ root.config =
       x: -400
       y: -750
       menu:
-        w: 300
-        h: 140
+        w: 400
+        h: 120
         message: "Mission 1\n\nGoal: Rescue the attack ships and eliminate " +
                  "all fungus in the area. Don't lose all your probes or " +
                  "attack ships."
@@ -298,21 +298,21 @@ root.config =
         lineHeight: 19
         cancel:
           x: 245
-          y: 125
+          y: 105
           w: 60
           h: 20
         start:
           x: 145
-          y: 125
+          y: 105
           w: 101
           h: 20
     mission2:
       x: 0
       y: -800
       menu:
-        w: 300
+        w: 400
         h: 100
-        message: "Mission 2\n\nGoal:"
+        message: "Mission 2\n\nGoal: **This mission has not been implemented yet**"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
@@ -331,9 +331,9 @@ root.config =
       x: 0
       y: -800
       menu:
-        w: 300
+        w: 400
         h: 100
-        message: "Mission 3\n\nGoal:"
+        message: "Mission 3\n\nGoal: **This mission has not been implemented yet**"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
@@ -353,21 +353,22 @@ root.config =
       y: 150
       menu:
         w: 400
-        h: 100
+        h: 150
         message: "Extermination\n\nGoal: Exterminate all fungus before it " +
-                 "exterminates you."
+                 "exterminates you.\n\nNote: It is recommended that you complete " +
+                 "the missions before attempting this"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
         lineHeight: 15
         cancel:
           x: 345
-          y: 85
+          y: 135
           w: 60
           h: 20
         start:
           x: 245
-          y: 85
+          y: 135
           w: 101
           h: 20
   units:
