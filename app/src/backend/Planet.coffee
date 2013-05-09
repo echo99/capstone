@@ -550,6 +550,7 @@ class Planet
     rate = root.config.resources.sendRate
     if @_availableResources < rate
       rate = @_availableResources
+    else
     @_availableResources -= rate
     carrier = new ResourceCarrier(rate, @_sendingResourcesTo)
     carrier.updateAi(@)
@@ -576,10 +577,10 @@ class Planet
         @_colonies += group.colonies()
         @_controlGroups = @_controlGroups.filter((g) => g != group)
     for carrier in @_resourceCarriers
-      console.log(@_resourceCarriers)
       carrier.resetMoved()
       if carrier.destination() is @
         @_availableResources += carrier.amount()
+        @_availableResources = @_availableResources.filter((c) => c != carrier)
 
   # Visibility upkeep method.
   # Updates visibility status and last-known values to reflect planet
@@ -713,7 +714,7 @@ class Planet
       carrier.setMoved()
       if !(carrier.destination() is @)
         carrier.next().receiveCarrier(carrier)
-        @_controlcarriers = @_controlCarriers.filter((c) => c != carrier)
+        @_resourceCarriers = @_resourceCarriers.filter((c) => c != carrier)
 
   # Adds a given group to the current planet
   #
