@@ -73,6 +73,9 @@ KeyCodes =
   MINUS: 189 # zoom out
   ADD: 107 # zoom in
   SUB: 109 # zoom out
+  CHEAT: 67
+
+cheat = false
 
 currentTime = ->
   new Date().getTime()
@@ -365,8 +368,8 @@ main = ->
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
       game.endTurn()
-      CurrentMission.onEndTurn()
       UI.endTurn()
+      CurrentMission.onEndTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
       nz = camera.getZoom() + window.config.ZOOM_SPEED
       console.log('zoom in to ' + nz)
@@ -374,6 +377,8 @@ main = ->
     else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
       nz = camera.getZoom() - window.config.ZOOM_SPEED
       camera.setZoom(nz)
+    else if e.keyCode == KeyCodes.CHEAT
+      cheat = not cheat
   )
 
   # Catch accidental leaving
