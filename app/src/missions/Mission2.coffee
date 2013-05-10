@@ -196,7 +196,8 @@ class Mission2 extends Mission
           'eventAction': 'Complete',
           'eventLabel': 'Victory',
           'dimension1': 'Mission 2',
-          'metric5': 1
+          'metric5': 1,
+          'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
@@ -219,7 +220,8 @@ class Mission2 extends Mission
           'eventAction': 'Complete'
           'eventLabel': 'Fail'
           'dimension1': 'Mission 2',
-          'metric6': 1
+          'metric6': 1,
+          'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
