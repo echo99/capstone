@@ -325,7 +325,8 @@ class Planet
       if @_unitConstructing == root.config.structures.outpost
         @_probes++
         @_colonies++
-      @_availableResources += @_unitConstructing.cost
+      else
+        @_availableResources += @_unitConstructing.cost
       @_unitConstructing = null
       @_turnsToComplete = 0
 
