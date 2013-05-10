@@ -621,6 +621,7 @@ class Planet
       return
     if (!@_outpost and !@_station) or @_availableResources == 0
       @_sendingResourcesTo = null
+      @_nextSend = null
       return
     path = AI.getPath(@, @_sendingResourcesTo, true)
     if path is []
@@ -634,6 +635,9 @@ class Planet
     carrier = new ResourceCarrier(amount, @_sendingResourcesTo)
     carrier.updateAi(@)
     @_resourceCarriers.push(carrier)
+    if @_resources == 0
+      @_sendingResourcesTo = null
+      @_nextSend = null
 
   # Movement phase 1.
   # Moves control groups.
