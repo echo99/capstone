@@ -1292,20 +1292,6 @@ class UserInterface
         b.close()
       else
         b.open()
-    if @stationMenu.visisble
-      @stationMenu.setDirty()
-    if @outpostMenu.visible
-      if @selectedPlanet.hasStation()
-        @outpostMenu.close()
-        @stationMenu.open()
-      else
-        @outpostMenu.setDirty()
-    if @colonyMenu.visible
-      if @selectedPlanet.hasOutpost()
-        @colonyMenu.close()
-        @outpostMenu.open()
-      else
-        @colonyMenu.setDirty()
 
     if @selectedPlanet
       if not @selectedPlanet.hasStation() and @stationMenu.visible
@@ -1322,6 +1308,22 @@ class UserInterface
         @outpostMenu.close()
       else if @colonyMenu.visible
         @colonyMenu.close()
+
+    if @stationMenu.visisble
+      @stationMenu.setDirty()
+    if @outpostMenu.visible
+      if @selectedPlanet.hasStation()
+        @outpostMenu.close()
+        @stationMenu.open()
+      else
+        @outpostMenu.setDirty()
+    if @colonyMenu.visible
+      if @selectedPlanet.hasOutpost()
+        @colonyMenu.close()
+        @outpostMenu.open()
+      else
+        @colonyMenu.setDirty()
+
 
     @hoveredGroup = null
 
