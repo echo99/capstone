@@ -1,10 +1,13 @@
 #_require Mission
 
 class Mission1 extends Mission
-  foundA1 = false
-  foundA2 = false
   # @see Mission#reset
   reset: ->
+    @foundA1 = false
+    @foundA2 = false
+    @failures = {not_failed: -1, no_probe: 0, no_ships: 1}
+    @failure = @failures.not_failed
+
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
@@ -136,6 +139,20 @@ class Mission1 extends Mission
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
+    switch @failure
+      when @failures.no_probe
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.font = window.config.windowStyle.defaultText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.color
+        ctx.fillText("No more probes", camera.width / 2, camera.height / 2 + 50)
+      when @failures.no_ships
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.font = window.config.windowStyle.defaultText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.color
+        ctx.fillText("No more attack ships",
+                     camera.width / 2, camera.height / 2 + 50)
 
   # @see Mission#onMouseMove
   onMouseMove: (x, y) ->
@@ -200,6 +217,10 @@ class Mission1 extends Mission
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
+      if not hasProbe
+        @failure = @failures.no_probe
+      else if not hasAttackShips
+        @failure = @failures.no_ships
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
