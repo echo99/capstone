@@ -422,6 +422,8 @@ class Planet
       if @_resources > 0
         @_availableResources += @_rate
         @_resources -= @_rate
+    if @_resources < 0
+      @_resources = 0
 
   # Fungus growth phase 1.
   # Determines growth and sporing for next turn.
