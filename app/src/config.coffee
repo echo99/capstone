@@ -203,6 +203,8 @@ root.config =
       costLoc: {x: 10, y: 70+10+20}
       turnsLoc: {x: 10 + 90, y: 70+10+20}
       imgLoc: {x: 170, y: 70+10+40}
+    cancelLoc: {x: 60, y: 90}
+    cancelSize: {w: 60, h: 20}
   planetRadius: 64
   buttonSpacing: 5
   spriteNames:

@@ -151,7 +151,6 @@ class Mission
     y = menu.h / 2 + 5
     menuButton = new Elements.Button(x, y, menu.w, menu.h)
     menuButton.setClickHandler(() =>
-      console.log('vis: ' + theMenu.visible)
       if theMenu.visible
         theMenu.close()
       else

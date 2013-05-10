@@ -136,7 +136,6 @@ class UserInterface
     cancelConstS.setProperty("location",
       @outpostMenu.getActualLocation(cancelConstS.x, cancelConstS.y))
     cancelConstS.setClickHandler(() =>
-      console.log("cancel station upgrade not yet implemented")
       @selectedPlanet.cancelConstruction()
     )
     cancelConstS.setDrawFunc((ctx) =>
@@ -158,7 +157,6 @@ class UserInterface
     outpostSend.setProperty("location",
       @outpostMenu.getActualLocation(outpostSend.x, outpostSend.y))
     outpostSend.setClickHandler(() =>
-      console.log('sending resources not yet implemented')
       @selectedPlanet.sending = true
       @lookingToSendResources = true
     )
@@ -181,7 +179,6 @@ class UserInterface
     outpostStop.setProperty("location",
       @outpostMenu.getActualLocation(outpostStop.x, outpostStop.y))
     outpostStop.setClickHandler(() =>
-      console.log('stop sending resources not yet implemented')
       @selectedPlanet.sending = false
       if not @lookingToSendResources
         @selectedPlanet.stopSendingResources()
@@ -224,7 +221,34 @@ class UserInterface
     h = (colonyStyle.height - winStyle.lineWidth / 2) - y
     @outpostButton = @_getStationButton(x, y, w, h,
                                        window.config.structures.outpost, true)
+    x = colonyStyle.cancelLoc.x
+    y = colonyStyle.cancelLoc.y
+    w = colonyStyle.cancelSize.w
+    h = colonyStyle.cancelSize.h
+    cancelConstO = new Elements.Button(x, y, w, h)
+    cancelConstO.setProperty("location",
+      @colonyMenu.getActualLocation(cancelConstO.x, cancelConstO.y))
+    cancelConstO.setClickHandler(() =>
+      @selectedPlanet.cancelConstruction()
+      @endTurn()
+      @turns--
+    )
+    cancelConstO.setDrawFunc((ctx) =>
+      loc = cancelConstO.getProperty("location")
+      console.log('draw')
+      if cancelConstO.isPressed()
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    cancelConstO.visible = false
+
     @colonyMenu.addChild(@outpostButton)
+    @colonyMenu.addChild(cancelConstO)
+    @colonyMenu.setProperty("cancelButton", cancelConstO)
+    @colonyMenu.setProperty("cancelOpen", false)
     @colonyMenu.visible = false
     frameElement.addChild(@colonyMenu)
 
@@ -670,6 +694,15 @@ class UserInterface
     y = loc.y + colonyStyle.availableLoc.y
     ctx.fillText(probes, x, y)
 
+    if @selectedPlanet.buildUnit()
+      if not @colonyMenu.getProperty("cancelOpen")
+        @colonyMenu.getProperty("cancelButton").open()
+        @colonyMenu.setProperty("cancelOpen", true)
+    else
+      if @colonyMenu.getProperty("cancelOpen")
+        @colonyMenu.getProperty("cancelButton").close()
+        @colonyMenu.setProperty("cancelOpen", false)
+
   # Must be called after newGame(...) or game.endTurn() for settings to be
   # correct on first turn.
   initialize: (onlyProbe=false, @moveToDiscovered=true, @showResources=true) ->
@@ -697,6 +730,9 @@ class UserInterface
     @showAll = false
 
   destroy: () ->
+    @selectedPlanet = null
+    @endTurn()
+
     for b in @planetButtons
       gameFrame.removeChild(b)
     @planetButtons = []
@@ -705,7 +741,6 @@ class UserInterface
       c.destroy()
     for g in @_groupDisplays
       g.destroy()
-
     for e in @movingElements
       e.destroy()
 
@@ -1275,14 +1310,18 @@ class UserInterface
     if @selectedPlanet
       if not @selectedPlanet.hasStation() and @stationMenu.visible
         @stationMenu.close()
-        #@selectedPlanet = null
       else if not @selectedPlanet.hasOutpost() and @outpostMenu.visible
         @outpostMenu.close()
-        #@selectedPlanet = null
       else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
               @colonyMenu.visible
         @colonyMenu.close()
-        #@selectedPlanet = null
+    else
+      if @stationMenu.visible
+        @stationMenu.close()
+      else if @outpostMenu.visible
+        @outpostMenu.close()
+      else if @colonyMenu.visible
+        @colonyMenu.close()
 
     @hoveredGroup = null
 
