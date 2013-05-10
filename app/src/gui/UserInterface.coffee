@@ -581,7 +581,8 @@ class UserInterface
         @outpostMenu.getProperty("cancelButton").close()
         @outpostMenu.setProperty("cancelOpen", false)
 
-    if @selectedPlanet.buildUnit()
+    if @selectedPlanet.buildUnit() or (@selectedPlanet.availableResources() == 0 and
+       @selectedPlanet.resources() == 0)
       if @outpostMenu.getProperty("sendOpen")
         @outpostMenu.getProperty("sendButton").close()
         @outpostMenu.setProperty("sendOpen", false)
