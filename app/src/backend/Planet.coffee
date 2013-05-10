@@ -668,7 +668,7 @@ class Planet
   visibilityUpkeep: ->
     @_nextSend = null
     # If it has probes:
-    if @_probes > 0 or
+    if @hasProbes() or
        @_attackShips > 0 or
        @_defenseShips > 0 or
        @_colonies or
@@ -825,12 +825,23 @@ class Planet
         total++
     return total
 
+   # Returns true if this planet contains probes including control groups.
+  #
+  # @return [Bool] Whether or not this planet contains probes.
+  hasProbes: ->
+    if @_probes > 0
+      return true
+    for group in @_controlGroups
+      if group.probes() > 0
+        return true
+    return false
+
   # Returns true if any adjacent planets contain probes.
   #
   # @return [Bool] Whether or not any adjacent planets contain probes.
   neighborsHaveProbes: ->
     for planet in @_adjacentPlanets
-      if planet.numShips(root.config.units.probe) > 0
+      if planet.hasProbes()
         return true
     return false
 
