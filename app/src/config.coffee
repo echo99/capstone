@@ -296,8 +296,8 @@ root.config =
       h: 20
     #one:
     two:
-      startingProbes: 6
-      startingColonyShips: 4
+      startingProbes: 7
+      startingColonyShips: 5
       startingAttackShips: 10
       resourceGoal: 50
     three:
@@ -316,13 +316,14 @@ root.config =
       y: -750
       menu:
         w: 400
-        h: 270
+        h: 290
         message: "Mission 1\n\n" +
-                 "We lost communications with scouting a party. We're giving " +
-                 "you a probe to go check out the area. Try to bring anyone you " +
-                 "find back safely, and be sure to eliminate any fungus hanging " +
-                 "around. Oh, and please don't lose the probe, it's the only one " +
-                 "we have right now.\n\n" +
+                 "We lost communications with scouting a party. They had several " +
+                 "attack ships which we would rather not lose so we're giving " +
+                 "you a probe to go check out the area. Try to bring any ships " +
+                 "you find back safely, and be sure to exterminate any fungus " +
+                 "hanging around. Oh, and please don't lose the probe, it's the " +
+                 "only one we have right now.\n\n" +
                  "Tasks:\n" +
                  "  - Rescue at least one ship\n" +
                  "  - Eliminate all fungus\n" +
@@ -333,12 +334,12 @@ root.config =
         lineHeight: 19
         cancel:
           x: 245
-          y: 270 - 15
+          y: 290 - 15
           w: 60
           h: 20
         start:
           x: 145
-          y: 270 - 15
+          y: 290 - 15
           w: 101
           h: 20
     mission2:
@@ -346,20 +347,33 @@ root.config =
       y: -800
       menu:
         w: 400
-        h: 100
-        message: "Mission 2\n\nGoal: **This mission has not been implemented yet**"
+        h: 365
+        message: "Mission 2\n\n" +
+                 "Many of our other scouting missions were successful and we " +
+                 "now have several ships available. However we are very low on " +
+                 "resources. We're giving you some colony ships and sending you " +
+                 "to an area of low fungus activity. Use the colony ships to " +
+                 "make outposts to gather resources, about 50 should do for " +
+                 "now.\n\n" +
+                 "We've outfitted your probes with scanners that can tell you " +
+                 "how many resources you can gather from a planet and how fast " +
+                 "they can be collected. Unfortunely the scanners are very short " +
+                 "range, but after your success with the last mission we are " +
+                 "confident you'll manage.\n\n" +
+                 "Tasks:\n" +
+                 "  - Gather a total of 50 resources"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
         lineHeight: 19
         cancel:
           x: 245
-          y: 85
+          y: 365 - 15
           w: 60
           h: 20
         start:
           x: 145
-          y: 85
+          y: 365 - 15
           w: 101
           h: 20
     mission3:
@@ -367,20 +381,23 @@ root.config =
       y: -800
       menu:
         w: 400
-        h: 100
-        message: "Mission 3\n\nGoal: **This mission has not been implemented yet**"
+        h: 200
+        message: "Mission 3\n\n" +
+                 "**This mission has not been implemented yet**\n\n" +
+                 "Tasks:\n" +
+                 "  - ??"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
         lineHeight: 19
         cancel:
           x: 245
-          y: 85
+          y: 200 - 15
           w: 60
           h: 20
         start:
           x: 145
-          y: 85
+          y: 200 - 15
           w: 101
           h: 20
     extermination:
@@ -389,21 +406,23 @@ root.config =
       menu:
         w: 400
         h: 150
-        message: "Extermination\n\nGoal: Exterminate all fungus before it " +
-                 "exterminates you.\n\nNote: It is recommended that you complete " +
-                 "the missions before attempting this"
+        message: "Extermination\n\n" +
+                 "Task:\n" +
+                 "  - Exterminate all fungus before it exterminates you.\n\n" +
+                 "Note: It is recommended that you complete the missions before " +
+                 "attempting this."
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
         lineHeight: 15
         cancel:
-          x: 345
-          y: 135
+          x: 245
+          y: 150 - 15
           w: 60
           h: 20
         start:
-          x: 245
-          y: 135
+          x: 145
+          y: 150 - 15
           w: 101
           h: 20
   units:
