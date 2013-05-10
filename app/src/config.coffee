@@ -316,22 +316,29 @@ root.config =
       y: -750
       menu:
         w: 400
-        h: 120
-        message: "Mission 1\n\nGoal: Rescue the attack ships and eliminate " +
-                 "all fungus in the area. Don't lose all your probes or " +
-                 "attack ships."
+        h: 270
+        message: "Mission 1\n\n" +
+                 "We lost communications with scouting a party. We're giving " +
+                 "you a probe to go check out the area. Try to bring anyone you " +
+                 "find back safely, and be sure to eliminate any fungus hanging " +
+                 "around. Oh, and please don't lose the probe, it's the only one " +
+                 "we have right now.\n\n" +
+                 "Tasks:\n" +
+                 "  - Rescue at least one ship\n" +
+                 "  - Eliminate all fungus\n" +
+                 "  - Don't lose your probe."
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
         lineHeight: 19
         cancel:
           x: 245
-          y: 105
+          y: 270 - 15
           w: 60
           h: 20
         start:
           x: 145
-          y: 105
+          y: 270 - 15
           w: 101
           h: 20
     mission2:
