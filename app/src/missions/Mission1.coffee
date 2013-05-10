@@ -18,7 +18,7 @@ class Mission1 extends Mission
     # Create planets:
     newGame(10000, 10000)
     @home = new Planet(0,0)
-    @home.addShips(window.config.units.probe, 2)
+    @home.addShips(window.config.units.probe, 1)
     game.addPlanet(@home)
 
     @a1 = new Planet(-1000, -1000)
@@ -150,10 +150,14 @@ class Mission1 extends Mission
   onEndTurn: ->
     if @a1.visibility() == window.config.visibility.visible and not @foundA1
       @foundA1 = true
-      @a1.addShips(window.config.units.attackShip, 2)
+      @a1.addShips(window.config.units.attackShip, 1)
+      UI.endTurn()
+      UI.turns--
     if @a2.visibility() == window.config.visibility.visible and not @foundA2
       @foundA2 = true
-      @a2.addShips(window.config.units.attackShip, 4)
+      @a2.addShips(window.config.units.attackShip, 2)
+      UI.endTurn()
+      UI.turns--
 
     hasFungus = false
     hasProbe = false
