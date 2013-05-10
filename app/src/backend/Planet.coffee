@@ -295,7 +295,6 @@ class Planet
       @_unitConstructing = root.config.structures.station
       @_turnsToComplete = root.config.structures.station.turns
       @_availableResources -= root.config.structures.station.cost
-      @_outpost = false
     else
       throw new Error("Invalid outpost construction -" +
                     " resources: " + @_availableResources +
@@ -590,7 +589,9 @@ class Planet
         if unit.isStructure
           switch unit
             when root.config.structures.outpost then @_outpost = true
-            when root.config.structures.station then @_station = true
+            when root.config.structures.station
+              @_station = true
+              @_outpost = false
             when root.config.structures.warpgate then @_warpgate = true
             else throw new Error("Invalid structure, it ain't one.")
         else
