@@ -647,7 +647,7 @@ class Planet
   movementUpkeep2: ->
     for group in @_controlGroups
       group.resetMoved()
-      if group.destination() is @
+      if (group.destination() is @) or @.fungusOnPlanet()
         @_attackShips += group.attackShips()
         @_defenseShips += group.defenseShips()
         @_probes += group.probes()
