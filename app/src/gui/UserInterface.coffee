@@ -802,12 +802,12 @@ class UserInterface
       # Draw planet
       vis = p.visibility()
       if vis == window.config.visibility.discovered
-        if p.fungusStrength() > 0
+        if p._lastSeenFungus
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
       else if vis == window.config.visibility.visible
-        if p.fungusStrength() > 0
+        if p._lastSeenFungus
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
@@ -845,6 +845,17 @@ class UserInterface
           ctx.fillText(tRes, pos.x+offset, pos.y)
           ctx.fillText(tRat, pos.x+offset, pos.y+20)
 
+      if p._lastSeenFungus
+        ctx.font = window.config.windowStyle.titleText.font
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = window.config.windowStyle.defaultText.red
+        offset = 60 * camera.getZoom()
+        if vis == window.config.visibility.visible
+          ctx.fillText(p.fungusStrength(), pos.x+offset, pos.y-offset)
+        else #if vis == window.config.visibility.discovered
+          ctx.fillText("?", pos.x+offset, pos.y-offset)
+      ###
       if vis == window.config.visibility.visible and p.fungusStrength() > 0
         ctx.font = window.config.windowStyle.titleText.font
         ctx.textAlign = 'left'
@@ -852,6 +863,7 @@ class UserInterface
         ctx.fillStyle = window.config.windowStyle.defaultText.red
         offset = 60 * camera.getZoom()
         ctx.fillText(p.fungusStrength(), pos.x+offset, pos.y-offset)
+      ###
 
       # Draw structure
       if p.hasOutpost()
