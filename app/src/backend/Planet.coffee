@@ -619,7 +619,7 @@ class Planet
   resourceSendingUpkeep: ->
     if @_sendingResourcesTo == null
       return
-    if !@_outpost and !@_station
+    if (!@_outpost and !@_station) or @_availableResources == 0
       @_sendingResourcesTo = null
       return
     path = AI.getPath(@, @_sendingResourcesTo, true)
