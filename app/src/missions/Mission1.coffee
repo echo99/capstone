@@ -11,9 +11,9 @@ class Mission1 extends Mission
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'Mission',
+      'eventCategory': 'Mission 1',
       'eventAction': 'Start'
-      'eventLabel': 'Mission 1'
+      #'eventLabel': 'Mission 1'
       'dimension1': 'Mission 1',
       'metric1': 1
     })
@@ -200,18 +200,18 @@ class Mission1 extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission',
-          'eventAction': 'Victory',
-          'eventLabel': 'Mission 1',
+          'eventCategory': 'Mission 1',
+          'eventAction': 'Complete',
+          'eventLabel': 'Victory',
           'dimension1': 'Mission 1',
           'metric5': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson',
-          'timingVar': 'Victory',
+          'timingCategory': 'Misson 1',
+          'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
-          'timingLabel': 'Mission 1'
+          'timingLabel': 'Victory'
         })
       @gameEnded = true
       UI.endGame()
@@ -225,18 +225,18 @@ class Mission1 extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission',
-          'eventAction': 'Fail'
-          'eventLabel': 'Mission 1'
+          'eventCategory': 'Mission 1',
+          'eventAction': 'Complete'
+          'eventLabel': 'Fail'
           'dimension1': 'Mission 1',
           'metric6': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson',
-          'timingVar': 'Fail',
+          'timingCategory': 'Misson 1',
+          'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
-          'timingLabel': 'Mission 1'
+          'timingLabel': 'Fail'
         })
       @gameEnded = true
       UI.endGame()

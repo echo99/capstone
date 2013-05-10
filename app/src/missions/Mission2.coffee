@@ -9,9 +9,9 @@ class Mission2 extends Mission
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'Mission',
+      'eventCategory': 'Mission 2',
       'eventAction': 'Start'
-      'eventLabel': 'Mission 2'
+      #'eventLabel': 'Mission 2'
       'dimension1': 'Mission 2',
       'metric1': 1
     })
@@ -121,8 +121,7 @@ class Mission2 extends Mission
       () =>
         newMission(Mission2)
       () =>
-        # TODO: save progress
-        newMission(Mission2)
+        newMission(Menu)
     )
     @failMenu = @createFailMenu(
       () =>
@@ -184,8 +183,6 @@ class Mission2 extends Mission
           hasProbe = true
         if g.colonies() > 0
           hasColonyShip = true
-    console.log('has probe: ' + hasProbe)
-    console.log('has colony: ' + hasColonyShip)
 
     if totalResources >= @settings2.resourceGoal
       current = localStorage["progress"]
@@ -195,18 +192,18 @@ class Mission2 extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission',
-          'eventAction': 'Victory',
-          'eventLabel': 'Mission 2',
+          'eventCategory': 'Mission 2',
+          'eventAction': 'Complete',
+          'eventLabel': 'Victory',
           'dimension1': 'Mission 2',
           'metric5': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson',
-          'timingVar': 'Victory',
+          'timingCategory': 'Misson 2',
+          'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
-          'timingLabel': 'Mission 2'
+          'timingLabel': 'Victory'
         })
       @gameEnded = true
       UI.endGame()
@@ -218,18 +215,18 @@ class Mission2 extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission',
-          'eventAction': 'Fail'
-          'eventLabel': 'Mission 2'
+          'eventCategory': 'Mission 2',
+          'eventAction': 'Complete'
+          'eventLabel': 'Fail'
           'dimension1': 'Mission 2',
           'metric6': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson',
-          'timingVar': 'Fail',
+          'timingCategory': 'Misson 2',
+          'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
-          'timingLabel': 'Mission 2'
+          'timingLabel': 'Fail'
         })
       @gameEnded = true
       UI.endGame()

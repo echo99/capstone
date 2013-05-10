@@ -4,7 +4,7 @@
 # This mission acts as our games main menu
 class Menu extends Mission
   settings: window.config.MainMenu
-  numMissions: 1
+  numMissions: 2
   # @see Mission#reset
   reset: ->
     # Load user progress

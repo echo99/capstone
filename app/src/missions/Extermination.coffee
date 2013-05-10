@@ -9,9 +9,9 @@ class Extermination extends Mission
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'Mission',
+      'eventCategory': 'Extermination',
       'eventAction': 'Start'
-      'eventLabel': 'Extermination'
+      #'eventLabel': 'Extermination'
       'dimension1': 'Extermination',
       'metric1': 1
     })
@@ -101,18 +101,18 @@ class Extermination extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission',
-          'eventAction': 'Victory',
-          'eventLabel': 'Extermination',
+          'eventCategory': 'Extermination',
+          'eventAction': 'Complete',
+          'eventLabel': 'Victory',
           'dimension1': 'Extermination',
           'metric5': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson',
-          'timingVar': 'Victory',
+          'timingCategory': 'Extermination',
+          'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
-          'timingLabel': 'Extermination'
+          'timingLabel': 'Victory'
         })
       @gameEnded = true
       UI.endGame()
@@ -123,18 +123,18 @@ class Extermination extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission',
-          'eventAction': 'Fail',
-          'eventLabel': 'Extermination',
+          'eventCategory': 'Extermination',
+          'eventAction': 'Complete',
+          'eventLabel': 'Fail',
           'dimension1': 'Extermination',
           'metric6': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson',
-          'timingVar': 'Fail',
+          'timingCategory': 'Extermination',
+          'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
-          'timingLabel': 'Extermination'
+          'timingLabel': 'Fail'
         })
       @gameEnded = true
       UI.endGame()
