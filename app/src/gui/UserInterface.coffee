@@ -16,6 +16,7 @@ class UserInterface
   lookingToSendResources: false
   carrierCount: 0
   movingElements: []
+  showAll: false
 
   # Creates a new UserInterface
   constructor: () ->
@@ -693,6 +694,7 @@ class UserInterface
     @unitSelection.initialize(onlyProbe)
     @controlGroups = []
     @_groupDisplays = []
+    @showAll = false
 
   destroy: () ->
     for b in @planetButtons
@@ -776,7 +778,7 @@ class UserInterface
       pos = camera.getScreenCoordinates(p.location())
       visited.push(p)
       for neighbor in p.getAdjacentPlanets()
-        if cheat or (neighbor not in visited and
+        if cheat or @showAll or (neighbor not in visited and
            p.visibility() != window.config.visibility.undiscovered and
            neighbor.visibility() != window.config.visibility.undiscovered)
           # draw connection to the neighbor
@@ -801,13 +803,14 @@ class UserInterface
       pos = camera.getScreenCoordinates(loc)
       # Draw planet
       vis = p.visibility()
-      if vis == window.config.visibility.discovered
+      if vis == window.config.visibility.discovered and not @showAll
         if p._lastSeenFungus
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
-      else if vis == window.config.visibility.visible
-        if p._lastSeenFungus
+      else if vis == window.config.visibility.visible or @showAll
+        if (@showAll and p.fungusStrength() > 0) or
+           (p._lastSeenFungus and not @showAll)
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
@@ -845,25 +848,17 @@ class UserInterface
           ctx.fillText(tRes, pos.x+offset, pos.y)
           ctx.fillText(tRat, pos.x+offset, pos.y+20)
 
-      if p._lastSeenFungus
+      if (@showAll and p.fungusStrength() > 0) or
+         (p._lastSeenFungus and not @showAll)
         ctx.font = window.config.windowStyle.titleText.font
         ctx.textAlign = 'left'
         ctx.textBaseline = 'middle'
         ctx.fillStyle = window.config.windowStyle.defaultText.red
         offset = 60 * camera.getZoom()
-        if vis == window.config.visibility.visible
+        if vis == window.config.visibility.visible or @showAll
           ctx.fillText(p.fungusStrength(), pos.x+offset, pos.y-offset)
-        else #if vis == window.config.visibility.discovered
+        else
           ctx.fillText("?", pos.x+offset, pos.y-offset)
-      ###
-      if vis == window.config.visibility.visible and p.fungusStrength() > 0
-        ctx.font = window.config.windowStyle.titleText.font
-        ctx.textAlign = 'left'
-        ctx.textBaseline = 'middle'
-        ctx.fillStyle = window.config.windowStyle.defaultText.red
-        offset = 60 * camera.getZoom()
-        ctx.fillText(p.fungusStrength(), pos.x+offset, pos.y-offset)
-      ###
 
       # Draw structure
       if p.hasOutpost()
@@ -1365,6 +1360,7 @@ class UserInterface
     @colonyMenu.close()
     @selectedPlanet = null
     @lookingToSendResources = false
+    @showAll = true
 
 class MovingElement
   constructor: (start, @end, @speed, @drawFunc) ->
