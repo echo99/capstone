@@ -3,6 +3,9 @@ if not root?
 
 if exports?
   {config} = require '../config'
+  {ControlGroup} = require './ControlGroup'
+  {AI} = require './AI'
+  console.log(AI)
   root.config = config
 
 #_require ControlGroup

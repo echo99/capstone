@@ -1,3 +1,10 @@
+if not root?
+  root = exports ? window
+
+if exports?
+  {config} = require '../config'
+  root.config = config
+
 AI =
   # Finds a path based on a breadth first search
   #
@@ -24,3 +31,6 @@ AI =
           seen.push(u)
           q.push([u, t])
     return route
+
+if exports?
+  exports.AI = AI
