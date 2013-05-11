@@ -39,6 +39,7 @@ class Planet
     @_sendingResourcesTo = null
     @_sendingUnitsTo = null
     @_nextSend = null
+    @_sprite = null
     @_visibility = root.config.visibility.undiscovered
     @_combatReport = {
       fungusDamage: 0
@@ -62,6 +63,12 @@ class Planet
   #
   toString: ->
     return "Planet(#{@_x}, #{@_y}, #{@_resources}, #{@_rate})"
+
+  # Returns the sprite used to display this planet
+  #
+  # @return [Integer] The sprite used to display this planet
+  sprite: ->
+    @_sprite
 
   # Returns the (x, y) location of the planet.
   #
@@ -210,6 +217,10 @@ class Planet
 
   # SETTERS FOR USE BY GUI #
 
+  # Set sprite
+  setSprite: (sprite) ->
+    @_sprite = sprite
+  
   # Sets the visibility state to either visible, discovered or undiscovered
   #
   setVisibility: (state) ->
