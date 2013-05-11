@@ -55,6 +55,7 @@ class Game
       if fungusPlanet.distance(homePlanet) >= root.config.minimumFungusDistance
         placedFungus = true
         fungusPlanet.setFungus(root.config.fungusInitialStrength)
+        fungusPlanet.getAdjacentPlanets()[0].setFungus(root.config.fungusInitialStrength)
       
     @endTurn()
     return homePlanet
