@@ -3,6 +3,11 @@
 if not root?
   root = exports ? window
 
+if exports?
+  {config} = require '../config'
+  {AI} = require './AI'
+  root.config = config
+
 #_require AI
 
 class ControlGroup
@@ -14,7 +19,7 @@ class ControlGroup
                 @_destination) ->
     @_route = []
     @_hasMoved = false
-  
+
   # Check rep invariants.
   #
   # throws [Error] if a rep invariant is violated.
