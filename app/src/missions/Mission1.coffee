@@ -121,20 +121,11 @@ class Mission1 extends Mission
     frameElement.removeChild(@menuButton)
 
   _initMenus: ->
-    @victoryMenu = @createVictoryMenu(
-      () =>
-        newMission(Mission1)
-      () =>
-        newMission(Mission2)
-    )
-    @failMenu = @createFailMenu(
-      () =>
-        newMission(Mission1)
-    )
-    @optionsMenu = @createOptionMenu(
-      () =>
-        newMission(Mission1)
-    )
+    restart = () => newMission(Mission1)
+    next = () => newMission(Mission2)
+    @victoryMenu = @createVictoryMenu(restart, next)
+    @failMenu = @createFailMenu(restart)
+    @optionsMenu = @createOptionMenu(restart)
     @menuButton = @createMenuButton(@optionsMenu)
 
   # @see Mission#draw

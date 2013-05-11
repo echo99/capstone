@@ -1,7 +1,7 @@
 #_require Mission
 
-class Mission2 extends Mission
-  settings2: window.config.Missions.two
+class Mission3 extends Mission
+  settings3: window.config.Missions.three
   # @see Mission#reset
   reset: ->
     @failed = false
@@ -9,21 +9,20 @@ class Mission2 extends Mission
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'Mission 2',
+      'eventCategory': 'Mission 3',
       'eventAction': 'Start'
-      #'eventLabel': 'Mission 2'
-      'dimension1': 'Mission 2',
+      #'eventLabel': 'Mission 3'
+      'dimension1': 'Mission 3',
       'metric1': 1
     })
 
     # Create planets:
     newGame(10000, 10000, true)
     @home = new Planet(0, 0, 0, 0)
-    @home.addShips(window.config.units.probe, @settings2.startingProbes)
-    @home.addShips(window.config.units.colonyShip, @settings2.startingColonyShips)
-    @home.addShips(window.config.units.attackShip, @settings2.startingAttackShips)
+    @home.addShips(window.config.units.probe, @settings3.startingProbes)
+    @home.addShips(window.config.units.probe, @settings3.startingDefenseShips)
     game.addPlanet(@home)
-
+    ###
     f1 = new Planet(1100, 1600, 17, 2)
     f1.setFungus(7)
     game.addPlanet(f1)
@@ -101,7 +100,7 @@ class Mission2 extends Mission
     game.setNeighbors(p9, p12)
     game.setNeighbors(p10, p11)
     game.setNeighbors(p12, p13)
-
+    ###
     camera.setZoom(0.5)
     camera.setTarget(@home.location())
 
@@ -117,8 +116,8 @@ class Mission2 extends Mission
     frameElement.removeChild(@menuButton)
 
   _initMenus: ->
-    restart = () => newMission(Mission2)
-    next = () => newMission(Mission3)
+    restart = () => newMission(Mission3)
+    next = () => newMission(Menu) # TODO: Mission4
     @victoryMenu = @createVictoryMenu(restart, next)
     @failMenu = @createFailMenu(restart)
     @optionsMenu = @createOptionMenu(restart)
@@ -126,6 +125,7 @@ class Mission2 extends Mission
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
+    ###
     totalResources = 0
     for p in game.getPlanets()
       if p.hasOutpost() or p.hasStation()
@@ -137,13 +137,14 @@ class Mission2 extends Mission
     ctx.fillStyle = window.config.windowStyle.defaultText.color
     t = "Resources collected: " + totalResources + "/" + @settings2.resourceGoal
     ctx.fillText(t, camera.width / 2, camera.height - 10)
+    ###
 
     if @failed
       ctx.textAlign = 'center'
       ctx.textBaseline = 'top'
       ctx.font = window.config.windowStyle.defaultText.font
       ctx.fillStyle = window.config.windowStyle.defaultText.color
-      ctx.fillText("Impossible to get to 50",
+      ctx.fillText("TODO: insert helpful fail message",
                    camera.width / 2, camera.height / 2 + 50)
 
   # @see Mission#onMouseMove
@@ -157,6 +158,7 @@ class Mission2 extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
+    ###
     totalResources = 0
     possibleResources = 0
     hasColonyShip = false
@@ -175,24 +177,24 @@ class Mission2 extends Mission
         if g.colonies() > 0
           hasColonyShip = true
 
-    if totalResources >= @settings2.resourceGoal
+    if totalResources >= @settings3.resourceGoal
       current = localStorage["progress"]
-      if current < 3
-        localStorage["progress"] = 3
+      if current < 4
+        localStorage["progress"] = 4
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission 2',
+          'eventCategory': 'Mission 3',
           'eventAction': 'Complete',
           'eventLabel': 'Victory',
-          'dimension1': 'Mission 2',
+          'dimension1': 'Mission 3',
           'metric5': 1,
           'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson 2',
+          'timingCategory': 'Misson 3',
           'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
@@ -207,16 +209,16 @@ class Mission2 extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Mission 2',
+          'eventCategory': 'Mission 3',
           'eventAction': 'Complete'
           'eventLabel': 'Fail'
-          'dimension1': 'Mission 2',
+          'dimension1': 'Mission 3',
           'metric6': 1,
           'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Misson 2',
+          'timingCategory': 'Misson 3',
           'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
@@ -224,3 +226,4 @@ class Mission2 extends Mission
       @gameEnded = true
       UI.endGame()
       @failMenu.open()
+    ###

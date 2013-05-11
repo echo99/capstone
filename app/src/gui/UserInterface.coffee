@@ -863,27 +863,53 @@ class UserInterface
       # Draw resources
       if @showResources
         if vis != window.config.visibility.undiscovered
+          yellow = window.config.windowStyle.defaultText.value
+          white = window.config.windowStyle.defaultText.color
+          red = window.config.windowStyle.defaultText.red
+          green = window.config.windowStyle.defaultText.green
+          a = p.availableResources()
           r = p.resources()
           rate = p.rate()
           if r == null
             r = "?"
             rate = "?"
-          ctx.font = window.config.windowStyle.defaultText.font
+          ctx.font = window.config.windowStyle.smallText.font
           if p.numShips(window.config.units.probe) > 0 or
              p.hasStation() or p.hasOutpost()
-            ctx.fillStyle = window.config.windowStyle.defaultText.value
+            ctx.fillStyle = yellow
           else
-            ctx.fillStyle = window.config.windowStyle.defaultText.color
+            ctx.fillStyle = white
           ctx.textAlign = 'left'
           ctx.textBaseline = 'middle'
           offset = 60 * camera.getZoom()
+          tAvb = "#{a}"
           tRes = "#{r}"
           tRat = "#{rate}"
           if camera.getZoom() > window.config.displayCutoff
+            tAvb = "Resrouces Collected: " + tAvb
             tRes = "Resources remaining: " + tRes
             tRat = "Collection rate: " + tRat
-          ctx.fillText(tRes, pos.x+offset, pos.y)
-          ctx.fillText(tRat, pos.x+offset, pos.y+20)
+          if p.hasOutpost() or p.hasStation()
+            if a > 0
+              ctx.fillStyle = green
+            else
+              ctx.fillStyle = red
+            ctx.fillText(tAvb, pos.x+offset, pos.y)
+          if r == 0
+            ctx.fillStyle = red
+          else if p.numShips(window.config.units.probe) > 0 or
+                  p.hasStation() or p.hasOutpost()
+            ctx.fillStyle = yellow
+          else
+            ctx.fillStyle = white
+          ctx.fillText(tRes, pos.x+offset, pos.y+15)
+
+          if p.numShips(window.config.units.probe) > 0 or
+             p.hasStation() or p.hasOutpost()
+            ctx.fillStyle = yellow
+          else
+            ctx.fillStyle = white
+          ctx.fillText(tRat, pos.x+offset, pos.y+30)
 
       if (@showAll and p.fungusStrength() > 0) or
          (p._lastSeenFungus and not @showAll)

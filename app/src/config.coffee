@@ -24,7 +24,10 @@ root.config =
       fontObj: {sizeVal: 13, unit: "px", family: "Arial"}
       color: "rgba(255, 255, 255, 1)"
       red: "rgba(255, 0, 0, 1)"
+      green: "rgba(0, 255, 0, 1)"
       value: "rgba(255, 255, 0, 1)"
+    smallText:
+      font: "10px Arial"
     lageText:
       fontObj: {sizeVal: 20, unit: "px", family: "Arial"}
       color: "rgba(255, 255, 255, 1)"
@@ -377,15 +380,17 @@ root.config =
           w: 101
           h: 20
     mission3:
-      x: 0
-      y: -800
+      x: 400
+      y: -750
       menu:
         w: 400
         h: 200
         message: "Mission 3\n\n" +
-                 "**This mission has not been implemented yet**\n\n" +
+                 "It turns out that 50 resorces wasn't enough, but the fungus is " +
+                 "closing in on our outposts. Send in some defense ships to hold " +
+                 "off the fungus long enough to gather 100 resources.\n\n" +
                  "Tasks:\n" +
-                 "  - ??"
+                 "  - Gather a total of 100 resources"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"

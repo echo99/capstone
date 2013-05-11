@@ -4,7 +4,7 @@
 # This mission acts as our games main menu
 class Menu extends Mission
   settings: window.config.MainMenu
-  numMissions: 2
+  numMissions: 3
   # @see Mission#reset
   reset: ->
     # Load user progress
@@ -27,7 +27,7 @@ class Menu extends Mission
       Missions: new Planet(@settings.missions.x, @settings.missions.y)
       Mission1: new Planet(@settings.mission1.x, @settings.mission1.y)
       Mission2: new Planet(@settings.mission2.x, @settings.mission2.y)
-      Mission3: new Planet(400, -750)
+      Mission3: new Planet(@settings.mission3.x, @settings.mission3.y)
       Extermination: new Planet(@settings.extermination.x,
                                 @settings.extermination.y)
       Credits: new Planet(-400, 150)
@@ -45,6 +45,7 @@ class Menu extends Mission
       @Planets.Mission2.setFungus(1)
     if @progress < 3
       @Planets.Mission3.setFungus(1)
+    # TODO: other missions
 
     # Add planets to game
     game.addPlanet(@Planets.Home)
@@ -65,8 +66,6 @@ class Menu extends Mission
 
     # Add probe to Home planet
     @Planets.Home.addShips(window.config.units.probe, 1)
-    #@Planets.Missions._attackShips = 23
-    #@Planets.Home._defenseShips = 23
 
     @lastPlanet = @Planets.Home
     camera.setZoom(0.5)
@@ -91,7 +90,7 @@ class Menu extends Mission
     @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
       newMission(Mission2))
     @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
-      console.log('clicked mission 3 button'))
+      newMission(Mission3))
     @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
       newMission(Extermination))
 
