@@ -235,7 +235,6 @@ class UserInterface
     )
     cancelConstO.setDrawFunc((ctx) =>
       loc = cancelConstO.getProperty("location")
-      console.log('draw')
       if cancelConstO.isPressed()
         SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
                          loc.x, loc.y, ctx, false)
@@ -581,26 +580,31 @@ class UserInterface
         @outpostMenu.getProperty("cancelButton").close()
         @outpostMenu.setProperty("cancelOpen", false)
 
-    if @selectedPlanet.buildUnit() or (@selectedPlanet.availableResources() == 0 and
-       @selectedPlanet.resources() == 0)
-      if @outpostMenu.getProperty("sendOpen")
-        @outpostMenu.getProperty("sendButton").close()
-        @outpostMenu.setProperty("sendOpen", false)
+    if not @selectedPlanet.buildUnit() and
+       (@selectedPlanet.availableResources() > 0 or
+       @selectedPlanet.resources() > 0)
+      if @selectedPlanet.sending
+        if @outpostMenu.getProperty("sendOpen")
+          @outpostMenu.getProperty("sendButton").close()
+          @outpostMenu.setProperty("sendOpen", false)
+        if not @outpostMenu.getProperty("stopOpen")
+          @outpostMenu.getProperty("stopButton").open()
+          @outpostMenu.setProperty("stopOpen", true)
+      else
+        if @outpostMenu.getProperty("stopOpen")
+          @outpostMenu.getProperty("stopButton").close()
+          @outpostMenu.setProperty("stopOpen", false)
+        if not @outpostMenu.getProperty("sendOpen")
+          @outpostMenu.getProperty("sendButton").open()
+          @outpostMenu.setProperty("sendOpen", true)
+    else
+      @selectedPlanet.sending = false
       if @outpostMenu.getProperty("stopOpen")
         @outpostMenu.getProperty("stopButton").close()
         @outpostMenu.setProperty("stopOpen", false)
-    else if @selectedPlanet.sending
       if @outpostMenu.getProperty("sendOpen")
         @outpostMenu.getProperty("sendButton").close()
         @outpostMenu.setProperty("sendOpen", false)
-        @outpostMenu.getProperty("stopButton").open()
-        @outpostMenu.setProperty("stopOpen", true)
-    else
-      if not @outpostMenu.getProperty("sendOpen")
-        @outpostMenu.getProperty("sendButton").open()
-        @outpostMenu.setProperty("sendOpen", true)
-        @outpostMenu.getProperty("stopButton").close()
-        @outpostMenu.setProperty("stopOpen", false)
 
   _drawColonyMenu: (ctx) =>
     winStyle = window.config.windowStyle
@@ -759,21 +763,19 @@ class UserInterface
           @updateControlGroups()
         @unitSelection.deselectAllUnits()
       else if @lookingToSendResources
-        if planet.hasStation() or planet.hasOutpost() and @selectedPlanet != planet
+        if planet.hasStation() and @selectedPlanet != planet
           @selectedPlanet.sendResources(planet)
           @lookingToSendResources = false
       else
         if @selectedPlanet == planet
           @stationMenu.close()
           @outpostMenu.close()
-          @lookingToSendResources = false
           @colonyMenu.close()
           @selectedPlanet = null
         else if planet.hasStation()
           @selectedPlanet = planet
           @stationMenu.open()
           @outpostMenu.close()
-          @lookingToSendResources = false
           @colonyMenu.close()
         else if planet.hasOutpost() or
                 planet.buildUnit() == window.config.structures.station
@@ -790,7 +792,6 @@ class UserInterface
         else
           @stationMenu.close()
           @outpostMenu.close()
-          @lookingToSendResources = false
           @colonyMenu.close()
           @selectedPlanet = null
         @switchedMenus = true
@@ -975,8 +976,7 @@ class UserInterface
     if @hoveredPlanet
       hasAction = true
       if @lookingToSendResources
-        if @hoveredPlanet.hasStation() or @hoveredPlanet.hasOutpost() and
-           @hoveredPlanet != @selectedPlanet
+        if @hoveredPlanet.hasStation() and @hoveredPlanet != @selectedPlanet
           tooltipCtx.fillText("Valid destination", x, y)
         else
           tooltipCtx.fillText("Invalid destination", x, y)
@@ -1014,7 +1014,7 @@ class UserInterface
         ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
         ctx.stroke()
     else if @lookingToSendResources
-      tooltipCtx.fillText("Select planet with station or outpost", x, y)
+      tooltipCtx.fillText("Select planet with station", x, y)
 
     if @selectedPlanet
       ctx.strokeStyle = window.config.selectionStyle.stroke
@@ -1297,25 +1297,26 @@ class UserInterface
     if @selectedPlanet
       if not @selectedPlanet.hasStation() and @stationMenu.visible
         @stationMenu.close()
+        @selectedPlanet = null
       else if not @selectedPlanet.hasOutpost() and @outpostMenu.visible
         @outpostMenu.close()
+        if @selectedPlanet.hasStation()
+          @stationMenu.open()
+        else
+          @selectedPlanet = null
       else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
               @colonyMenu.visible
         @colonyMenu.close()
+        if @selectedPlanet.hasOutpost()
+          @outpostMenu.open()
+        else
+          @selectedPlanet = null
       else if @stationMenu.visisble
         @stationMenu.setDirty()
       else if @outpostMenu.visible
-        if @selectedPlanet.hasStation()
-          @outpostMenu.close()
-          @stationMenu.open()
-        else
-          @outpostMenu.setDirty()
+        @outpostMenu.setDirty()
       else if @colonyMenu.visible
-        if @selectedPlanet.hasOutpost()
-          @colonyMenu.close()
-          @outpostMenu.open()
-        else
-          @colonyMenu.setDirty()
+        @colonyMenu.setDirty()
     else
       if @stationMenu.visible
         @stationMenu.close()

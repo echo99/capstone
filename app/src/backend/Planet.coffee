@@ -370,7 +370,7 @@ class Planet
   nextSend: ->
     if @_sendingResourcesTo == null
       return null
-    console.log("next send initial " + @_nextSend)
+    #console.log("next send initial " + @_nextSend)
     if @_nextSend == null or @_nextSend == undefined
       path = AI.getPath(@, @_sendingResourcesTo)
       if path == []
@@ -378,7 +378,7 @@ class Planet
         @_sendingResourcesTo = null
       else
         @_nextSend = path[0]
-    console.log("next send " + @_nextSend)
+    #console.log("next send " + @_nextSend)
     return @_nextSend
 
   # Sends units to given planet
