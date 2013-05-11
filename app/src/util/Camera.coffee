@@ -133,7 +133,7 @@ class Camera
   # @param [Object] coords Where coords.x and cords.y are the coordinates
   # @return [Boolean] true if coords is within view, false otherwise
   onScreen: (coords) ->
-    return 0 < coords.x < @width and 0 < coords.y < @height
+    return -100 < coords.x < @width+100 and -100 < coords.y < @height+100
 
   # Moves the camera's current position toward its target position
   # Call once per draw

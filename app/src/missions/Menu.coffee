@@ -8,7 +8,6 @@ class Menu extends Mission
   # @see Mission#reset
   reset: ->
     # Load user progress
-    #   Add fungus to locked mission planets
     @progress = localStorage["progress"]
     if not @progress
       @progress = 1
@@ -20,7 +19,7 @@ class Menu extends Mission
 
     # Create planets:
     newGame(10000, 10000, true)
-    @Names = ["Home", "Missions", "Mission1", "Mission2", "Mission3",
+    @Names = ["Home", "Missions", "Mission 1", "Mission 2", "Mission 3",
               "Extermination", "Credits"]
     @Planets =
       Home: new Planet(@settings.home.x, @settings.home.y)
@@ -42,9 +41,9 @@ class Menu extends Mission
     @Planets.Credits.setVisibility(window.config.visibility.discovered)
 
     if @progress < 2
-      @Planets.Mission2.setFungus(1)
+      @Planets.Mission2.setSprite(SpriteNames.PLANET_BLUE_FUNGUS)
     if @progress < 3
-      @Planets.Mission3.setFungus(1)
+      @Planets.Mission3.setSprite(SpriteNames.PLANET_BLUE_FUNGUS)
     # TODO: other missions
 
     # Add planets to game
@@ -205,7 +204,14 @@ class Menu extends Mission
     ctx.fillStyle = winStyle.labelText.color
     ctx.textAlign = 'center'
     for p in @Names
-      planet = @Planets[p]
+      if p == "Mission 1"
+        planet = @Planets["Mission1"]
+      else if p == "Mission 2"
+        planet = @Planets["Mission2"]
+      else if p == "Mission 3"
+        planet = @Planets["Mission3"]
+      else
+        planet = @Planets[p]
       if planet.numShips(window.config.units.probe) == 0 and
          planet.visibility() == window.config.visibility.visible
         loc = planet.location()
@@ -274,7 +280,7 @@ class Menu extends Mission
 
   _checkMissions: (p) ->
     @lastPlanet = p
-    if p.fungusStrength() == 0
+    if p.sprite() != SpriteNames.PLANET_BLUE_FUNGUS #p.fungusStrength() == 0
       if @lastPlanet == @Planets.Mission1
         @mission1Menu.open()
       else

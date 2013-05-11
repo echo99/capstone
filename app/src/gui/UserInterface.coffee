@@ -846,7 +846,9 @@ class UserInterface
         else
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
       else if vis == window.config.visibility.visible or @showAll
-        if (@showAll and p.fungusStrength() > 0) or
+        if p.sprite()
+          SHEET.drawSprite(p.sprite(), loc.x, loc.y, ctx)
+        else if (@showAll and p.fungusStrength() > 0) or
            (p._lastSeenFungus and not @showAll)
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else

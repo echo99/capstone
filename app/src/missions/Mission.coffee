@@ -59,7 +59,7 @@ class Mission
 
     @_attachRestartButton(menuBox, onRestart)
     @_attachQuitButton(menuBox)
-    @_attachNextButton(menuBox, onNextMission)
+    #@_attachNextButton(menuBox, onNextMission)
 
     cameraHudFrame.addChild(menuBox)
 
