@@ -162,7 +162,7 @@ class Mission2 extends Mission
     hasColonyShip = false
     hasProbe = false
     for p in game.getPlanets()
-      if p.hasOutpost()
+      if p.hasOutpost() or p.hasStation()
         totalResources += p.availableResources()
         possibleResources += p.resources()
       if p.numShips(window.config.units.probe) > 0

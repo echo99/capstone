@@ -306,7 +306,17 @@ root.config =
     three:
       startingProbes: 2
       startingDefenseShips: 10
-      resourceGoal: 20
+      resourceGoal: 150
+      homeAvailable: 13
+      homeResources: 30
+      o1Available: 6
+      o1Resources: 32
+      o2Available: 7
+      o2Resources: 30
+      o3Available: 9
+      o3Resources: 44
+      o4Available: 10
+      o4Resources: 26
   MainMenu:
     home:
       x: 0
@@ -388,9 +398,9 @@ root.config =
         message: "Mission 3\n\n" +
                  "It turns out that 50 resorces wasn't enough, but the fungus is " +
                  "closing in on our outposts. Send in some defense ships to hold " +
-                 "off the fungus long enough to gather 100 resources.\n\n" +
+                 "off the fungus long enough to gather 150 resources.\n\n" +
                  "Tasks:\n" +
-                 "  - Gather a total of 100 resources"
+                 "  - Gather a total of 150 resources"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"

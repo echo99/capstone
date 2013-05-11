@@ -902,14 +902,14 @@ class UserInterface
             ctx.fillStyle = yellow
           else
             ctx.fillStyle = white
-          ctx.fillText(tRes, pos.x+offset, pos.y+15)
+          ctx.fillText(tRes, pos.x+offset, pos.y+10)
 
           if p.numShips(window.config.units.probe) > 0 or
              p.hasStation() or p.hasOutpost()
             ctx.fillStyle = yellow
           else
             ctx.fillStyle = white
-          ctx.fillText(tRat, pos.x+offset, pos.y+30)
+          ctx.fillText(tRat, pos.x+offset, pos.y+20)
 
       if (@showAll and p.fungusStrength() > 0) or
          (p._lastSeenFungus and not @showAll)
