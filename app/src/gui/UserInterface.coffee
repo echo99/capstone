@@ -1302,6 +1302,20 @@ class UserInterface
       else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
               @colonyMenu.visible
         @colonyMenu.close()
+      else if @stationMenu.visisble
+        @stationMenu.setDirty()
+      else if @outpostMenu.visible
+        if @selectedPlanet.hasStation()
+          @outpostMenu.close()
+          @stationMenu.open()
+        else
+          @outpostMenu.setDirty()
+      else if @colonyMenu.visible
+        if @selectedPlanet.hasOutpost()
+          @colonyMenu.close()
+          @outpostMenu.open()
+        else
+          @colonyMenu.setDirty()
     else
       if @stationMenu.visible
         @stationMenu.close()
@@ -1309,22 +1323,6 @@ class UserInterface
         @outpostMenu.close()
       else if @colonyMenu.visible
         @colonyMenu.close()
-
-    if @stationMenu.visisble
-      @stationMenu.setDirty()
-    if @outpostMenu.visible
-      if @selectedPlanet.hasStation()
-        @outpostMenu.close()
-        @stationMenu.open()
-      else
-        @outpostMenu.setDirty()
-    if @colonyMenu.visible
-      if @selectedPlanet.hasOutpost()
-        @colonyMenu.close()
-        @outpostMenu.open()
-      else
-        @colonyMenu.setDirty()
-
 
     @hoveredGroup = null
 
