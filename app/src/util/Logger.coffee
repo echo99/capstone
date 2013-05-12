@@ -27,11 +27,19 @@ class Logger
   # @param [Boolean] async Send the log asynchronously
   #
   @send: (async=true) ->
-    $.post "../server/logger.php",
+    # $.post "../server/logger.php",
+    #   async: async
+    #   events: @_queue
+    #   (data) ->
+    #   "json"
+    $.ajax
+      type: 'POST'
+      url: '../server/logger.php'
+      data:
+        events: @_queue
+      success: (data) ->
+      dataType: 'json'
       async: async
-      events: @_queue
-      (data) ->
-      "json"
     @_queue = []
 
 window.Logger = Logger
