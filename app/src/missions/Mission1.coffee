@@ -3,6 +3,7 @@
 class Mission1 extends Mission
   # @see Mission#reset
   reset: ->
+    Logger.logEvent("Starting Mission 1")
     @foundA1 = false
     @foundA2 = false
     @failures = {not_failed: -1, no_probe: 0, no_ships: 1}
@@ -120,6 +121,9 @@ class Mission1 extends Mission
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
 
+    Logger.logEvent("Leaving Mission 1")
+    Logger.send()
+
   _initMenus: ->
     restart = () => newMission(Mission1)
     next = () => newMission(Mission2)
@@ -161,11 +165,13 @@ class Mission1 extends Mission
       @a1.addShips(window.config.units.attackShip, 1)
       UI.endTurn()
       UI.turns--
+      Logger.logEvent("Player found single attack ship")
     if @a2.visibility() == window.config.visibility.visible and not @foundA2
       @foundA2 = true
       @a2.addShips(window.config.units.attackShip, 2)
       UI.endTurn()
       UI.turns--
+      Logger.logEvent("Player found two attack ships")
 
     hasFungus = false
     hasProbe = false
@@ -205,14 +211,18 @@ class Mission1 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Logger.logEvent("Player successfully completed Mission 1",
+                        getMinutes(@endTime - @startTime))
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
     else if not hasProbe or (not hasAttackShips and @foundA1 and @foundA2)
       if not hasProbe
         @failure = @failures.no_probe
+        Logger.logEvent("Player lost their probe")
       else if not hasAttackShips
         @failure = @failures.no_ships
+        Logger.logEvent("Player lost their attack ships")
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
@@ -231,6 +241,7 @@ class Mission1 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Logger.logEvent("Player failed Mission 1", getMinutes(@endTime - @startTime))
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

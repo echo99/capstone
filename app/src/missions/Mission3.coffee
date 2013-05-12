@@ -169,6 +169,8 @@ class Mission3 extends Mission
     game.endTurn()
     UI.initialize(false, true, true)
 
+    @startTime = currentTime()
+
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)

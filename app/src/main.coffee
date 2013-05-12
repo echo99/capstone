@@ -133,6 +133,13 @@ newMission = (mission) ->
 newGame = (w, h, move) ->
   game = new Game(w, h, move)
 
+endTurn = () ->
+  Logger.logEvent("End turn")
+  Logger.send()
+  game.endTurn()
+  UI.endTurn()
+  CurrentMission.onEndTurn()
+
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
   canvas = ctx.canvas
@@ -367,12 +374,11 @@ main = ->
 
   document.body.addEventListener('keydown', (e) ->
     if e.keyCode == KeyCodes.HOME
+      Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
       Logger.logEvent("Pressed SPACE")
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
+      endTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
       Logger.logEvent("Pressed +")
       nz = camera.getZoom() + window.config.ZOOM_SPEED
@@ -390,7 +396,7 @@ main = ->
   # Catch accidental leaving
   window.onbeforeunload = (e) ->
     Logger.logEvent("Trying to leave")
-    Logger.send()
+    Logger.send(false)
     # No progress can be lost in the menu
     if (not (CurrentMission instanceof Menu))
       if (not e)
@@ -400,6 +406,7 @@ main = ->
         e.stopPropagation()
         e.preventDefault()
         return "Warning: Progress my be lost."
+    return null
 
   prevPos = {x: 0, y: 0}
   drag = false

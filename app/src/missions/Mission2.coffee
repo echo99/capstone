@@ -4,6 +4,7 @@ class Mission2 extends Mission
   settings2: window.config.Missions.two
   # @see Mission#reset
   reset: ->
+    Logger.logEvent("Starting Mission 2")
     @failed = false
 
     @gameEnded = false
@@ -110,11 +111,16 @@ class Mission2 extends Mission
     game.endTurn()
     UI.initialize(false, true, true)
 
+    @startTime = currentTime()
+
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
+
+    Logger.logEvent("Leaving Mission 2")
+    Logger.send()
 
   _initMenus: ->
     restart = () => newMission(Mission2)
@@ -197,6 +203,9 @@ class Mission2 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Logger.logEvent("Resources:", totalResources)
+        Logger.logEvent("Player successfully completed Mission 2",
+                        getMinutes(@endTime - @startTime))
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -221,6 +230,11 @@ class Mission2 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Logger.logEvent("Resources:", totalResources)
+        Logger.logEvent("Max possible:", totalResources + possibleResources)
+        Logger.logEvent("colony ship?", hasColonyShip)
+        Logger.logEvent("probe?", hasProbe)
+        Logger.logEvent("Player faild Mission 2", getMinutes(@endTime - @startTime))
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

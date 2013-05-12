@@ -128,7 +128,7 @@ class Menu extends Mission
     cameraHudFrame.addChild(@creditsMenu)
 
     if @progress > @numMissions and @seenGameComplete == 'false'
-      console.log("creating menu")
+      Logger.log("Showing mission complete menu")
       close = new Elements.Button(500 - 10, 10, 16, 16,
         () =>
           @gameCompleteMenu.close()
@@ -241,10 +241,9 @@ class Menu extends Mission
         break
 
     if inGroup
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
+      endTurn()
       camera.setTarget(@lastPlanet.location())
+      Logger.logEvent("Moving Main Menu probe to " + @lastPlanet.toString())
 
   getHomeTarget: ->
     return @lastPlanet.location()
@@ -262,34 +261,38 @@ class Menu extends Mission
         found = true
         @_checkMissions(p)
         break
+
     if not found
       @Planets.Missions.addShips(window.config.units.probe, 1)
       @lastPlanet = @Planets.Missions
       camera.setTarget(@lastPlanet.location())
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
+      endTurn()
 
   _checkMissions: (p) ->
     @lastPlanet = p
     if p.sprite() != SpriteNames.PLANET_BLUE_FUNGUS #p.fungusStrength() == 0
       if @lastPlanet == @Planets.Mission1
+        Logger.logEvent("Showing mission 1 menu")
         @mission1Menu.open()
       else
         @mission1Menu.close()
       if @lastPlanet == @Planets.Mission2
+        Logger.logEvent("Showing mission 2 menu")
         @mission2Menu.open()
       else
         @mission2Menu.close()
       if @lastPlanet == @Planets.Mission3
+        Logger.logEvent("Showing mission 3 menu")
         @mission3Menu.open()
       else
         @mission3Menu.close()
       if @lastPlanet == @Planets.Extermination
+        Logger.logEvent("Showing extermination menu")
         @exterminationMenu.open()
       else
         @exterminationMenu.close()
       if @lastPlanet == @Planets.Credits
+        Logger.logEvent("Showing credits")
         @creditsMenu.open()
       else
         @creditsMenu.close()
