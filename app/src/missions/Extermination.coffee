@@ -3,39 +3,36 @@
 # This mission acts as our games main menu
 class Extermination extends Mission
   #settings: window.config.MainMenu
+  size: ""
+  numPlanets: 0
+  restart: null
 
   # @see Mission#reset
   reset: ->
-    @attempts = localStorage["extermination_attempts"]
+    @attemptName = "extermination_"+@size+"_attempts"
+    @mission = "Extermination " + @size
+
+    @attempts = localStorage[@attemptName]
     if not @attempts
       @attempts = 0
     @attempts++
-    localStorage["extermination_attempts"] = Number(@attempts)
-    Logger.logEvent("Starting Extermination", {attempt: @attempts})
+    localStorage[@attemptName] = Number(@attempts)
+    Logger.logEvent("Starting " + @mission, {attempt: @attempts})
 
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'Extermination',
+      'eventCategory': @mission,
       'eventAction': 'Start'
-      #'eventLabel': 'Extermination'
-      'dimension1': 'Extermination',
+      'dimension1': @mission,
       'metric1': 1
     })
 
     newGame(10000, 10000)
 
     # Create planets:
-    @home = game.setup(root.config.numberOfPlanetsInExterminate)
+    @home = game.setup(@numPlanets)
     @home.addStation()
-
-    # Test stuff
-    #@home.getAdjacentPlanets()[0].addOutpost()
-    #@home.addShips(window.config.units.probe, 8)
-    #@home.addShips(window.config.units.colonyShip, 10)
-    #@home.addShips(window.config.units.attackShip, 10)
-    #@home.addShips(window.config.units.defenseShip, 10)
-    # End test stuff
 
     UI.initialize()
     camera.setZoom(0.5)
@@ -51,11 +48,11 @@ class Extermination extends Mission
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
 
-    Logger.logEvent("Leaving Extermination")
+    Logger.logEvent("Leaving " + @mission)
     Logger.send()
 
   _initMenus: ->
-    restart = () => newMission(Extermination)
+    restart = () => newMission(@restart)
     next = () => newMission(Menu)
     @victoryMenu = @createVictoryMenu(restart, next)
     @failMenu = @createFailMenu(restart)
@@ -99,21 +96,21 @@ class Extermination extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Extermination',
+          'eventCategory': @mission,
           'eventAction': 'Complete',
           'eventLabel': 'Victory',
-          'dimension1': 'Extermination',
+          'dimension1': @mission,
           'metric5': 1,
           'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Extermination',
+          'timingCategory': @mission,
           'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
-        Logger.logEvent("Player successfully completed Extermination",
+        Logger.logEvent("Player successfully completed " + @mission,
                         {minutes: getMinutes(@endTime - @startTime)
                         turns: UI.turns})
       @gameEnded = true
@@ -125,21 +122,21 @@ class Extermination extends Mission
         @endTime = currentTime()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Extermination',
+          'eventCategory': @mission,
           'eventAction': 'Complete',
           'eventLabel': 'Fail',
-          'dimension1': 'Extermination',
+          'dimension1': @mission,
           'metric6': 1,
           'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Extermination',
+          'timingCategory': @mission,
           'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
-        Logger.logEvent("Player failed Extermination",
+        Logger.logEvent("Player failed " + @mission,
                         {minutes: getMinutes(@endTime - @startTime)
                         turns: UI.turns})
       @gameEnded = true

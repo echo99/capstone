@@ -421,10 +421,14 @@ root.config =
     extermination:
       x: 400
       y: 150
+    small:
+      x: 900
+      y: 150
       menu:
         w: 400
-        h: 150
-        message: "Extermination\n\n" +
+        h: 200
+        message: "Extermination - Small map\n\n" +
+                 "Estimated Time: 5-10 minutes\n\n" +
                  "Task:\n" +
                  "  - Exterminate all fungus before it exterminates you.\n\n" +
                  "Note: It is recommended that you complete the missions before " +
@@ -435,12 +439,64 @@ root.config =
         lineHeight: 15
         cancel:
           x: 245
-          y: 150 - 15
+          y: 200 - 15
           w: 60
           h: 20
         start:
           x: 145
-          y: 150 - 15
+          y: 200 - 15
+          w: 101
+          h: 20
+    medium:
+      x: 750
+      y: 500
+      menu:
+        w: 400
+        h: 200
+        message: "Extermination - Medium map\n\n" +
+                 "Estimated Time: 20-40 minutes\n\n" +
+                 "Task:\n" +
+                 "  - Exterminate all fungus before it exterminates you.\n\n" +
+                 "Note: It is recommended that you complete the missions before " +
+                 "attempting this."
+        textAlign: 'left'
+        vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 15
+        cancel:
+          x: 245
+          y: 200 - 15
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 200 - 15
+          w: 101
+          h: 20
+    large:
+      x: 400
+      y: 650
+      menu:
+        w: 400
+        h: 200
+        message: "Extermination - Large map\n\n" +
+                 "Estimated Time: 60+ minutes\n\n" +
+                 "Task:\n" +
+                 "  - Exterminate all fungus before it exterminates you.\n\n" +
+                 "Note: It is recommended that you complete the missions before " +
+                 "attempting this."
+        textAlign: 'left'
+        vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 15
+        cancel:
+          x: 245
+          y: 200 - 15
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 200 - 15
           w: 101
           h: 20
   units:
@@ -500,7 +556,9 @@ root.config =
   maximumAdjacencyDistance: 800
   minimumFungusDistance: 5000
   fungusInitialStrength: 1
-  numberOfPlanetsInExterminate: 100
+  numberOfPlanetsInExterminateSmall: 20
+  numberOfPlanetsInExterminateMedium: 50
+  numberOfPlanetsInExterminateLarge: 100
   resources:
     homePlanetResources: 40
     homePlanetRate: 2
