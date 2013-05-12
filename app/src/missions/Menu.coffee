@@ -7,6 +7,7 @@ class Menu extends Mission
   numMissions: 3
   # @see Mission#reset
   reset: ->
+    Logger.logEvent("Starting the Menu")
     # Load user progress
     @progress = localStorage["progress"]
     if not @progress
@@ -82,6 +83,9 @@ class Menu extends Mission
     cameraHudFrame.removeChild(@creditsMenu)
     if @gameCompleteMenu
       cameraHudFrame.removeChild(@gameCompleteMenu)
+
+    Logger.logEvent("Leaving Main Menu")
+    Logger.send()
 
   _initMenus: ->
     @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
@@ -241,18 +245,6 @@ class Menu extends Mission
       UI.endTurn()
       CurrentMission.onEndTurn()
       camera.setTarget(@lastPlanet.location())
-    ###
-    while inGroup#@lastPlanet.numShips(window.config.units.probe) == 0 or inGroup
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
-      inGroup = false
-      for c in @lastPlanet.getControlGroups()
-        if c.probes() == 1
-          inGroup = true
-          break
-      camera.setTarget(@lastPlanet.location())
-    ###
 
   getHomeTarget: ->
     return @lastPlanet.location()

@@ -170,6 +170,8 @@ updateCanvases = (frame, canvases...) ->
 
 # The main method for the game
 main = ->
+  Logger.start()
+  Logger.logEvent("Setting up frames")
   ##################################################################################
   # Get all necessary html elements
 
@@ -233,7 +235,7 @@ main = ->
   # win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
   # win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
   # frameElement.addChild(win)
-  # frameElement.drawChildren()
+  # nframeElement.drawChildren()
   # frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
   #   "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
   #   font: '15px sans-serif'}))
@@ -367,22 +369,28 @@ main = ->
     if e.keyCode == KeyCodes.HOME
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
+      Logger.logEvent("Pressed SPACE")
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+      Logger.logEvent("Pressed +")
       nz = camera.getZoom() + window.config.ZOOM_SPEED
       console.log('zoom in to ' + nz)
       camera.setZoom(nz)
     else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+      Logger.logEvent("Pressed -")
       nz = camera.getZoom() - window.config.ZOOM_SPEED
       camera.setZoom(nz)
     else if e.keyCode == KeyCodes.CHEAT
+      Logger.logEvent("Pressed CHEAT")
       cheat = not cheat
   )
 
   # Catch accidental leaving
   window.onbeforeunload = (e) ->
+    Logger.logEvent("Trying to leave")
+    Logger.send()
     # No progress can be lost in the menu
     if (not (CurrentMission instanceof Menu))
       if (not e)
@@ -510,4 +518,5 @@ main = ->
   if TESTING
     draw()
   else
+    Logger.logEvent("Beginning draw loop")
     setInterval draw, 30
