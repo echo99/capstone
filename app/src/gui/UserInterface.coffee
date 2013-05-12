@@ -1014,6 +1014,26 @@ class UserInterface
     tooltipCtx.font = window.config.toolTipStyle.font
     tooltipCtx.fillStyle = window.config.toolTipStyle.color
     if @hoveredPlanet
+      if @hoveredPlanet.hasStation() and @hoveredPlanet.isBuilding()
+        switch @hoveredPlanet.buildUnit()
+          when window.config.units.probe
+            sprite = SpriteNames.PROBE
+          when window.config.units.colonyShip
+            sprite = SpriteNames.COLONY_SHIP
+          when window.config.units.attackShip
+            sprite = SpriteNames.ATTACK_SHIP
+          when window.config.units.defenseShip
+            sprite = SpriteNames.DEFENSE_SHIP
+        SHEET.drawSprite(sprite, x + 16, y + 24, ctx, false)
+        turns = @hoveredPlanet.buildStatus()
+        text = turns + " turn"
+        if turns > 1
+          text += "s"
+        text += " remaining"
+        ctx.font = window.config.windowStyle.defaultText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.value
+        ctx.fillText(text, x + 35, y + 24)
+
       hasAction = true
       if @lookingToSendResources
         if @hoveredPlanet.hasStation() and @hoveredPlanet != @selectedPlanet
