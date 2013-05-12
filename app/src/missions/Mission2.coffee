@@ -4,7 +4,13 @@ class Mission2 extends Mission
   settings2: window.config.Missions.two
   # @see Mission#reset
   reset: ->
-    Logger.logEvent("Starting Mission 2")
+    attempts = localStorage["mission 2 attempts"]
+    if not attempts
+      attempts = 1
+    else
+      localStorage["mission 2 attempts"] = attempts + 1
+    Logger.logEvent("Starting Mission 2", attempts)
+
     @failed = false
 
     @gameEnded = false
@@ -185,6 +191,8 @@ class Mission2 extends Mission
       current = localStorage["progress"]
       if current < 3
         localStorage["progress"] = 3
+        Logger.logEvent("Player completed Mission 2 for the first time",
+                        {attempts: attempts})
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
@@ -203,9 +211,9 @@ class Mission2 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
-        Logger.logEvent("Resources:", totalResources)
         Logger.logEvent("Player successfully completed Mission 2",
-                        getMinutes(@endTime - @startTime))
+                        {minutes: getMinutes(@endTime - @startTime)
+                        resources: totalResources})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -230,11 +238,12 @@ class Mission2 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
-        Logger.logEvent("Resources:", totalResources)
-        Logger.logEvent("Max possible:", totalResources + possibleResources)
-        Logger.logEvent("colony ship?", hasColonyShip)
-        Logger.logEvent("probe?", hasProbe)
-        Logger.logEvent("Player faild Mission 2", getMinutes(@endTime - @startTime))
+        Logger.logEvent("Player failed Mission 2",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        resources: totalResources
+                        max_possible: totalResources + possibleResources
+                        colony_ship: hasColonyShip
+                        probe: hasProbe})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

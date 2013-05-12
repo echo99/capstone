@@ -3,7 +3,13 @@
 class Mission1 extends Mission
   # @see Mission#reset
   reset: ->
-    Logger.logEvent("Starting Mission 1")
+    attempts = localStorage["mission 1 attempts"]
+    if not attempts
+      attempts = 1
+    else
+      localStorage["mission 1 attempts"] = attempts + 1
+    Logger.logEvent("Starting Mission 1", attempts)
+
     @foundA1 = false
     @foundA2 = false
     @failures = {not_failed: -1, no_probe: 0, no_ships: 1}
@@ -193,6 +199,8 @@ class Mission1 extends Mission
       current = localStorage["progress"]
       if current < 2
         localStorage["progress"] = 2
+        Logger.logEvent("Player completed Mission 1 for the first time",
+                        {attempts: attempts})
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
@@ -212,7 +220,7 @@ class Mission1 extends Mission
           'timingLabel': 'Victory'
         })
         Logger.logEvent("Player successfully completed Mission 1",
-                        getMinutes(@endTime - @startTime))
+                        {minutes: getMinutes(@endTime - @startTime)})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -241,7 +249,8 @@ class Mission1 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
-        Logger.logEvent("Player failed Mission 1", getMinutes(@endTime - @startTime))
+        Logger.logEvent("Player failed Mission 1",
+                        {minutes: getMinutes(@endTime - @startTime)})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

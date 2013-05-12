@@ -4,6 +4,13 @@ class Mission3 extends Mission
   settings3: window.config.Missions.three
   # @see Mission#reset
   reset: ->
+    attempts = localStorage["mission 3 attempts"]
+    if not attempts
+      attempts = 1
+    else
+      localStorage["mission 3 attempts"] = attempts + 1
+    Logger.logEvent("Starting Mission 3", attempts)
+
     @failed = false
 
     @gameEnded = false
@@ -177,6 +184,9 @@ class Mission3 extends Mission
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
 
+    Logger.logEvent("Leaving Mission 3")
+    Logger.send()
+
   _initMenus: ->
     restart = () => newMission(Mission3)
     next = () => newMission(Menu) # TODO: Mission4
@@ -229,6 +239,8 @@ class Mission3 extends Mission
       current = localStorage["progress"]
       if current < 4
         localStorage["progress"] = 4
+        Logger.logEvent("Player completed Mission 3 for the first time",
+                        {attempts: attempts})
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
@@ -247,6 +259,9 @@ class Mission3 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Logger.logEvent("Player successfully completed Mission 3",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        resources: totalResources})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -270,6 +285,10 @@ class Mission3 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Logger.logEvent("Player failed Mission 3",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        resources: totalResources
+                        max_possible: totalResources + possibleResources})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()
