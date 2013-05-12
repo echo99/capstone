@@ -809,21 +809,33 @@ class UserInterface
   # @param [CanvasRenderingContext2D] hudCtx The hud context
   draw: (ctx, hudCtx) ->
     visited = []
-    ctx.strokeStyle = window.config.connectionStyle.normal.stroke
+    #ctx.strokeStyle = window.config.connectionStyle.normal.stroke
     ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     for p in game.getPlanets()
       pos = camera.getScreenCoordinates(p.location())
       visited.push(p)
       for neighbor in p.getAdjacentPlanets()
-        if cheat or @showAll or (neighbor not in visited and
-           p.visibility() != window.config.visibility.undiscovered and
-           neighbor.visibility() != window.config.visibility.undiscovered)
-          # draw connection to the neighbor
-          nPos = camera.getScreenCoordinates(neighbor.location())
-          ctx.beginPath()
-          ctx.moveTo(pos.x, pos.y)
-          ctx.lineTo(nPos.x, nPos.y)
-          ctx.stroke()
+        if neighbor in visited
+          ctx.strokeStyle = window.config.connectionStyle.normal.undiscovered
+        else if cheat or @showAll
+          ctx.strokeStyle = window.config.connectionStyle.normal.discovered
+        else if p.visibility() == window.config.visibility.visible and
+                neighbor.visibility() == window.config.visibility.visible
+          ctx.strokeStyle = window.config.connectionStyle.normal.visible
+        else if p.visibility() == window.config.visibility.undiscovered or
+                neighbor.visibility() == window.config.visibility.undiscovered
+          ctx.strokeStyle = window.config.connectionStyle.normal.undiscovered
+        else
+          ctx.strokeStyle = window.config.connectionStyle.normal.discovered
+        #if cheat or @showAll or (neighbor not in visited and
+        #   p.visibility() != window.config.visibility.undiscovered and
+        #   neighbor.visibility() != window.config.visibility.undiscovered)
+        # draw connection to the neighbor
+        nPos = camera.getScreenCoordinates(neighbor.location())
+        ctx.beginPath()
+        ctx.moveTo(pos.x, pos.y)
+        ctx.lineTo(nPos.x, nPos.y)
+        ctx.stroke()
 
     if @hoveredGroup != null
       tooltipCtx.textAlign = "left"

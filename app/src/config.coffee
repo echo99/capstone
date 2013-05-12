@@ -75,6 +75,9 @@ root.config =
     defenseLoc: {x: -80, y: 150}
   connectionStyle:
     normal:
+      visible: "rgba(128, 128, 128, 0.8)"
+      discovered: "rgba(128, 128, 128, 0.2)"
+      undiscovered: "rgba(128, 128, 128, 0.0)"
       stroke: "rgba(128, 128, 128, 0.5)"
       lineWidth: 2
     path:
