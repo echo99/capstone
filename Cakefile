@@ -58,6 +58,7 @@ VENDOR_JS_FILES = [
 # Flag to make sure we aren't calling build multiple times at once
 BUILDING = false
 WATCHING = false
+BUILD_PASSED = true
 
 coffeeLintConfig =
   no_tabs:
@@ -254,6 +255,7 @@ task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
       # Try to compile all files individually first, to get a better
       # error message, then if it succeeds, compile them all to one file
       callback = (passed) ->
+        BUILD_PASSED = passed
         if passed
           files = new Rehab().process './'+SRC_DIR
 
@@ -456,7 +458,7 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
             if failCount > 0
               notify("Build succeeded, but #{failCount} lint errors were " +
                 "found! Please check the terminal for more details.",
-                MessageLevel.ERROR) if WATCHING
+                MessageLevel.ERROR) if WATCHING and BUILD_PASSED
               console.error("\n")
               if errorCount > 0
                 console.error(("#{errorCount} syntax error(s) found!").red.bold)
@@ -468,7 +470,7 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
                 "#{coffeeLintConfig.max_line_length.value} characters").grey)
             else
               notify("Build succeeded. All files passed lint.",
-                MessageLevel.INFO) if WATCHING
+                MessageLevel.INFO) if WATCHING and BUILD_PASSED
               console.log('No lint errors found!'.green)
             console.log("") if WATCHING
         catch e
