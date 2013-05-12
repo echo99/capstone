@@ -626,7 +626,6 @@ class Elements.UIElement extends Module
   #
   setHovering: (hovering) ->
     @_hovering = hovering
-    @_parent?.hoveredChild or= hovering
 
   # Get the hover status of this element
   #
