@@ -344,7 +344,7 @@ main = ->
   ##################################################################################
   # Set event handlers
 
-  window.onresize = ->
+  onResize = ->
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
     updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
 
@@ -371,7 +371,7 @@ main = ->
 
     # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
-  document.body.addEventListener('keydown', (e) ->
+  keyDownListener = (e) ->
     if e.keyCode == KeyCodes.HOME
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
@@ -390,10 +390,9 @@ main = ->
     else if e.keyCode == KeyCodes.CHEAT
       Logger.logEvent("Pressed CHEAT")
       cheat = not cheat
-  )
 
   # Catch accidental leaving
-  window.onbeforeunload = (e) ->
+  onBeforeUnload = (e) ->
     Logger.logEvent("Trying to leave")
     Logger.send(false)
     # No progress can be lost in the menu
@@ -410,8 +409,7 @@ main = ->
   prevPos = {x: 0, y: 0}
   drag = false
 
-  # hudCanvas.addEventListener('mousemove', (e) ->
-  surface.addEventListener('mousemove', (e) ->
+  mouseMoveHandler = (e) ->
     x = e.clientX
     y = e.clientY
     UI.onMouseMove(x, y)
@@ -448,9 +446,8 @@ main = ->
       # coords = camera.getWorldCoordinates({x: x, y: x})
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
-  )
-  # hudCanvas.addEventListener('click', (e) ->
-  surface.addEventListener('click', (e) ->
+
+  clickHandler = (e) ->
     UI.onMouseClick(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
     # msgBox.click(e.clientX, e.clientY)
@@ -464,41 +461,41 @@ main = ->
       gameFrame.mouseMove(x, y)
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
-  )
 
-  # hudCanvas.addEventListener('mousedown', (e) ->
-  surface.addEventListener('mousedown', (e) ->
+  mouseDownHandler = (e) ->
     if not frameElement.mouseDown(e.clientX, e.clientY) and
         not cameraHudFrame.mouseDown(e.clientX, e.clientY)
       drag = true
       prevPos = {x: e.clientX, y: e.clientY}
       gameFrame.mouseDown(e.clientX, e.clientY)
-  )
 
-  # hudCanvas.addEventListener('mouseup', (e) ->
-  surface.addEventListener('mouseup', (e) ->
+  mouseUpHandler = (e) ->
     drag = false
     frameElement.mouseUp()
     cameraHudFrame.mouseUp()
     gameFrame.mouseUp()
-  )
 
-  # hudCanvas.addEventListener('mouseout', (e) ->
-  surface.addEventListener('mouseout', (e) ->
+  mouseOutHandler = (e) ->
     # frameElement.mouseOut()
     # cameraHudFrame.mouseOut()
     # gameFrame.mouseOut()
-    drag = false)
+    drag = false
 
   mouseWheelHandler = (e) ->
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz)
 
+  window.onresize = onResize
+  document.body.addEventListener('keydown', keyDownListener)
+  window.onbeforeunload = onBeforeUnload
+  surface.addEventListener('mousemove', mouseMoveHandler)
+  surface.addEventListener('click', clickHandler)
+  surface.addEventListener('mousedown', mouseDownHandler)
+  surface.addEventListener('mouseup', mouseUpHandler)
+  surface.addEventListener('mouseout', mouseOutHandler)
   document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
-
   document.body.addEventListener('mousewheel', mouseWheelHandler)
-
 
   ##################################################################################
   # Draw loop

@@ -21,7 +21,7 @@ class Menu extends Mission
     # Create planets:
     newGame(10000, 10000, true)
     @Names = ["Home", "Missions", "Mission 1", "Mission 2", "Mission 3",
-              "Extermination", "Credits"]
+              "Extermination", "Small", "Medium", "Large", "Credits"]
     @Planets =
       Home: new Planet(@settings.home.x, @settings.home.y)
       Missions: new Planet(@settings.missions.x, @settings.missions.y)
@@ -30,6 +30,9 @@ class Menu extends Mission
       Mission3: new Planet(@settings.mission3.x, @settings.mission3.y)
       Extermination: new Planet(@settings.extermination.x,
                                 @settings.extermination.y)
+      Small: new Planet(@settings.small.x, @settings.small.y)
+      Medium: new Planet(@settings.medium.x, @settings.medium.y)
+      Large: new Planet(@settings.large.x, @settings.large.y)
       Credits: new Planet(-400, 150)
 
     # Set visibilities
@@ -39,6 +42,9 @@ class Menu extends Mission
     @Planets.Mission2.setVisibility(window.config.visibility.discovered)
     @Planets.Mission3.setVisibility(window.config.visibility.discovered)
     @Planets.Extermination.setVisibility(window.config.visibility.discovered)
+    @Planets.Small.setVisibility(window.config.visibility.discovered)
+    @Planets.Medium.setVisibility(window.config.visibility.discovered)
+    @Planets.Large.setVisibility(window.config.visibility.discovered)
     @Planets.Credits.setVisibility(window.config.visibility.discovered)
 
     if @progress < 2
@@ -54,6 +60,9 @@ class Menu extends Mission
     game.addPlanet(@Planets.Mission2)
     game.addPlanet(@Planets.Mission3)
     game.addPlanet(@Planets.Extermination)
+    game.addPlanet(@Planets.Small)
+    game.addPlanet(@Planets.Medium)
+    game.addPlanet(@Planets.Large)
     game.addPlanet(@Planets.Credits)
 
     # Add connections to game
@@ -63,6 +72,9 @@ class Menu extends Mission
     game.setNeighbors(@Planets.Missions, @Planets.Mission1)
     game.setNeighbors(@Planets.Missions, @Planets.Mission2)
     game.setNeighbors(@Planets.Missions, @Planets.Mission3)
+    game.setNeighbors(@Planets.Extermination, @Planets.Small)
+    game.setNeighbors(@Planets.Extermination, @Planets.Medium)
+    game.setNeighbors(@Planets.Extermination, @Planets.Large)
 
     # Add probe to Home planet
     @Planets.Home.addShips(window.config.units.probe, 1)
@@ -79,7 +91,9 @@ class Menu extends Mission
     cameraHudFrame.removeChild(@mission1Menu)
     cameraHudFrame.removeChild(@mission2Menu)
     cameraHudFrame.removeChild(@mission3Menu)
-    cameraHudFrame.removeChild(@exterminationMenu)
+    cameraHudFrame.removeChild(@smallMenu)
+    cameraHudFrame.removeChild(@mediumMenu)
+    cameraHudFrame.removeChild(@largeMenu)
     cameraHudFrame.removeChild(@creditsMenu)
     if @gameCompleteMenu
       cameraHudFrame.removeChild(@gameCompleteMenu)
@@ -94,8 +108,12 @@ class Menu extends Mission
       newMission(Mission2))
     @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
       newMission(Mission3))
-    @exterminationMenu = @_createMenu(@settings.extermination.menu, () =>
-      newMission(Extermination))
+    @smallMenu = @_createMenu(@settings.small.menu, () =>
+      newMission(ExterminationSmall))
+    @mediumMenu = @_createMenu(@settings.medium.menu, () =>
+      newMission(ExterminationMedium))
+    @largeMenu = @_createMenu(@settings.large.menu, () =>
+      newMission(ExterminationLarge))
 
     c = new Elements.Button(200 - 10, 10, 16, 16,
       () =>
@@ -286,11 +304,21 @@ class Menu extends Mission
         @mission3Menu.open()
       else
         @mission3Menu.close()
-      if @lastPlanet == @Planets.Extermination
-        Logger.logEvent("Showing extermination menu")
-        @exterminationMenu.open()
+      if @lastPlanet == @Planets.Small
+        Logger.logEvent("Showing extermination small menu")
+        @smallMenu.open()
       else
-        @exterminationMenu.close()
+        @smallMenu.close()
+      if @lastPlanet == @Planets.Medium
+        Logger.logEvent("Showing extermination medium menu")
+        @mediumMenu.open()
+      else
+        @mediumMenu.close()
+      if @lastPlanet == @Planets.Large
+        Logger.logEvent("Showing extermination large menu")
+        @largeMenu.open()
+      else
+        @largeMenu.close()
       if @lastPlanet == @Planets.Credits
         Logger.logEvent("Showing credits")
         @creditsMenu.open()
