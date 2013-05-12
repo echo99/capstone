@@ -18,10 +18,11 @@ main = ->
     reqPath = url.parse(request.url).pathname
     if reqPath == '/'
       reqPath = '/index.html'
-    console.log 'Requested path: ' + reqPath
+    sys.puts 'Requested path: ' + reqPath
     fullPath = path.join dir, reqPath
     path.exists fullPath, (exists) ->
       if not exists
+        sys.puts '  Error: Requested path not found!'
         response.writeHeader 404,
           'Content-Type': 'text/plain'
         response.write '404 Not Found\n'

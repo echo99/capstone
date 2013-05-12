@@ -35,6 +35,9 @@ manifest = [
   ,
     src: 'assets/audio/empty_space_stage2.ogg'
     id: 'bgmusic2'
+  ,
+    src: 'assets/audio/dark_space.ogg|assets/audio/dark_space.mp3'
+    id: 'bgmusic3'
 ]
 
 bgmusic = null
@@ -47,7 +50,7 @@ createjs.Sound.addEventListener "loadComplete", ->
   if numLoaded >= numToLoad
     # Play music once all sounds have been loaded
     console.log('Finished loading sounds!')
-    bgmusic = createjs.Sound.play('bgmusic1', createjs.Sound.INTERRUPT_NONE,
+    bgmusic = createjs.Sound.play('bgmusic3', createjs.Sound.INTERRUPT_NONE,
       10, 0, -1, 0.5)
     # Start it off muted
     bgmusic.mute(true)
