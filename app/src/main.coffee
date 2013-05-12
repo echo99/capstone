@@ -9,6 +9,12 @@
 #_require gui/uielements
 #_require backend/Game
 
+# The chance that this game will be recorded
+RECORD_CHANCE = 1
+# Set playback to a string holding a file name that is a recorded game
+# to play that game back instead of playing the game yourself
+playback = null
+
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
 DOM_LOADED = false
@@ -83,7 +89,7 @@ currentTime = ->
 getMinutes = (ms) ->
   return (ms / 1000) / 60
 
-gameStart = currentTime()
+gameStart = null
 
 timeSinceStart = ->
   gameStart - new Date().getTime()
@@ -179,7 +185,17 @@ updateCanvases = (frame, canvases...) ->
 
 # The main method for the game
 main = ->
-  Math.seedrandom()
+  seed = Math.seedrandom()
+  # TODO:
+  #recording = false
+  #playback = false
+  #if playback != null
+  #  setup game playback
+  #  playback = true
+  #else if Math.random() < RECORD_CHANCE
+  #  setup game recorder (be sure to record the seed that is being used)
+  #  recording = true
+
   Logger.start()
   Logger.logEvent("Setting up frames")
   ##################################################################################
@@ -349,6 +365,10 @@ main = ->
   # Set event handlers
 
   onResize = ->
+    # TODO:
+    #if recording
+    #  record event "onResize" with no extra parameters
+
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
     updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
 
@@ -376,6 +396,10 @@ main = ->
     # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
   keyDownListener = (e) ->
+    # TODO:
+    #if recording
+    #  record event "keyDown" with parameter e
+
     if e.keyCode == KeyCodes.HOME
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
@@ -414,6 +438,10 @@ main = ->
   drag = false
 
   mouseMoveHandler = (e) ->
+    # TODO:
+    #if recording
+    #  record event "mouseMove" with parameter e
+
     x = e.clientX
     y = e.clientY
     UI.onMouseMove(x, y)
@@ -452,6 +480,10 @@ main = ->
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
 
   clickHandler = (e) ->
+    # TODO:
+    #if recording
+    #  record event "click" with parameter e
+
     UI.onMouseClick(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
     # msgBox.click(e.clientX, e.clientY)
@@ -467,6 +499,10 @@ main = ->
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
   mouseDownHandler = (e) ->
+    # TODO:
+    #if recording
+    #  record event "mouseDown" with parameter e
+
     if not frameElement.mouseDown(e.clientX, e.clientY) and
         not cameraHudFrame.mouseDown(e.clientX, e.clientY)
       drag = true
@@ -474,22 +510,36 @@ main = ->
       gameFrame.mouseDown(e.clientX, e.clientY)
 
   mouseUpHandler = (e) ->
+    # TODO:
+    #if recording
+    #  record event "mouseUp" with parameter e
+
     drag = false
     frameElement.mouseUp()
     cameraHudFrame.mouseUp()
     gameFrame.mouseUp()
 
   mouseOutHandler = (e) ->
+    # TODO:
+    #if recording
+    #  record event "mousOut" with parameter e
+
     # frameElement.mouseOut()
     # cameraHudFrame.mouseOut()
     # gameFrame.mouseOut()
     drag = false
 
   mouseWheelHandler = (e) ->
+    # TODO:
+    #if recording
+    #  record event "mousWheel" with parameter e
+
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz)
 
+  #if playback != null
+  #  register events with the recorder instead of the document/surface
   window.onresize = onResize
   document.body.addEventListener('keydown', keyDownListener)
   window.onbeforeunload = onBeforeUnload
@@ -503,6 +553,7 @@ main = ->
 
   ##################################################################################
   # Draw loop
+
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
@@ -527,3 +578,9 @@ main = ->
   else
     Logger.logEvent("Beginning draw loop")
     setInterval draw, 30
+    gameStart = currentTime()
+    # TODO:
+    #if recording
+    #  start recording
+    #else if playback
+    #  start playback
