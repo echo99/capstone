@@ -41,6 +41,15 @@ NODE_DIR = ".#{SLASH}node_modules"
 NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
 RHINO_DIR = "vendor#{SLASH}tools"
 HOME_FROM_RHINO = "..#{SLASH}.."
+
+VENDOR_JS_FILES = [
+  'browserdetect.js'
+  'jquery-1.9.1.min.js'
+  'jqModal.js'
+  'soundjs-0.4.0.min.js'
+  'soundjs.flashplugin-0.4.0.min.js'
+  'seedrandom.js'
+]
 # if process.platform == 'win32'
 #   APP_JS = 'public\\app.js'
 #   VENDOR_JS = 'public\\vendor.js'
@@ -288,14 +297,7 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
   scripts = ''
   dir = VENDOR_DIR
   # files = fs.readdirSync dir
-  files = [
-    'browserdetect.js',
-    'jquery-1.9.1.min.js',
-    'jqModal.js',
-    'soundjs-0.4.0.min.js',
-    'soundjs.flashplugin-0.4.0.min.js'
-  ]
-  for file in files
+  for file in VENDOR_JS_FILES
     contents = fs.readFileSync (dir+'/'+file), 'utf8'
     scripts += contents + "\n"
     #name = file.replace /\..*/, '' # remove extension
