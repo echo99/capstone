@@ -5,7 +5,6 @@ if exports?
   {config} = require '../config'
   {ControlGroup} = require './ControlGroup'
   {AI} = require './AI'
-  console.log(AI)
   root.config = config
 
 #_require ControlGroup
@@ -220,7 +219,7 @@ class Planet
   # Set sprite
   setSprite: (sprite) ->
     @_sprite = sprite
-  
+
   # Sets the visibility state to either visible, discovered or undiscovered
   #
   setVisibility: (state) ->

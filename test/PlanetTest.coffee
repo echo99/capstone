@@ -37,6 +37,23 @@ suite 'Planet', ->
       assert.doesNotThrow(-> testPlanet.buildUpkeep())
       assert.equal(testPlanet._probes, 1, 'Probe was added to probe count.')
 
+  suite '#visibility', ->
+    visibility = config.visibility
+
+    test 'should be visible when a probe is in a control group', ->
+      # Create planets
+      planet1 = new Planet(0, 0)
+      planet2 = new Planet(100, 0)
+      planet1.addNeighbor(planet2)
+      planet1.addShips(config.units.probe, 1)
+      planet1.moveShips(0, 0, 1, 0, planet2)
+      planet1.visibilityUpkeep()
+      planet2.visibilityUpkeep()
+      assert.equal(planet1.visibility(), visibility.visible,
+        'Planet 1 should be visible')
+      assert.equal(planet2.visibility(), visibility.visible,
+        'Planet 2 should be visible')
+
   suite '#gatherResources', ->
     suite 'Planet with 4 resources and rate 3', ->
       planet = null
