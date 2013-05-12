@@ -1165,7 +1165,7 @@ class UserInterface
         groupDisplay = @_getExpandedDisplay(controlGameLoc, groups, previous)
 
         controlGroup = @_getCollapsedDisplay(controlGameLoc, groupDisplay)
-        @_setHandler(groupDisplay, controlGroup)
+        @_setHandler(groupDisplay, controlGroup, controlGameLoc, groups)
 
         @controlGroups.push(controlGroup)
         controlGroup.setZIndex(100)
@@ -1179,44 +1179,6 @@ class UserInterface
     w = window.config.controlGroup.expandedWidth
     h = window.config.controlGroup.expandedHeight * groups.length
     groupDisplay = new Elements.BoxElement(-1000, -1000, w, h)
-    clear = (ctx) =>
-      ctx.fillStyle = winStyle.fill
-      ctx.strokeStyle = winStyle.stroke
-      ctx.lineJoin = winStyle.lineJoin
-      ctx.lineWidth = winStyle.lineWidth
-
-      loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
-      ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
-                    loc.y - winStyle.lineWidth/2 - 1,
-                    w + winStyle.lineWidth + 2,
-                    h + winStyle.lineWidth + 2,)
-
-    groupDisplay.setClearFunc(clear)
-    groupDisplay.setDrawFunc(
-      (ctx) =>
-        clear(ctx)
-        winStyle = window.config.windowStyle
-        ctx.fillStyle = winStyle.fill
-        ctx.strokeStyle = winStyle.stroke
-        ctx.lineJoin = winStyle.lineJoin
-        ctx.lineWidth = winStyle.lineWidth
-
-        loc = camera.getScreenCoordinates(controlGameLoc)
-        groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
-
-        ctx.fillRect(loc.x, loc.y, w, h)
-        ctx.strokeRect(loc.x, loc.y, w, h)
-
-        offset = 0
-        height = window.config.controlGroup.expandedHeight
-        for g in groups
-          # Draw divider
-          ctx.beginPath()
-          ctx.moveTo(loc.x, loc.y + offset)
-          ctx.lineTo(loc.x + w, loc.y + offset)
-          ctx.stroke()
-          offset += height
-    )
 
     height = window.config.controlGroup.expandedHeight
     y = height/2
@@ -1290,7 +1252,53 @@ class UserInterface
     )
     return button
 
-  _setHandler: (groupDisplay, controlGroup) ->
+  _setHandler: (groupDisplay, controlGroup, controlGameLoc, groups) ->
+    winStyle = window.config.windowStyle
+    h = groupDisplay.h
+    w = groupDisplay.w
+    clear = (ctx) =>
+      ctx.fillStyle = winStyle.fill
+      ctx.strokeStyle = winStyle.stroke
+      ctx.lineJoin = winStyle.lineJoin
+      ctx.lineWidth = winStyle.lineWidth
+
+      loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
+      ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
+                    loc.y - winStyle.lineWidth/2 - 1,
+                    w + winStyle.lineWidth + 2,
+                    h + winStyle.lineWidth + 2,)
+
+    groupDisplay.setClearFunc(clear)
+    groupDisplay.setDrawFunc(
+      (ctx) =>
+        clear(ctx)
+        winStyle = window.config.windowStyle
+        ctx.fillStyle = winStyle.fill
+        ctx.strokeStyle = winStyle.stroke
+        ctx.lineJoin = winStyle.lineJoin
+        ctx.lineWidth = winStyle.lineWidth
+
+        loc = camera.getScreenCoordinates(controlGameLoc)
+        groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
+
+        ctx.fillRect(loc.x, loc.y, w, h)
+        ctx.strokeRect(loc.x, loc.y, w, h)
+
+        offset = 0
+        height = window.config.controlGroup.expandedHeight
+        for g in groups
+          # Draw divider
+          ctx.beginPath()
+          ctx.moveTo(loc.x, loc.y + offset)
+          ctx.lineTo(loc.x + w, loc.y + offset)
+          ctx.stroke()
+          offset += height
+        if not groupDisplay.isHovered() and
+           groupDisplay.visible and not controlGroup.visible
+          controlGroup.open()
+          groupDisplay.close()
+    )
+
     groupDisplay.setMouseOutHandler(
       () =>
         if groupDisplay.visible and not controlGroup.visible

@@ -85,6 +85,9 @@ getMinutes = (ms) ->
 
 gameStart = currentTime()
 
+timeSinceStart = ->
+  gameStart - new Date().getTime()
+
 SpriteNames = window.config.spriteNames
 
 frameElement = null
@@ -176,6 +179,7 @@ updateCanvases = (frame, canvases...) ->
 
 # The main method for the game
 main = ->
+  Math.seedrandom()
   Logger.start()
   Logger.logEvent("Setting up frames")
   ##################################################################################
