@@ -620,6 +620,14 @@ class Elements.UIElement extends Module
     # if
     @resizeHandler?()
 
+  # Set hovering state of the element
+  #
+  # @param [Boolean] hovering
+  #
+  setHovering: (hovering) ->
+    @_hovering = hovering
+    @_parent?.hoveredChild or= hovering
+
   # Get the hover status of this element
   #
   # @return [Boolean] Whether or not this element is currently being hovered over
