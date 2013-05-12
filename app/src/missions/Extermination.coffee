@@ -6,6 +6,13 @@ class Extermination extends Mission
 
   # @see Mission#reset
   reset: ->
+    @attempts = localStorage["extermination_attempts"]
+    if not @attempts
+      @attempts = 0
+    @attempts++
+    localStorage["extermination_attempts"] = Number(@attempts)
+    Logger.logEvent("Starting Extermination", {attempt: @attempts})
+
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
@@ -44,24 +51,15 @@ class Extermination extends Mission
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
 
+    Logger.logEvent("Leaving Extermination")
+    Logger.send()
+
   _initMenus: ->
-    @victoryMenu = @createVictoryMenu(
-      () =>
-        console.log('restart extermination')
-        newMission(Extermination)
-      () =>
-        console.log('to next mission')
-        newMission(Menu)
-    )
-    @failMenu = @createFailMenu(
-      () =>
-        console.log('restart extermination')
-        newMission(Extermination)
-    )
-    @optionsMenu = @createOptionMenu(
-      () =>
-        newMission(Extermination)
-    )
+    restart = () => newMission(Extermination)
+    next = () => newMission(Menu)
+    @victoryMenu = @createVictoryMenu(restart, next)
+    @failMenu = @createFailMenu(restart)
+    @optionsMenu = @createOptionMenu(restart)
     @menuButton = @createMenuButton(@optionsMenu)
 
   # @see Mission#draw
@@ -115,6 +113,9 @@ class Extermination extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Logger.logEvent("Player successfully completed Extermination",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -138,6 +139,9 @@ class Extermination extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Logger.logEvent("Player failed Extermination",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

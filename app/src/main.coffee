@@ -134,7 +134,6 @@ newGame = (w, h, move) ->
   game = new Game(w, h, move)
 
 endTurn = () ->
-  Logger.logEvent("End turn")
   Logger.send()
   game.endTurn()
   UI.endTurn()

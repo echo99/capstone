@@ -4,12 +4,12 @@ class Mission2 extends Mission
   settings2: window.config.Missions.two
   # @see Mission#reset
   reset: ->
-    attempts = localStorage["mission 2 attempts"]
-    if not attempts
-      attempts = 1
-    else
-      localStorage["mission 2 attempts"] = attempts + 1
-    Logger.logEvent("Starting Mission 2", attempts)
+    @attempts = localStorage["mission_2_attempts"]
+    if not @attempts
+      @attempts = 0
+    @attempts++
+    localStorage["mission_2_attempts"] = Number(@attempts)
+    Logger.logEvent("Starting Mission 2", {attempt: @attempts})
 
     @failed = false
 
@@ -192,7 +192,7 @@ class Mission2 extends Mission
       if current < 3
         localStorage["progress"] = 3
         Logger.logEvent("Player completed Mission 2 for the first time",
-                        {attempts: attempts})
+                        {attempts: @attempts})
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
@@ -213,6 +213,7 @@ class Mission2 extends Mission
         })
         Logger.logEvent("Player successfully completed Mission 2",
                         {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
                         resources: totalResources})
       @gameEnded = true
       UI.endGame()
@@ -240,6 +241,7 @@ class Mission2 extends Mission
         })
         Logger.logEvent("Player failed Mission 2",
                         {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
                         resources: totalResources
                         max_possible: totalResources + possibleResources
                         colony_ship: hasColonyShip

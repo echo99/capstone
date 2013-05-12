@@ -128,7 +128,7 @@ class Menu extends Mission
     cameraHudFrame.addChild(@creditsMenu)
 
     if @progress > @numMissions and @seenGameComplete == 'false'
-      Logger.log("Showing mission complete menu")
+      Logger.logEvent("Showing mission complete menu")
       close = new Elements.Button(500 - 10, 10, 16, 16,
         () =>
           @gameCompleteMenu.close()

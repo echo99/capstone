@@ -4,12 +4,12 @@ class Mission3 extends Mission
   settings3: window.config.Missions.three
   # @see Mission#reset
   reset: ->
-    attempts = localStorage["mission 3 attempts"]
-    if not attempts
-      attempts = 1
-    else
-      localStorage["mission 3 attempts"] = attempts + 1
-    Logger.logEvent("Starting Mission 3", attempts)
+    @attempts = localStorage["mission_3_attempts"]
+    if not @attempts
+      @attempts = 0
+    @attempts++
+    localStorage["mission_3_attempts"] = Number(@attempts)
+    Logger.logEvent("Starting Mission 3", {attempt: @attempts})
 
     @failed = false
 
@@ -240,7 +240,7 @@ class Mission3 extends Mission
       if current < 4
         localStorage["progress"] = 4
         Logger.logEvent("Player completed Mission 3 for the first time",
-                        {attempts: attempts})
+                        {attempts: @attempts})
       if not @gameEnded
         @endTime = currentTime()
         ga('send', {
@@ -261,6 +261,7 @@ class Mission3 extends Mission
         })
         Logger.logEvent("Player successfully completed Mission 3",
                         {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
                         resources: totalResources})
       @gameEnded = true
       UI.endGame()
@@ -287,6 +288,7 @@ class Mission3 extends Mission
         })
         Logger.logEvent("Player failed Mission 3",
                         {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
                         resources: totalResources
                         max_possible: totalResources + possibleResources})
       @gameEnded = true
