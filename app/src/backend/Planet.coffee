@@ -227,6 +227,9 @@ class Planet
        (state is root.config.visibility.discovered) or
        (state is root.config.visibility.undiscovered)
       @_visibility = state
+      if (state is root.config.visibility.visible) or
+         (state is root.config.visibility.discovered)
+        @_hasBeenSeen = true
     else
       throw Error "Invalid Visibility"
 

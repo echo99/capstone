@@ -8,6 +8,7 @@
 #_require util/Camera
 #_require gui/uielements
 #_require backend/Game
+#_require util/EventRecorder
 
 # The chance that this game will be recorded
 RECORD_CHANCE = 1
@@ -95,7 +96,7 @@ getMinutes = (ms) ->
 gameStart = null
 
 timeSinceStart = ->
-  gameStart - new Date().getTime()
+  return currentTime() - gameStart
 
 SpriteNames = window.config.spriteNames
 
@@ -189,15 +190,12 @@ updateCanvases = (frame, canvases...) ->
 # The main method for the game
 main = ->
   seed = Math.seedrandom()
-  # TODO:
-  #recording = false
-  #playback = false
-  #if playback != null
-  #  setup game playback
-  #  playback = true
-  #else if Math.random() < RECORD_CHANCE
-  #  setup game recorder (be sure to record the seed that is being used)
-  #  recording = true
+  recording = false
+  if playback != null
+    eventPlay = new EventPlayback(playback)
+  else if Math.random() < RECORD_CHANCE
+    eventRec = new EventRecorder(seed, currentTime())
+    recording = true
 
   Logger.start()
   Logger.logEvent("Setting up frames")
@@ -368,9 +366,9 @@ main = ->
   # Set event handlers
 
   onResize = ->
-    # TODO:
-    #if recording
-    #  record event "onResize" with no extra parameters
+    if recording
+      eventRec.recordEvent("onResize",
+        {width: window.outerWidth, height: window.outerHeight})
 
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
     updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
@@ -399,15 +397,15 @@ main = ->
     # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
   keyDownListener = (e) ->
-    # TODO:
-    #if recording
-    #  record event "keyDown" with parameter e
+    if recording
+      eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
 
     if e.keyCode == KeyCodes.HOME
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
       Logger.logEvent("Pressed SPACE")
+      #window.resizeTo(window.outerWidth + 20, window.outerHeight + 20)
       endTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
       Logger.logEvent("Pressed +")
@@ -425,6 +423,8 @@ main = ->
   onBeforeUnload = (e) ->
     Logger.logEvent("Trying to leave")
     Logger.send(false)
+    if eventRec
+      eventRec.send(false)
     # No progress can be lost in the menu
     if (not (CurrentMission instanceof Menu))
       if (not e)
@@ -440,9 +440,9 @@ main = ->
   drag = false
 
   mouseMoveHandler = (e) ->
-    # TODO:
-    #if recording
-    #  record event "mouseMove" with parameter e
+    if recording
+      eventRec.recordEvent("mouseMove",
+        {clientX: e.clientX, clientY: e.clientY})
 
     x = e.clientX
     y = e.clientY
@@ -482,9 +482,9 @@ main = ->
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
 
   clickHandler = (e) ->
-    # TODO:
-    #if recording
-    #  record event "click" with parameter e
+    if recording
+      eventRec.recordEvent("click",
+        {clientX: e.clientX, clientY: e.clientY})
 
     UI.onMouseClick(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
@@ -501,9 +501,9 @@ main = ->
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
   mouseDownHandler = (e) ->
-    # TODO:
-    #if recording
-    #  record event "mouseDown" with parameter e
+    if recording
+      eventRec.recordEvent("mouseDown",
+        {clientX: e.clientX, clientY: e.clientY})
 
     if not frameElement.mouseDown(e.clientX, e.clientY) and
         not cameraHudFrame.mouseDown(e.clientX, e.clientY)
@@ -512,9 +512,8 @@ main = ->
       gameFrame.mouseDown(e.clientX, e.clientY)
 
   mouseUpHandler = (e) ->
-    # TODO:
-    #if recording
-    #  record event "mouseUp" with parameter e
+    if recording
+      eventRec.recordEvent("mouseUp", {})
 
     drag = false
     frameElement.mouseUp()
@@ -522,9 +521,8 @@ main = ->
     gameFrame.mouseUp()
 
   mouseOutHandler = (e) ->
-    # TODO:
-    #if recording
-    #  record event "mousOut" with parameter e
+    if recording
+      eventRec.recordEvent("mouseOut", {})
 
     # frameElement.mouseOut()
     # cameraHudFrame.mouseOut()
@@ -532,26 +530,34 @@ main = ->
     drag = false
 
   mouseWheelHandler = (e) ->
-    # TODO:
-    #if recording
-    #  record event "mousWheel" with parameter e
+    if recording
+      eventRec.recordEvent("mouseWheel",
+        {wheelDelta: e.wheelDelta, detail: e.detail})
 
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz)
 
-  #if playback != null
-  #  register events with the recorder instead of the document/surface
-  window.onresize = onResize
-  document.body.addEventListener('keydown', keyDownListener)
-  window.onbeforeunload = onBeforeUnload
-  surface.addEventListener('mousemove', mouseMoveHandler)
-  surface.addEventListener('click', clickHandler)
-  surface.addEventListener('mousedown', mouseDownHandler)
-  surface.addEventListener('mouseup', mouseUpHandler)
-  surface.addEventListener('mouseout', mouseOutHandler)
-  document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
-  document.body.addEventListener('mousewheel', mouseWheelHandler)
+  if playback
+    eventPlay.registerEvent("onResize", onResize)
+    eventPlay.registerEvent("keyDown", keyDownListener)
+    eventPlay.registerEvent("mouseMove", mouseMoveHandler)
+    eventPlay.registerEvent("click", clickHandler)
+    eventPlay.registerEvent("mouseDown", mouseDownHandler)
+    eventPlay.registerEvent("mouseUp", mouseUpHandler)
+    eventPlay.registerEvent("mouseOut", mouseOutHandler)
+    eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
+  else
+    window.onresize = onResize
+    document.body.addEventListener('keydown', keyDownListener)
+    window.onbeforeunload = onBeforeUnload
+    surface.addEventListener('mousemove', mouseMoveHandler)
+    surface.addEventListener('click', clickHandler)
+    surface.addEventListener('mousedown', mouseDownHandler)
+    surface.addEventListener('mouseup', mouseUpHandler)
+    surface.addEventListener('mouseout', mouseOutHandler)
+    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
+    document.body.addEventListener('mousewheel', mouseWheelHandler)
 
   ##################################################################################
   # Draw loop
@@ -580,9 +586,7 @@ main = ->
   else
     Logger.logEvent("Beginning draw loop")
     setInterval draw, 30
+
     gameStart = currentTime()
-    # TODO:
-    #if recording
-    #  start recording
-    #else if playback
-    #  start playback
+    if playback
+      eventPlay.beginPlayback()
