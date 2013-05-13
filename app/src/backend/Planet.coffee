@@ -398,11 +398,14 @@ class Planet
   #
   # @throw [Error] If there is no immediate path.
   sendUnits: (planet) ->
-    path = AI.getPath(@, planet)
-    if path is []
-      throw new Error("There is no path between the two planets")
-    # There is a valid path between them
-    @_sendingUnitsTo = planet
+    if planet == @
+      @_sendingUnitsTo = null
+    else
+      path = AI.getPath(@, planet)
+      if path is []
+        throw new Error("There is no path between the two planets")
+      # There is a valid path between them
+      @_sendingUnitsTo = planet
 
   # Stop sending ships to another planet
   #
@@ -619,13 +622,13 @@ class Planet
           if @_sendingUnitsTo != null
             switch unit
               when root.config.units.probe
-                moveShips(0, 0, 1, 0, @_sendingUnitsTo)
+                @moveShips(0, 0, 1, 0, @_sendingUnitsTo)
               when root.config.units.colonyShip
-                moveShips(0, 0, 0, 1, @_sendingUnitsTo)
+                @moveShips(0, 0, 0, 1, @_sendingUnitsTo)
               when root.config.units.attackShip
-                moveShips(1, 0, 0, 0, @_sendingUnitsTo)
+                @moveShips(1, 0, 0, 0, @_sendingUnitsTo)
               when root.config.units.defenseShip
-                moveShips(0, 1, 0, 0, @_sendingUnitsTo)
+                @moveShips(0, 1, 0, 0, @_sendingUnitsTo)
               else throw new Error("Ship type unknown.")
 
   # Create new resource carriers if sending and can afford it.

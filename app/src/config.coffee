@@ -115,6 +115,10 @@ root.config =
     pathColor: "rgba(0, 40, 255, 0.8)"
     pathWidth: 6
     finishRadius: 30
+  rallyPoint:
+    color: "rgba(0, 255, 0, 0.8)"
+    width: 2
+    radius: 40
   unitDisplay:
     location: {x: -220, y: -70}
     fill: "rgba(255, 255, 0, 0.5)"
@@ -179,6 +183,10 @@ root.config =
       imgLoc: {x: 332+32/2, y: 10+20+32/2+70}
       costLoc: {x: 332+45, y: 10+20+70}
       turnsLoc: {x: 332+45, y: 10+20+20+70}
+    rallyLoc: {x: 130, y: 20}
+    rallySize: {w: 112, h: 20}
+    cancelRallyLoc: {x: 112, y: 20}
+    cancelRallySize: {w: 106, h: 20}
   outpostMenuStyle:
     location: {x: 120, y: 5}
     width: 200
@@ -272,6 +280,8 @@ root.config =
       ['stop_sending_button_hover.png'])
     MENU_BUTTON_IDLE: new AnimatedSprite(['menu_button_idle.png'])
     MENU_BUTTON_HOVER: new AnimatedSprite(['menu_button_hover.png'])
+    RALLY_BUTTON_IDLE: new AnimatedSprite(['rally_button_idle.png'])
+    RALLY_BUTTON_HOVER: new AnimatedSprite(['rally_button_hover.png'])
   Missions:
     w: 244
     h: 60

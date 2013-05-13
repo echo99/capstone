@@ -14,6 +14,7 @@ class UserInterface
   hoveredGroup: null
   turns: 0
   lookingToSendResources: false
+  lookingToSetRally: false
   carrierCount: 0
   movingElements: []
   showAll: false
@@ -84,6 +85,48 @@ class UserInterface
     h = (stationStyle.height - winStyle.lineWidth / 2) - y
     defenseButton = @_getStationButton(x, y, w, h, window.config.units.defenseShip)
 
+    x = stationStyle.rallyLoc.x
+    y = stationStyle.rallyLoc.y
+    w = stationStyle.rallySize.w
+    h = stationStyle.rallySize.h
+    stationRally = new Elements.Button(x, y, w, h)
+    stationRally.setProperty("location",
+      @stationMenu.getActualLocation(stationRally.x, stationRally.y))
+    stationRally.setClickHandler(() =>
+      @lookingToSetRally = true
+    )
+    stationRally.setDrawFunc((ctx) =>
+      loc = stationRally.getProperty("location")
+      if stationRally.isPressed()
+        SHEET.drawSprite(SpriteNames.RALLY_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.RALLY_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    stationRally.visible = true
+
+    x = stationStyle.cancelRallyLoc.x
+    y = stationStyle.cancelRallyLoc.y
+    w = stationStyle.cancelRallySize.w
+    h = stationStyle.cancelRallySize.h
+    stationCancelRally = new Elements.Button(x, y, w, h)
+    stationCancelRally.setProperty("location",
+      @stationMenu.getActualLocation(stationCancelRally.x, stationCancelRally.y))
+    stationCancelRally.setClickHandler(() =>
+      @lookingToSetRally = false
+    )
+    stationCancelRally.setDrawFunc((ctx) =>
+      loc = stationCancelRally.getProperty("location")
+      if stationCancelRally.isPressed()
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    stationCancelRally.visible = false
+
     x = stationStyle.cancelLoc.x
     y = stationStyle.cancelLoc.y
     w = stationStyle.cancelSize.w
@@ -109,8 +152,14 @@ class UserInterface
     @stationMenu.addChild(attackButton)
     @stationMenu.addChild(defenseButton)
     @stationMenu.addChild(cancelBuild)
+    @stationMenu.addChild(stationRally)
+    @stationMenu.addChild(stationCancelRally)
     @stationMenu.setProperty("cancelButton", cancelBuild)
     @stationMenu.setProperty("cancelOpen", false)
+    @stationMenu.setProperty("rallyButton", stationRally)
+    @stationMenu.setProperty("rallyOpen", true)
+    @stationMenu.setProperty("cancelRallyButton", stationCancelRally)
+    @stationMenu.setProperty("cancelRallyOpen", false)
     @stationMenu.visible = false
     frameElement.addChild(@stationMenu)
 
@@ -465,6 +514,21 @@ class UserInterface
         @stationMenu.getProperty("cancelButton").close()
         @stationMenu.setProperty("cancelOpen", false)
 
+    if @lookingToSetRally
+      if @stationMenu.getProperty("rallyOpen")
+        @stationMenu.getProperty("rallyButton").close()
+        @stationMenu.setProperty("rallyOpen", false)
+      if not @stationMenu.getProperty("cancelRallyOpen")
+        @stationMenu.getProperty("cancelRallyButton").open()
+        @stationMenu.setProperty("cancelRallyOpen", true)
+    else
+      if @stationMenu.getProperty("cancelRallyOpen")
+        @stationMenu.getProperty("cancelRallyButton").close()
+        @stationMenu.setProperty("cancelRallyOpen", false)
+      if not @stationMenu.getProperty("rallyOpen")
+        @stationMenu.getProperty("rallyButton").open()
+        @stationMenu.setProperty("rallyOpen", true)
+
   _drawUnitBlock: (ctx, title, loc, unit, unitConfig, sprite) =>
     x = loc.x + unitConfig.labelLoc.x
     y = loc.y + unitConfig.labelLoc.y
@@ -766,6 +830,9 @@ class UserInterface
         if planet.hasStation() and @selectedPlanet != planet
           @selectedPlanet.sendResources(planet)
           @lookingToSendResources = false
+      else if @lookingToSetRally
+        @selectedPlanet.sendUnits(planet)
+        @lookingToSetRally = false
       else
         if @selectedPlanet == planet
           @stationMenu.close()
@@ -1040,6 +1107,8 @@ class UserInterface
           tooltipCtx.fillText("Valid destination", x, y)
         else
           tooltipCtx.fillText("Invalid destination", x, y)
+      else if @lookingToSetRally
+        tooltipCtx.fillText("Set planet as unit rally point", x, y)
       else if @unitSelection.total > 0
         tooltipCtx.fillText("Move selected units", x, y)
       else if @hoveredPlanet.hasOutpost() or
@@ -1087,12 +1156,32 @@ class UserInterface
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
 
+    use = null
+    if @hoveredPlanet and @hoveredPlanet.hasStation()
+      use = @hoveredPlanet
+    else if @selectedPlanet and @selectedPlanet.hasStation()
+      use = @selectedPlanet
+    if use
+      if use._sendingUnitsTo
+        loc = use._sendingUnitsTo.location()
+      else
+        loc = use.location()
+      pos = camera.getScreenCoordinates(loc)
+      ctx.strokeStyle = window.config.rallyPoint.color
+      ctx.lineWidth = window.config.rallyPoint.width
+      r = (window.config.planetRadius + window.config.rallyPoint.radius) *
+        camera.getZoom()
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+      ctx.stroke()
+
     if @switchedMenus
       @stationMenu.setDirty()
       @outpostMenu.setDirty()
       @colonyMenu.setDirty()
 
-    if drag and not @hoveredPlanet and not @lookingToSendResources
+    if drag and not @hoveredPlanet and not @lookingToSendResources and
+       not @lookingToSetRally
       @stationMenu.close()
       @outpostMenu.close()
       @colonyMenu.close()
@@ -1372,8 +1461,8 @@ class UserInterface
           @stationMenu.open()
         else
           @selectedPlanet = null
-      else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
-              @colonyMenu.visible
+      else if (@selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
+              @colonyMenu.visible) or @selectedPlanet.hasOutpost()
         @colonyMenu.close()
         if @selectedPlanet.hasOutpost()
           @outpostMenu.open()
