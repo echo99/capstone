@@ -168,7 +168,8 @@ class Mission3 extends Mission
     game.setNeighbors(p15, p16)
     game.setNeighbors(p16, p17)
 
-    camera.setZoom(0.5)
+    camera.setZoom(0.1)
+    camera.setZoomTarget(0.5)
     camera.setTarget(@home.location())
 
     @_initMenus()

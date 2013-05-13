@@ -412,7 +412,6 @@ main = ->
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
       Logger.logEvent("Pressed +")
       nz = camera.getZoom() + window.config.ZOOM_SPEED
-      console.log('zoom in to ' + nz)
       camera.setZoom(nz)
     else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
       Logger.logEvent("Pressed -")

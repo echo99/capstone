@@ -35,18 +35,6 @@ class Menu extends Mission
       Large: new Planet(@settings.large.x, @settings.large.y)
       Credits: new Planet(-400, 150)
 
-    # Set visibilities
-    @Planets.Home.setVisibility(window.config.visibility.discovered)
-    @Planets.Missions.setVisibility(window.config.visibility.discovered)
-    @Planets.Mission1.setVisibility(window.config.visibility.discovered)
-    @Planets.Mission2.setVisibility(window.config.visibility.discovered)
-    @Planets.Mission3.setVisibility(window.config.visibility.discovered)
-    @Planets.Extermination.setVisibility(window.config.visibility.discovered)
-    @Planets.Small.setVisibility(window.config.visibility.discovered)
-    @Planets.Medium.setVisibility(window.config.visibility.discovered)
-    @Planets.Large.setVisibility(window.config.visibility.discovered)
-    @Planets.Credits.setVisibility(window.config.visibility.discovered)
-
     if @progress < 2
       @Planets.Mission2.setSprite(SpriteNames.PLANET_BLUE_FUNGUS)
     if @progress < 3
@@ -80,12 +68,21 @@ class Menu extends Mission
     @Planets.Home.addShips(window.config.units.probe, 1)
 
     @lastPlanet = @Planets.Home
-    camera.setZoom(0.5)
+    camera.setZoom(0.1)
+    camera.setZoomTarget(0.5)
     camera.setTarget(@Planets.Home.location())
 
     @_initMenus()
     game.endTurn()
     UI.initialize(true, false, false)
+
+    # Set visibilities
+    @Planets.Mission1.setVisibility(window.config.visibility.discovered)
+    @Planets.Mission2.setVisibility(window.config.visibility.discovered)
+    @Planets.Mission3.setVisibility(window.config.visibility.discovered)
+    @Planets.Small.setVisibility(window.config.visibility.discovered)
+    @Planets.Medium.setVisibility(window.config.visibility.discovered)
+    @Planets.Large.setVisibility(window.config.visibility.discovered)
 
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)
@@ -113,6 +110,7 @@ class Menu extends Mission
     @mediumMenu = @_createMenu(@settings.medium.menu, () =>
       newMission(ExterminationMedium))
     @largeMenu = @_createMenu(@settings.large.menu, () =>
+      camera.setZoom(0.1)
       newMission(ExterminationLarge))
 
     c = new Elements.Button(200 - 10, 10, 16, 16,
