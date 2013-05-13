@@ -417,9 +417,9 @@ main = ->
       Logger.logEvent("Pressed -")
       nz = camera.getZoom() - window.config.ZOOM_SPEED
       camera.setZoom(nz)
-    else if e.keyCode == KeyCodes.CHEAT
-      Logger.logEvent("Pressed CHEAT")
-      cheat = not cheat
+    #else if e.keyCode == KeyCodes.CHEAT
+    #  Logger.logEvent("Pressed CHEAT")
+    #  cheat = not cheat
 
   # Catch accidental leaving
   onBeforeUnload = (e) ->

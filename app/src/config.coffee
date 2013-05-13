@@ -186,7 +186,7 @@ root.config =
     rallyLoc: {x: 130, y: 20}
     rallySize: {w: 112, h: 20}
     cancelRallyLoc: {x: 112, y: 20}
-    cancelRallySize: {w: 106, h: 20}
+    cancelRallySize: {w: 60, h: 20}
   outpostMenuStyle:
     location: {x: 120, y: 5}
     width: 200
