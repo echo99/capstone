@@ -50,13 +50,23 @@ class Game
         @makeAdjacent(newPlanet)
         @_planets.push(newPlanet)
     placedFungus = false
-    while !placedFungus
+    planetsTried = []
+    chosenPlanet = null
+    chosenPlanetDistance = -1
+    while !placedFungus and planetsTried.length < @_planets.length
       fungusPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
-      if fungusPlanet.distance(homePlanet) >= root.config.minimumFungusDistance
-        placedFungus = true
-        fungusPlanet.setFungus(root.config.fungusInitialStrength)
-        fungusPlanet.getAdjacentPlanets()[0].setFungus(root.config.fungusInitialStrength)
-      
+      while fungusPlanet in planetsTried
+        fungusPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
+      planetsTried.push(fungusPlanet)
+      fungusPlanetDistance = fungusPlanet.distance(homePlanet)
+      if fungusPlanetDistance >= root.config.minimumFungusDistance or
+          (chosenPlanet is null or chosenPlanetDistance < fungusPlanetDistance)
+        placedFungus = fungusPlanetDistance >= root.config.minimumFungusDistance
+        chosenPlanet = fungusPlanet
+        chosenPlanetDistance = fungusPlanetDistance
+    chosenPlanet.setFungus(root.config.fungusInitialStrength)
+    chosenPlanet.getAdjacentPlanets()[0].setFungus(root.config.fungusInitialStrength)
+    
     @endTurn()
     return homePlanet
 
