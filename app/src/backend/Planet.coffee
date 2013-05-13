@@ -695,16 +695,18 @@ class Planet
   visibilityUpkeep: ->
     @_nextSend = null
     # If it has probes:
+    if @hasProbes()
+      @_lastSeenFungus = @_fungusStrength
+      @_lastSeenResources = @_resources
+    # If it has any units
     if @hasProbes() or
        @_attackShips > 0 or
        @_defenseShips > 0 or
-       @_colonies or
+       @_colonies > 0 or
        @_station or @_outpost
       # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen
         @_hasBeenSeen = true
-      @_lastSeenFungus = @_fungusStrength
-      @_lastSeenResources = @_resources
       @_visibility = root.config.visibility.visible
     # If it is adjacent to a probe:
     else if @neighborsHaveProbes()
