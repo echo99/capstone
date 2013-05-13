@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null
+playback = null#"1368470354658.txt"
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false

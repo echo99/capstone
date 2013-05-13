@@ -18,7 +18,7 @@ $seed = $_POST['seed'];
 $id = $_POST['id'];
 
 // Only write to log if session ID exists (although it should never be empty)
-if ($session_id != '') {
+if ($id != '') {
   $filename = 'event_logs/'.$id.'.txt';
   $handle = null;
 

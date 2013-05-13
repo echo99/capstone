@@ -344,7 +344,7 @@ root.config =
         w: 400
         h: 290
         message: "Mission 1\n\n" +
-                 "We lost communications with scouting a party. They had several " +
+                 "We lost communications with a scouting party. They had several " +
                  "attack ships which we would rather not lose so we're giving " +
                  "you a probe to go check out the area. Try to bring any ships " +
                  "you find back safely, and be sure to exterminate any fungus " +
