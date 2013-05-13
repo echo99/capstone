@@ -20,35 +20,42 @@ main = ->
       reqPath = '/index.html'
     sys.puts 'Requested path: ' + reqPath
     fullPath = path.join dir, reqPath
-    path.exists fullPath, (exists) ->
-      if not exists
-        sys.puts '  Error: Requested path not found!'
-        response.writeHeader 404,
+
+    if reqPath.indexOf('/server') == 0
+      response.writeHeader 200,
           'Content-Type': 'text/plain'
-        response.write '404 Not Found\n'
-        response.end()
-      else
-        fs.readFile fullPath, 'binary', (err, file) ->
-          if err
-            response.writeHeader 500,
-              'Content-Type': 'text/plain'
-            response.write err + '\n'
-            response.end()
-          else
-            # if fullPath.match(/\.css$/)
-            #   response.writeHeader 200,
-            #     'Content-Type': 'text/css'
-            #   response.write file
-            #   response.end()
-            # else
-            #   response.writeHeader 200
-            #   response.write file, 'binary'
-            #   response.end()
-            contentType = getContentType reqPath
-            response.writeHeader 200,
-              'Content-Type': contentType
-            response.write file, 'binary'
-            response.end()
+      response.write 'Dummy server text\n'
+      response.end()
+    else
+      path.exists fullPath, (exists) ->
+        if not exists
+          sys.puts '  Error: Requested path not found!'
+          response.writeHeader 404,
+            'Content-Type': 'text/plain'
+          response.write '404 Not Found\n'
+          response.end()
+        else
+          fs.readFile fullPath, 'binary', (err, file) ->
+            if err
+              response.writeHeader 500,
+                'Content-Type': 'text/plain'
+              response.write err + '\n'
+              response.end()
+            else
+              # if fullPath.match(/\.css$/)
+              #   response.writeHeader 200,
+              #     'Content-Type': 'text/css'
+              #   response.write file
+              #   response.end()
+              # else
+              #   response.writeHeader 200
+              #   response.write file, 'binary'
+              #   response.end()
+              contentType = getContentType reqPath
+              response.writeHeader 200,
+                'Content-Type': contentType
+              response.write file, 'binary'
+              response.end()
 
   # Start the server
   server.listen 8080

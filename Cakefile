@@ -34,8 +34,9 @@ SLASH = if PLATFORM == Platform.WINDOWS then '\\' else '/'
 APP_JS = "public#{SLASH}app.js"
 VENDOR_JS = "public#{SLASH}vendor.js"
 SRC_DIR = "app#{SLASH}src"
-VENDOR_DIR = "vendor#{SLASH}scripts"
-VENDOR_STYLES = "vendor#{SLASH}stylesheets"
+VENDOR_DIR = "vendor"
+VENDOR_SCRIPTS = "#{VENDOR_DIR}#{SLASH}scripts"
+VENDOR_STYLES = "#{VENDOR_DIR}#{SLASH}stylesheets"
 VENDOR_CSS = "public#{SLASH}vendor.css"
 NODE_DIR = ".#{SLASH}node_modules"
 NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
@@ -54,7 +55,7 @@ VENDOR_JS_FILES = [
 #   APP_JS = 'public\\app.js'
 #   VENDOR_JS = 'public\\vendor.js'
 #   SRC_DIR = 'app\\src'
-#   VENDOR_DIR = 'vendor\\scripts'
+#   VENDOR_SCRIPTS = 'vendor\\scripts'
 # Flag to make sure we aren't calling build multiple times at once
 BUILDING = false
 WATCHING = false
@@ -114,7 +115,7 @@ checkDep = (callback) ->
     callback()
 
 # Install missing dependent modules
-installDep = (callback = null) ->
+installDep = (callback=null) ->
   curModuleNum = 0
   installMissingModules = ->
     if curModuleNum < missingModules.length
@@ -134,8 +135,7 @@ installDep = (callback = null) ->
       # Empty missing modules
       missingModules = []
       # Call callback function if one was given
-      if callback != null
-        callback()
+      callback?()
   installMissingModules()
 
 # Check to see if a global node module is missing, and if it isn't executes the
@@ -153,9 +153,7 @@ checkGlobalModule = (moduleName, modulePkg, cmd, failOnError, callback) ->
         missingGlobalModule(moduleName, modulePkg, err) if failOnError
       else
         throw err # Unknown error
-      callback(false)
-    else
-      callback(true)
+    callback not err
 
 # Handle missing global modules
 missingGlobalModule = (moduleName, modulePkg, error) ->
@@ -173,9 +171,7 @@ checkSyntax = (callback) ->
       console.error(err.toString().trim().red)
       notify("Build failed! Please check the terminal for details.",
         MessageLevel.ERROR) if WATCHING
-      callback(false)
-    else
-      callback(true)
+     callback not err
 
 # Helper for finding all source files
 getSourceFilePaths = (dirPath = SRC_DIR) ->
@@ -220,7 +216,7 @@ notify = (message, msgLvl) ->
       spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
         message]
 
-#
+# Do a test run on the compiled JavaScript code using a simulated browser
 jsSanityCheck = (options, callback) ->
   process.chdir(RHINO_DIR)
   options.verbose ?= 'verbose' of options
@@ -228,10 +224,83 @@ jsSanityCheck = (options, callback) ->
     console.log(stdout) if stdout and options.verbose
     console.error(stderr.red) if stderr
     process.chdir(HOME_FROM_RHINO)
-    if err
-      callback(false)
-    else
-      callback(true)
+    callback not err
+
+# Compile vendor scripts and styles
+compileVendorFiles = ->
+  console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
+  _compileFiles(VENDOR_SCRIPTS, VENDOR_JS_FILES, VENDOR_JS)
+
+  console.log("Combining vendor styles to #{VENDOR_CSS}".yellow)
+  _compileFiles(VENDOR_STYLES, fs.readdirSync(VENDOR_STYLES), VENDOR_CSS)
+
+# Helper function for compiling files
+_compileFiles = (dir, files, target) ->
+  text = ''
+  for file in files
+    contents = fs.readFileSync (dir+'/'+file), 'utf8'
+    text += contents + "\n"
+    #name = file.replace /\..*/, '' # remove extension
+    #templateJs += "window.#{name} = '#{contents}';"
+  try
+    fs.writeFile target, text
+  catch err
+    console.log(err)
+
+buildSource = (options, callback=null) ->
+  if not BUILDING
+    BUILDING = true
+    console.log(
+        "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
+    # Try to compile all files individually first, to get a better
+    # error message, then if it succeeds, compile them all to one file
+    callback2 = (passed) ->
+      BUILD_PASSED = passed
+      if passed
+        files = new Rehab().process './'+SRC_DIR
+
+        to_single_file = "--join #{APP_JS}"
+        from_files = "--compile #{files.join ' '}"
+
+        exec "coffee #{to_single_file} #{from_files}",
+          (err, stdout, stderr) ->
+            if err
+              # Should probably figure out way to handle this error
+              # However, if it got to this point, there should be no problems
+              console.error(err.toString().trim().red)
+            else
+              # notify("Build successful!", MessageLevel.INFO) if WATCHING
+              console.log('Build successful!'.green)
+              # console.log()
+            if options['no-rhino']
+              invoke 'lint'
+              invoke 'doc' if not options['no-doc']
+              callback?()
+            else
+              console.log('Doing test run on compiled script...'.yellow)
+              jsSanityCheck options, (passed) ->
+                if passed
+                  console.log('Test passed!'.green)
+                  invoke 'lint'
+                  invoke 'doc' if not options['no-doc']
+                else
+                  notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
+                  console.error('Test run failed!'.red)
+                callback?()
+      else
+        invoke 'lint'
+      BUILDING = false
+      # else
+      #   console.log('Build failed!'.red)
+      #   console.log()
+
+    checkSyntax(callback2)
+
+initOptions = (options) ->
+  options['verbose'] ?= 'verbose' of options
+  options['no-doc'] ?= 'no-doc' of options
+  options['no-rhino'] ?= 'no-rhino' of options
+  return options
 
 ###############################################################################
 # Options
@@ -243,87 +312,21 @@ option null, '--no-rhino', 'Don\'t try to run the script with rhino'
 ###############################################################################
 # Tasks
 
-task 'build', 'Build coffee2js using Rehab', sbuild = (options) ->
-  options['no-doc'] ?= 'no-doc' of options
-  options['no-rhino'] ?= 'no-rhino' of options
-  if not BUILDING
-    BUILDING = true
-    checkDep ->
-      invoke 'vendcomp'
-      console.log(
-        "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
-      # Try to compile all files individually first, to get a better
-      # error message, then if it succeeds, compile them all to one file
-      callback = (passed) ->
-        BUILD_PASSED = passed
-        if passed
-          files = new Rehab().process './'+SRC_DIR
+task 'build', 'Build coffee2js using Rehab', (options) ->
+  initOptions(options)
+  checkDep ->
+    compileVendorFiles()
+    buildSource(options)
 
-          to_single_file = "--join #{APP_JS}"
-          from_files = "--compile #{files.join ' '}"
+task 'build:vendor', 'Combine vendor scripts into one file', ->
+  compileVendorFiles()
 
-          exec "coffee #{to_single_file} #{from_files}",
-            (err, stdout, stderr) ->
-              if err
-                # Should probably figure out way to handle this error
-                # However, if it got to this point, there should be no problems
-                console.error(err.toString().trim().red)
-              else
-                # notify("Build successful!", MessageLevel.INFO) if WATCHING
-                console.log('Build successful!'.green)
-                # console.log()
-              if options['no-rhino']
-                invoke 'lint'
-                invoke 'doc' if not options['no-doc']
-              else
-                console.log('Doing test run on compiled script...'.yellow)
-                jsSanityCheck options, (passed) ->
-                  if passed
-                    console.log('Test passed!'.green)
-                    invoke 'lint'
-                    invoke 'doc' if not options['no-doc']
-                  else
-                    notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
-                    console.error('Test run failed!'.red)
-        else
-          invoke 'lint'
-        BUILDING = false
-        # else
-        #   console.log('Build failed!'.red)
-        #   console.log()
-
-      checkSyntax(callback)
-
-task 'vendcomp', 'Combine vendor scripts into one file', ->
-  console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
-  scripts = ''
-  dir = VENDOR_DIR
-  # files = fs.readdirSync dir
-  for file in VENDOR_JS_FILES
-    contents = fs.readFileSync (dir+'/'+file), 'utf8'
-    scripts += contents + "\n"
-    #name = file.replace /\..*/, '' # remove extension
-    #templateJs += "window.#{name} = '#{contents}';"
-  try
-    fs.writeFile VENDOR_JS, scripts
-  catch err
-    console.log(err)
-
-  console.log("Combining vendor styles to #{VENDOR_CSS}".yellow)
-  styles = ''
-  dir = VENDOR_STYLES
-  files = fs.readdirSync dir
-  for file in files
-    contents = fs.readFileSync (dir+'/'+file), 'utf8'
-    styles += contents + "\n"
-    #name = file.replace /\..*/, '' # remove extension
-    #templateJs += "window.#{name} = '#{contents}';"
-  try
-    fs.writeFile VENDOR_CSS, styles
-  catch err
-    console.log(err)
-  # exec 'echo "hi2"'
-  #exec "echo #{scripts} > ../public/vendor.js"
+task 'build:production', 'Compile and minify all scripts', (options) ->
+  initOptions(options)
+  checkDep ->
+    compileVendorFiles()
+    buildSource options, ->
+      invoke 'minify'
 
 # task 'test', 'Task for testing cake stuff', ->
 #   filesToProcess = 0
@@ -338,45 +341,22 @@ task 'vendcomp', 'Combine vendor scripts into one file', ->
 #     # console.log(stderr)
 
 
-task 'watch', 'Watch all files in src and compile as needed', sbuild = ->
+task 'watch', 'Watch all files in src and compile as needed', (options) ->
+  initOptions(options)
   WATCHING = true
+  watch = tryRequire('node-watch')
   checkDep ->
-    console.log("Watching files #{SRC_DIR}#{SLASH}*.coffee".yellow)
+    console.log("Watching #{SRC_DIR} for changes...".yellow)
+    console.log("Watching #{VENDOR_DIR} for changes...".yellow)
 
-    # Get total number of files
-    files = new Rehab().process './'+SRC_DIR
-    filesToProcess = files.length
+    watch = require 'node-watch'
+    watch SRC_DIR, ->
+      buildSource(options)
+    watch VENDOR_DIR, ->
+      compileVendorFiles()
 
-    # # Get number of empty files
-    # emptyFiles = 0
-    # exec "coffee -p #{SRC_DIR}", (err, stdout, stderr) ->
-    #   parts = stdout.split("(function() {\n\n\n}).call(this);")
-    #   emptyFiles = parts.length
-    #   filesToProcess -= emptyFiles
-
-    cmd = 'coffee'
-    if process.platform == 'win32'
-      cmd = 'coffee.cmd'
-    args = ['-wp', SRC_DIR]
-    coffee = spawn cmd, args
-
-    coffee.stdout.on 'data', (data) ->
-      # # Only compile the last time iterating throught all the files
-      # if filesToProcess > 1
-      #   filesToProcess--
-      #   console.log(filesToProcess + " files left")
-      # else
-      #   #console.log('Recompiling files...'.yellow)
-      #   invoke 'build'
-
-      # This will execute each time the script picks up something from stdout,
-      # including multiple outputs the first time printing everything, but
-      # I haven't yet come up with a way around it.
-      invoke 'build'
-
-task 'integrate', 'Compile and combine all files', sbuild = ->
-  invoke 'build'
-  invoke 'vendcomp'
+    # Initial build
+    invoke 'build'
 
 task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
   console.log 'Minifying app.js and vendor.js'
