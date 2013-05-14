@@ -84,6 +84,8 @@ class Menu extends Mission
     @Planets.Medium.setVisibility(window.config.visibility.discovered)
     @Planets.Large.setVisibility(window.config.visibility.discovered)
 
+    @_selectProbe()
+
   destroy: ->
     cameraHudFrame.removeChild(@mission1Menu)
     cameraHudFrame.removeChild(@mission2Menu)
@@ -283,6 +285,17 @@ class Menu extends Mission
       @lastPlanet = @Planets.Missions
       camera.setTarget(@lastPlanet.location())
       endTurn()
+
+    @_selectProbe()
+
+  _selectProbe: ->
+    console.log('select')
+    for p in game.getPlanets()
+      units = p.unitSelection
+      for row in units.probes
+        for stack in row
+          if not stack.isSelected() and stack.getCount() > 0
+            stack.toggleSelection()
 
   _checkMissions: (p) ->
     @lastPlanet = p
