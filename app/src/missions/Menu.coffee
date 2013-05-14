@@ -289,7 +289,6 @@ class Menu extends Mission
     @_selectProbe()
 
   _selectProbe: ->
-    console.log('select')
     for p in game.getPlanets()
       units = p.unitSelection
       for row in units.probes

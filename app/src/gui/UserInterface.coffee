@@ -22,7 +22,7 @@ class UserInterface
   # Creates a new UserInterface
   constructor: () ->
     @unitSelection = new UnitSelection()
-    b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
+    b = new Elements.Button(5 + 133/2, camera.height + 5 - 20/2, 133, 20)
     b.setClickHandler(() =>
       game.endTurn()
       UI.endTurn()
@@ -300,7 +300,7 @@ class UserInterface
     @colonyMenu.visible = false
     frameElement.addChild(@colonyMenu)
 
-    @turnCounter = new Elements.BoxElement(100, camera.height + 5 - 20/2, 30, 20)
+    @turnCounter = new Elements.BoxElement(155, camera.height + 5 - 20/2, 30, 20)
     clear = (ctx) =>
       w = @turnCounter.w
       h = @turnCounter.h
