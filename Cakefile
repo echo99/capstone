@@ -28,6 +28,11 @@ Platform =
   WINDOWS: 'win32'
   LINUX: 'linux'
 
+class Environment
+  @PRODUCTION: 1
+  @STAGING: 2
+  @DEV: 3
+
 SLASH = if PLATFORM == Platform.WINDOWS then '\\' else '/'
 
 # Constants
@@ -42,6 +47,11 @@ NODE_DIR = ".#{SLASH}node_modules"
 NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
 RHINO_DIR = "vendor#{SLASH}tools"
 HOME_FROM_RHINO = "..#{SLASH}.."
+
+Configs =
+  DEFAULT: "app#{SLASH}cfg#{SLASH}default.cfg.coffee"
+  PRODUCTION: "app#{SLASH}cfg#{SLASH}production.cfg.coffee"
+  DEV: "app#{SLASH}cfg#{SLASH}dev.cfg.coffee"
 
 VENDOR_JS_FILES = [
   'browserdetect.js'
@@ -247,17 +257,25 @@ _compileFiles = (dir, files, target) ->
   catch err
     console.log(err)
 
-buildSource = (options, callback=null) ->
+# Build source code
+buildSource = (options, env=Environment.DEV, callback=null) ->
   if not BUILDING
     BUILDING = true
     console.log(
         "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
     # Try to compile all files individually first, to get a better
     # error message, then if it succeeds, compile them all to one file
-    callback2 = (passed) ->
+    checkSyntax (passed) ->
       BUILD_PASSED = passed
       if passed
         files = new Rehab().process './'+SRC_DIR
+
+        switch env
+          when Environment.PRODUCTION
+            files.unshift(Configs.PRODUCTION)
+          when Environment.DEV
+            files.unshift(Configs.DEV)
+        files.unshift(Configs.DEFAULT)
 
         to_single_file = "--join #{APP_JS}"
         from_files = "--compile #{files.join ' '}"
@@ -294,8 +312,68 @@ buildSource = (options, callback=null) ->
       #   console.log('Build failed!'.red)
       #   console.log()
 
-    checkSyntax(callback2)
+    # checkSyntax(callback2)
 
+# Run Coffeelint on source code
+lintSource = (options, callback=null) ->
+  console.log("Checking #{SRC_DIR}#{SLASH}*.coffee for lint".yellow)
+  pass = "✔".green
+  warn = "⚠".yellow
+  fail = "✖".red
+  if process.platform == 'win32'
+    pass = "√".green
+    warn = "!".yellow
+    fail = "x".red
+  failCount = 0
+  fileFailCount = 0
+  errorCount = 0
+  # errorFileCount = 0
+  files = getSourceFilePaths()
+  filesToLint = files.length
+  files.forEach (filepath) ->
+  # getSourceFilePaths().forEach (filepath) ->
+    fs.readFile filepath, (err, data) ->
+      filesToLint--
+      shortPath = filepath.substr SRC_DIR.length + 1
+      try
+        result = coffeelint.lint data.toString(), coffeeLintConfig
+        if result.length
+          fileFailCount++
+          hasError = result.some (res) -> res.level is 'error'
+          level = if hasError then fail else warn
+          console.error "#{level}  #{shortPath}".red
+          for res in result
+            failCount++
+            level = if res.level is 'error' then fail else warn
+            console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
+        else if options.verbose
+          console.log("#{pass}  #{shortPath}".green)
+        if filesToLint == 0
+          # console.log("#{failCount} lint failures")
+          if failCount > 0
+            notify("Build succeeded, but #{failCount} lint errors were " +
+              "found! Please check the terminal for more details.",
+              MessageLevel.ERROR) if WATCHING and BUILD_PASSED
+            console.error("\n")
+            if errorCount > 0
+              console.error(("#{errorCount} syntax error(s) found!").red.bold)
+            console.error(("#{failCount} lint error(s) found in " +
+              "#{fileFailCount} file(s)!").red.bold)
+            console.error("As a reminder:".grey.underline)
+            console.error("- Indentation is two spaces. No tabs allowed".grey)
+            console.error(("- Maximum line width is " +
+              "#{coffeeLintConfig.max_line_length.value} characters").grey)
+          else
+            notify("Build succeeded. All files passed lint.",
+              MessageLevel.INFO) if WATCHING and BUILD_PASSED
+            console.log('No lint errors found!'.green)
+          console.log("") if WATCHING
+          callback?()
+      catch e
+        errorCount++
+        console.error("#{filepath}: #{e}".red)
+
+# Intialize options hash for boolean values
 initOptions = (options) ->
   options['verbose'] ?= 'verbose' of options
   options['no-doc'] ?= 'no-doc' of options
@@ -325,26 +403,18 @@ task 'build:production', 'Compile and minify all scripts', (options) ->
   initOptions(options)
   checkDep ->
     compileVendorFiles()
-    buildSource options, ->
+    buildSource options, Environment.PRODUCTION, ->
       invoke 'minify'
-
-# task 'test', 'Task for testing cake stuff', ->
-#   filesToProcess = 0
-#   exec "coffee -p #{SRC_DIR}", (err, stdout, stderr) ->
-#     filesToProcess++
-#     console.log("Finished!".green)
-#     # console.log(err)
-#     # console.log(stdout)
-#     # parts = stdout.split(/^\}\)\.call\(this\);$/)
-#     parts = stdout.split("(function() {\n\n\n}).call(this);")
-#     console.log("Num files :  #{parts.length}")
-#     # console.log(stderr)
-
 
 task 'watch', 'Watch all files in src and compile as needed', (options) ->
   initOptions(options)
   WATCHING = true
   watch = tryRequire('node-watch')
+  updateMsg = [
+    "Cakefile has been updated."
+    "Please restart `cake watch` as soon as you can."
+  ].join(' ')
+
   checkDep ->
     console.log("Watching #{SRC_DIR} for changes...".yellow)
     console.log("Watching #{VENDOR_DIR} for changes...".yellow)
@@ -354,27 +424,27 @@ task 'watch', 'Watch all files in src and compile as needed', (options) ->
       buildSource(options)
     watch VENDOR_DIR, ->
       compileVendorFiles()
+    watch 'Cakefile', ->
+      console.log updateMsg.yellow
+      notify updateMsg, MessageLevel.INFO
 
     # Initial build
     invoke 'build'
 
 task 'minify', 'Minifies all public .js files (requires UglifyJS)', ->
-  console.log 'Minifying app.js and vendor.js'
+  console.log 'Minifying app.js and vendor.js...'.yellow
 
   checkGlobalModule 'UglifyJS', 'uglify-js', 'uglifyjs', true, (hasModule = false) ->
     exec "uglifyjs #{APP_JS} -o #{APP_JS}", (err, stdout, stderr) ->
       throw err if err
-
-  exec "uglifyjs #{VENDOR_JS} -o #{VENDOR_JS}", (err, stdout, stderr) ->
-    if err
-      throw err
+    exec "uglifyjs #{VENDOR_JS} -o #{VENDOR_JS}", (err, stdout, stderr) ->
+      throw err if err
 
 task 'check', 'Temporarily compiles coffee files to check syntax', ->
   checkDep ->
-    passFunc = (passed) ->
+    checkSyntax (passed) ->
       if passed
         console.log("No errors found".green)
-    checkSyntax(passFunc)
 
 # task 'print', 'Do stuff', ->
 #   checkDep ->
@@ -399,82 +469,19 @@ task 'install-dep', 'Install all necessary node modules', ->
   installDep()
 
 task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
+  initOptions(options)
   checkDep ->
-    options.verbose ?= 'verbose' of options
-    console.log("Checking #{SRC_DIR}#{SLASH}*.coffee for lint".yellow)
-    pass = "✔".green
-    warn = "⚠".yellow
-    fail = "✖".red
-    if process.platform == 'win32'
-      pass = "√".green
-      warn = "!".yellow
-      fail = "x".red
-    failCount = 0
-    fileFailCount = 0
-    errorCount = 0
-    # errorFileCount = 0
-    files = getSourceFilePaths()
-    filesToLint = files.length
-    files.forEach (filepath) ->
-    # getSourceFilePaths().forEach (filepath) ->
-      fs.readFile filepath, (err, data) ->
-        filesToLint--
-        shortPath = filepath.substr SRC_DIR.length + 1
-        try
-          result = coffeelint.lint data.toString(), coffeeLintConfig
-          if result.length
-            fileFailCount++
-            hasError = result.some (res) -> res.level is 'error'
-            level = if hasError then fail else warn
-            console.error "#{level}  #{shortPath}".red
-            for res in result
-              failCount++
-              level = if res.level is 'error' then fail else warn
-              console.error("   #{level}  Line #{res.lineNumber}: #{res.message}")
-          else if options.verbose
-            console.log("#{pass}  #{shortPath}".green)
-          if filesToLint == 0
-            # console.log("#{failCount} lint failures")
-            if failCount > 0
-              notify("Build succeeded, but #{failCount} lint errors were " +
-                "found! Please check the terminal for more details.",
-                MessageLevel.ERROR) if WATCHING and BUILD_PASSED
-              console.error("\n")
-              if errorCount > 0
-                console.error(("#{errorCount} syntax error(s) found!").red.bold)
-              console.error(("#{failCount} lint error(s) found in " +
-                "#{fileFailCount} file(s)!").red.bold)
-              console.error("As a reminder:".grey.underline)
-              console.error("- Indentation is two spaces. No tabs allowed".grey)
-              console.error(("- Maximum line width is " +
-                "#{coffeeLintConfig.max_line_length.value} characters").grey)
-            else
-              notify("Build succeeded. All files passed lint.",
-                MessageLevel.INFO) if WATCHING and BUILD_PASSED
-              console.log('No lint errors found!'.green)
-            console.log("") if WATCHING
-        catch e
-          errorCount++
-          console.error("#{filepath}: #{e}".red)
-          # return e
+    lintSource(options)
 
 task 'doc', 'Document the source code using Codo', (options) ->
   lastResortCodoFix = (cmd, callback=null) ->
     console.log('Documenting with codo failed'.red)
     try
-      # if process.platform == 'win32'
-      #   process.chdir('node_modules\\codo')
-      # else
-      #   process.chdir('node_modules/codo')
       process.chdir("#{NODE_DIR}#{SLASH}codo")
       console.log('Attempting to force installation of walkdir v0.0.5...'.yellow)
       exec "npm install walkdir@0.0.5", (err, stdout, stderr) ->
         # console.log(stdout)
         throw err if err
-        # if process.platform == 'win32'
-        #   process.chdir('..\\..')
-        # else
-        #   process.chdir('../..')
         process.chdir("..#{SLASH}..")
         console.log('Installation successful'.green)
         console.log('Attempting to run codo again...'.yellow)
@@ -489,9 +496,6 @@ task 'doc', 'Document the source code using Codo', (options) ->
   checkDep ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
     checkGlobalModule 'Codo', 'codo', 'codo', false, (hasModule = false) ->
-      # cmd = './node_modules/.bin/codo'
-      # if process.platform == 'win32'
-      #   cmd = '.\\node_modules\\.bin\\codo'
       cmd = "#{NODE_BIN_DIR}#{SLASH}codo"
       if hasModule
         exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
