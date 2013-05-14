@@ -31,10 +31,10 @@ class EventPlayback
 
     param = sizeline.match(/{.*}/)
     seed = JSON.parse(param)
-    console.log('parsed seed: ' + seed.seed)
     Math.seedrandom(seed.seed)
 
     @currentLine = @_nextLine('\n')
+    @replyDone = @currentLine == ""
 
   _nextLine: (lineEnd) ->
     end = @text.indexOf(lineEnd)
@@ -66,3 +66,5 @@ class EventPlayback
             e[key] = Number(value)
           @callbacks[event](e)
         @currentLine = @_nextLine('\n')
+    else
+      @replayDone = true

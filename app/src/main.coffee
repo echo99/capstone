@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null#"1368542305455.txt"
+playback = null#"fungusBug.txt"
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -613,8 +613,14 @@ main = ->
       tooltipCtx.textBaseline = 'middle'
       tooltipCtx.fillText(timeSinceStart() + " ms", camera.width - 5, 50)
 
-      #tooltipCtx.strokeStyle = "rgb(255, 255, 255)"
-      #tooltipCtx.strokeRect(0, 0, camera.width, camera.height)
+      if eventPlay.replayDone
+        tooltipCtx.font = "40px Arial"
+        tooltipCtx.textAlign = 'center'
+        tooltipCtx.fillText("End of recording", camera.width/2, camera.height/2)
+
+      tooltipCtx.strokeStyle = "rgb(255, 255, 255)"
+      tooltipCtx.strokeRect(0, 0, camera.width, camera.height)
+
       window.resizeTo(camera.width+16, camera.height+65)
 
     bgCanvas.style.left = Math.floor(camera.x /

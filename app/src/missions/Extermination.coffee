@@ -18,7 +18,7 @@ class Extermination extends Mission
     @attempts++
     localStorage[@attemptName] = Number(@attempts)
     Logger.logEvent("Starting " + @mission, {attempt: @attempts})
-    console.log('1: ' + Math.random())
+
     randSave = Math.random
     Math.seedrandom()
     @gameEnded = false
