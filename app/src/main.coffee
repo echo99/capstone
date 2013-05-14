@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null#"1368470354658.txt"
+playback = null#"1368494551463.txt"
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -361,6 +361,9 @@ main = ->
     # catch e
     #   console.warn(e)
 
+  # for playback mouse position drawing
+  mousedown = false
+  mousepos = {x: 0, y: 0}
 
   ##################################################################################
   # Set event handlers
@@ -404,8 +407,8 @@ main = ->
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
+      console.log('key was space')
       Logger.logEvent("Pressed SPACE")
-      #window.resizeTo(window.outerWidth + 20, window.outerHeight + 20)
       endTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
       Logger.logEvent("Pressed +")
@@ -481,6 +484,8 @@ main = ->
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
 
+    mousepos = {x: x, y: y}
+
   clickHandler = (e) ->
     if recording
       eventRec.recordEvent("click",
@@ -511,6 +516,8 @@ main = ->
       prevPos = {x: e.clientX, y: e.clientY}
       gameFrame.mouseDown(e.clientX, e.clientY)
 
+    mousedown = true
+
   mouseUpHandler = (e) ->
     if recording
       eventRec.recordEvent("mouseUp", {})
@@ -519,6 +526,8 @@ main = ->
     frameElement.mouseUp()
     cameraHudFrame.mouseUp()
     gameFrame.mouseUp()
+
+    mousedown = false
 
   mouseOutHandler = (e) ->
     if recording
@@ -538,8 +547,10 @@ main = ->
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz)
 
+  window.onresize = onResize
+
   if playback
-    eventPlay.registerEvent("onResize", onResize)
+    eventPlay.registerEvent("onResize", null)
     eventPlay.registerEvent("keyDown", keyDownListener)
     eventPlay.registerEvent("mouseMove", mouseMoveHandler)
     eventPlay.registerEvent("click", clickHandler)
@@ -548,7 +559,6 @@ main = ->
     eventPlay.registerEvent("mouseOut", mouseOutHandler)
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
   else
-    window.onresize = onResize
     document.body.addEventListener('keydown', keyDownListener)
     window.onbeforeunload = onBeforeUnload
     surface.addEventListener('mousemove', mouseMoveHandler)
@@ -559,9 +569,14 @@ main = ->
     document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
     document.body.addEventListener('mousewheel', mouseWheelHandler)
 
+  #if playback
+    #window.onresize = onResize
+    #window.resizeTo(size[0], size[1])
+    #window.onresize = null
+    #console.log(window.innerWidth, window.innerHeight)
+
   ##################################################################################
   # Draw loop
-
 
   draw = ->
     ctx.clearRect(0, 0, camera.width, camera.height)
@@ -571,6 +586,22 @@ main = ->
     cameraHudFrame.drawChildren()
     frameElement.drawChildren()
     gameFrame.drawChildren()
+
+    if playback
+      if mousedown
+        tooltipCtx.fillStyle = "rgb(255, 0, 0)"
+      else
+        tooltipCtx.fillStyle = "rgb(0, 255, 0)"
+      tooltipCtx.beginPath()
+      tooltipCtx.arc(mousepos.x, mousepos.y, 3, 0, 2*Math.PI)
+      tooltipCtx.fill()
+
+      tooltipCtx.font = "13px Arial"
+      tooltipCtx.fillStyle = "rgb(255, 255, 255)"
+      tooltipCtx.textAlign = 'right'
+      tooltipCtx.textBaseline = 'middle'
+      tooltipCtx.fillText(timeSinceStart() + " ms", camera.width - 5, 50)
+
     bgCanvas.style.left = Math.floor(camera.x /
       window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
     bgCanvas.style.top = Math.floor(camera.y /
@@ -585,8 +616,8 @@ main = ->
     draw()
   else
     Logger.logEvent("Beginning draw loop")
+    draw()
     setInterval draw, 30
 
     gameStart = currentTime()
-    if playback
-      eventPlay.beginPlayback()
+    setInterval eventPlay.next, 1
