@@ -11,14 +11,16 @@ class Extermination extends Mission
   reset: ->
     @attemptName = "extermination_"+@size+"_attempts"
     @mission = "Extermination " + @size
-
     @attempts = localStorage[@attemptName]
+
     if not @attempts
       @attempts = 0
     @attempts++
     localStorage[@attemptName] = Number(@attempts)
     Logger.logEvent("Starting " + @mission, {attempt: @attempts})
-
+    console.log('1: ' + Math.random())
+    randSave = Math.random
+    Math.seedrandom()
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
@@ -27,9 +29,9 @@ class Extermination extends Mission
       'dimension1': @mission,
       'metric1': 1
     })
+    Math.random = randSave
 
     newGame(10000, 10000)
-
     # Create planets:
     @home = game.setup(@numPlanets)
     @home.addStation()
@@ -95,6 +97,8 @@ class Extermination extends Mission
     if not hasFungus
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': @mission,
@@ -111,6 +115,7 @@ class Extermination extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Math.random = randSave
         Logger.logEvent("Player successfully completed " + @mission,
                         {minutes: getMinutes(@endTime - @startTime)
                         turns: UI.turns})
@@ -121,6 +126,8 @@ class Extermination extends Mission
     if not hasAnything
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': @mission,
@@ -137,6 +144,7 @@ class Extermination extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Math.random = randSave
         Logger.logEvent("Player failed " + @mission,
                         {minutes: getMinutes(@endTime - @startTime)
                         turns: UI.turns})

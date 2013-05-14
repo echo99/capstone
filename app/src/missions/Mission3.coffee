@@ -13,6 +13,8 @@ class Mission3 extends Mission
 
     @failed = false
 
+    randSave = Math.random
+    Math.seedrandom()
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
@@ -22,6 +24,7 @@ class Mission3 extends Mission
       'dimension1': 'Mission 3',
       'metric1': 1
     })
+    Math.random = randSave
 
     # Create planets:
     newGame(10000, 10000)
@@ -244,6 +247,8 @@ class Mission3 extends Mission
                         {attempts: @attempts})
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission 3',
@@ -260,6 +265,7 @@ class Mission3 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Math.random = randSave
         Logger.logEvent("Player successfully completed Mission 3",
                         {minutes: getMinutes(@endTime - @startTime)
                         turns: UI.turns
@@ -271,6 +277,8 @@ class Mission3 extends Mission
       @failed = true
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission 3',
@@ -287,6 +295,7 @@ class Mission3 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Math.random = randSave
         Logger.logEvent("Player failed Mission 3",
                         {minutes: getMinutes(@endTime - @startTime)
                         turns: UI.turns

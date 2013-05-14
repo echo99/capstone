@@ -815,7 +815,6 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
-      console.log('number carriers: ' + planet._resourceCarriers.length)
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -1435,7 +1434,6 @@ class UserInterface
     return controlGroup
 
   endTurn: () ->
-    console.log('end turn')
     @updateControlGroups()
 
     for p in game.getPlanets()

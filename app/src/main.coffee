@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null#"1368494551463.txt"
+playback = null#"1368542305455.txt"
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -141,7 +141,7 @@ newMission = (mission) ->
   if UI == null
     UI = new UserInterface()
   CurrentMission = new mission()
-  window.onresize()
+  #window.onresize()
 
 newGame = (w, h, move) ->
   game = new Game(w, h, move)
@@ -177,9 +177,9 @@ drawBackground = (ctx, spritesheet, name) ->
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 # Update the size of the frame and the canvases when the window size changes
-updateCanvases = (frame, canvases...) ->
-  frameWidth = window.innerWidth
-  frameHeight = window.innerHeight
+updateCanvases = (frame, canvases..., width, height) ->
+  frameWidth = width
+  frameHeight = height
   frame.width = frameWidth
   frame.height = frameHeight
   for canvas in canvases
@@ -196,6 +196,7 @@ main = ->
   else if Math.random() < RECORD_CHANCE
     eventRec = new EventRecorder(seed, currentTime())
     recording = true
+    Math.seedrandom(seed)
 
   Logger.start()
   Logger.logEvent("Setting up frames")
@@ -210,7 +211,12 @@ main = ->
   tooltipCanvas = document.getElementById('canvas-tooltip')
   # Need a better variable name for this
   surface = document.getElementById('surface')
-  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
+  if playback
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+      eventPlay.initWidth, eventPlay.initHeight)
+  else
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+      window.innerWidth, window.innerHeight)
   # we should just make the bg larger than we'll ever need it to be
   bgCanvas.width = screen.width * 2
   bgCanvas.height = screen.height * 2
@@ -278,7 +284,6 @@ main = ->
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
-
   UI = new UserInterface()
   CurrentMission = new Menu()
 
@@ -371,10 +376,11 @@ main = ->
   onResize = ->
     if recording
       eventRec.recordEvent("onResize",
-        {width: window.outerWidth, height: window.outerHeight})
+        {width: window.innerWidth, height: window.innerHeight})
 
     # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+      window.innerWidth, window.innerHeight)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
@@ -407,7 +413,6 @@ main = ->
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
-      console.log('key was space')
       Logger.logEvent("Pressed SPACE")
       endTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
@@ -547,10 +552,16 @@ main = ->
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz)
 
-  window.onresize = onResize
+  #window.onresize = onResize
 
   if playback
-    eventPlay.registerEvent("onResize", null)
+    eventPlay.registerEvent("onResize", (width, height) ->
+      updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+        width, height)
+      frameElement.resize()
+      frameElement.setDirty()
+      frameElement.drawChildren()
+      cameraHudFrame.resize())
     eventPlay.registerEvent("keyDown", keyDownListener)
     eventPlay.registerEvent("mouseMove", mouseMoveHandler)
     eventPlay.registerEvent("click", clickHandler)
@@ -559,6 +570,7 @@ main = ->
     eventPlay.registerEvent("mouseOut", mouseOutHandler)
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
   else
+    window.onresize = onResize
     document.body.addEventListener('keydown', keyDownListener)
     window.onbeforeunload = onBeforeUnload
     surface.addEventListener('mousemove', mouseMoveHandler)
@@ -602,6 +614,10 @@ main = ->
       tooltipCtx.textBaseline = 'middle'
       tooltipCtx.fillText(timeSinceStart() + " ms", camera.width - 5, 50)
 
+      #tooltipCtx.strokeStyle = "rgb(255, 255, 255)"
+      #tooltipCtx.strokeRect(0, 0, camera.width, camera.height)
+      window.resizeTo(camera.width+16, camera.height+65)
+
     bgCanvas.style.left = Math.floor(camera.x /
       window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
     bgCanvas.style.top = Math.floor(camera.y /
@@ -620,4 +636,5 @@ main = ->
     setInterval draw, 30
 
     gameStart = currentTime()
-    setInterval eventPlay.next, 1
+    if playback
+      setInterval eventPlay.next, 1

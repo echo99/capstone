@@ -22,12 +22,17 @@ class EventPlayback
       dataType: 'text'
       async: false
 
-    seed = @_nextLine('endseed\n')
-    Math.seedrandom(seed)
+    @_nextLine('endseed\n')
 
     sizeline = @_nextLine('\n')
     wh = sizeline.match(/[0-9]+/g)
-    window.resizeTo(wh[0], wh[1])
+    @initWidth = Number(wh[0])
+    @initHeight = Number(wh[1])
+
+    param = sizeline.match(/{.*}/)
+    seed = JSON.parse(param)
+    console.log('parsed seed: ' + seed.seed)
+    Math.seedrandom(seed.seed)
 
     @currentLine = @_nextLine('\n')
 
@@ -44,23 +49,6 @@ class EventPlayback
   registerEvent: (event, callback) ->
     @callbacks[event] = callback
 
-  beginPlayback: ->
-    line = @_nextLine('\n')
-    while line != ""
-      time = line.match(/[0-9]+/)
-      event = line.match(/[A-z]+/)
-      param = line.match(/{.*}/)
-      e = JSON.parse(param)
-      if timeSinceStart() >= time
-        console.log("calling event " + event + " at " + timeSinceStart())
-        if event[0] == "onResize"
-          width = window.outerWidth - window.innerWidth + e.width
-          height = window.outerHeight - window.innerHeight + e.height
-          window.resizeTo(width, height)
-        else
-          @callbacks[event](e)
-        line = @_nextLine('\n')
-
   next: =>
     if @currentLine != ""
       time = @currentLine.match(/[0-9]+/)
@@ -70,9 +58,9 @@ class EventPlayback
       if timeSinceStart() >= time
         #console.log("calling event " + event + " at " + timeSinceStart())
         if event[0] == "onResize"
-          width = window.outerWidth - window.innerWidth + e.width
-          height = window.outerHeight - window.innerHeight + e.height
-          window.resizeTo(width, height)
+          width = Number(e.width)
+          height = Number(e.height)
+          @callbacks[event](width, height)
         else
           for key, value of e
             e[key] = Number(value)
