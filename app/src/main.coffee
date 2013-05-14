@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null#"fungusBug.txt"
+playback = null#"1368552063783.txt"
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -82,6 +82,7 @@ KeyCodes =
   MINUS: 189 # zoom out
   ADD: 107 # zoom in
   SUB: 109 # zoom out
+  STATION: 83 # select next idle station
   CHEAT: 67
 
 cheat = false
@@ -422,6 +423,9 @@ main = ->
       Logger.logEvent("Pressed -")
       nz = camera.getZoom() - window.config.ZOOM_SPEED
       camera.setZoom(nz)
+    else if e.keyCode == KeyCodes.STATION
+      Logger.logEvent("Pressed S")
+      UI.gotoNextStation()
     #else if e.keyCode == KeyCodes.CHEAT
     #  Logger.logEvent("Pressed CHEAT")
     #  cheat = not cheat

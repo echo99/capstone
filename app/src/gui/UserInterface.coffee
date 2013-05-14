@@ -869,6 +869,37 @@ class UserInterface
   planetButtonOutCallback: () =>
     @hoveredPlanet = null
 
+  gotoNextStation: () ->
+    foundCurrent = false
+    findFirst = @selectedPlanet == null or not @selectedPlanet.hasStation()
+    first = null
+    target = null
+    for p in game.getPlanets()
+      if first == null and (p.hasStation() and not p.isBuilding())
+        first = p
+      if (p.hasStation() and not p.isBuilding()) and
+         (findFirst or foundCurrent)
+        @selectedPlanet = p
+        @outpostMenu.close()
+        @colonyMenu.close()
+        @stationMenu.open()
+        @stationMenu.setDirty()
+        @switchedMenus = true
+        camera.setTarget(p.location())
+        target = p
+        break
+      if p == @selectedPlanet
+        foundCurrent = true
+
+    if target == null and first
+      @selectedPlanet = first
+      @outpostMenu.close()
+      @colonyMenu.close()
+      @stationMenu.open()
+      @stationMenu.setDirty()
+      @switchedMenus = true
+      camera.setTarget(first.location())
+
   # Draws the game and HUD
   #
   # @param [CanvasRenderingContext2D] ctx The game context
