@@ -27,8 +27,7 @@ Browser =
   IE: 'Explorer'
 
 TESTING = window.TESTING?
-DEBUG = true
-# console.log("Testing flag: " + TESTING)
+# debug("Testing flag: " + TESTING)
 
 manifest = [
     src: 'assets/audio/empty_space_stage1.ogg'
@@ -50,7 +49,7 @@ createjs.Sound.addEventListener "loadComplete", ->
   numLoaded++
   if numLoaded >= numToLoad
     # Play music once all sounds have been loaded
-    console.log('Finished loading sounds!')
+    debug('Finished loading sounds!')
     bgmusic = createjs.Sound.play('bgmusic3', createjs.Sound.INTERRUPT_NONE,
       10, 0, -1, 0.5)
     # Start it off muted
@@ -120,7 +119,7 @@ drag = false
 WIN7 = false
 
 determineWin7 = ->
-  console.log(navigator.userAgent)
+  debug(navigator.userAgent)
   pat = /^\S+ \((.*?)\)/
   match = navigator.userAgent.match(pat)
   osStr = match[1]
@@ -131,7 +130,7 @@ determineWin7 = ->
     # Windows 7 is Windows NT 6.1
     if version == '6.1'
       WIN7 = true
-      console.log('You are using Windows 7')
+      debug('You are using Windows 7')
 
 determineWin7()
 
@@ -214,20 +213,20 @@ main = ->
   # we should just make the bg larger than we'll ever need it to be
   bgCanvas.width = screen.width * 2
   bgCanvas.height = screen.height * 2
-  # console.log(screen.width)
+  # debug(screen.width)
   surface.style.width = screen.width + 'px'
   surface.style.height = screen.height + 'px'
-  # console.log(topSurface.style.width)
+  # debug(topSurface.style.width)
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
   tooltipCtx = tooltipCanvas.getContext('2d')
 
-  # console.log(ctx.font)
+  # debug(ctx.font)
   # ctx.setFont({family: 'Arial'})
-  # console.log(ctx.font)
+  # debug(ctx.font)
   # ctx.setFontSizeVal(20)
-  # console.log(ctx.font)
+  # debug(ctx.font)
 
   # feedback = $('#comments').jqm()
   feedback = $('#comments').jqm({
@@ -266,7 +265,7 @@ main = ->
   # frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
   #   "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
   #   font: '15px sans-serif'}))
-  # console.log(frameElement.toString())
+  # debug(frameElement.toString())
 
   # msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
   # msgBox2.setDefaultCloseBtn()
@@ -285,9 +284,9 @@ main = ->
   sheet = SHEET
   if sheet == null
     # Should never get here
-    console.log("Sheet not loaded!")
+    debug("Sheet not loaded!")
   else
-    console.log("Sheet loaded!")
+    debug("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
 
   # Set global variables for debugging
@@ -311,7 +310,7 @@ main = ->
   fullscreenBtn.setClickHandler ->
     if document.mozFullScreenElement or document.webkitFullscreenElement or
         document.fullScreenElement
-      console.log "Already full screen!"
+      debug "Already full screen!"
       if document.cancelFullScreen
         document.cancelFullScreen()
       else if document.mozCancelFullScreen
@@ -321,7 +320,7 @@ main = ->
       # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
       fullscreenBtn.setState('fullscreen')
     else
-      console.log "Not at full screen"
+      debug "Not at full screen"
       body = document.body
       if body.requestFullScreen
         body.requestFullScreen()
@@ -373,7 +372,7 @@ main = ->
       eventRec.recordEvent("onResize",
         {width: window.outerWidth, height: window.outerHeight})
 
-    # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
+    # debug("New Size: #{window.innerWidth} x #{window.innerHeight}")
     updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
@@ -397,7 +396,7 @@ main = ->
     frameElement.drawChildren()
     cameraHudFrame.resize()
 
-    # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
+    # debug("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
   keyDownListener = (e) ->
     if recording
@@ -407,7 +406,7 @@ main = ->
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
-      console.log('key was space')
+      debug('key was space')
       Logger.logEvent("Pressed SPACE")
       endTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
@@ -474,7 +473,7 @@ main = ->
       dify = y - prevPos.y
       # difx = difx / Math.abs(difx) if difx
       # dify = dify / Math.abs(dify) if dify
-      # console.log "Difx: #{difx}, dify: #{dify}"
+      # debug "Difx: #{difx}, dify: #{dify}"
       # newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
       # newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
       # camera.setPosition(newX, newY)
@@ -573,7 +572,7 @@ main = ->
     #window.onresize = onResize
     #window.resizeTo(size[0], size[1])
     #window.onresize = null
-    #console.log(window.innerWidth, window.innerHeight)
+    #debug(window.innerWidth, window.innerHeight)
 
   ##################################################################################
   # Draw loop
