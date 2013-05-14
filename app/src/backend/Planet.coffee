@@ -696,7 +696,6 @@ class Planet
     @_nextSend = null
     # If it has probes:
     if @hasProbes()
-      @_lastSeenFungus = @_fungusStrength
       @_lastSeenResources = @_resources
     # If it has any units
     if @hasProbes() or
@@ -707,6 +706,7 @@ class Planet
       # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen
         @_hasBeenSeen = true
+      @_lastSeenFungus = @_fungusStrength
       @_visibility = root.config.visibility.visible
     # If it is adjacent to a probe:
     else if @neighborsHaveProbes()
