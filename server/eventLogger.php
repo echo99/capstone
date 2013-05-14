@@ -47,7 +47,8 @@ if ($id != '') {
       echo "Cannot open file ($filename)";
       exit;
     } 
-    fwrite($handle, 'seed: ' . $seed . "\nEvents:\n");
+    fwrite($handle, $seed);
+    write_events($handle, $events);
     fclose($handle);
   }
 }

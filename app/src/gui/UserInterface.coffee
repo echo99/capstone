@@ -1435,6 +1435,7 @@ class UserInterface
     return controlGroup
 
   endTurn: () ->
+    console.log('end turn')
     @updateControlGroups()
 
     for p in game.getPlanets()
