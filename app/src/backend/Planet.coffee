@@ -668,6 +668,8 @@ class Planet
   #
   #
   combineControlGroups: (group) ->
+    if group == undefined
+      return
     for other in @_controlGroups.filter((g) => g != group)
       if group.destination() == other.destination()
         group.setProbes(group.probes() + other.probes())
@@ -808,6 +810,8 @@ class Planet
       @_colonies -= colonies
       controlGroup.updateAi(@)
       # add to planet
+      if controlGroup == undefined
+        console.log("Control Group that we made is undefined somehow")
       @_controlGroups.push(controlGroup)
       @combineControlGroups(controlGroup)
 
@@ -849,6 +853,8 @@ class Planet
   #
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
+    if group == undefined
+      return
     @_controlGroups.push(group)
     @combineControlGroups(group)
 
