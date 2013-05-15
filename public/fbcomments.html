@@ -26,14 +26,16 @@
   Found a bug? Send us a report!
   <br /><br />
   <form id="bugform" method="post" action="../server/reportBug.php">
+    <input id="play-id" name="play_id" type="hidden"></input>
     <input id="bug-title" name="title" placeholder="Title" type="text"></input><br /><br />
-    <textarea id="bug-msg" placeholder="Message" name="message"></textarea><br /><br />
+    <textarea id="bug-msg" placeholder="Description" name="message"></textarea><br /><br />
     <input type="submit" id="submit" value="Submit" />
   </form>
   <script type="text/javascript">
     $('#bugform').submit(function() {
       // alert("hi");
       // return false;
+      document.getElementById('play-id').value = window.player_id;
       $.post($(this).attr('action'), $(this).serialize(), function(response){
             // do something here on success
       },'json');
