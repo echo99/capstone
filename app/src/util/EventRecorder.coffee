@@ -12,8 +12,22 @@ class EventRecorder
       url: '../server/eventLogger.php'
       data:
         id: @id
-        seed: "endseed\n"#@seed
+        seed: "endseed\n"
         events: [{time: window.innerWidth, event: window.innerHeight, param: seed}]
+      success: (data) ->
+      dataType: 'json'
+      async: true
+
+    $.ajax
+      type: 'POST'
+      url: '../server/eventLogger.php'
+      data:
+        id: @id
+        seed: @seed
+        events: [{
+          time: localStorage["progress"],
+          event: localStorage["complete"],
+          param: null}]
       success: (data) ->
       dataType: 'json'
       async: true

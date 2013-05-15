@@ -14,8 +14,10 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-#playback = "1368507904447.txt"
+#playback = "1368601393398.txt"
 playback = null
+
+window.player_id
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -195,7 +197,8 @@ main = ->
   if playback != null
     eventPlay = new EventPlayback(playback)
   else if Math.random() < RECORD_CHANCE
-    eventRec = new EventRecorder(seed, currentTime())
+    window.player_id = currentTime()
+    eventRec = new EventRecorder(seed, window.player_id)
     recording = true
     Math.seedrandom(seed)
 

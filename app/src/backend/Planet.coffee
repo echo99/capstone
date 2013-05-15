@@ -660,7 +660,7 @@ class Planet
     carrier = new ResourceCarrier(amount, @_sendingResourcesTo)
     carrier.updateAi(@)
     @_resourceCarriers.push(carrier)
-    if @_resources == 0
+    if @_resources == 0 and @_availableResources == 0
       @_sendingResourcesTo = null
       @_nextSend = null
 

@@ -57,6 +57,10 @@ root.config =
     delay: 10
     radius: 7
     color: "rgba(0, 255, 255, 1)"
+  arrowStyle:
+    color: "rgba(255, 255, 255, 1)"
+    width: 2
+    angle: 145
   combatStyle:
     good:
       fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
@@ -282,6 +286,8 @@ root.config =
     MENU_BUTTON_HOVER: new AnimatedSprite(['menu_button_hover.png'])
     RALLY_BUTTON_IDLE: new AnimatedSprite(['rally_button_idle.png'])
     RALLY_BUTTON_HOVER: new AnimatedSprite(['rally_button_hover.png'])
+    NEXT_STATION_BUTTON_IDLE: new AnimatedSprite(['next_station_button_idle.png'])
+    NEXT_STATION_BUTTON_HOVER: new AnimatedSprite(['next_station_button_hover.png'])
   Missions:
     w: 244
     h: 60
@@ -513,41 +519,41 @@ root.config =
     probe:
       cost: 1
       turns: 1
-      attack: .1
-      defense: .1
+      attack: .05
+      defense: .05
       isStructure: false
     colonyShip:
       cost: 3
-      turns: 1
-      attack: .1
-      defense: .1
+      turns: 3
+      attack: .05
+      defense: .05
       isStructure: false
     attackShip:
-      cost: 4
-      turns: 2
+      cost: 5
+      turns: 3
       attack: .5
-      defense: 0
+      defense: 0.001
       isStructure: false
     defenseShip:
-      cost: 3
-      turns: 1
-      attack: 0
+      cost: 6
+      turns: 4
+      attack: 0.001
       defense: .5
       isStructure: false
     fungus:
-      attack: .5
-      defense: 0
+      attack: .50
+      defense: 0.001
       growthPerTurn: 0
-      growthChancePerTurn: 0.2
+      growthChancePerTurn: 0.15
   structures:
     outpost:
       cost: 1
-      turns: 1
+      turns: 2
       defense: .1
       isStructure: true
       sendRate: 5
     station:
-      cost: 10
+      cost: 8
       turns: 3
       defense: .5
       isStructure: true

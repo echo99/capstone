@@ -1,4 +1,5 @@
 #_require Mission
+#_require ../util/ArrowElement
 
 class Mission1 extends Mission
   # @see Mission#reset
@@ -123,6 +124,21 @@ class Mission1 extends Mission
     game.endTurn()
     UI.initialize(false, true, false)
 
+    @phases =
+      SELECT_PROBE: 1
+      SELECT_PLANET: 2
+      END_TURN: 3
+      THE_REST: 4
+      FIRST_TURN: 5
+    @phase = @phases.FIRST_TURN
+    @probeArrow = new ArrowElement({x: -250, y: -100}, {x: -300, y: -150}, 5, 30)
+    @planetArrow1 = new ArrowElement({x: 350, y: -550}, {x: 300, y: -600}, 5, 30)
+    @planetArrow2 = new ArrowElement({x: -450, y: -550}, {x: -500, y: -600}, 5, 30)
+    @planetArrow3 = new ArrowElement({x: -550, y: 450}, {x: -600, y: 400}, 5, 30)
+    @endArrow = new ArrowElement(
+      {x: 50, y: camera.height - 30},
+      {x: 50, y: camera.height - 30 - 50}, 3, 30, true)
+
     @startTime = currentTime()
 
   destroy: ->
@@ -130,6 +146,7 @@ class Mission1 extends Mission
     cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
+    @probeArrow.destroy()
 
     Logger.logEvent("Leaving Mission 1")
     Logger.send()
@@ -164,12 +181,54 @@ class Mission1 extends Mission
 
   # @see Mission#onMouseClick
   onMouseClick: (x, y) ->
+    if @phase == @phases.FIRST_TURN
+      if @_probeInControlGroup()
+        @planetArrow1.close()
+        @planetArrow2.close()
+        @planetArrow3.close()
+        @probeArrow.close()
+        @endArrow.open()
+      else if @_probeSelected()
+        @planetArrow1.open()
+        @planetArrow2.open()
+        @planetArrow3.open()
+        @probeArrow.close()
+        @endArrow.close()
+      else
+        @planetArrow1.close()
+        @planetArrow2.close()
+        @planetArrow3.close()
+        @probeArrow.open()
+        @endArrow.close()
+    else
+      @planetArrow1.close()
+      @planetArrow2.close()
+      @planetArrow3.close()
+      @probeArrow.close()
+      @endArrow.close()
+
+  _probeInControlGroup: ->
+    for p in game.getPlanets()
+      for g in p.getControlGroups()
+        if g.probes() > 0
+          return true
+
+  _probeSelected: ->
+    for p in game.getPlanets()
+      units = p.unitSelection
+      for row in units.probes
+        for stack in row
+          if stack.isSelected() and stack.getCount() > 0
+            return true
 
   getHomeTarget: ->
     return @home.location()
 
   # @see Mission#onEndTurn
   onEndTurn: ->
+    if @home.numShips(window.config.units.probe) == 0
+      @phase = @phases.THE_REST
+
     if @a1.visibility() == window.config.visibility.visible and not @foundA1
       @foundA1 = true
       @a1.addShips(window.config.units.attackShip, 1)

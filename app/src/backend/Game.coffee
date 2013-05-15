@@ -66,7 +66,6 @@ class Game
         chosenPlanetDistance = fungusPlanetDistance
     chosenPlanet.setFungus(root.config.fungusInitialStrength)
     chosenPlanet.getAdjacentPlanets()[0].setFungus(root.config.fungusInitialStrength)
-    
     @endTurn()
     return homePlanet
 
