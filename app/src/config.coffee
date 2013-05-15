@@ -519,41 +519,41 @@ root.config =
     probe:
       cost: 1
       turns: 1
-      attack: .1
-      defense: .1
+      attack: .05
+      defense: .05
       isStructure: false
     colonyShip:
       cost: 3
-      turns: 1
-      attack: .1
-      defense: .1
+      turns: 3
+      attack: .05
+      defense: .05
       isStructure: false
     attackShip:
-      cost: 4
-      turns: 2
+      cost: 5
+      turns: 3
       attack: .5
-      defense: 0
+      defense: 0.001
       isStructure: false
     defenseShip:
-      cost: 3
-      turns: 1
-      attack: 0
+      cost: 6
+      turns: 4
+      attack: 0.001
       defense: .5
       isStructure: false
     fungus:
-      attack: .5
-      defense: 0
+      attack: .50
+      defense: 0.001
       growthPerTurn: 0
-      growthChancePerTurn: 0.2
+      growthChancePerTurn: 0.15
   structures:
     outpost:
       cost: 1
-      turns: 1
+      turns: 2
       defense: .1
       isStructure: true
       sendRate: 5
     station:
-      cost: 10
+      cost: 8
       turns: 3
       defense: .5
       isStructure: true
