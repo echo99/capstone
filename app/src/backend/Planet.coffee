@@ -290,10 +290,13 @@ class Planet
   #
   # @throw [Error] if there is insufficient ships or a building already.
   scheduleOutpost: ->
-    if !@_station and !@_outpost and @_probes > 0 and @_colonies > 0
+    if !@_station and
+       !@_outpost and
+       @_probes >= root.config.structures.outpost.cost and
+       @_colonies > 0
       @_unitConstructing = root.config.structures.outpost
       @_turnsToComplete = root.config.structures.outpost.turns
-      @_probes -= 1
+      @_probes -= root.config.structures.outpost.cost
       @_colonies -= 1
     else
       throw new Error("Invalid outpost construction -" +
@@ -373,6 +376,7 @@ class Planet
     if @_sendingResourcesTo == null
       throw new Error("Tried to cancel sending resources, no such job.")
     @_sendingResourcesTo = null
+    @_nextSend = null
 
   # Returns the planet we are sending resources to.
   #
@@ -660,6 +664,19 @@ class Planet
       @_sendingResourcesTo = null
       @_nextSend = null
 
+  # Combines control groups headed to the same destination
+  #
+  #
+  combineControlGroups: (group) ->
+    for other in @_controlGroups.filter((g) => g != group)
+      if group.destination() == other.destination()
+        group.setProbes(group.probes() + other.probes())
+        group.setAttackShips(group.attackShips() + other.attackShips())
+        group.setDefenseShips(group.defenseShips() + other.defenseShips())
+        group.setColonies(group.colonies() + other.colonies())
+        @_controlGroups = @_controlGroups.filter((g) => g != other)
+
+
   # Movement phase 1.
   # Moves control groups.
   #
@@ -695,7 +712,7 @@ class Planet
   visibilityUpkeep: ->
     @_nextSend = null
     # If it has probes:
-    if @hasProbes()
+    if @hasProbes() or @_station or @_outpost
       @_lastSeenResources = @_resources
     # If it has any units
     if @hasProbes() or
@@ -792,6 +809,7 @@ class Planet
       controlGroup.updateAi(@)
       # add to planet
       @_controlGroups.push(controlGroup)
+      @combineControlGroups(controlGroup)
 
   # SETTERS FOR USE BY GAME CLASS #
 
@@ -832,6 +850,7 @@ class Planet
   # @param [ControlGroup] group The group to add.
   receiveGroup: (group) ->
     @_controlGroups.push(group)
+    @combineControlGroups(group)
 
   # Adds a given carrier to the current planet
   #

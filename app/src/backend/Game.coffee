@@ -120,6 +120,7 @@ class Game
     planet.growPass3() for planet in @_planets
     planet.buildUpkeep() for planet in @_planets
     planet.visibilityUpkeep() for planet in @_planets
+    planet.combineControlGroups() for planet in @_planets
     planet.checkRepresentationalInvariants() for planet in @_planets
     console.log("--------------------------------------")
 
