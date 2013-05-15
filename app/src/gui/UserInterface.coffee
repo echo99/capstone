@@ -28,15 +28,10 @@ class UserInterface
       UI.endTurn()
       CurrentMission.onEndTurn()
     )
-    b.setMouseUpHandler(() =>
-      b.setDirty()
-    )
-    b.setMouseDownHandler(() =>
-      b.setDirty()
-    )
-    b.setMouseOutHandler(() =>
-      b.setDirty()
-    )
+    b.setMouseUpHandler(() => b.setDirty())
+    b.setMouseDownHandler(() => b.setDirty())
+    b.setMouseOutHandler(() => b.setDirty())
+    b.setHoverHandler(() => b.setDirty())
     b.setDrawFunc((ctx) =>
       b.y = camera.height-5-10
       if b.isPressed()
@@ -46,6 +41,28 @@ class UserInterface
     )
     b.setZIndex(100)
     frameElement.addChild(b)
+
+    @nextStationButton = new Elements.Button(5 + 150/2, 230, 150, 20)
+    @nextStationButton.setClearFunc((ctx) =>
+      ctx.clearRect(5, 230 - 10, 150, 20)
+    )
+    @nextStationButton.setClickHandler(() => @gotoNextStation())
+    @nextStationButton.setMouseUpHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setMouseDownHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setMouseOutHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setHoverHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setDrawFunc((ctx) =>
+      if @nextStationButton.isPressed()
+        SHEET.drawSprite(SpriteNames.NEXT_STATION_BUTTON_HOVER,
+                         @nextStationButton.x, @nextStationButton.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.NEXT_STATION_BUTTON_IDLE,
+                         @nextStationButton.x, @nextStationButton.y, ctx, false)
+    )
+    @nextStationButton.setZIndex(100)
+    @nextStationButton.visible = false
+    frameElement.addChild(@nextStationButton)
+
     @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return", {zIndex: 10})
     @help.visible = false
@@ -1197,6 +1214,7 @@ class UserInterface
       else
         loc = use.location()
       pos = camera.getScreenCoordinates(loc)
+
       ctx.strokeStyle = window.config.rallyPoint.color
       ctx.lineWidth = window.config.rallyPoint.width
       r = (window.config.planetRadius + window.config.rallyPoint.radius) *
@@ -1204,6 +1222,12 @@ class UserInterface
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
+
+      ctx.font = window.config.windowStyle.defaultText.font
+      ctx.fillStyle = window.config.rallyPoint.color
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText("Rally Point", pos.x, pos.y - r)
 
     if @switchedMenus
       @stationMenu.setDirty()
@@ -1216,6 +1240,16 @@ class UserInterface
       @outpostMenu.close()
       @colonyMenu.close()
       @selectedPlanet = null
+
+    hasIdle = false
+    for p in game.getPlanets()
+      if p.hasStation() and not p.isBuilding()
+        hasIdle = true
+
+    if hasIdle
+      @nextStationButton.open()
+    else
+      @nextStationButton.close()
 
   _drawRoute: (ctx, route) ->
     start = camera.getScreenCoordinates(route[0].location())
@@ -1234,6 +1268,12 @@ class UserInterface
     ctx.beginPath()
     ctx.arc(finish.x, finish.y, r, 0, 2*Math.PI)
     ctx.stroke()
+
+    ctx.font = window.config.windowStyle.defaultText.font
+    ctx.fillStyle = "rgb(0, 100, 255)"
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText("Destination", pos.x, pos.y - r)
 
   # The UI expects this to be called when the mouse moves
   #

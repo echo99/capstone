@@ -286,6 +286,8 @@ root.config =
     MENU_BUTTON_HOVER: new AnimatedSprite(['menu_button_hover.png'])
     RALLY_BUTTON_IDLE: new AnimatedSprite(['rally_button_idle.png'])
     RALLY_BUTTON_HOVER: new AnimatedSprite(['rally_button_hover.png'])
+    NEXT_STATION_BUTTON_IDLE: new AnimatedSprite(['next_station_button_idle.png'])
+    NEXT_STATION_BUTTON_HOVER: new AnimatedSprite(['next_station_button_hover.png'])
   Missions:
     w: 244
     h: 60
