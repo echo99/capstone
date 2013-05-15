@@ -33,6 +33,16 @@ class EventPlayback
     seed = JSON.parse(param)
     Math.seedrandom(seed.seed)
 
+    storageline = @_nextLine('\n')
+    p = storageline.match(/[0-9]+/g)
+    if p == null
+      p = 1
+    c = storageline.match(/[0-9]+/g)
+    if c == null
+      c = false
+    localStorage["progress"] = p
+    localStorage["complete"] = c
+
     @currentLine = @_nextLine('\n')
     @replyDone = @currentLine == ""
 
