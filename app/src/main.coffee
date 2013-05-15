@@ -8,6 +8,16 @@
 #_require util/Camera
 #_require gui/uielements
 #_require backend/Game
+#_require util/EventRecorder
+
+# The chance that this game will be recorded
+RECORD_CHANCE = 1
+# Set playback to a string holding a file name that is a recorded game
+# to play that game back instead of playing the game yourself
+#playback = "1368601393398.txt"
+playback = null
+
+window.player_id
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -20,8 +30,7 @@ Browser =
   IE: 'Explorer'
 
 TESTING = window.TESTING?
-DEBUG = true
-# console.log("Testing flag: " + TESTING)
+# debug("Testing flag: " + TESTING)
 
 manifest = [
     src: 'assets/audio/empty_space_stage1.ogg'
@@ -29,6 +38,9 @@ manifest = [
   ,
     src: 'assets/audio/empty_space_stage2.ogg'
     id: 'bgmusic2'
+  ,
+    src: 'assets/audio/dark_space.ogg|assets/audio/dark_space.mp3'
+    id: 'bgmusic3'
 ]
 
 bgmusic = null
@@ -40,8 +52,8 @@ createjs.Sound.addEventListener "loadComplete", ->
   numLoaded++
   if numLoaded >= numToLoad
     # Play music once all sounds have been loaded
-    console.log('Finished loading sounds!')
-    bgmusic = createjs.Sound.play('bgmusic1', createjs.Sound.INTERRUPT_NONE,
+    debug('Finished loading sounds!')
+    bgmusic = createjs.Sound.play('bgmusic3', createjs.Sound.INTERRUPT_NONE,
       10, 0, -1, 0.5)
     # Start it off muted
     bgmusic.mute(true)
@@ -73,6 +85,7 @@ KeyCodes =
   MINUS: 189 # zoom out
   ADD: 107 # zoom in
   SUB: 109 # zoom out
+  STATION: 83 # select next idle station
   CHEAT: 67
 
 cheat = false
@@ -83,7 +96,10 @@ currentTime = ->
 getMinutes = (ms) ->
   return (ms / 1000) / 60
 
-gameStart = currentTime()
+gameStart = null
+
+timeSinceStart = ->
+  return currentTime() - gameStart
 
 SpriteNames = window.config.spriteNames
 
@@ -107,7 +123,7 @@ drag = false
 WIN7 = false
 
 determineWin7 = ->
-  console.log(navigator.userAgent)
+  debug(navigator.userAgent)
   pat = /^\S+ \((.*?)\)/
   match = navigator.userAgent.match(pat)
   osStr = match[1]
@@ -118,7 +134,7 @@ determineWin7 = ->
     # Windows 7 is Windows NT 6.1
     if version == '6.1'
       WIN7 = true
-      console.log('You are using Windows 7')
+      debug('You are using Windows 7')
 
 determineWin7()
 
@@ -128,10 +144,16 @@ newMission = (mission) ->
   if UI == null
     UI = new UserInterface()
   CurrentMission = new mission()
-  window.onresize()
+  #window.onresize()
 
 newGame = (w, h, move) ->
   game = new Game(w, h, move)
+
+endTurn = () ->
+  Logger.send()
+  game.endTurn()
+  UI.endTurn()
+  CurrentMission.onEndTurn()
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -158,9 +180,9 @@ drawBackground = (ctx, spritesheet, name) ->
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 # Update the size of the frame and the canvases when the window size changes
-updateCanvases = (frame, canvases...) ->
-  frameWidth = window.innerWidth
-  frameHeight = window.innerHeight
+updateCanvases = (frame, canvases..., width, height) ->
+  frameWidth = width
+  frameHeight = height
   frame.width = frameWidth
   frame.height = frameHeight
   for canvas in canvases
@@ -170,6 +192,18 @@ updateCanvases = (frame, canvases...) ->
 
 # The main method for the game
 main = ->
+  seed = Math.seedrandom()
+  recording = false
+  if playback != null
+    eventPlay = new EventPlayback(playback)
+  else if Math.random() < RECORD_CHANCE
+    window.player_id = currentTime()
+    eventRec = new EventRecorder(seed, window.player_id)
+    recording = true
+    Math.seedrandom(seed)
+
+  Logger.start()
+  Logger.logEvent("Setting up frames")
   ##################################################################################
   # Get all necessary html elements
 
@@ -181,24 +215,29 @@ main = ->
   tooltipCanvas = document.getElementById('canvas-tooltip')
   # Need a better variable name for this
   surface = document.getElementById('surface')
-  updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
+  if playback
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+      eventPlay.initWidth, eventPlay.initHeight)
+  else
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+      window.innerWidth, window.innerHeight)
   # we should just make the bg larger than we'll ever need it to be
   bgCanvas.width = screen.width * 2
   bgCanvas.height = screen.height * 2
-  # console.log(screen.width)
+  # debug(screen.width)
   surface.style.width = screen.width + 'px'
   surface.style.height = screen.height + 'px'
-  # console.log(topSurface.style.width)
+  # debug(topSurface.style.width)
   bgCtx = bgCanvas.getContext('2d')
   ctx = canvas.getContext('2d')
   hudCtx = hudCanvas.getContext('2d')
   tooltipCtx = tooltipCanvas.getContext('2d')
 
-  # console.log(ctx.font)
+  # debug(ctx.font)
   # ctx.setFont({family: 'Arial'})
-  # console.log(ctx.font)
+  # debug(ctx.font)
   # ctx.setFontSizeVal(20)
-  # console.log(ctx.font)
+  # debug(ctx.font)
 
   # feedback = $('#comments').jqm()
   feedback = $('#comments').jqm({
@@ -233,11 +272,11 @@ main = ->
   # win.setBackgroundColor("rgba(0, 37, 255, 0.5)")
   # win.addChild(new Elements.MessageBox(50, 50, 80, 80, "hover here"))
   # frameElement.addChild(win)
-  # frameElement.drawChildren()
+  # nframeElement.drawChildren()
   # frameElement.addChild(new Elements.TextElement(300, 500, 160, 80,
   #   "some text here", {clickable: false, fontColor: 'rgb(100,255,255)',
   #   font: '15px sans-serif'}))
-  # console.log(frameElement.toString())
+  # debug(frameElement.toString())
 
   # msgBox2 = new Elements.MessageBox(200, -200, 100, 100, "test")
   # msgBox2.setDefaultCloseBtn()
@@ -249,16 +288,15 @@ main = ->
   # msgBox.addUpdateCallback ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
-
   UI = new UserInterface()
   CurrentMission = new Menu()
 
   sheet = SHEET
   if sheet == null
     # Should never get here
-    console.log("Sheet not loaded!")
+    debug("Sheet not loaded!")
   else
-    console.log("Sheet loaded!")
+    debug("Sheet loaded!")
     drawBackground(bgCtx, sheet, SpriteNames.BACKGROUND)
 
   # Set global variables for debugging
@@ -282,7 +320,7 @@ main = ->
   fullscreenBtn.setClickHandler ->
     if document.mozFullScreenElement or document.webkitFullscreenElement or
         document.fullScreenElement
-      console.log "Already full screen!"
+      debug "Already full screen!"
       if document.cancelFullScreen
         document.cancelFullScreen()
       else if document.mozCancelFullScreen
@@ -292,7 +330,7 @@ main = ->
       # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
       fullscreenBtn.setState('fullscreen')
     else
-      console.log "Not at full screen"
+      debug "Not at full screen"
       body = document.body
       if body.requestFullScreen
         body.requestFullScreen()
@@ -332,13 +370,21 @@ main = ->
     # catch e
     #   console.warn(e)
 
+  # for playback mouse position drawing
+  mousedown = false
+  mousepos = {x: 0, y: 0}
 
   ##################################################################################
   # Set event handlers
 
-  window.onresize = ->
-    # console.log("New Size: #{window.innerWidth} x #{window.innerHeight}")
-    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas)
+  onResize = ->
+    if recording
+      eventRec.recordEvent("onResize",
+        {width: window.innerWidth, height: window.innerHeight})
+
+    # debug("New Size: #{window.innerWidth} x #{window.innerHeight}")
+    updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+      window.innerWidth, window.innerHeight)
 
     if screen.height > bgCanvas.height or screen.width > bgCanvas.width
       bgCanvas.height = screen.height
@@ -361,28 +407,39 @@ main = ->
     frameElement.drawChildren()
     cameraHudFrame.resize()
 
-    # console.log("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
+    # debug("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
-  document.body.addEventListener('keydown', (e) ->
+  keyDownListener = (e) ->
+    if recording
+      eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
+
     if e.keyCode == KeyCodes.HOME
+      Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
+      Logger.logEvent("Pressed SPACE")
+      endTurn()
     else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+      Logger.logEvent("Pressed +")
       nz = camera.getZoom() + window.config.ZOOM_SPEED
-      console.log('zoom in to ' + nz)
       camera.setZoom(nz)
     else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+      Logger.logEvent("Pressed -")
       nz = camera.getZoom() - window.config.ZOOM_SPEED
       camera.setZoom(nz)
-    else if e.keyCode == KeyCodes.CHEAT
-      cheat = not cheat
-  )
+    else if e.keyCode == KeyCodes.STATION
+      Logger.logEvent("Pressed S")
+      UI.gotoNextStation()
+    #else if e.keyCode == KeyCodes.CHEAT
+    #  Logger.logEvent("Pressed CHEAT")
+    #  cheat = not cheat
 
   # Catch accidental leaving
-  window.onbeforeunload = (e) ->
+  onBeforeUnload = (e) ->
+    Logger.logEvent("Trying to leave")
+    Logger.send(false)
+    if eventRec
+      eventRec.send(false)
     # No progress can be lost in the menu
     if (not (CurrentMission instanceof Menu))
       if (not e)
@@ -392,12 +449,16 @@ main = ->
         e.stopPropagation()
         e.preventDefault()
         return "Warning: Progress my be lost."
+    return null
 
   prevPos = {x: 0, y: 0}
   drag = false
 
-  # hudCanvas.addEventListener('mousemove', (e) ->
-  surface.addEventListener('mousemove', (e) ->
+  mouseMoveHandler = (e) ->
+    if recording
+      eventRec.recordEvent("mouseMove",
+        {clientX: e.clientX, clientY: e.clientY})
+
     x = e.clientX
     y = e.clientY
     UI.onMouseMove(x, y)
@@ -425,7 +486,7 @@ main = ->
       dify = y - prevPos.y
       # difx = difx / Math.abs(difx) if difx
       # dify = dify / Math.abs(dify) if dify
-      # console.log "Difx: #{difx}, dify: #{dify}"
+      # debug "Difx: #{difx}, dify: #{dify}"
       # newX = camera.x + difx #/ window.config.PAN_SPEED_FACTOR / camera.zoom
       # newY = camera.y + dify #/ window.config.PAN_SPEED_FACTOR / camera.zoom
       # camera.setPosition(newX, newY)
@@ -434,9 +495,14 @@ main = ->
       # coords = camera.getWorldCoordinates({x: x, y: x})
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
-  )
-  # hudCanvas.addEventListener('click', (e) ->
-  surface.addEventListener('click', (e) ->
+
+    mousepos = {x: x, y: y}
+
+  clickHandler = (e) ->
+    if recording
+      eventRec.recordEvent("click",
+        {clientX: e.clientX, clientY: e.clientY})
+
     UI.onMouseClick(e.clientX, e.clientY)
     # if msgBox.containsPoint(e.clientX, e.clientY)
     # msgBox.click(e.clientX, e.clientY)
@@ -450,41 +516,83 @@ main = ->
       gameFrame.mouseMove(x, y)
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
-  )
 
-  # hudCanvas.addEventListener('mousedown', (e) ->
-  surface.addEventListener('mousedown', (e) ->
+  mouseDownHandler = (e) ->
+    if recording
+      eventRec.recordEvent("mouseDown",
+        {clientX: e.clientX, clientY: e.clientY})
+
     if not frameElement.mouseDown(e.clientX, e.clientY) and
         not cameraHudFrame.mouseDown(e.clientX, e.clientY)
       drag = true
       prevPos = {x: e.clientX, y: e.clientY}
       gameFrame.mouseDown(e.clientX, e.clientY)
-  )
 
-  # hudCanvas.addEventListener('mouseup', (e) ->
-  surface.addEventListener('mouseup', (e) ->
+    mousedown = true
+
+  mouseUpHandler = (e) ->
+    if recording
+      eventRec.recordEvent("mouseUp", {})
+
     drag = false
     frameElement.mouseUp()
     cameraHudFrame.mouseUp()
     gameFrame.mouseUp()
-  )
 
-  # hudCanvas.addEventListener('mouseout', (e) ->
-  surface.addEventListener('mouseout', (e) ->
+    mousedown = false
+
+  mouseOutHandler = (e) ->
+    if recording
+      eventRec.recordEvent("mouseOut", {})
+
     # frameElement.mouseOut()
     # cameraHudFrame.mouseOut()
     # gameFrame.mouseOut()
-    drag = false)
+    drag = false
 
   mouseWheelHandler = (e) ->
+    if recording
+      eventRec.recordEvent("mouseWheel",
+        {wheelDelta: e.wheelDelta, detail: e.detail})
+
     delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
     nz = camera.zoom + delta * window.config.ZOOM_SPEED
     camera.setZoom(nz)
 
-  document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
+  #window.onresize = onResize
 
-  document.body.addEventListener('mousewheel', mouseWheelHandler)
+  if playback
+    eventPlay.registerEvent("onResize", (width, height) ->
+      updateCanvases(frame, canvas, hudCanvas, camerahudCanvas, tooltipCanvas,
+        width, height)
+      frameElement.resize()
+      frameElement.setDirty()
+      frameElement.drawChildren()
+      cameraHudFrame.resize())
+    eventPlay.registerEvent("keyDown", keyDownListener)
+    eventPlay.registerEvent("mouseMove", mouseMoveHandler)
+    eventPlay.registerEvent("click", clickHandler)
+    eventPlay.registerEvent("mouseDown", mouseDownHandler)
+    eventPlay.registerEvent("mouseUp", mouseUpHandler)
+    eventPlay.registerEvent("mouseOut", mouseOutHandler)
+    eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
+  else
+    window.onresize = onResize
+    document.body.addEventListener('keydown', keyDownListener)
+    window.onbeforeunload = onBeforeUnload
+    surface.addEventListener('mousemove', mouseMoveHandler)
+    surface.addEventListener('click', clickHandler)
+    surface.addEventListener('mousedown', mouseDownHandler)
+    surface.addEventListener('mouseup', mouseUpHandler)
+    surface.addEventListener('mouseout', mouseOutHandler)
+    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
+    document.body.addEventListener('mousewheel', mouseWheelHandler)
 
+  #if playback
+    #window.onresize = onResize
+    #window.resizeTo(size[0], size[1])
+    #window.onresize = null
+    #debug(window.innerWidth, window.innerHeight)
 
   ##################################################################################
   # Draw loop
@@ -497,6 +605,32 @@ main = ->
     cameraHudFrame.drawChildren()
     frameElement.drawChildren()
     gameFrame.drawChildren()
+
+    if playback
+      if mousedown
+        tooltipCtx.fillStyle = "rgb(255, 0, 0)"
+      else
+        tooltipCtx.fillStyle = "rgb(0, 255, 0)"
+      tooltipCtx.beginPath()
+      tooltipCtx.arc(mousepos.x, mousepos.y, 3, 0, 2*Math.PI)
+      tooltipCtx.fill()
+
+      tooltipCtx.font = "13px Arial"
+      tooltipCtx.fillStyle = "rgb(255, 255, 255)"
+      tooltipCtx.textAlign = 'right'
+      tooltipCtx.textBaseline = 'middle'
+      tooltipCtx.fillText(timeSinceStart() + " ms", camera.width - 5, 50)
+
+      if eventPlay.replayDone
+        tooltipCtx.font = "40px Arial"
+        tooltipCtx.textAlign = 'center'
+        tooltipCtx.fillText("End of recording", camera.width/2, camera.height/2)
+
+      tooltipCtx.strokeStyle = "rgb(255, 255, 255)"
+      tooltipCtx.strokeRect(0, 0, camera.width, camera.height)
+
+      window.resizeTo(camera.width+16, camera.height+65)
+
     bgCanvas.style.left = Math.floor(camera.x /
       window.config.BG_PAN_SPEED_FACTOR - camera.width/2) + "px"
     bgCanvas.style.top = Math.floor(camera.y /
@@ -510,4 +644,10 @@ main = ->
   if TESTING
     draw()
   else
+    Logger.logEvent("Beginning draw loop")
+    draw()
     setInterval draw, 30
+
+    gameStart = currentTime()
+    if playback
+      setInterval eventPlay.next, 1

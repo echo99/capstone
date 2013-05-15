@@ -52,20 +52,20 @@ body {
 }
 
 .jqmWindow {
-    position: fixed;
-    top: 25%;
-    left: 50%;
-    
-    margin-left: -315px;
-    width: 600px;
-    
-    /*background-color: #EEE;*/
-    background-color: #333;
-    /*color: #333;*/
-    color: #EEE;
-    font-weight: bold;
-    border: 1px solid #222;
-    padding: 12px;
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  
+  margin-left: -315px;
+  width: 600px;
+  
+  /*background-color: #EEE;*/
+  background-color: #333;
+  /*color: #333;*/
+  color: #EEE;
+  font-weight: bold;
+  border: 1px solid #222;
+  padding: 12px;
 }
 
 .jqmWindow a {
@@ -76,4 +76,20 @@ body {
 .jqmWindow a:hover {
   color: #CCE;
   text-decoration: none;
+}
+
+.jqmWindow #bug-title {
+  /*border-width: 3px;*/
+  width: 594px;
+}
+
+.jqmWindow #bug-msg {
+  /*border-width: 3px;*/
+  min-width: 594px;
+  max-width: 594px;
+  width: 594px;
+}
+
+.jqmWindow form #submit {
+  float: right;
 }

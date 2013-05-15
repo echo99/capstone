@@ -4,8 +4,17 @@ class Mission3 extends Mission
   settings3: window.config.Missions.three
   # @see Mission#reset
   reset: ->
+    @attempts = localStorage["mission_3_attempts"]
+    if not @attempts
+      @attempts = 0
+    @attempts++
+    localStorage["mission_3_attempts"] = Number(@attempts)
+    Logger.logEvent("Starting Mission 3", {attempt: @attempts})
+
     @failed = false
 
+    randSave = Math.random
+    Math.seedrandom()
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
@@ -15,93 +24,155 @@ class Mission3 extends Mission
       'dimension1': 'Mission 3',
       'metric1': 1
     })
+    Math.random = randSave
 
     # Create planets:
-    newGame(10000, 10000, true)
-    @home = new Planet(0, 0, 0, 0)
+    newGame(10000, 10000)
+    @home = new Planet(0, 0, @settings3.homeResources, 1)
+    @home._availableResources = @settings3.homeAvailable
+    @home.addOutpost()
     @home.addShips(window.config.units.probe, @settings3.startingProbes)
-    @home.addShips(window.config.units.probe, @settings3.startingDefenseShips)
+    @home.addShips(window.config.units.defenseShip, @settings3.startingDefenseShips)
     game.addPlanet(@home)
-    ###
-    f1 = new Planet(1100, 1600, 17, 2)
-    f1.setFungus(7)
+
+    f1 = new Planet(-2270, -1000, 15, 1)
+    f1.setFungus(5)
     game.addPlanet(f1)
 
-    f2 = new Planet(1400, 0, 20, 1)
-    f2.setFungus(8)
+    f2 = new Planet(1900, -1270, 20, 1)
+    f2.setFungus(5)
     game.addPlanet(f2)
 
-    f3 = new Planet(1300, 850, 14, 1)
-    f3.setFungus(9)
+    f3 = new Planet(2270, 750, 14, 1)
+    f3.setFungus(5)
     game.addPlanet(f3)
 
-    p1 = new Planet(-100, -700, 11, 1)
+    o1 = new Planet(-700, -1100, @settings3.o1Resources, 1)
+    o1._availableResources = @settings3.o1Available
+    o1.addOutpost()
+    game.addPlanet(o1)
+
+    o2 = new Planet(270, -1100, @settings3.o2Resources, 1)
+    o2._availableResources = @settings3.o2Available
+    o2.addOutpost()
+    game.addPlanet(o2)
+
+    o3 = new Planet(-500, -10, @settings3.o3Resources, 1)
+    o3._availableResources = @settings3.o3Available
+    o3.addOutpost()
+    game.addPlanet(o3)
+
+    o4 = new Planet(550, 170, @settings3.o4Resources, 1)
+    o4._availableResources = @settings3.o4Available
+    o4.addOutpost()
+    game.addPlanet(o4)
+
+    p1 = new Planet(-2050, -560, 11, 1)
     game.addPlanet(p1)
 
-    p2 = new Planet(-700, -300, 5, 1)
+    p2 = new Planet(-1600, -260, 5, 1)
     game.addPlanet(p2)
 
-    p3 = new Planet(-1000, 300, 1, 1)
+    p3 = new Planet(-1050, -550, 1, 1)
     game.addPlanet(p3)
 
-    p4 = new Planet(-450, 550, 7, 2)
+    p4 = new Planet(-1250, 170, 7, 2)
     game.addPlanet(p4)
 
-    p5 = new Planet(200, 800, 6, 1)
+    p5 = new Planet(-400, -670, 6, 1)
     game.addPlanet(p5)
 
-    p6 = new Planet(900, 1100, 0, 0)
+    p6 = new Planet(-700, 520, 0, 0)
     game.addPlanet(p6)
 
-    p7 = new Planet(400, 400, 3, 1)
+    p7 = new Planet(180, -500, 3, 1)
     game.addPlanet(p7)
 
-    p8 = new Planet(600, -290, 8, 1)
+    p8 = new Planet(-50, 550, 8, 1)
     game.addPlanet(p8)
 
-    p9 = new Planet(900, 200, 2, 1)
+    p9 = new Planet(600, -700, 2, 1)
     game.addPlanet(p9)
 
-    p10 = new Planet(1200, -400, 10, 1)
+    p10 = new Planet(1170, -720, 10, 1)
     game.addPlanet(p10)
 
-    p11 = new Planet(1100, -800, 3, 1)
+    p11 = new Planet(1420, -1130, 3, 1)
     game.addPlanet(p11)
 
-    p12 = new Planet(1200, 400, 4, 1)
+    p12 = new Planet(1900, -750, 4, 1)
     game.addPlanet(p12)
 
-    p13 = new Planet(1800, 400, 9, 1)
+    p13 = new Planet(1900, -100, 9, 1)
     game.addPlanet(p13)
 
-    game.setNeighbors(@home, p1)
-    game.setNeighbors(@home, p2)
-    game.setNeighbors(@home, p3)
-    game.setNeighbors(@home, p4)
+    p14 = new Planet(1770, 480, 3, 1)
+    game.addPlanet(p14)
+
+    p15 = new Planet(1500, -10, 1, 1)
+    game.addPlanet(p15)
+
+    p16 = new Planet(1170, 100, 18, 1)
+    game.addPlanet(p16)
+
+    p17 = new Planet(1170, 730, 13, 1)
+    game.addPlanet(p17)
+
+    p18 = new Planet(-1600, -920, 11, 1)
+    game.addPlanet(p18)
+
+    p19 = new Planet(-2000, 160, 9, 1)
+    game.addPlanet(p19)
+
+    game.setNeighbors(@home, o3)
+    game.setNeighbors(@home, o4)
+    game.setNeighbors(@home, p5)
     game.setNeighbors(@home, p7)
     game.setNeighbors(@home, p8)
 
-    game.setNeighbors(f1, p6)
-    game.setNeighbors(f2, p9)
-    game.setNeighbors(f2, p10)
+    game.setNeighbors(o1, p3)
+    game.setNeighbors(o1, p5)
+    game.setNeighbors(o2, p7)
+    game.setNeighbors(o2, p9)
+    game.setNeighbors(o3, p3)
+    game.setNeighbors(o3, p4)
+    game.setNeighbors(o3, p5)
+    game.setNeighbors(o3, p6)
+    game.setNeighbors(o3, p8)
+    game.setNeighbors(o4, p8)
+    game.setNeighbors(o4, p16)
+    game.setNeighbors(o4, p17)
+
+    game.setNeighbors(f1, p1)
+    game.setNeighbors(f2, p11)
     game.setNeighbors(f2, p12)
-    game.setNeighbors(f3, p12)
+    game.setNeighbors(f3, p14)
 
     game.setNeighbors(p1, p2)
     game.setNeighbors(p2, p3)
-    game.setNeighbors(p3, p4)
-    game.setNeighbors(p4, p5)
-    game.setNeighbors(p5, p6)
+    game.setNeighbors(p2, p4)
+    game.setNeighbors(p2, p18)
+    game.setNeighbors(p2, p19)
+    game.setNeighbors(p3, p5)
+    game.setNeighbors(p4, p6)
     game.setNeighbors(p5, p7)
+    game.setNeighbors(p6, p8)
     game.setNeighbors(p7, p9)
-    game.setNeighbors(p8, p9)
-    game.setNeighbors(p8, p10)
     game.setNeighbors(p9, p10)
-    game.setNeighbors(p9, p12)
     game.setNeighbors(p10, p11)
+    game.setNeighbors(p10, p12)
+    game.setNeighbors(p10, p13)
+    game.setNeighbors(p11, p12)
     game.setNeighbors(p12, p13)
-    ###
-    camera.setZoom(0.5)
+    game.setNeighbors(p13, p14)
+    game.setNeighbors(p13, p15)
+    game.setNeighbors(p14, p17)
+    game.setNeighbors(p14, p15)
+    game.setNeighbors(p15, p16)
+    game.setNeighbors(p16, p17)
+
+    camera.setZoom(0.1)
+    camera.setZoomTarget(0.5)
     camera.setTarget(@home.location())
 
     @_initMenus()
@@ -109,11 +180,16 @@ class Mission3 extends Mission
     game.endTurn()
     UI.initialize(false, true, true)
 
+    @startTime = currentTime()
+
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
+
+    Logger.logEvent("Leaving Mission 3")
+    Logger.send()
 
   _initMenus: ->
     restart = () => newMission(Mission3)
@@ -125,7 +201,6 @@ class Mission3 extends Mission
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
-    ###
     totalResources = 0
     for p in game.getPlanets()
       if p.hasOutpost() or p.hasStation()
@@ -135,16 +210,15 @@ class Mission3 extends Mission
     ctx.textBaseline = 'bottom'
     ctx.font = window.config.windowStyle.defaultText.font
     ctx.fillStyle = window.config.windowStyle.defaultText.color
-    t = "Resources collected: " + totalResources + "/" + @settings2.resourceGoal
+    t = "Resources collected: " + totalResources + "/" + @settings3.resourceGoal
     ctx.fillText(t, camera.width / 2, camera.height - 10)
-    ###
 
     if @failed
       ctx.textAlign = 'center'
       ctx.textBaseline = 'top'
       ctx.font = window.config.windowStyle.defaultText.font
       ctx.fillStyle = window.config.windowStyle.defaultText.color
-      ctx.fillText("TODO: insert helpful fail message",
+      ctx.fillText("Impossible to get to " + @settings3.resourceGoal,
                    camera.width / 2, camera.height / 2 + 50)
 
   # @see Mission#onMouseMove
@@ -158,31 +232,23 @@ class Mission3 extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    ###
     totalResources = 0
     possibleResources = 0
-    hasColonyShip = false
-    hasProbe = false
     for p in game.getPlanets()
-      if p.hasOutpost()
+      if p.hasOutpost() or p.hasStation()
         totalResources += p.availableResources()
         possibleResources += p.resources()
-      if p.numShips(window.config.units.probe) > 0
-        hasProbe = true
-      if p.numShips(window.config.units.colonyShip) > 0
-        hasColonyShip = true
-      for g in p.getControlGroups()
-        if g.probes() > 0
-          hasProbe = true
-        if g.colonies() > 0
-          hasColonyShip = true
 
     if totalResources >= @settings3.resourceGoal
       current = localStorage["progress"]
       if current < 4
         localStorage["progress"] = 4
+        Logger.logEvent("Player completed Mission 3 for the first time",
+                        {attempts: @attempts})
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission 3',
@@ -199,14 +265,20 @@ class Mission3 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Math.random = randSave
+        Logger.logEvent("Player successfully completed Mission 3",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
+                        resources: totalResources})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
-    else if not (hasColonyShip and hasProbe) and
-            possibleResources + totalResources < @settings2.resourceGoal
+    else if possibleResources + totalResources < @settings3.resourceGoal
       @failed = true
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission 3',
@@ -223,7 +295,12 @@ class Mission3 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Math.random = randSave
+        Logger.logEvent("Player failed Mission 3",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
+                        resources: totalResources
+                        max_possible: totalResources + possibleResources})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()
-    ###

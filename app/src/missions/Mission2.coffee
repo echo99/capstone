@@ -4,8 +4,17 @@ class Mission2 extends Mission
   settings2: window.config.Missions.two
   # @see Mission#reset
   reset: ->
+    @attempts = localStorage["mission_2_attempts"]
+    if not @attempts
+      @attempts = 0
+    @attempts++
+    localStorage["mission_2_attempts"] = Number(@attempts)
+    Logger.logEvent("Starting Mission 2", {attempt: @attempts})
+
     @failed = false
 
+    randSave = Math.random
+    Math.seedrandom()
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
@@ -15,6 +24,7 @@ class Mission2 extends Mission
       'dimension1': 'Mission 2',
       'metric1': 1
     })
+    Math.random = randSave
 
     # Create planets:
     newGame(10000, 10000, true)
@@ -102,7 +112,8 @@ class Mission2 extends Mission
     game.setNeighbors(p10, p11)
     game.setNeighbors(p12, p13)
 
-    camera.setZoom(0.5)
+    camera.setZoom(0.1)
+    camera.setZoomTarget(0.5)
     camera.setTarget(@home.location())
 
     @_initMenus()
@@ -110,11 +121,16 @@ class Mission2 extends Mission
     game.endTurn()
     UI.initialize(false, true, true)
 
+    @startTime = currentTime()
+
   destroy: ->
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
+
+    Logger.logEvent("Leaving Mission 2")
+    Logger.send()
 
   _initMenus: ->
     restart = () => newMission(Mission2)
@@ -162,7 +178,7 @@ class Mission2 extends Mission
     hasColonyShip = false
     hasProbe = false
     for p in game.getPlanets()
-      if p.hasOutpost()
+      if p.hasOutpost() or p.hasStation()
         totalResources += p.availableResources()
         possibleResources += p.resources()
       if p.numShips(window.config.units.probe) > 0
@@ -179,8 +195,12 @@ class Mission2 extends Mission
       current = localStorage["progress"]
       if current < 3
         localStorage["progress"] = 3
+        Logger.logEvent("Player completed Mission 2 for the first time",
+                        {attempts: @attempts})
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission 2',
@@ -197,6 +217,12 @@ class Mission2 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Math.random = randSave
+
+        Logger.logEvent("Player successfully completed Mission 2",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
+                        resources: totalResources})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -205,6 +231,8 @@ class Mission2 extends Mission
       @failed = true
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
           'eventCategory': 'Mission 2',
@@ -221,6 +249,14 @@ class Mission2 extends Mission
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Math.random = randSave
+        Logger.logEvent("Player failed Mission 2",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns
+                        resources: totalResources
+                        max_possible: totalResources + possibleResources
+                        colony_ship: hasColonyShip
+                        probe: hasProbe})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

@@ -57,6 +57,10 @@ root.config =
     delay: 10
     radius: 7
     color: "rgba(0, 255, 255, 1)"
+  arrowStyle:
+    color: "rgba(255, 255, 255, 1)"
+    width: 2
+    angle: 145
   combatStyle:
     good:
       fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
@@ -75,6 +79,9 @@ root.config =
     defenseLoc: {x: -80, y: 150}
   connectionStyle:
     normal:
+      visible: "rgba(128, 128, 128, 0.8)"
+      discovered: "rgba(128, 128, 128, 0.2)"
+      undiscovered: "rgba(128, 128, 128, 0.0)"
       stroke: "rgba(128, 128, 128, 0.5)"
       lineWidth: 2
     path:
@@ -112,6 +119,10 @@ root.config =
     pathColor: "rgba(0, 40, 255, 0.8)"
     pathWidth: 6
     finishRadius: 30
+  rallyPoint:
+    color: "rgba(0, 255, 0, 0.8)"
+    width: 2
+    radius: 40
   unitDisplay:
     location: {x: -220, y: -70}
     fill: "rgba(255, 255, 0, 0.5)"
@@ -176,6 +187,10 @@ root.config =
       imgLoc: {x: 332+32/2, y: 10+20+32/2+70}
       costLoc: {x: 332+45, y: 10+20+70}
       turnsLoc: {x: 332+45, y: 10+20+20+70}
+    rallyLoc: {x: 130, y: 20}
+    rallySize: {w: 112, h: 20}
+    cancelRallyLoc: {x: 112, y: 20}
+    cancelRallySize: {w: 60, h: 20}
   outpostMenuStyle:
     location: {x: 120, y: 5}
     width: 200
@@ -269,6 +284,10 @@ root.config =
       ['stop_sending_button_hover.png'])
     MENU_BUTTON_IDLE: new AnimatedSprite(['menu_button_idle.png'])
     MENU_BUTTON_HOVER: new AnimatedSprite(['menu_button_hover.png'])
+    RALLY_BUTTON_IDLE: new AnimatedSprite(['rally_button_idle.png'])
+    RALLY_BUTTON_HOVER: new AnimatedSprite(['rally_button_hover.png'])
+    NEXT_STATION_BUTTON_IDLE: new AnimatedSprite(['next_station_button_idle.png'])
+    NEXT_STATION_BUTTON_HOVER: new AnimatedSprite(['next_station_button_hover.png'])
   Missions:
     w: 244
     h: 60
@@ -306,7 +325,17 @@ root.config =
     three:
       startingProbes: 2
       startingDefenseShips: 10
-      resourceGoal: 20
+      resourceGoal: 150
+      homeAvailable: 13
+      homeResources: 30
+      o1Available: 6
+      o1Resources: 32
+      o2Available: 7
+      o2Resources: 30
+      o3Available: 9
+      o3Resources: 44
+      o4Available: 10
+      o4Resources: 26
   MainMenu:
     home:
       x: 0
@@ -321,7 +350,7 @@ root.config =
         w: 400
         h: 290
         message: "Mission 1\n\n" +
-                 "We lost communications with scouting a party. They had several " +
+                 "We lost communications with a scouting party. They had several " +
                  "attack ships which we would rather not lose so we're giving " +
                  "you a probe to go check out the area. Try to bring any ships " +
                  "you find back safely, and be sure to exterminate any fungus " +
@@ -388,9 +417,9 @@ root.config =
         message: "Mission 3\n\n" +
                  "It turns out that 50 resorces wasn't enough, but the fungus is " +
                  "closing in on our outposts. Send in some defense ships to hold " +
-                 "off the fungus long enough to gather 100 resources.\n\n" +
+                 "off the fungus long enough to gather 150 resources.\n\n" +
                  "Tasks:\n" +
-                 "  - Gather a total of 100 resources"
+                 "  - Gather a total of 150 resources"
         textAlign: 'left'
         vAlign: 'top'
         font: "15px Arial"
@@ -408,10 +437,14 @@ root.config =
     extermination:
       x: 400
       y: 150
+    small:
+      x: 900
+      y: 150
       menu:
         w: 400
-        h: 150
-        message: "Extermination\n\n" +
+        h: 200
+        message: "Extermination - Small map\n\n" +
+                 "Estimated Time: 5-10 minutes\n\n" +
                  "Task:\n" +
                  "  - Exterminate all fungus before it exterminates you.\n\n" +
                  "Note: It is recommended that you complete the missions before " +
@@ -422,12 +455,64 @@ root.config =
         lineHeight: 15
         cancel:
           x: 245
-          y: 150 - 15
+          y: 200 - 15
           w: 60
           h: 20
         start:
           x: 145
-          y: 150 - 15
+          y: 200 - 15
+          w: 101
+          h: 20
+    medium:
+      x: 750
+      y: 500
+      menu:
+        w: 400
+        h: 200
+        message: "Extermination - Medium map\n\n" +
+                 "Estimated Time: 20-40 minutes\n\n" +
+                 "Task:\n" +
+                 "  - Exterminate all fungus before it exterminates you.\n\n" +
+                 "Note: It is recommended that you complete the missions before " +
+                 "attempting this."
+        textAlign: 'left'
+        vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 15
+        cancel:
+          x: 245
+          y: 200 - 15
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 200 - 15
+          w: 101
+          h: 20
+    large:
+      x: 400
+      y: 650
+      menu:
+        w: 400
+        h: 200
+        message: "Extermination - Large map\n\n" +
+                 "Estimated Time: 60+ minutes\n\n" +
+                 "Task:\n" +
+                 "  - Exterminate all fungus before it exterminates you.\n\n" +
+                 "Note: It is recommended that you complete the missions before " +
+                 "attempting this."
+        textAlign: 'left'
+        vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 15
+        cancel:
+          x: 245
+          y: 200 - 15
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 200 - 15
           w: 101
           h: 20
   units:
@@ -487,7 +572,9 @@ root.config =
   maximumAdjacencyDistance: 800
   minimumFungusDistance: 5000
   fungusInitialStrength: 1
-  numberOfPlanetsInExterminate: 100
+  numberOfPlanetsInExterminateSmall: 20
+  numberOfPlanetsInExterminateMedium: 50
+  numberOfPlanetsInExterminateLarge: 100
   resources:
     homePlanetResources: 40
     homePlanetRate: 2

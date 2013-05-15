@@ -3,35 +3,42 @@
 # This mission acts as our games main menu
 class Extermination extends Mission
   #settings: window.config.MainMenu
+  size: ""
+  numPlanets: 0
+  restart: null
 
   # @see Mission#reset
   reset: ->
+    @attemptName = "extermination_"+@size+"_attempts"
+    @mission = "Extermination " + @size
+    @attempts = localStorage[@attemptName]
+
+    if not @attempts
+      @attempts = 0
+    @attempts++
+    localStorage[@attemptName] = Number(@attempts)
+    Logger.logEvent("Starting " + @mission, {attempt: @attempts})
+
+    randSave = Math.random
+    Math.seedrandom()
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'Extermination',
+      'eventCategory': @mission,
       'eventAction': 'Start'
-      #'eventLabel': 'Extermination'
-      'dimension1': 'Extermination',
+      'dimension1': @mission,
       'metric1': 1
     })
+    Math.random = randSave
 
     newGame(10000, 10000)
-
     # Create planets:
-    @home = game.setup(root.config.numberOfPlanetsInExterminate)
+    @home = game.setup(@numPlanets)
     @home.addStation()
 
-    # Test stuff
-    #@home.getAdjacentPlanets()[0].addOutpost()
-    #@home.addShips(window.config.units.probe, 8)
-    #@home.addShips(window.config.units.colonyShip, 10)
-    #@home.addShips(window.config.units.attackShip, 10)
-    #@home.addShips(window.config.units.defenseShip, 10)
-    # End test stuff
-
     UI.initialize()
-    camera.setZoom(0.5)
+    camera.setZoom(0.1)
+    camera.setZoomTarget(0.5)
     camera.setTarget(@home.location())
 
     @_initMenus()
@@ -44,24 +51,15 @@ class Extermination extends Mission
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
 
+    Logger.logEvent("Leaving " + @mission)
+    Logger.send()
+
   _initMenus: ->
-    @victoryMenu = @createVictoryMenu(
-      () =>
-        console.log('restart extermination')
-        newMission(Extermination)
-      () =>
-        console.log('to next mission')
-        newMission(Menu)
-    )
-    @failMenu = @createFailMenu(
-      () =>
-        console.log('restart extermination')
-        newMission(Extermination)
-    )
-    @optionsMenu = @createOptionMenu(
-      () =>
-        newMission(Extermination)
-    )
+    restart = () => newMission(@restart)
+    next = () => newMission(Menu)
+    @victoryMenu = @createVictoryMenu(restart, next)
+    @failMenu = @createFailMenu(restart)
+    @optionsMenu = @createOptionMenu(restart)
     @menuButton = @createMenuButton(@optionsMenu)
 
   # @see Mission#draw
@@ -99,22 +97,28 @@ class Extermination extends Mission
     if not hasFungus
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Extermination',
+          'eventCategory': @mission,
           'eventAction': 'Complete',
           'eventLabel': 'Victory',
-          'dimension1': 'Extermination',
+          'dimension1': @mission,
           'metric5': 1,
           'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Extermination',
+          'timingCategory': @mission,
           'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Victory'
         })
+        Math.random = randSave
+        Logger.logEvent("Player successfully completed " + @mission,
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns})
       @gameEnded = true
       UI.endGame()
       @victoryMenu.open()
@@ -122,22 +126,28 @@ class Extermination extends Mission
     if not hasAnything
       if not @gameEnded
         @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
         ga('send', {
           'hitType': 'event',
-          'eventCategory': 'Extermination',
+          'eventCategory': @mission,
           'eventAction': 'Complete',
           'eventLabel': 'Fail',
-          'dimension1': 'Extermination',
+          'dimension1': @mission,
           'metric6': 1,
           'metric2': 1
         })
         ga('send', {
           'hitType': 'timing',
-          'timingCategory': 'Extermination',
+          'timingCategory': @mission,
           'timingVar': 'Complete',
           'timingValue': @endTime - @startTime,
           'timingLabel': 'Fail'
         })
+        Math.random = randSave
+        Logger.logEvent("Player failed " + @mission,
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns})
       @gameEnded = true
       UI.endGame()
       @failMenu.open()

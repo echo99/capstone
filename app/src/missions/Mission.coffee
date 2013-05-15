@@ -59,7 +59,7 @@ class Mission
 
     @_attachRestartButton(menuBox, onRestart)
     @_attachQuitButton(menuBox)
-    @_attachNextButton(menuBox, onNextMission)
+    #@_attachNextButton(menuBox, onNextMission)
 
     cameraHudFrame.addChild(menuBox)
 
@@ -160,6 +160,7 @@ class Mission
     menuButton.setMouseDownHandler(() => menuButton.setDirty())
     menuButton.setMouseOutHandler(() => menuButton.setDirty())
     menuButton.setDrawFunc((ctx) =>
+      menuButton.x = camera.width - menu.w / 2 - 5
       loc = {x: menuButton.x, y: menuButton.y}
       if menuButton.isPressed()
         SHEET.drawSprite(SpriteNames.MENU_BUTTON_HOVER, loc.x, loc.y, ctx, false)

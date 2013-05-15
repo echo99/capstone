@@ -14,6 +14,7 @@ class UserInterface
   hoveredGroup: null
   turns: 0
   lookingToSendResources: false
+  lookingToSetRally: false
   carrierCount: 0
   movingElements: []
   showAll: false
@@ -21,21 +22,16 @@ class UserInterface
   # Creates a new UserInterface
   constructor: () ->
     @unitSelection = new UnitSelection()
-    b = new Elements.Button(5 + 73/2, camera.height + 5 - 20/2, 73, 20)
+    b = new Elements.Button(5 + 133/2, camera.height + 5 - 20/2, 133, 20)
     b.setClickHandler(() =>
       game.endTurn()
       UI.endTurn()
       CurrentMission.onEndTurn()
     )
-    b.setMouseUpHandler(() =>
-      b.setDirty()
-    )
-    b.setMouseDownHandler(() =>
-      b.setDirty()
-    )
-    b.setMouseOutHandler(() =>
-      b.setDirty()
-    )
+    b.setMouseUpHandler(() => b.setDirty())
+    b.setMouseDownHandler(() => b.setDirty())
+    b.setMouseOutHandler(() => b.setDirty())
+    b.setHoverHandler(() => b.setDirty())
     b.setDrawFunc((ctx) =>
       b.y = camera.height-5-10
       if b.isPressed()
@@ -45,6 +41,28 @@ class UserInterface
     )
     b.setZIndex(100)
     frameElement.addChild(b)
+
+    @nextStationButton = new Elements.Button(5 + 150/2, 230, 150, 20)
+    @nextStationButton.setClearFunc((ctx) =>
+      ctx.clearRect(5, 230 - 10, 150, 20)
+    )
+    @nextStationButton.setClickHandler(() => @gotoNextStation())
+    @nextStationButton.setMouseUpHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setMouseDownHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setMouseOutHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setHoverHandler(() => @nextStationButton.setDirty())
+    @nextStationButton.setDrawFunc((ctx) =>
+      if @nextStationButton.isPressed()
+        SHEET.drawSprite(SpriteNames.NEXT_STATION_BUTTON_HOVER,
+                         @nextStationButton.x, @nextStationButton.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.NEXT_STATION_BUTTON_IDLE,
+                         @nextStationButton.x, @nextStationButton.y, ctx, false)
+    )
+    @nextStationButton.setZIndex(100)
+    @nextStationButton.visible = false
+    frameElement.addChild(@nextStationButton)
+
     @help = new Elements.MessageBox(0, 0, 300, 50,
       "Press HOME to return", {zIndex: 10})
     @help.visible = false
@@ -84,6 +102,48 @@ class UserInterface
     h = (stationStyle.height - winStyle.lineWidth / 2) - y
     defenseButton = @_getStationButton(x, y, w, h, window.config.units.defenseShip)
 
+    x = stationStyle.rallyLoc.x
+    y = stationStyle.rallyLoc.y
+    w = stationStyle.rallySize.w
+    h = stationStyle.rallySize.h
+    stationRally = new Elements.Button(x, y, w, h)
+    stationRally.setProperty("location",
+      @stationMenu.getActualLocation(stationRally.x, stationRally.y))
+    stationRally.setClickHandler(() =>
+      @lookingToSetRally = true
+    )
+    stationRally.setDrawFunc((ctx) =>
+      loc = stationRally.getProperty("location")
+      if stationRally.isPressed()
+        SHEET.drawSprite(SpriteNames.RALLY_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.RALLY_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    stationRally.visible = true
+
+    x = stationStyle.cancelRallyLoc.x
+    y = stationStyle.cancelRallyLoc.y
+    w = stationStyle.cancelRallySize.w
+    h = stationStyle.cancelRallySize.h
+    stationCancelRally = new Elements.Button(x, y, w, h)
+    stationCancelRally.setProperty("location",
+      @stationMenu.getActualLocation(stationCancelRally.x, stationCancelRally.y))
+    stationCancelRally.setClickHandler(() =>
+      @lookingToSetRally = false
+    )
+    stationCancelRally.setDrawFunc((ctx) =>
+      loc = stationCancelRally.getProperty("location")
+      if stationCancelRally.isPressed()
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+    stationCancelRally.visible = false
+
     x = stationStyle.cancelLoc.x
     y = stationStyle.cancelLoc.y
     w = stationStyle.cancelSize.w
@@ -109,8 +169,14 @@ class UserInterface
     @stationMenu.addChild(attackButton)
     @stationMenu.addChild(defenseButton)
     @stationMenu.addChild(cancelBuild)
+    @stationMenu.addChild(stationRally)
+    @stationMenu.addChild(stationCancelRally)
     @stationMenu.setProperty("cancelButton", cancelBuild)
     @stationMenu.setProperty("cancelOpen", false)
+    @stationMenu.setProperty("rallyButton", stationRally)
+    @stationMenu.setProperty("rallyOpen", true)
+    @stationMenu.setProperty("cancelRallyButton", stationCancelRally)
+    @stationMenu.setProperty("cancelRallyOpen", false)
     @stationMenu.visible = false
     frameElement.addChild(@stationMenu)
 
@@ -251,7 +317,7 @@ class UserInterface
     @colonyMenu.visible = false
     frameElement.addChild(@colonyMenu)
 
-    @turnCounter = new Elements.BoxElement(100, camera.height + 5 - 20/2, 30, 20)
+    @turnCounter = new Elements.BoxElement(155, camera.height + 5 - 20/2, 30, 20)
     clear = (ctx) =>
       w = @turnCounter.w
       h = @turnCounter.h
@@ -464,6 +530,21 @@ class UserInterface
       if @stationMenu.getProperty("cancelOpen")
         @stationMenu.getProperty("cancelButton").close()
         @stationMenu.setProperty("cancelOpen", false)
+
+    if @lookingToSetRally
+      if @stationMenu.getProperty("rallyOpen")
+        @stationMenu.getProperty("rallyButton").close()
+        @stationMenu.setProperty("rallyOpen", false)
+      if not @stationMenu.getProperty("cancelRallyOpen")
+        @stationMenu.getProperty("cancelRallyButton").open()
+        @stationMenu.setProperty("cancelRallyOpen", true)
+    else
+      if @stationMenu.getProperty("cancelRallyOpen")
+        @stationMenu.getProperty("cancelRallyButton").close()
+        @stationMenu.setProperty("cancelRallyOpen", false)
+      if not @stationMenu.getProperty("rallyOpen")
+        @stationMenu.getProperty("rallyButton").open()
+        @stationMenu.setProperty("rallyOpen", true)
 
   _drawUnitBlock: (ctx, title, loc, unit, unitConfig, sprite) =>
     x = loc.x + unitConfig.labelLoc.x
@@ -751,7 +832,6 @@ class UserInterface
 
   planetButtonCallback: (planet) =>
     return () =>
-      console.log('number carriers: ' + planet._resourceCarriers.length)
       if @unitSelection.total > 0
         for p in @unitSelection.planetsWithSelectedUnits
           attack = @unitSelection.getNumberOfAttacks(p)
@@ -766,6 +846,9 @@ class UserInterface
         if planet.hasStation() and @selectedPlanet != planet
           @selectedPlanet.sendResources(planet)
           @lookingToSendResources = false
+      else if @lookingToSetRally
+        @selectedPlanet.sendUnits(planet)
+        @lookingToSetRally = false
       else
         if @selectedPlanet == planet
           @stationMenu.close()
@@ -803,27 +886,72 @@ class UserInterface
   planetButtonOutCallback: () =>
     @hoveredPlanet = null
 
+  _isIdle: (p) ->
+    return p.hasStation() and not p.isBuilding() and p.availableResources() > 0
+
+  gotoNextStation: () ->
+    foundCurrent = false
+    findFirst = @selectedPlanet == null or not @selectedPlanet.hasStation()
+    first = null
+    target = null
+    for p in game.getPlanets()
+      if first == null and @_isIdle(p)
+        first = p
+      if @_isIdle(p) and (findFirst or foundCurrent)
+        @selectedPlanet = p
+        @outpostMenu.close()
+        @colonyMenu.close()
+        @stationMenu.open()
+        @stationMenu.setDirty()
+        @switchedMenus = true
+        camera.setTarget(p.location())
+        target = p
+        break
+      if p == @selectedPlanet
+        foundCurrent = true
+
+    if target == null and first
+      @selectedPlanet = first
+      @outpostMenu.close()
+      @colonyMenu.close()
+      @stationMenu.open()
+      @stationMenu.setDirty()
+      @switchedMenus = true
+      camera.setTarget(first.location())
+
   # Draws the game and HUD
   #
   # @param [CanvasRenderingContext2D] ctx The game context
   # @param [CanvasRenderingContext2D] hudCtx The hud context
   draw: (ctx, hudCtx) ->
     visited = []
-    ctx.strokeStyle = window.config.connectionStyle.normal.stroke
+    #ctx.strokeStyle = window.config.connectionStyle.normal.stroke
     ctx.lineWidth = window.config.connectionStyle.normal.lineWidth
     for p in game.getPlanets()
       pos = camera.getScreenCoordinates(p.location())
       visited.push(p)
       for neighbor in p.getAdjacentPlanets()
-        if cheat or @showAll or (neighbor not in visited and
-           p.visibility() != window.config.visibility.undiscovered and
-           neighbor.visibility() != window.config.visibility.undiscovered)
-          # draw connection to the neighbor
-          nPos = camera.getScreenCoordinates(neighbor.location())
-          ctx.beginPath()
-          ctx.moveTo(pos.x, pos.y)
-          ctx.lineTo(nPos.x, nPos.y)
-          ctx.stroke()
+        if neighbor in visited
+          ctx.strokeStyle = window.config.connectionStyle.normal.undiscovered
+        else if cheat or @showAll
+          ctx.strokeStyle = window.config.connectionStyle.normal.discovered
+        else if p.visibility() == window.config.visibility.visible and
+                neighbor.visibility() == window.config.visibility.visible
+          ctx.strokeStyle = window.config.connectionStyle.normal.visible
+        else if p.visibility() == window.config.visibility.undiscovered or
+                neighbor.visibility() == window.config.visibility.undiscovered
+          ctx.strokeStyle = window.config.connectionStyle.normal.undiscovered
+        else
+          ctx.strokeStyle = window.config.connectionStyle.normal.discovered
+        #if cheat or @showAll or (neighbor not in visited and
+        #   p.visibility() != window.config.visibility.undiscovered and
+        #   neighbor.visibility() != window.config.visibility.undiscovered)
+        # draw connection to the neighbor
+        nPos = camera.getScreenCoordinates(neighbor.location())
+        ctx.beginPath()
+        ctx.moveTo(pos.x, pos.y)
+        ctx.lineTo(nPos.x, nPos.y)
+        ctx.stroke()
 
     if @hoveredGroup != null
       tooltipCtx.textAlign = "left"
@@ -846,7 +974,9 @@ class UserInterface
         else
           SHEET.drawSprite(SpriteNames.PLANET_INVISIBLE, loc.x, loc.y, ctx)
       else if vis == window.config.visibility.visible or @showAll
-        if (@showAll and p.fungusStrength() > 0) or
+        if p.sprite()
+          SHEET.drawSprite(p.sprite(), loc.x, loc.y, ctx)
+        else if (@showAll and p.fungusStrength() > 0) or
            (p._lastSeenFungus and not @showAll)
           SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
@@ -902,14 +1032,14 @@ class UserInterface
             ctx.fillStyle = yellow
           else
             ctx.fillStyle = white
-          ctx.fillText(tRes, pos.x+offset, pos.y+15)
+          ctx.fillText(tRes, pos.x+offset, pos.y+10)
 
           if p.numShips(window.config.units.probe) > 0 or
              p.hasStation() or p.hasOutpost()
             ctx.fillStyle = yellow
           else
             ctx.fillStyle = white
-          ctx.fillText(tRat, pos.x+offset, pos.y+30)
+          ctx.fillText(tRat, pos.x+offset, pos.y+20)
 
       if (@showAll and p.fungusStrength() > 0) or
          (p._lastSeenFungus and not @showAll)
@@ -1000,12 +1130,34 @@ class UserInterface
     tooltipCtx.font = window.config.toolTipStyle.font
     tooltipCtx.fillStyle = window.config.toolTipStyle.color
     if @hoveredPlanet
+      if @hoveredPlanet.hasStation() and @hoveredPlanet.isBuilding()
+        switch @hoveredPlanet.buildUnit()
+          when window.config.units.probe
+            sprite = SpriteNames.PROBE
+          when window.config.units.colonyShip
+            sprite = SpriteNames.COLONY_SHIP
+          when window.config.units.attackShip
+            sprite = SpriteNames.ATTACK_SHIP
+          when window.config.units.defenseShip
+            sprite = SpriteNames.DEFENSE_SHIP
+        SHEET.drawSprite(sprite, x + 16, y + 24, ctx, false)
+        turns = @hoveredPlanet.buildStatus()
+        text = turns + " turn"
+        if turns > 1
+          text += "s"
+        text += " remaining"
+        ctx.font = window.config.windowStyle.defaultText.font
+        ctx.fillStyle = window.config.windowStyle.defaultText.value
+        ctx.fillText(text, x + 35, y + 24)
+
       hasAction = true
       if @lookingToSendResources
         if @hoveredPlanet.hasStation() and @hoveredPlanet != @selectedPlanet
           tooltipCtx.fillText("Valid destination", x, y)
         else
           tooltipCtx.fillText("Invalid destination", x, y)
+      else if @lookingToSetRally
+        tooltipCtx.fillText("Set planet as unit rally point", x, y)
       else if @unitSelection.total > 0
         tooltipCtx.fillText("Move selected units", x, y)
       else if @hoveredPlanet.hasOutpost() or
@@ -1053,16 +1205,53 @@ class UserInterface
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
 
+    use = null
+    if @hoveredPlanet and @hoveredPlanet.hasStation()
+      use = @hoveredPlanet
+    else if @selectedPlanet and @selectedPlanet.hasStation()
+      use = @selectedPlanet
+    if use
+      if use._sendingUnitsTo
+        loc = use._sendingUnitsTo.location()
+      else
+        loc = use.location()
+      pos = camera.getScreenCoordinates(loc)
+
+      ctx.strokeStyle = window.config.rallyPoint.color
+      ctx.lineWidth = window.config.rallyPoint.width
+      r = (window.config.planetRadius + window.config.rallyPoint.radius) *
+        camera.getZoom()
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+      ctx.stroke()
+
+      ctx.font = window.config.windowStyle.defaultText.font
+      ctx.fillStyle = window.config.rallyPoint.color
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText("Rally Point", pos.x, pos.y - r)
+
     if @switchedMenus
       @stationMenu.setDirty()
       @outpostMenu.setDirty()
       @colonyMenu.setDirty()
 
-    if drag and not @hoveredPlanet and not @lookingToSendResources
+    if drag and not @hoveredPlanet and not @lookingToSendResources and
+       not @lookingToSetRally
       @stationMenu.close()
       @outpostMenu.close()
       @colonyMenu.close()
       @selectedPlanet = null
+
+    hasIdle = false
+    for p in game.getPlanets()
+      if @_isIdle(p)
+        hasIdle = true
+
+    if hasIdle
+      @nextStationButton.open()
+    else
+      @nextStationButton.close()
 
   _drawRoute: (ctx, route) ->
     start = camera.getScreenCoordinates(route[0].location())
@@ -1081,6 +1270,12 @@ class UserInterface
     ctx.beginPath()
     ctx.arc(finish.x, finish.y, r, 0, 2*Math.PI)
     ctx.stroke()
+
+    ctx.font = window.config.windowStyle.defaultText.font
+    ctx.fillStyle = "rgb(0, 100, 255)"
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText("Destination", pos.x, pos.y - r)
 
   # The UI expects this to be called when the mouse moves
   #
@@ -1131,7 +1326,7 @@ class UserInterface
         groupDisplay = @_getExpandedDisplay(controlGameLoc, groups, previous)
 
         controlGroup = @_getCollapsedDisplay(controlGameLoc, groupDisplay)
-        @_setHandler(groupDisplay, controlGroup)
+        @_setHandler(groupDisplay, controlGroup, controlGameLoc, groups)
 
         @controlGroups.push(controlGroup)
         controlGroup.setZIndex(100)
@@ -1145,48 +1340,9 @@ class UserInterface
     w = window.config.controlGroup.expandedWidth
     h = window.config.controlGroup.expandedHeight * groups.length
     groupDisplay = new Elements.BoxElement(-1000, -1000, w, h)
-    clear = (ctx) =>
-      ctx.fillStyle = winStyle.fill
-      ctx.strokeStyle = winStyle.stroke
-      ctx.lineJoin = winStyle.lineJoin
-      ctx.lineWidth = winStyle.lineWidth
-
-      loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
-      ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
-                    loc.y - winStyle.lineWidth/2 - 1,
-                    w + winStyle.lineWidth + 2,
-                    h + winStyle.lineWidth + 2,)
-
-    groupDisplay.setClearFunc(clear)
-    groupDisplay.setDrawFunc(
-      (ctx) =>
-        clear(ctx)
-        winStyle = window.config.windowStyle
-        ctx.fillStyle = winStyle.fill
-        ctx.strokeStyle = winStyle.stroke
-        ctx.lineJoin = winStyle.lineJoin
-        ctx.lineWidth = winStyle.lineWidth
-
-        loc = camera.getScreenCoordinates(controlGameLoc)
-        groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
-
-        ctx.fillRect(loc.x, loc.y, w, h)
-        ctx.strokeRect(loc.x, loc.y, w, h)
-
-        offset = 0
-        height = window.config.controlGroup.expandedHeight
-        for g in groups
-          # Draw divider
-          ctx.beginPath()
-          ctx.moveTo(loc.x, loc.y + offset)
-          ctx.lineTo(loc.x + w, loc.y + offset)
-          ctx.stroke()
-          offset += height
-    )
 
     height = window.config.controlGroup.expandedHeight
     y = height/2
-    winStyle
     for g in groups
       button = @_getControlButton(w/2, y,
                                   w-winStyle.lineWidth, height - winStyle.lineWidth,
@@ -1256,7 +1412,53 @@ class UserInterface
     )
     return button
 
-  _setHandler: (groupDisplay, controlGroup) ->
+  _setHandler: (groupDisplay, controlGroup, controlGameLoc, groups) ->
+    winStyle = window.config.windowStyle
+    h = groupDisplay.h
+    w = groupDisplay.w
+    clear = (ctx) =>
+      ctx.fillStyle = winStyle.fill
+      ctx.strokeStyle = winStyle.stroke
+      ctx.lineJoin = winStyle.lineJoin
+      ctx.lineWidth = winStyle.lineWidth
+
+      loc = {x: groupDisplay.x-w/2, y: groupDisplay.y-h/2}
+      ctx.clearRect(loc.x - winStyle.lineWidth/2 - 1,
+                    loc.y - winStyle.lineWidth/2 - 1,
+                    w + winStyle.lineWidth + 2,
+                    h + winStyle.lineWidth + 2,)
+
+    groupDisplay.setClearFunc(clear)
+    groupDisplay.setDrawFunc(
+      (ctx) =>
+        clear(ctx)
+        winStyle = window.config.windowStyle
+        ctx.fillStyle = winStyle.fill
+        ctx.strokeStyle = winStyle.stroke
+        ctx.lineJoin = winStyle.lineJoin
+        ctx.lineWidth = winStyle.lineWidth
+
+        loc = camera.getScreenCoordinates(controlGameLoc)
+        groupDisplay.moveTo(loc.x + w/2, loc.y + h/2)
+
+        ctx.fillRect(loc.x, loc.y, w, h)
+        ctx.strokeRect(loc.x, loc.y, w, h)
+
+        offset = 0
+        height = window.config.controlGroup.expandedHeight
+        for g in groups
+          # Draw divider
+          ctx.beginPath()
+          ctx.moveTo(loc.x, loc.y + offset)
+          ctx.lineTo(loc.x + w, loc.y + offset)
+          ctx.stroke()
+          offset += height
+        if not groupDisplay.isHovered() and
+           groupDisplay.visible and not controlGroup.visible
+          controlGroup.open()
+          groupDisplay.close()
+    )
+
     groupDisplay.setMouseOutHandler(
       () =>
         if groupDisplay.visible and not controlGroup.visible
@@ -1330,8 +1532,8 @@ class UserInterface
           @stationMenu.open()
         else
           @selectedPlanet = null
-      else if @selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
-              @colonyMenu.visible
+      else if (@selectedPlanet.numShips(window.config.units.colonyShip) == 0 and
+              @colonyMenu.visible) or @selectedPlanet.hasOutpost()
         @colonyMenu.close()
         if @selectedPlanet.hasOutpost()
           @outpostMenu.open()

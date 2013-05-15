@@ -20,6 +20,10 @@ class Camera
   # A factor for controlling the movement speed when approaching the target
   MOVEFACTOR: 10
 
+  ZOOMFACTOR: 30
+
+  DELTA: 0.02
+
   @DragMode:
     DEFAULT: 1
     ONE_TO_ONE: 2
@@ -34,6 +38,7 @@ class Camera
   constructor: (@targetX, @targetY, @width, @height, @zoom=1.0) ->
     @setZoom(@zoom)
     @curDragMode = @constructor.DragMode.DEFAULT
+    @targetZoom = @zoom
 
   # Sets the width and height of the camera
   #
@@ -69,6 +74,20 @@ class Camera
       @zoom = @MINZOOM
     else
       @zoom = z
+
+    @targetZoom = @zoom
+
+  # Sets a target zoom that will be transitioned to. The zoom will always be between
+  # 1 and MINZOOM
+  #
+  # @param [Number] z The desired zoom
+  setZoomTarget: (z) ->
+    if z > 1.0
+      @targetZoom = 1.0
+    else if z < @MINZOOM
+      @targetZoom = @MINZOOM
+    else
+      @targetZoom = z
 
   # Set the drag mode of the camera
   #
@@ -133,7 +152,7 @@ class Camera
   # @param [Object] coords Where coords.x and cords.y are the coordinates
   # @return [Boolean] true if coords is within view, false otherwise
   onScreen: (coords) ->
-    return 0 < coords.x < @width and 0 < coords.y < @height
+    return -100 < coords.x < @width+100 and -100 < coords.y < @height+100
 
   # Moves the camera's current position toward its target position
   # Call once per draw
@@ -142,5 +161,9 @@ class Camera
     dify = @targetY - @y
     @x = @x + difx / @MOVEFACTOR
     @y = @y + dify / @MOVEFACTOR
+
+    difz = @targetZoom - @zoom
+    if Math.abs(difz) > @DELTA
+      @zoom = @zoom + difz / @ZOOMFACTOR
 
 root.Camera = Camera

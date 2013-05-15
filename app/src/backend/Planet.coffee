@@ -5,7 +5,6 @@ if exports?
   {config} = require '../config'
   {ControlGroup} = require './ControlGroup'
   {AI} = require './AI'
-  console.log(AI)
   root.config = config
 
 #_require ControlGroup
@@ -220,7 +219,7 @@ class Planet
   # Set sprite
   setSprite: (sprite) ->
     @_sprite = sprite
-  
+
   # Sets the visibility state to either visible, discovered or undiscovered
   #
   setVisibility: (state) ->
@@ -228,6 +227,9 @@ class Planet
        (state is root.config.visibility.discovered) or
        (state is root.config.visibility.undiscovered)
       @_visibility = state
+      if (state is root.config.visibility.visible) or
+         (state is root.config.visibility.discovered)
+        @_hasBeenSeen = true
     else
       throw Error "Invalid Visibility"
 
@@ -399,11 +401,14 @@ class Planet
   #
   # @throw [Error] If there is no immediate path.
   sendUnits: (planet) ->
-    path = AI.getPath(@, planet)
-    if path is []
-      throw new Error("There is no path between the two planets")
-    # There is a valid path between them
-    @_sendingUnitsTo = planet
+    if planet == @
+      @_sendingUnitsTo = null
+    else
+      path = AI.getPath(@, planet)
+      if path is []
+        throw new Error("There is no path between the two planets")
+      # There is a valid path between them
+      @_sendingUnitsTo = planet
 
   # Stop sending ships to another planet
   #
@@ -620,13 +625,13 @@ class Planet
           if @_sendingUnitsTo != null
             switch unit
               when root.config.units.probe
-                moveShips(0, 0, 1, 0, @_sendingUnitsTo)
+                @moveShips(0, 0, 1, 0, @_sendingUnitsTo)
               when root.config.units.colonyShip
-                moveShips(0, 0, 0, 1, @_sendingUnitsTo)
+                @moveShips(0, 0, 0, 1, @_sendingUnitsTo)
               when root.config.units.attackShip
-                moveShips(1, 0, 0, 0, @_sendingUnitsTo)
+                @moveShips(1, 0, 0, 0, @_sendingUnitsTo)
               when root.config.units.defenseShip
-                moveShips(0, 1, 0, 0, @_sendingUnitsTo)
+                @moveShips(0, 1, 0, 0, @_sendingUnitsTo)
               else throw new Error("Ship type unknown.")
 
   # Create new resource carriers if sending and can afford it.
@@ -690,16 +695,18 @@ class Planet
   visibilityUpkeep: ->
     @_nextSend = null
     # If it has probes:
+    if @hasProbes()
+      @_lastSeenResources = @_resources
+    # If it has any units
     if @hasProbes() or
        @_attackShips > 0 or
        @_defenseShips > 0 or
-       @_colonies or
+       @_colonies > 0 or
        @_station or @_outpost
       # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen
         @_hasBeenSeen = true
       @_lastSeenFungus = @_fungusStrength
-      @_lastSeenResources = @_resources
       @_visibility = root.config.visibility.visible
     # If it is adjacent to a probe:
     else if @neighborsHaveProbes()
