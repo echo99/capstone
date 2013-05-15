@@ -57,6 +57,10 @@ root.config =
     delay: 10
     radius: 7
     color: "rgba(0, 255, 255, 1)"
+  arrowStyle:
+    color: "rgba(255, 255, 255, 1)"
+    width: 2
+    angle: 145
   combatStyle:
     good:
       fontObj: {sizeVal: 15, unit: "px", family: "Arial"}

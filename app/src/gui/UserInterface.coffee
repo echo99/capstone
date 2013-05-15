@@ -1301,7 +1301,6 @@ class UserInterface
 
     height = window.config.controlGroup.expandedHeight
     y = height/2
-    winStyle
     for g in groups
       button = @_getControlButton(w/2, y,
                                   w-winStyle.lineWidth, height - winStyle.lineWidth,

@@ -298,7 +298,7 @@ class Menu extends Mission
 
   _checkMissions: (p) ->
     @lastPlanet = p
-    if p.sprite() != SpriteNames.PLANET_BLUE_FUNGUS #p.fungusStrength() == 0
+    if p.sprite() != SpriteNames.PLANET_BLUE_FUNGUS
       if @lastPlanet == @Planets.Mission1
         Logger.logEvent("Showing mission 1 menu")
         @mission1Menu.open()
