@@ -886,16 +886,18 @@ class UserInterface
   planetButtonOutCallback: () =>
     @hoveredPlanet = null
 
+  _isIdle: (p) ->
+    return p.hasStation() and not p.isBuilding() and p.availableResources() > 0
+
   gotoNextStation: () ->
     foundCurrent = false
     findFirst = @selectedPlanet == null or not @selectedPlanet.hasStation()
     first = null
     target = null
     for p in game.getPlanets()
-      if first == null and (p.hasStation() and not p.isBuilding())
+      if first == null and @_isIdle(p)
         first = p
-      if (p.hasStation() and not p.isBuilding()) and
-         (findFirst or foundCurrent)
+      if @_isIdle(p) and (findFirst or foundCurrent)
         @selectedPlanet = p
         @outpostMenu.close()
         @colonyMenu.close()
@@ -1243,7 +1245,7 @@ class UserInterface
 
     hasIdle = false
     for p in game.getPlanets()
-      if p.hasStation() and not p.isBuilding()
+      if @_isIdle(p)
         hasIdle = true
 
     if hasIdle
