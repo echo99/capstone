@@ -178,7 +178,8 @@ class Mission2 extends Mission
     hasColonyShip = false
     hasProbe = false
     for p in game.getPlanets()
-      if p.hasOutpost() or p.hasStation()
+      if p.hasOutpost() or p.hasStation() or
+         (p.isBuilding() and p.buildUnit() == window.config.structures.outpost)
         totalResources += p.availableResources()
         possibleResources += p.resources()
       if p.numShips(window.config.units.probe) > 0
@@ -190,6 +191,8 @@ class Mission2 extends Mission
           hasProbe = true
         if g.colonies() > 0
           hasColonyShip = true
+
+    if @gameEnded then return
 
     if totalResources >= @settings2.resourceGoal
       current = localStorage["progress"]
