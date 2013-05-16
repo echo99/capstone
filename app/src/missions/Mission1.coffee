@@ -146,7 +146,13 @@ class Mission1 extends Mission
     cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
     frameElement.removeChild(@menuButton)
+    cameraHudFrame.removeChild(@foundA1Message)
+    cameraHudFrame.removeChild(@foundA2Message)
     @probeArrow.destroy()
+    @planetArrow1.destroy()
+    @planetArrow2.destroy()
+    @planetArrow3.destroy()
+    @endArrow.destroy()
 
     Logger.logEvent("Leaving Mission 1")
     Logger.send()
@@ -158,6 +164,53 @@ class Mission1 extends Mission
     @failMenu = @createFailMenu(restart)
     @optionsMenu = @createOptionMenu(restart)
     @menuButton = @createMenuButton(@optionsMenu)
+
+    closeA1 = new Elements.Button(250 - 10, 10, 16, 16,
+      () =>
+        @foundA1Message.close()
+    )
+    closeA1.setDrawFunc(
+      (ctx) =>
+        loc = @foundA1Message.getActualLocation(closeA1.x, closeA1.y)
+        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+    )
+    message = "Man am I glad to see you, I wasn't going to last much longer out " +
+              "here. What? You say the fungus is still around? Just point me at " +
+              "it and I'll take it from there."
+    @foundA1Message = new Elements.MessageBox(0, 0, 250, 100, message,
+      {
+        closeBtn: closeA1,
+        textAlign: 'left',
+        vAlign: 'middle',
+        font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
+        visible: false
+      })
+    cameraHudFrame.addChild(@foundA1Message)
+
+    closeA2 = new Elements.Button(250 - 10, 10, 16, 16,
+      () =>
+        @foundA2Message.close()
+    )
+    closeA2.setDrawFunc(
+      (ctx) =>
+        loc = @foundA2Message.getActualLocation(closeA2.x, closeA2.y)
+        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+    )
+    message = "You found us! We were starting to think we'd been abandoned. " +
+              "There's still fungus out there? Then you best stay back and let " +
+              "us handle it."
+    @foundA2Message = new Elements.MessageBox(0, 0, 250, 100, message,
+      {
+        closeBtn: closeA2,
+        textAlign: 'left',
+        vAlign: 'middle',
+        font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
+        visible: false
+      })
+    cameraHudFrame.addChild(@foundA2Message)
+
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
@@ -227,15 +280,28 @@ class Mission1 extends Mission
   # @see Mission#onEndTurn
   onEndTurn: ->
     if @home.numShips(window.config.units.probe) == 0
+      @planetArrow1.close()
+      @planetArrow2.close()
+      @planetArrow3.close()
+      @probeArrow.close()
+      @endArrow.close()
       @phase = @phases.THE_REST
 
     if @a1.visibility() == window.config.visibility.visible and not @foundA1
+      if @foundA2Message.visible
+        @foundA2Message.close()
+      @foundA1Message.open()
+      camera.setTarget(@a1.location())
       @foundA1 = true
       @a1.addShips(window.config.units.attackShip, 1)
       UI.endTurn()
       UI.turns--
       Logger.logEvent("Player found single attack ship")
     if @a2.visibility() == window.config.visibility.visible and not @foundA2
+      if @foundA1Message.visible
+        @foundA1Message.close()
+      @foundA2Message.open()
+      camera.setTarget(@a2.location())
       @foundA2 = true
       @a2.addShips(window.config.units.attackShip, 2)
       UI.endTurn()
