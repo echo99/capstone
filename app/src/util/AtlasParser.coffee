@@ -10,7 +10,7 @@ class AtlasParser
   #
   # @param [SpriteSheet] spritesheet The SpriteSheet object asoociated with the
   #     atlas data
-  # @param [JSONObject] jsonData The atlas data in JSON format
+  # @param [Object] jsonData The atlas data in JSON format
   #
   constructor: (@spritesheet, @jsonData) ->
 
