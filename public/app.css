@@ -93,3 +93,39 @@ body {
 .jqmWindow form #submit {
   float: right;
 }
+
+.notification {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  margin-left: -302px;
+  width: 600px;
+  padding: 10px;
+  background-color: white;
+  border: 2px solid black;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+.notification a:link,
+.notification a:visited {
+  color: #478CE6;
+  text-decoration: none;
+}
+
+.notification a:hover,
+.notification a:active {
+  color: #59A3FF;
+  text-decoration: none;
+}
+
+.error {
+  background-color: #EA9E9E;
+  border-color: #B50404;
+  color: #B50404;
+}
+
+.success {
+  background-color: #C1F5BD;
+  border-color: #008709;
+  color: #008709;
+}
