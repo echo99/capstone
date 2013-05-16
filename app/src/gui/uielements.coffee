@@ -156,8 +156,8 @@ class Elements.Frame extends Elements.UIElement
 
   # Create a new frame
   #
-  # @param [Div] frame The frame div
-  # @param [Canvas] canvas The HUD canvas
+  # @param [Element] frame The frame div
+  # @param [Element] canvas The HUD canvas
   #
   constructor: (@frame, @canvas) ->
     super(0, 0)
@@ -208,7 +208,7 @@ class Elements.CameraFrame extends Elements.UIElement
   # Create a new camera frame
   #
   # @param [Camera] camera The camera object
-  # @param [Canvas] canvas The camera hud canvas
+  # @param [Element] canvas The camera hud canvas
   #
   constructor: (@camera, @canvas) ->
     # super(Math.floor(@camera.width/2), Math.floor(@camera.height/2))
@@ -273,7 +273,7 @@ class Elements.GameFrame extends Elements.UIElement
   # Create a new game frame
   #
   # @param [Camera] camera The camera object
-  # @param [Canvas] canvas The game canvas
+  # @param [Element] canvas The game canvas
   #
   constructor: (@camera, @canvas) ->
     super(0, 0)
@@ -609,15 +609,6 @@ class Elements.MessageBox extends Elements.BoxElement
   addUpdateCallback: (callback) ->
     @updCallback = callback
 
-
-  # # @private Clear this message box from the context
-  # #
-  # # @param [CanvasRenderingContext2D] ctx Canvas context to draw on
-  # #
-  # _clearBox: (ctx) ->
-  #   lw = Math.ceil(config.windowStyle.lineWidth / 2)
-  #   lw2 = lw + lw
-  #   ctx.clearRect(@actX+@cx-lw, @actY+@cy-lw, @w + lw2, @h + lw2)
 
   # @see Elements.UIElement#clear
   clear: (ctx) ->

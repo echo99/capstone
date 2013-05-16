@@ -11,9 +11,9 @@ class Logger
   # Log an event
   #
   # @param [String] evt The name of the event
-  # @param [Mixed] params The parameters associated with the event
+  # @param [*] params The parameters associated with the event
   #
-  @logEvent: (evt, params) ->
+  @logEvent: (evt, params=null) ->
     if not @startTime?
       console.error('Logger has not yet been started!')
     else

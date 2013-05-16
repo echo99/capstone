@@ -146,6 +146,10 @@ class Elements.UIElement extends Module
 
   # @private Clear and delete all children in the remove queue
   #
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords
+  # @param [Number] zoom
+  #
   _emptyRemoveQueue: (ctx, coords=null, zoom=null) ->
     for clearedChild in @_removeQueue
       clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
@@ -156,7 +160,7 @@ class Elements.UIElement extends Module
 
   # @private Actually remove the child from this element's children list
   #
-  # @param [Elements.UIElement] elem
+  # @param [Elements.UIElement] child
   #
   _deleteChild: (child) ->
     child._parent = null
@@ -217,7 +221,7 @@ class Elements.UIElement extends Module
   # Set a custom property for this element
   #
   # @param [String] key
-  # @param [Mixed] value
+  # @param [*] value
   #
   setProperty: (key, value) ->
     @_properties[key] = value
@@ -225,7 +229,7 @@ class Elements.UIElement extends Module
   # Get a custom property value from this element
   #
   # @param [String] key
-  # @return [Mixed] Property value that was set
+  # @return [*] Property value that was set
   #
   getProperty: (key) ->
     if key of @_properties
@@ -291,16 +295,10 @@ class Elements.UIElement extends Module
 
   # Call the draw function with the passed arguments
   #
-  # @overload draw(ctx)
-  #   Draw the element
-  #   @param [CanvasRenderingContext2D] ctx
-  #
-  # @overload draw(ctx, coords, zoom, forceDraw)
-  #   Draw the element at the given coordinates and zoom
-  #   @param [CanvasRenderingContext2D] ctx
-  #   @param [Object] coords The coordinates to draw to
-  #   @param [Number] zoom The current zoom
-  #   @param [Boolean] forceDraw Force the element to be redrawn
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords The coordinates to draw to
+  # @param [Number] zoom The current zoom
+  # @param [Boolean] forceDraw Force the element to be redrawn
   #
   draw: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
     @_emptyRemoveQueue(ctx)
@@ -327,19 +325,29 @@ class Elements.UIElement extends Module
         @_drawChildren(ctx, coords, zoom, forceDraw)
       else if @_hasDirtyChildren
         @_drawChildren(ctx, coords, zoom, forceDraw)
+      # for child in @_children
+      #   child.draw(ctx, coords, zoom, forceDraw)
       @_hasDirtyChildren = false
-        # for child in @_children
-        #   child.draw(ctx, coords, zoom, forceDraw)
+
 
   # @private Draw all children of this element
   #
-  _drawChildren: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords
+  # @param [Number] zoom
+  # @param [Boolean] forceDraw
+  #
+  _drawChildren: (ctx, coords=null, zoom=null, forceDraw=false) ->
     for child in @_children
       if child? and not child._removed
         child.draw(ctx, coords, zoom, forceDraw)
 
   # @private @abstract Custom draw method for each element that is meant to be
   # overridden
+  #
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords
+  # @param [Number] zoom
   #
   _customDraw: (ctx, coords=null, zoom=1.0) ->
 
@@ -376,10 +384,12 @@ class Elements.UIElement extends Module
 
   # Set this element and all child elements to dirty
   #
-  # @TODO: Somehow propogate dirty state back to parent so it knows to redraw it,
+  # @TODO: Somehow propagate dirty state back to parent so it knows to redraw it,
   #   but we don't always want to redraw the dirty parent.
   #
-  setDirty: (propagateUp = true) ->
+  # @param [Boolean] propagateUp
+  #
+  setDirty: (propagateUp=true) ->
     # console.log("SetDirty called on #{@constructor.name}")
     @dirty = true
     for zIndex in @zIndices
@@ -390,7 +400,7 @@ class Elements.UIElement extends Module
 
   # @private Method for propogating dirtyness
   #
-  # @param [UIElement] child
+  # @param [Elements.UIElement] child
   #
   _handleDirtyChild: (child) ->
     #  and (@_transparent or @_closing)
@@ -481,7 +491,7 @@ class Elements.UIElement extends Module
   #
   # @param [Number] x
   # @param [Number] y
-  # @param [Boolean] Whether or not an element was pressed
+  # @return [Boolean] Whether or not an element was pressed
   #
   mouseDown: (x, y) ->
     if @containsPoint(x, y) and @visible
@@ -670,7 +680,7 @@ class Elements.UIElement extends Module
 
   # @private Update ordering of child elements when a child's z-index updates
   #
-  # @param [UIElement] child
+  # @param [Elements.UIElement] child
   # @param [Number] lastZIndex
   #
   _updateChildOrdering: (child, lastZIndex) ->
