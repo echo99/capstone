@@ -333,6 +333,7 @@ main = ->
       else if document.webkitCancelFullScreen
         document.webkitCancelFullScreen()
       # sheet.drawSprite(SpriteNames.FULL_SCREEN, 8, 8, fsCtx, false)
+      Logger.logEvent("Clicked FULLSCREEN")
       fullscreenBtn.setState('fullscreen')
     else
       debug "Not at full screen"
@@ -344,6 +345,7 @@ main = ->
       else if body.webkitRequestFullscreen
         body.webkitRequestFullscreen()
       fullscreenBtn.setState('unfullscreen')
+      Logger.logEvent("Clicked UNFULLSCREEN")
       # sheet.drawSprite(SpriteNames.UNFULL_SCREEN, 8, 8, fsCtx, false)
   # Disable fullscreen button on IE (since it doesn't support those features)
   # Also disable on Windows 7 Chrome due to bug
@@ -357,9 +359,11 @@ main = ->
   muteBtn.setState('unmuted')
   muteBtn.setClickHandler ->
     if bgmusic.getMute()
+      Logger.logEvent("Clicked UNMUTE")
       bgmusic.setMute(false)
       muteBtn.setState('unmuted')
     else
+      Logger.logEvent("Clicked MUTE")
       bgmusic.setMute(true)
       muteBtn.setState('muted')
 
@@ -368,6 +372,7 @@ main = ->
     config.spriteNames.FEEDBACK, SHEET).setRight(btnSpacing*2 + fullscreenBtn.w)
     .setBottom(btnSpacing)
   feedbackBtn.setClickHandler ->
+    Logger.logEvent("Clicked FEEDBACK")
     feedback.jqmShow()
     # if BROWSER == Browser.IE
     #   feedbackElem.style.display = 'inline-block'
