@@ -14,8 +14,13 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-#playback = "1368601393398.txt"
 playback = null
+###
+$.getJSON('recorded_games/replay.json', {}, (data) ->
+  console.log("data: ", data.file)
+  playback = data.file
+)
+###
 
 window.player_id
 
@@ -619,7 +624,7 @@ main = ->
       tooltipCtx.fillStyle = "rgb(255, 255, 255)"
       tooltipCtx.textAlign = 'right'
       tooltipCtx.textBaseline = 'middle'
-      tooltipCtx.fillText(timeSinceStart() + " ms", camera.width - 5, 50)
+      tooltipCtx.fillText(timeSinceStart() + " ms", window.innerWidth - 5, 50)
 
       if eventPlay.replayDone
         tooltipCtx.font = "40px Arial"

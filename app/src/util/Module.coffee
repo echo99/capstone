@@ -7,12 +7,14 @@ moduleKeywords = ['extended', 'included']
 # @see http://arcturo.github.io/library/coffeescript/03_classes.html
 #
 class Module
+  constructor: ->
+
   # Extends static properties
   @extend: (obj) ->
     for key, value of obj when key not in moduleKeywords
       @[key] = value
 
-    obj.extended?.apply(@)
+    obj['extended']?.apply(@)
     this
 
   # Extends instance properties
@@ -21,7 +23,7 @@ class Module
       # Assign properties to the prototype
       @::[key] = value
 
-    obj.included?.apply(@)
+    obj['included']?.apply(@)
     this
 
 if exports?
