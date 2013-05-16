@@ -671,7 +671,8 @@ class Planet
     if group == undefined
       return
     for other in @_controlGroups.filter((g) => g != group)
-      if group.destination() == other.destination()
+      if (group.destination() == other.destination()) and
+         (group.moved() == other.moved())
         group.setProbes(group.probes() + other.probes())
         group.setAttackShips(group.attackShips() + other.attackShips())
         group.setDefenseShips(group.defenseShips() + other.defenseShips())

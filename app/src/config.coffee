@@ -251,7 +251,16 @@ root.config =
        'station_buildings_gathering_2.png'], 20)
     STATION_NOT_GATHERING: new AnimatedSprite(
       ['station_buildings_not_gathering.png'])
-    STATION_CONSTRUCTING: new AnimatedSprite(['station_constructing.png'])
+    STATION_CONSTRUCTING: new AnimatedSprite(
+      ['station_constructing_1.png', 'station_constructing_2.png',
+       'station_constructing_3.png', 'station_constructing_4.png',
+       'station_constructing_5.png', 'station_constructing_6.png',
+       'station_constructing_7.png', 'station_constructing_8.png',
+       'station_constructing_9.png', 'station_constructing_10.png',
+       'station_constructing_11.png', 'station_constructing_12.png',
+       'station_constructing_13.png', 'station_constructing_14.png',
+       'station_constructing_15.png', 'station_constructing_16.png',
+       'station_constructing_17.png'], 5)
     STATION_NOT_CONSTRUCTING: new AnimatedSprite(['station_not_constructing.png'])
     STATION_CONSTRUCTION: new AnimatedSprite(['station_construction.png'])
     OUTPOST_CONSTRUCTION: new AnimatedSprite(['outpost_construction.png'])
