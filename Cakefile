@@ -463,6 +463,10 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   catch e
     null
 
+  TMP_COFFEE_FILE = "tmp#{SLASH}tmp.coffee"
+  TMP_JS_FILE = "tmp#{SLASH}tmp.js"
+  TMP_GOOGJS_FILE = "tmp#{SLASH}compiled.coffee"
+
   # files = new Rehab().process './'+SRC_DIR
 
   # # switch env
@@ -757,12 +761,12 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
       afterClassDecBuffer = ''
       inClass = false
       inComment = false
-  fs.writeFile 'tmp/tmp.coffee', buffer
+  fs.writeFile TMP_COFFEE_FILE, buffer
 
   # console.log(classes)
 
   console.log('Compiling source...'.yellow)
-  exec "coffee -cb tmp/tmp.coffee", (err, stdout, stderr) ->
+  exec "coffee -cb #{TMP_COFFEE_FILE}", (err, stdout, stderr) ->
     console.log stdout if stdout
     console.error err if err
 
@@ -780,7 +784,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
 
     buffer = ''
 
-    contents = fs.readFileSync ('tmp/tmp.js'), 'utf8'
+    contents = fs.readFileSync (TMP_JS_FILE), 'utf8'
     parts = contents.split(jsClassDec2)
 
     header = parts[0].replace(/__extends.*/, '')
@@ -884,10 +888,11 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
     # # for line in lines
     # #   if line.match(jsClassDec)
     # buffer = lines.join('\n')
-    fs.writeFile 'tmp/tmp.js', buffer
+    fs.writeFile TMP_JS_FILE, buffer
 
     console.log('Running Closure type checker...'.yellow)
-    cmd = 'java -jar vendor/tools/compiler.jar --js tmp/tmp.js --js_output_file tmp/compiled.js --jscomp_error checkTypes'
+    cmd = "java -jar vendor/tools/compiler.jar --js #{TMP_JS_FILE} --js_output_file #{TMP_GOOGJS_FILE} --jscomp_error checkTypes"
+    # console.log cmd
     exec cmd, (err, stdout, stderr) ->
       console.log stdout if stdout
       console.error stderr.red if stderr
