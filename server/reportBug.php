@@ -15,7 +15,7 @@ session_start();
 $session_id = session_id();
 $title = $_POST['title'];
 $message = $_POST['message'];
-$play_id = $_POST['play_id'];
+$replay_id = $_POST['replay_id'];
 
 $date = date('Y-m-d');
 $dir = 'bugs/' . $date;
@@ -57,7 +57,7 @@ if ($session_id != '') {
   if ($handle) {
     // write_events($handle, $events);
     // echo "Success, wrote events to ($filename)<br>";
-    fwrite($handle, $timestamp.' | Play ID: '.$play_id."\n");
+    fwrite($handle, $timestamp.' | Replay ID: '.$replay_id."\n");
     fwrite($handle, '------------------------'."\n");
     fwrite($handle, 'Title: ' . $title."\n\n");
     fwrite($handle, $message."\n\n");
