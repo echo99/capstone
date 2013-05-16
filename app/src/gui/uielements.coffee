@@ -885,7 +885,7 @@ class Elements.DOMButton
 
   # Set the right offset of the button. Overrides left offset.
   #
-  # @param [Number] offsetTop Right offset in pixels
+  # @param [Number] offsetRight Right offset in pixels
   # @return [Elements.DOMButton] this button
   #
   setRight: (@offsetRight) ->
