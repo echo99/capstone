@@ -60,8 +60,8 @@ createjs.Sound.addEventListener "loadComplete", ->
     debug('Finished loading sounds!')
     bgmusic = createjs.Sound.play('bgmusic3', createjs.Sound.INTERRUPT_NONE,
       10, 0, -1, 0.5)
-    # Start it off muted
-    bgmusic.mute(true)
+    # # Start it off muted
+    # bgmusic.mute(true)
 
 createjs.Sound.registerManifest(manifest)
 
@@ -354,6 +354,7 @@ main = ->
   muteBtn = new Elements.DOMButton('muted', config.spriteNames.MUTED, SHEET)
     .setRight(btnSpacing).setBottom(btnSpacing*2 + fullscreenBtn.h)
   muteBtn.addState('unmuted', config.spriteNames.UNMUTED)
+  muteBtn.setState('unmuted')
   muteBtn.setClickHandler ->
     if bgmusic.getMute()
       bgmusic.setMute(false)
