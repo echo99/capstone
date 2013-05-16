@@ -55,6 +55,7 @@ Configs =
   PRODUCTION: "app#{SLASH}cfg#{SLASH}production.cfg.coffee"
   DEV: "app#{SLASH}cfg#{SLASH}dev.cfg.coffee"
   CLOSURE: "app#{SLASH}cfg#{SLASH}closure_overrides.cfg.coffee"
+  CLOSURE_INTERN: "app#{SLASH}cfg#{SLASH}closure_intern_overrides.cfg.coffee"
 
 VENDOR_JS_FILES = [
   'browserdetect.js'
@@ -478,6 +479,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   files.unshift(Configs.CLOSURE)
   files.unshift(Configs.DEV)
   files.unshift(Configs.DEFAULT)
+  files.push(Configs.CLOSURE_INTERN)
   # files = ['app/src/util/Logger.coffee']
   # files = ['app/src/util/Sprite.coffee']
   # files = ['app/src/missions/ExterminationSmall.coffee', 'app/src/missions/ExterminationMedium.coffee']

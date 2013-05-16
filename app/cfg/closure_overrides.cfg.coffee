@@ -11,8 +11,8 @@ document.fullScreenElement = {}
 ###* @type {?} ###
 document.webkitFullscreenElement = {}
 
-###* @type {?} ###
-createjs = {}
+###* @constructor ###
+createjs = ->
 
 ###* @type {?} ###
 createjs.Sound = {}
@@ -31,14 +31,38 @@ createjs.Sound.play = (varargs) ->
 ###
 createjs.Sound.registerManifest = (varargs) ->
 
-###* @type {?} ###
-BrowserDetect = {}
+###* @constructor ###
+BrowserDetect = ->
 
 ###* @type {string} ###
 BrowserDetect.browser
 
-###* @type {?} ###
+###*
+* @param {...*} varargs
+* @return {{jqmShow: function(), jqmHide: function()}}
+###
 $.jqm = (varargs) ->
 
 ###* @type {?} ###
 $.getJSON = (varargs) ->
+
+###*
+* @suppress {duplicate}
+* @expose
+* @param {string} type
+* @param {(EventListener|function ((Event|null)): (boolean|undefined)|null)} listener
+* @param {boolean=} useCapture
+###
+Node::addEventListener = (type, listener, useCapture) ->
+
+###*
+* @suppress {duplicate}
+* @expose
+* @param {number} x
+* @param {number} y
+* @param {number} radius
+* @param {number} startAngle
+* @param {number} endAngle
+* @param {boolean=} anticlockwise
+###
+CanvasRenderingContext2D::arc = (x, y, radius ,startAngle, endAngle, anticlockwise) ->
