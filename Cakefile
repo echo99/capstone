@@ -4,7 +4,6 @@ path = require 'path'
 
 # Flag for debugging the Cakefile
 DEBUG_MODE = false
-
 # Add to list any modules that cannot be found
 missingModules = []
 tryRequire = (moduleName) ->
@@ -475,6 +474,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   files.unshift(Configs.CLOSURE)
   files.unshift(Configs.DEV)
   files.unshift(Configs.DEFAULT)
+  # files = ['app/src/util/Logger.coffee']
   # files = ['app/src/util/Sprite.coffee']
   # files = ['app/src/missions/ExterminationSmall.coffee', 'app/src/missions/ExterminationMedium.coffee']
   # files = ['app/src/util/Module.coffee', 'app/src/gui/Elements.UIElement.coffee']
@@ -636,6 +636,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
                   paramParts = param.split(/\s*=\s*/)
                   debug paramParts
                   paramName = paramParts[0]
+                  paramDefault = paramParts[1]
                   if paramName.indexOf('@') == 0
                     paramName = paramName.substr(1)
                   for i in [1..commentBuffer.length-1]
@@ -643,6 +644,8 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
                     if commLine.indexOf(paramName) > 0
                       debug "Found #{paramName} in '#{commLine}'"
                       commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
+                      if paramDefault is 'null'
+                        commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
                       break
 
             if line.indexOf('constructor') > 0
@@ -715,10 +718,28 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
             else
               buffer += line + '\n'
       else
-        if inClass
-          afterClassDecBuffer += '\n'
+        if inComment
+          # Exit comment
+          commentBuffer.push lastSpacing + '###\n'
+          if containsTypeDef
+            if inClass
+              afterClassDecBuffer += commentBuffer.join('')
+            else
+              buffer += commentBuffer.join('')
+          else
+            if inClass
+              afterClassDecBuffer += nonTypeCommentBuffer
+            else
+              buffer += nonTypeCommentBuffer
+          commentBuffer = []
+          nonTypeCommentBuffer = ''
+          inComment = false
+          containsTypeDef = false
         else
-          buffer += '\n'
+          if inClass
+            afterClassDecBuffer += '\n'
+          else
+            buffer += '\n'
     # debug buffer
     if inClass
       debug("Reached end of file!")

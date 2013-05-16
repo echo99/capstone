@@ -146,6 +146,10 @@ class Elements.UIElement extends Module
 
   # @private Clear and delete all children in the remove queue
   #
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords
+  # @param [Number] zoom
+  #
   _emptyRemoveQueue: (ctx, coords=null, zoom=null) ->
     for clearedChild in @_removeQueue
       clearedChild.clear(ctx, coords, zoom) if clearedChild.visible or
@@ -321,19 +325,29 @@ class Elements.UIElement extends Module
         @_drawChildren(ctx, coords, zoom, forceDraw)
       else if @_hasDirtyChildren
         @_drawChildren(ctx, coords, zoom, forceDraw)
+      # for child in @_children
+      #   child.draw(ctx, coords, zoom, forceDraw)
       @_hasDirtyChildren = false
-        # for child in @_children
-        #   child.draw(ctx, coords, zoom, forceDraw)
+
 
   # @private Draw all children of this element
   #
-  _drawChildren: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords
+  # @param [Number] zoom
+  # @param [Boolean] forceDraw
+  #
+  _drawChildren: (ctx, coords=null, zoom=null, forceDraw=false) ->
     for child in @_children
       if child? and not child._removed
         child.draw(ctx, coords, zoom, forceDraw)
 
   # @private @abstract Custom draw method for each element that is meant to be
   # overridden
+  #
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords
+  # @param [Number] zoom
   #
   _customDraw: (ctx, coords=null, zoom=1.0) ->
 
