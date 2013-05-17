@@ -506,7 +506,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   multilineComment = /^(\s*)###+/
   requireLine = /^(\s*)#_require/
   # typeCheck = /@(require|param)/
-  typeCheck = /@(require|param)\s+\[(.*?)\]\s*(.*)/
+  typeCheck = /@(return|param)\s+\[(.*?)\]\s*(.*)/
   collectionType = /(.*?)<(.*)>/
   builtInTypes = ['boolean', 'string', 'number', 'list']
   capTypes = ['CanvasRenderingContext2D', 'Array', 'Object']
