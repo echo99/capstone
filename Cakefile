@@ -4,6 +4,7 @@ path = require 'path'
 
 # Flag for debugging the Cakefile
 DEBUG_MODE = false
+
 # Add to list any modules that cannot be found
 missingModules = []
 tryRequire = (moduleName) ->
@@ -50,6 +51,7 @@ NODE_BIN_DIR = NODE_DIR + SLASH + '.bin'
 RHINO_DIR = "vendor#{SLASH}tools"
 HOME_FROM_RHINO = "..#{SLASH}.."
 
+# CoffeeScript config files
 Configs =
   DEFAULT: "app#{SLASH}cfg#{SLASH}default.cfg.coffee"
   PRODUCTION: "app#{SLASH}cfg#{SLASH}production.cfg.coffee"
@@ -57,19 +59,17 @@ Configs =
   CLOSURE: "app#{SLASH}cfg#{SLASH}closure_overrides.cfg.coffee"
   CLOSURE_INTERN: "app#{SLASH}cfg#{SLASH}closure_intern_overrides.cfg.coffee"
 
+# List of external third-party JavaScript files that need to be combined in a
+# particular order
 VENDOR_JS_FILES = [
-  'browserdetect.js'
+  # 'browserdetect.js'
   'jquery-1.9.1.min.js'
   'jqModal.js'
   'soundjs-0.4.0.min.js'
   'soundjs.flashplugin-0.4.0.min.js'
-  'seedrandom.js'
+  # 'seedrandom.js'
 ]
-# if process.platform == 'win32'
-#   APP_JS = 'public\\app.js'
-#   VENDOR_JS = 'public\\vendor.js'
-#   SRC_DIR = 'app\\src'
-#   VENDOR_SCRIPTS = 'vendor\\scripts'
+
 # Flag to make sure we aren't calling build multiple times at once
 BUILDING = false
 WATCHING = false
@@ -102,6 +102,7 @@ coffeeLintConfig =
     value: 'unix'
     level: 'ignore'
 
+# "Enum" of message levels
 MessageLevel =
   INFO: 'info'
   WARN: 'warn'
@@ -248,19 +249,23 @@ jsSanityCheck = (options, callback) ->
 # Compile vendor scripts and styles
 compileVendorFiles = ->
   console.log("Combining vendor scripts to #{VENDOR_JS}".yellow)
-  _compileFiles(VENDOR_SCRIPTS, VENDOR_JS_FILES, VENDOR_JS)
+  _compileFiles(VENDOR_SCRIPTS, VENDOR_JS, VENDOR_JS_FILES)
 
   console.log("Combining vendor styles to #{VENDOR_CSS}".yellow)
-  _compileFiles(VENDOR_STYLES, fs.readdirSync(VENDOR_STYLES), VENDOR_CSS)
+  _compileFiles(VENDOR_STYLES, VENDOR_CSS)
 
 # Helper function for compiling files
-_compileFiles = (dir, files, target) ->
+_compileFiles = (dir, target, orderedFiles=[]) ->
   text = ''
-  for file in files
+  for file in orderedFiles
     contents = fs.readFileSync (dir+'/'+file), 'utf8'
     text += contents + "\n"
     #name = file.replace /\..*/, '' # remove extension
     #templateJs += "window.#{name} = '#{contents}';"
+  for file in fs.readdirSync(dir)
+    unless file in orderedFiles
+      contents = fs.readFileSync (dir+'/'+file), 'utf8'
+      text += contents + "\n"
   try
     fs.writeFile target, text
   catch err
