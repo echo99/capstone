@@ -38,12 +38,12 @@ TESTING = window.TESTING?
 # debug("Testing flag: " + TESTING)
 
 manifest = [
-    src: 'assets/audio/empty_space_stage1.ogg'
-    id: 'bgmusic1'
-  ,
-    src: 'assets/audio/empty_space_stage2.ogg'
-    id: 'bgmusic2'
-  ,
+  #   src: 'assets/audio/empty_space_stage1.ogg'
+  #   id: 'bgmusic1'
+  # ,
+  #   src: 'assets/audio/empty_space_stage2.ogg'
+  #   id: 'bgmusic2'
+  # ,
     src: 'assets/audio/dark_space.ogg|assets/audio/dark_space.mp3'
     id: 'bgmusic3'
 ]
