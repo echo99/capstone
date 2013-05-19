@@ -623,8 +623,10 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
               # if type.toLowerCase() in numberTypes
               #   type = 'number'
               type = normalizeType(type)
-
-            commentBuffer.push "#{spacing}* @#{tag} \{#{type}\} #{desc}\n"
+            if type
+              commentBuffer.push "#{spacing}* @#{tag} \{#{type}\} #{desc}\n"
+            else
+              commentBuffer.push "#{spacing}* @#{tag} #{desc}\n"
             params.push
               tag: tag
               type: type
@@ -904,9 +906,15 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
     fs.writeFile TMP_JS_FILE, buffer
 
     console.log('Running Closure type checker...'.yellow)
-    cmd = "java -jar vendor/tools/compiler.jar --js #{TMP_JS_FILE} --js_output_file #{TMP_GOOGJS_FILE} --jscomp_error checkTypes"
+    cmd = "java"
+    args = [
+      "-jar vendor/tools/compiler.jar"
+      "--js #{TMP_JS_FILE}"
+      "--js_output_file #{TMP_GOOGJS_FILE}"
+      "--jscomp_error checkTypes"
+    ].join(' ')
     # console.log cmd
-    exec cmd, (err, stdout, stderr) ->
+    exec "#{cmd} #{args}", (err, stdout, stderr) ->
       console.log stdout if stdout
       console.error stderr.red if stderr
 
