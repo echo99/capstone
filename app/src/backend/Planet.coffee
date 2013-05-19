@@ -653,9 +653,12 @@ class Planet
       @_sendingResourcesTo = null
       return
     # We are sending resources
-    amount = root.config.resources.sendRate
-    if @_availableResources < amount
+    if @_availableResources < root.config.resources.sendRate
+      console.log("We only have " + @_availableResources)
       amount = @_availableResources
+    else
+      console.log("Sending max: " + root.config.resources.sendRate)
+      amount = root.config.resources.sendRate
     @_availableResources -= amount
     carrier = new ResourceCarrier(amount, @_sendingResourcesTo)
     carrier.updateAi(@)
