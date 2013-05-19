@@ -71,7 +71,7 @@ class Planet
 
   # Returns the (x, y) location of the planet.
   #
-  # @return [{x: ..., y: ...}] Location of planet
+  # @return [Array.<Integer>] Location of planet
   #
   location: ->
     return {x: @_x, y: @_y}
@@ -113,18 +113,18 @@ class Planet
 
   # Returns the current visibility state of the planet.
   #
-  # @return [root.config.visibility.*] The current visibility state of the planet.
+  # @return [Visibility] The current visibility state of the planet.
   #
   visibility: ->
     return @_visibility
 
   # Returns the current number of ships on the planet of the specified type.
   #
-  # @param [root.config.units.*] type The specified type
+  # @param [Visibility] type The specified type
   #
   # @return [Integer] The number of ships of the specified type.
   #
-  # @throw [Error] If the ship type is not one of root.config.units.*
+  # @throw [Error] If the ship type is not one of Visibility
   #
   numShips: (type) ->
     return switch type
@@ -170,14 +170,14 @@ class Planet
 
   # Returns a list of planets adjacent to this one.
   #
-  # @return [List] A list of planets adjacent to this one.
+  # @return [Array.<Planet>] A list of planets adjacent to this one.
   #
   getAdjacentPlanets: ->
     return @_adjacentPlanets
 
   # Returns the list of control groups stationed at this planet.
   #
-  # @return [List] The list of control groups stationed at this planet.
+  # @return [Array.<Planet>] The list of control groups stationed at this planet.
   getControlGroups: ->
     return @_controlGroups
 
@@ -192,7 +192,7 @@ class Planet
   # Returns the type of unit being constructed, or null if no unit is being
   # constructed.
   #
-  # @return [root.config.units.*] The type of unit being constructed
+  # @return [Visibility] The type of unit being constructed
   #
   buildUnit: ->
     return @_unitConstructing
