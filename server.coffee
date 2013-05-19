@@ -1,5 +1,4 @@
-# Server script
-# To run from root directory, run `coffee server.coffee`
+# Server module
 
 # Import modules
 sys = require 'sys'
@@ -9,7 +8,7 @@ url = require 'url'
 fs = require 'fs'
 
 # The main method
-main = ->
+main = (port=8080) ->
   # Set directory to root/public
   dir = path.join(process.cwd(), 'public')
 
@@ -58,8 +57,8 @@ main = ->
               response.end()
 
   # Start the server
-  server.listen 8080
-  sys.puts 'Server now listening on port 8080'
+  server.listen port
+  sys.puts "Server now listening on port #{port}"
 
 # Get the MIME type for the file
 getContentType = (filename) ->
@@ -88,5 +87,6 @@ getContentType = (filename) ->
   # Default
   return ''
 
-# Start the script
-main()
+# Export server functions
+module.exports = 
+  start: main

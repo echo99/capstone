@@ -36,7 +36,8 @@ class Environment
   @STAGING: 2
   @DEV: 3
 
-SLASH = if PLATFORM == Platform.WINDOWS then '\\' else '/'
+SLASH = if PLATFORM is Platform.WINDOWS then '\\' else '/'
+COMMAND_SUFFIX = if PLATFORM is Platform.WINDOWS then '.cmd' else ''
 
 # Constants
 APP_JS = "public#{SLASH}app.js"
@@ -58,6 +59,9 @@ Configs =
   DEV: "app#{SLASH}cfg#{SLASH}dev.cfg.coffee"
   CLOSURE: "app#{SLASH}cfg#{SLASH}closure_overrides.cfg.coffee"
   CLOSURE_INTERN: "app#{SLASH}cfg#{SLASH}closure_intern_overrides.cfg.coffee"
+
+Commands =
+  COFFEESCRIPT: "coffee#{COMMAND_SUFFIX}"
 
 # List of external third-party JavaScript files that need to be combined in a
 # particular order
@@ -394,6 +398,7 @@ initOptions = (options) ->
   options['verbose'] ?= 'verbose' of options
   options['no-doc'] ?= 'no-doc' of options
   options['no-rhino'] ?= 'no-rhino' of options
+  options['port'] ?= null
   return options
 
 ###############################################################################
@@ -402,6 +407,7 @@ initOptions = (options) ->
 option '-v', '--verbose', 'Print out verbose output'
 option null, '--no-doc', 'Don\'t document the source files when building'
 option null, '--no-rhino', 'Don\'t try to run the script with rhino'
+option '-p', '--port [PORT]', 'Specify port to run server on'
 
 ###############################################################################
 # Tasks
@@ -1005,3 +1011,18 @@ task "test", "Run tests", (options) ->
       console.log(output) if output
       console.log(stderr) if stderr
       # throw err if err
+
+task "server", "Start the local server", (options) ->
+  initOptions(options)
+  server = require './server'
+  server.start(options['port'])
+  # cmd = Commands.COFFEESCRIPT
+  # args = ['server.coffee']
+  # server = spawn cmd, args
+  # server.stdout.on 'data', (data) ->
+  #   console.log data.toString().trim()
+  # server.stderr.on 'data', (data) ->
+  #   console.error data.toString().trim()
+  # exec cmd, (err, output, stderr) ->
+  #   console.log(output) if output
+  #   console.log(stderr) if stderr
