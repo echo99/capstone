@@ -715,14 +715,16 @@ class Planet
   visibilityUpkeep: ->
     @_nextSend = null
     # If it has probes:
-    if @hasProbes() or @_station or @_outpost
+    if @hasProbes() or @_station or @_outpost or
+       @_unitConstructing == root.config.structures.outpost
       @_lastSeenResources = @_resources
     # If it has any units
     if @hasProbes() or
        @_attackShips > 0 or
        @_defenseShips > 0 or
        @_colonies > 0 or
-       @_station or @_outpost
+       @_station or @_outpost or 
+       @_unitConstructing == root.config.structures.outpost
       # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen
         @_hasBeenSeen = true
