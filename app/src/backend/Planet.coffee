@@ -118,6 +118,18 @@ class Planet
   visibility: ->
     return @_visibility
 
+  # Returns the current planet we are senting resources to or null if none.
+  #
+  # @return [Planet] The planet we are sending resources to.
+  sendingResourcesTo: ->
+    return @_sendingResourcesTo
+
+  # Returns the current planet we are senting units to or null if none.
+  #
+  # @return [Planet] The planet we are sending units to.
+  sendingUnitsTo: ->
+    return @_sendingUnitsTo
+
   # Returns the current number of ships on the planet of the specified type.
   #
   # @param [Visibility] type The specified type
