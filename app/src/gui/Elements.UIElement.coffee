@@ -24,9 +24,8 @@ if exports?
 # The base class for UI elements
 #
 # TODO:
-# - Figure what to do about duplicate child references
-# - Delay actual removing of children until after drawing to eliminate bugs due to
-#   removing while drawing
+# - Figure what to do about duplicate child references (might be fine as it is)
+# - Implement a way to handle collision detection (for overlapping elements)
 #
 class Elements.UIElement extends Module
   # @property [Boolean] Flag for if element is visible
@@ -666,6 +665,25 @@ class Elements.UIElement extends Module
   # @return [Object] The coordinates `{'x': x, 'y': y}`
   getActualLocation: (x, y) ->
     return {'x': @actX, 'y': @actY}
+
+  # Check if this element intersects the given rectangle
+  # @abstract
+  #
+  # @param [Number] x x-coordinate of center of rectangle
+  # @param [Number] y y-coordinate of center of rectangle
+  # @param [Number] w Width of rectangle
+  # @param [Number] h Height of rectangle
+  # @return [Boolean] Whether or not this elements intersects the given rectangle
+  intersectsRect: (x, y, w, h) ->
+
+  # Check if this element intersects the given circle
+  # @abstract
+  #
+  # @param [Number] x x-coordinate of center of circle
+  # @param [Number] y y-coordinate of center of circle
+  # @param [Number] r Radius of circle
+  # @return [Boolean] Whether or not this elements intersects the given circle
+  intersectsRect: (x, y, r) ->
 
   # Set the z-index of the element
   #
