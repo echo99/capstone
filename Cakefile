@@ -309,10 +309,10 @@ buildSource = (options, env=Environment.DEV, callback=null) ->
               console.log('Build successful!'.green)
               # console.log()
             # Run the type checker. Doesn't seem like the best place for it
-            invoke 'typecheck'
             if options['no-rhino']
               invoke 'lint'
               invoke 'doc' if not options['no-doc']
+              invoke 'typecheck'
               callback?()
             else
               console.log('Doing test run on compiled script...'.yellow)
@@ -321,6 +321,7 @@ buildSource = (options, env=Environment.DEV, callback=null) ->
                   console.log('Test passed!'.green)
                   invoke 'lint'
                   invoke 'doc' if not options['no-doc']
+                  invoke 'typecheck'
                 else
                   notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
                   console.error('Test run failed!'.red)
