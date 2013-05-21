@@ -486,7 +486,6 @@ class UnitSelection
   # Draws the one type of ship
   #
   # @param [CanvasRenderingContext2D] ctx The game context
-  # @param [Object] location Where to draw the ships
   # @param [AnimatedSprite] sprite The sprite to draw
   # @param [Array<Array<Stack>>] stacks The list of stacks
   _drawShips: (ctx, sprite, stacks) ->
@@ -647,8 +646,6 @@ class Stack
   # Draws the selection of the stack
   #
   # @param [CanvasRenderingContext2D] ctx The game context
-  # @param [Number] x The x location of the stack
-  # @param [Number] y The y location of the stack
   draw: (ctx) ->
     if not @open then return
     x = @x - @w / 2

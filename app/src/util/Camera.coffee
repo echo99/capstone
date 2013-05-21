@@ -48,8 +48,7 @@ class Camera
 
   # Sets the target position of the camera
   #
-  # @param [Number] targetX The desired x position of the camera
-  # @param [Number] targetY The desired y position of the camera
+  # @param [Number] target The desired position of the camera
   setTarget: (target) ->
     @targetX = -target.x
     @targetY = -target.y

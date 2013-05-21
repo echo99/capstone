@@ -22,7 +22,7 @@ $.getJSON('recorded_games/replay.json', {}, (data) ->
 )
 ###
 
-window.player_id
+window.player_id = null
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
