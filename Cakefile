@@ -242,12 +242,13 @@ notify = (message, msgLvl) ->
 
 # Do a test run on the compiled JavaScript code using a simulated browser
 jsSanityCheck = (options, callback) ->
-  process.chdir(RHINO_DIR)
+  # process.chdir(RHINO_DIR)
   options.verbose ?= 'verbose' of options
-  exec 'java -jar js.jar -opt -1 testrun.js', (err, stdout, stderr) ->
-    console.log(stdout) if stdout and options.verbose
+  exec "java -jar #{RHINO_DIR}#{SLASH}js.jar -opt -1 #{RHINO_DIR}#{SLASH}testrun.js", (err, stdout, stderr) ->
+    # console.log(stdout) if stdout and options.verbose
+    console.log(stdout) if stdout
     console.error(stderr.red) if stderr
-    process.chdir(HOME_FROM_RHINO)
+    # process.chdir(HOME_FROM_RHINO)
     callback not err
 
 # Compile vendor scripts and styles
