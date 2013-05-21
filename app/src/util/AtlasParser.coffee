@@ -21,9 +21,9 @@ class AtlasParser
     sheet = @spritesheet
     frames = @jsonData.frames
     for spriteName, spriteData of frames
-      frame = spriteData.frame
-      sptSrcSize = spriteData.spriteSourceSize
-      srcSize = spriteData.sourceSize
+      frame = spriteData['frame']
+      sptSrcSize = spriteData['spriteSourceSize']
+      srcSize = spriteData['sourceSize']
       cx = 0
       cy = 0
       if sptSrcSize.w == srcSize.w and sptSrcSize.h == srcSize.h
