@@ -683,7 +683,7 @@ class Elements.UIElement extends Module
   # @param [Number] y y-coordinate of center of circle
   # @param [Number] r Radius of circle
   # @return [Boolean] Whether or not this elements intersects the given circle
-  intersectsRect: (x, y, r) ->
+  intersectsCircle: (x, y, r) ->
 
   # Set the z-index of the element
   #
