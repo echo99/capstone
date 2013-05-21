@@ -183,6 +183,8 @@ class Mission3 extends Mission
     @startTime = currentTime()
 
   destroy: ->
+    if @description
+      cameraHudFrame.removeChild(@description)
     cameraHudFrame.removeChild(@victoryMenu)
     cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
@@ -192,11 +194,20 @@ class Mission3 extends Mission
     Logger.send()
 
   _initMenus: ->
+    if @showDescription
+      @description = @_createMenu(window.config.MainMenu.mission3.menu,
+        () =>
+          @description.close()
+        start=true, restart=false, quit=true, cancel=false, close=false
+      )
+      @description.open()
+
     restart = () => newMission(Mission3)
     next = () => newMission(Menu) # TODO: Mission4
     @victoryMenu = @createVictoryMenu(restart, next)
     @failMenu = @createFailMenu(restart)
-    @optionsMenu = @createOptionMenu(restart)
+    @optionsMenu = @_createMenu(window.config.MainMenu.mission3.menu,
+      restart, start=false, restart=true, quit=true, cancel=false, close=true)
     @menuButton = @createMenuButton(@optionsMenu)
 
   # @see Mission#draw

@@ -143,12 +143,12 @@ determineWin7 = ->
 
 determineWin7()
 
-newMission = (mission) ->
+newMission = (mission, desc=false) ->
   CurrentMission.destroy()
   UI.destroy()
   if UI == null
     UI = new UserInterface()
-  CurrentMission = new mission()
+  CurrentMission = new mission(desc)
   #window.onresize()
 
 newGame = (w, h, move) ->

@@ -101,20 +101,31 @@ class Menu extends Mission
     Logger.send()
 
   _initMenus: ->
-    @mission1Menu = @_createMenu(@settings.mission1.menu, () =>
-      newMission(Mission1))
-    @mission2Menu = @_createMenu(@settings.mission2.menu, () =>
-      newMission(Mission2))
-    @mission3Menu = @_createMenu(@settings.mission3.menu, () =>
-      newMission(Mission3))
-    @smallMenu = @_createMenu(@settings.small.menu, () =>
-      newMission(ExterminationSmall))
-    @mediumMenu = @_createMenu(@settings.medium.menu, () =>
-      newMission(ExterminationMedium))
-    @largeMenu = @_createMenu(@settings.large.menu, () =>
-      camera.setZoom(0.1)
-      newMission(ExterminationLarge))
-
+    @mission1Menu = @_createMenu(@settings.mission1.menu,
+      () =>
+        newMission(Mission1)
+      start=true, restart=false, quit=false, cancel=true, close=false)
+    @mission2Menu = @_createMenu(@settings.mission2.menu,
+      () =>
+        newMission(Mission2)
+      start=true, restart=false, quit=false, cancel=true, close=false)
+    @mission3Menu = @_createMenu(@settings.mission3.menu,
+      () =>
+        newMission(Mission3)
+      start=true, restart=false, quit=false, cancel=true, close=false)
+    @smallMenu = @_createMenu(@settings.small.menu,
+      () =>
+        newMission(ExterminationSmall)
+      start=true, restart=false, quit=false, cancel=true, close=false)
+    @mediumMenu = @_createMenu(@settings.medium.menu,
+      () =>
+        newMission(ExterminationMedium)
+      start=true, restart=false, quit=false, cancel=true, close=false)
+    @largeMenu = @_createMenu(@settings.large.menu,
+      () =>
+        camera.setZoom(0.1)
+        newMission(ExterminationLarge)
+      start=true, restart=false, quit=false, cancel=true, close=false)
     c = new Elements.Button(200 - 10, 10, 16, 16,
       () =>
         @creditsMenu.close()
@@ -173,51 +184,6 @@ class Menu extends Mission
         })
       cameraHudFrame.addChild(@gameCompleteMenu)
       @gameCompleteMenu.open()
-
-  _createMenu: (settings, onStart) ->
-    cancel = settings.cancel
-    start = settings.start
-    cancelButton = new Elements.Button(cancel.x, cancel.y, cancel.w, cancel.h)
-    menuBox = new Elements.MessageBox(0, 0,
-                                      settings.w, settings.h,
-                                      settings.message,
-                                      {
-                                        closeBtn: cancelButton,
-                                        textAlign: settings.textAlign,
-                                        vAlign: settings.vAlign,
-                                        font: settings.font
-                                        lineHeight: settings.lineHeight,
-                                        visible: false
-                                      })
-    cancelButton.setClickHandler(() =>
-      menuBox.close()
-    )
-    cancelButton.setDrawFunc((ctx) =>
-      loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
-      if cancelButton.isPressed()
-        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
-                         loc.x, loc.y, ctx, false)
-      else
-        SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
-                         loc.x, loc.y, ctx, false)
-    )
-
-    startButton = new Elements.Button(start.x, start.y, start.w, start.h)
-    startButton.setClickHandler(onStart)
-    startButton.setDrawFunc((ctx) =>
-      loc = menuBox.getActualLocation(startButton.x, startButton.y)
-      if startButton.isPressed()
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
-                         loc.x, loc.y, ctx, false)
-      else
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
-                         loc.x, loc.y, ctx, false)
-    )
-
-    menuBox.addChild(startButton)
-    cameraHudFrame.addChild(menuBox)
-
-    return menuBox
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->

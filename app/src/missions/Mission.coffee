@@ -5,7 +5,7 @@ class Mission
 
   # Creates a new mission and sets it up. This should not need to be
   # overwitten.
-  constructor: ->
+  constructor: (@showDescription=false)->
     @reset()
 
   # Removes any Elements that were created and does any other cleanup that might
@@ -59,7 +59,7 @@ class Mission
 
     @_attachRestartButton(menuBox, onRestart)
     @_attachQuitButton(menuBox)
-    #@_attachNextButton(menuBox, onNextMission)
+    @_attachNextButton(menuBox, onNextMission)
 
     cameraHudFrame.addChild(menuBox)
 
@@ -171,3 +171,149 @@ class Mission
     frameElement.addChild(menuButton)
 
     return menuButton
+
+  _createMenu: (settings, onStart=null, start=false, restart=false, quit=false,
+                cancel=false, close=false) ->
+    cancelButton = null
+    if cancel
+      cancelButton = new Elements.Button(settings.w * 2/3, settings.h - 15,
+                                         60, 20)
+    else if close
+      cancelButton = new Elements.Button(settings.w - 8 - 5, 8 + 5,
+                                         16, 16)
+
+    menuBox = new Elements.MessageBox(0, 0,
+                                      settings.w, settings.h,
+                                      settings.message,
+                                      {
+                                        closeBtn: cancelButton,
+                                        textAlign: settings.textAlign,
+                                        vAlign: settings.vAlign,
+                                        font: settings.font
+                                        lineHeight: settings.lineHeight,
+                                        visible: false
+                                      })
+    if cancel
+      cancelButton.setClickHandler(() =>
+        menuBox.close()
+      )
+      cancelButton.setDrawFunc((ctx) =>
+        loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
+        if cancelButton.isPressed()
+          SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                           loc.x, loc.y, ctx, false)
+        else
+          SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                           loc.x, loc.y, ctx, false)
+      )
+
+    if close
+      cancelButton.setClickHandler(() =>
+        menuBox.close()
+      )
+      cancelButton.setDrawFunc((ctx) =>
+        loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
+        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+      )
+
+    if start
+      startButton = new Elements.Button(settings.w * 1/3, settings.h - 15,
+                                        101, 20)
+      startButton.setClickHandler(onStart)
+      startButton.setDrawFunc((ctx) =>
+        loc = menuBox.getActualLocation(startButton.x, startButton.y)
+        if startButton.isPressed()
+          SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
+                           loc.x, loc.y, ctx, false)
+        else
+          SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
+                           loc.x, loc.y, ctx, false)
+      )
+
+      menuBox.addChild(startButton)
+    else if restart
+      startButton = new Elements.Button(settings.w * 1/3, settings.h - 15,
+                                        63, 20)
+      startButton.setClickHandler(onStart)
+      startButton.setDrawFunc((ctx) =>
+        loc = menuBox.getActualLocation(startButton.x, startButton.y)
+        if startButton.isPressed()
+          SHEET.drawSprite(SpriteNames.RESTART_BUTTON_HOVER,
+                           loc.x, loc.y, ctx, false)
+        else
+          SHEET.drawSprite(SpriteNames.RESTART_BUTTON_IDLE,
+                           loc.x, loc.y, ctx, false)
+      )
+
+      menuBox.addChild(startButton)
+
+    if quit
+      quitButton = new Elements.Button(settings.w * 2/3, settings.h - 15,
+                                       40, 20)
+      quitButton.setClickHandler(() => newMission(Menu))
+      quitButton.setDrawFunc((ctx) =>
+        loc = menuBox.getActualLocation(quitButton.x, quitButton.y)
+        if quitButton.isPressed()
+          SHEET.drawSprite(SpriteNames.QUIT_BUTTON_HOVER,
+                           loc.x, loc.y, ctx, false)
+        else
+          SHEET.drawSprite(SpriteNames.QUIT_BUTTON_IDLE,
+                           loc.x, loc.y, ctx, false)
+      )
+
+      menuBox.addChild(quitButton)
+
+    cameraHudFrame.addChild(menuBox)
+
+    return menuBox
+
+  ###
+  _createMenu: (settings, onStart, showCancel=true) ->
+    cancel = settings.cancel
+    start = settings.start
+    cancelButton = if showCancel
+      new Elements.Button(cancel.x, cancel.y, cancel.w, cancel.h)
+    else
+      null
+    menuBox = new Elements.MessageBox(0, 0,
+                                      settings.w, settings.h,
+                                      settings.message,
+                                      {
+                                        closeBtn: cancelButton,
+                                        textAlign: settings.textAlign,
+                                        vAlign: settings.vAlign,
+                                        font: settings.font
+                                        lineHeight: settings.lineHeight,
+                                        visible: false
+                                      })
+    if showCancel
+      cancelButton.setClickHandler(() =>
+        menuBox.close()
+      )
+      cancelButton.setDrawFunc((ctx) =>
+        loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
+        if cancelButton.isPressed()
+          SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
+                           loc.x, loc.y, ctx, false)
+        else
+          SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
+                           loc.x, loc.y, ctx, false)
+      )
+
+    startButton = new Elements.Button(start.x, start.y, start.w, start.h)
+    startButton.setClickHandler(onStart)
+    startButton.setDrawFunc((ctx) =>
+      loc = menuBox.getActualLocation(startButton.x, startButton.y)
+      if startButton.isPressed()
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
+                         loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
+                         loc.x, loc.y, ctx, false)
+    )
+
+    menuBox.addChild(startButton)
+    cameraHudFrame.addChild(menuBox)
+
+    return menuBox
+  ###
