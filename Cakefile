@@ -908,7 +908,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
     console.log('Running Closure type checker...'.yellow)
     cmd = "java"
     args = [
-      "-jar vendor/tools/compiler.jar"
+      "-jar vendor#{SLASH}tools#{SLASH}compiler.jar"
       "--js #{TMP_JS_FILE}"
       "--js_output_file #{TMP_GOOGJS_FILE}"
       "--jscomp_error checkTypes"
