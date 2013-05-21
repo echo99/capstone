@@ -71,7 +71,7 @@ class Game
 
   # Replaces current graph with the specified.
   #
-  # param [Array of Planets] The new graph.
+  # param [Array.<Planet>] The new graph.
   setGraph: (planets) ->
     @_planets = planets
 
@@ -98,7 +98,7 @@ class Game
 
   # Get the entire graph as a list of planets
   #
-  # @return [Array of Planets] The current graph.
+  # @return [Array.<Planet>] The current graph.
   getPlanets: ->
     return @_planets
 

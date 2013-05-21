@@ -24,7 +24,7 @@ class ResourceCarrier
 
   # Returns the route that this Control Group currently intends to follow.
   #
-  # @return [Array of Planets] The group's route.
+  # @return [Array.<Planet>] The group's route.
   route: ->
     @_route
 
