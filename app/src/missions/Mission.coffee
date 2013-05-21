@@ -150,6 +150,11 @@ class Mission
     x = camera.width - menu.w / 2 - 5
     y = menu.h / 2 + 5
     menuButton = new Elements.Button(x, y, menu.w, menu.h)
+    menuButton.setClearFunc((ctx) =>
+      ctx.clearRect(menuButton.x - menuButton.w / 2,
+                    menuButton.y - menuButton.h / 2,
+                    menuButton.w, menuButton.h)
+    )
     menuButton.setClickHandler(() =>
       if theMenu.visible
         theMenu.close()
