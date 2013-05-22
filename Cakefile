@@ -521,6 +521,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   # typeCheck = /@(require|param)/
   typeCheck = /@(return|param)\s+\[(.*?)\]\s*(.*)/
   collectionType = /(.*?)(?:\.)?<(.*)>/
+  objectType = /^\{(.*?)\}$/
   builtInTypes = ['boolean', 'string', 'number', 'list']
   capTypes = ['CanvasRenderingContext2D', 'Array', 'Object']
   numberTypes = ['integer', 'double', 'float']
@@ -621,6 +622,11 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
               #     inner = 'number'
               inner = normalizeType(inner)
               type += inner + closing
+            else if type.match(objectType)
+              for jsType in builtInTypes
+                type = type.replace(new RegExp(jsType, 'ig'), jsType)
+              for numType in numberTypes
+                type = type.replace(new RegExp(numType, 'ig'), 'number')
             else
               # if type.toLowerCase() in numberTypes
               #   type = 'number'
