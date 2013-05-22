@@ -233,6 +233,11 @@ root.config =
     PROBE: new AnimatedSprite(['probe.png'])
     PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
     PLANET_BLUE_FUNGUS: new AnimatedSprite(['planet_blue_fungus.png'])
+    PLANET_BLUE_FUNGUS_MAX: new AnimatedSprite(
+      ['planet_blue_fungus_max_1.png', 'planet_blue_fungus_max_2.png',
+       'planet_blue_fungus_max_3.png', 'planet_blue_fungus_max_4.png',
+       'planet_blue_fungus_max_5.png', 'planet_blue_fungus_max_6.png',
+       'planet_blue_fungus_max_7.png', 'planet_blue_fungus_max_8.png'], 1)
     PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
     PLANET_INVISIBLE_FUNGUS: new AnimatedSprite(['planet_invisible_fungus.png'])
     TITLE: new AnimatedSprite(['title.png'])

@@ -978,7 +978,10 @@ class UserInterface
           SHEET.drawSprite(p.sprite(), loc.x, loc.y, ctx)
         else if (@showAll and p.fungusStrength() > 0) or
            (p._lastSeenFungus and not @showAll)
-          SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
+          if (p.fungusStrength() == p._fungusMaximumStrength)
+            SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS_MAX, loc.x, loc.y, ctx)
+          else
+            SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
       else if cheat
