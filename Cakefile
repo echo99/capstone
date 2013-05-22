@@ -669,7 +669,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
                         commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
                       break
 
-            if line.indexOf('constructor') > 0
+            if line.indexOf('constructor:') > 0
               # Found constructor!
               # Put the constructor documentation before the class definition so
               # Google closure can see it
@@ -710,6 +710,34 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
             nonTypeCommentBuffer = ''
             inComment = false
             containsTypeDef = false
+          else if line.indexOf('constructor:') > 0 and not inBlockComment
+            # Found constructor!
+            # Put the constructor documentation before the class definition so
+            # Google closure can see it
+            # debug commentBuffer.length
+            # trimmedBuffer = []
+            # for commLine in commentBuffer
+            #   # debug i
+            #   # debug(commentBuffer[i])
+            #   # debug commLine.replace(/^\s+/, '')
+            #   trimmedBuffer.push commLine.replace(/^\s+/g, '')
+            trimmedBuffer = [
+              '###*\n'
+              '* @constructor\n'
+            ]
+            classStr = curClass
+            if curClass of superclasses
+              trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
+              classStr += " extends #{superclasses[curClass]}"
+            trimmedBuffer.push('###\n')
+            classBuffer += trimmedBuffer.join('')
+            classBuffer += "class #{classStr}\n"
+            buffer += classBuffer
+            buffer += afterClassDecBuffer
+            # buffer += line + '\n'
+            classBuffer = ''
+            afterClassDecBuffer = ''
+            inClass = false
           if line.match(classRegex) and not inBlockComment
             if line.match(classExtendsRegex)
               matches = line.match(classExtendsRegex)
