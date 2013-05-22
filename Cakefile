@@ -520,7 +520,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   requireLine = /^(\s*)#_require/
   # typeCheck = /@(require|param)/
   typeCheck = /@(return|param)\s+\[(.*?)\]\s*(.*)/
-  collectionType = /(.*?)<(.*)>/
+  collectionType = /(.*?)(?:\.)?<(.*)>/
   builtInTypes = ['boolean', 'string', 'number', 'list']
   capTypes = ['CanvasRenderingContext2D', 'Array', 'Object']
   numberTypes = ['integer', 'double', 'float']
