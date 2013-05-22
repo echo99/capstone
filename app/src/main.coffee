@@ -90,8 +90,16 @@ KeyCodes =
   MINUS: 189 # zoom out
   ADD: 107 # zoom in
   SUB: 109 # zoom out
-  STATION: 83 # select next idle station
+  STATION: 81 # select next idle station
   CHEAT: 67
+  W: 87 # move camera up
+  UP: 38 # move camera up
+  A: 65 # move left
+  LEFT: 37 # move left
+  S: 83 # move down
+  DOWN: 40 # move down
+  D: 68 # move right
+  RIGHT: 39 #move right
 
 cheat = false
 
@@ -439,8 +447,20 @@ main = ->
       nz = camera.getZoom() - window.config.ZOOM_SPEED
       camera.setZoom(nz)
     else if e.keyCode == KeyCodes.STATION
-      Logger.logEvent("Pressed S")
+      Logger.logEvent("Pressed Q")
       UI.gotoNextStation()
+    else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
+      Logger.logEvent("Pressed up")
+      camera.moveCameraByScreenDistance(0, 20)
+    else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
+      Logger.logEvent("Pressed left")
+      camera.moveCameraByScreenDistance(20, 0)
+    else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
+      Logger.logEvent("Pressed down")
+      camera.moveCameraByScreenDistance(0, -20)
+    else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
+      Logger.logEvent("Pressed right")
+      camera.moveCameraByScreenDistance(-20, 0)
     #else if e.keyCode == KeyCodes.CHEAT
     #  Logger.logEvent("Pressed CHEAT")
     #  cheat = not cheat
