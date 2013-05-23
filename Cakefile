@@ -5,6 +5,8 @@ path = require 'path'
 # Flag for debugging the Cakefile
 DEBUG_MODE = false
 
+RUN_RHINO = false
+
 # Add to list any modules that cannot be found
 missingModules = []
 tryRequire = (moduleName) ->
@@ -310,7 +312,7 @@ buildSource = (options, env=Environment.DEV, callback=null) ->
               console.log('Build successful!'.green)
               # console.log()
             # Run the type checker. Doesn't seem like the best place for it
-            if options['no-rhino']
+            if options['no-rhino'] or not RUN_RHINO
               invoke 'lint'
               invoke 'doc' if not options['no-doc']
               invoke 'typecheck'
