@@ -390,12 +390,6 @@ class Planet
     @_sendingResourcesTo = null
     @_nextSend = null
 
-  # Returns the planet we are sending resources to.
-  #
-  # @return [Planet] Last planet in supply chain.
-  sendingResourcesTo: ->
-    @_sendingResourcesTo
-
   # Returns the first planet to send resources to.
   #
   # @return [Planet] First planet in supply chain.

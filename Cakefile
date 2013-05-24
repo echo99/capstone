@@ -5,6 +5,8 @@ path = require 'path'
 # Flag for debugging the Cakefile
 DEBUG_MODE = false
 
+RUN_RHINO = false
+
 # Add to list any modules that cannot be found
 missingModules = []
 tryRequire = (moduleName) ->
@@ -310,7 +312,7 @@ buildSource = (options, env=Environment.DEV, callback=null) ->
               console.log('Build successful!'.green)
               # console.log()
             # Run the type checker. Doesn't seem like the best place for it
-            if options['no-rhino']
+            if options['no-rhino'] or not RUN_RHINO
               invoke 'lint'
               invoke 'doc' if not options['no-doc']
               invoke 'typecheck'
@@ -521,6 +523,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   # typeCheck = /@(require|param)/
   typeCheck = /@(return|param)\s+\[(.*?)\]\s*(.*)/
   collectionType = /(.*?)(?:\.)?<(.*)>/
+  objectType = /^\{(.*?)\}$/
   builtInTypes = ['boolean', 'string', 'number', 'list']
   capTypes = ['CanvasRenderingContext2D', 'Array', 'Object']
   numberTypes = ['integer', 'double', 'float']
@@ -621,6 +624,11 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
               #     inner = 'number'
               inner = normalizeType(inner)
               type += inner + closing
+            else if type.match(objectType)
+              for jsType in builtInTypes
+                type = type.replace(new RegExp(jsType, 'ig'), jsType)
+              for numType in numberTypes
+                type = type.replace(new RegExp(numType, 'ig'), 'number')
             else
               # if type.toLowerCase() in numberTypes
               #   type = 'number'
