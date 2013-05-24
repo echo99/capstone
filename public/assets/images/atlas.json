@@ -2,7 +2,7 @@
 
 "activate_full_screen_button.png" :
 {
-	"frame": {"x":876,"y":450,"w":16,"h":16},
+	"frame": {"x":876,"y":468,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
@@ -32,13 +32,13 @@
 },
 "close_button.png" :
 {
-	"frame": {"x":583,"y":762,"w":16,"h":16},
+	"frame": {"x":583,"y":780,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "colony_ship.png" :
 {
-	"frame": {"x":1010,"y":882,"w":30,"h":32},
+	"frame": {"x":1010,"y":816,"w":30,"h":32},
 	"spriteSourceSize": {"x":1,"y":0,"w":30,"h":32},
 	"sourceSize": {"w":32,"h":32}
 },
@@ -50,7 +50,7 @@
 },
 "deactivate_full_screen_button.png" :
 {
-	"frame": {"x":602,"y":862,"w":16,"h":16},
+	"frame": {"x":581,"y":803,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
@@ -62,7 +62,7 @@
 },
 "defense_ship_construction.png" :
 {
-	"frame": {"x":1010,"y":848,"w":30,"h":32},
+	"frame": {"x":1010,"y":882,"w":30,"h":32},
 	"spriteSourceSize": {"x":193,"y":28,"w":30,"h":32},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -80,13 +80,13 @@
 },
 "feedback_button_hover.png" :
 {
-	"frame": {"x":876,"y":468,"w":16,"h":16},
+	"frame": {"x":876,"y":450,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
 "feedback_button_idle.png" :
 {
-	"frame": {"x":581,"y":803,"w":16,"h":16},
+	"frame": {"x":583,"y":744,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
@@ -104,7 +104,13 @@
 },
 "muted_button.png" :
 {
-	"frame": {"x":583,"y":744,"w":16,"h":16},
+	"frame": {"x":620,"y":862,"w":16,"h":16},
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16}
+},
+"next_button.png" :
+{
+	"frame": {"x":583,"y":762,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
@@ -236,7 +242,7 @@
 },
 "probe_construction.png" :
 {
-	"frame": {"x":620,"y":862,"w":8,"h":16},
+	"frame": {"x":638,"y":862,"w":8,"h":16},
 	"spriteSourceSize": {"x":204,"y":36,"w":8,"h":16},
 	"sourceSize": {"w":256,"h":256}
 },
@@ -458,7 +464,7 @@
 },
 "unmuted_button.png" :
 {
-	"frame": {"x":583,"y":780,"w":16,"h":16},
+	"frame": {"x":602,"y":862,"w":16,"h":16},
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
 	"sourceSize": {"w":16,"h":16}
 },
@@ -488,7 +494,7 @@
 },
 "warp_gate_construction.png" :
 {
-	"frame": {"x":1010,"y":816,"w":30,"h":30},
+	"frame": {"x":1010,"y":850,"w":30,"h":30},
 	"spriteSourceSize": {"x":193,"y":29,"w":30,"h":30},
 	"sourceSize": {"w":256,"h":256}
 }

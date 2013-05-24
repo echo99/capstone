@@ -246,6 +246,7 @@ root.config =
     MUTED: new AnimatedSprite(['muted_button.png'])
     UNMUTED: new AnimatedSprite(['unmuted_button.png'])
     CLOSE: new AnimatedSprite(['close_button.png'])
+    NEXT: new AnimatedSprite(['next_button.png'])
     FEEDBACK: new AnimatedSprite(['feedback_button_hover.png'])
     OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
       'outpost_buildings_gathering_2.png'], 20)

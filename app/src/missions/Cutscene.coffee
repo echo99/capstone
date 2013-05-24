@@ -70,7 +70,7 @@ class Cutscene extends Mission
     Logger.send()
 
   _initMenus: ->
-    @m1 = @_getM("Getting ready to move into uncharted territory",
+    @m1 = @_getM("We're getting ready to move into uncharted territory.",
       () =>
         @m1.close()
         @phase = @phases.MOVE_HIDDEN
@@ -83,14 +83,16 @@ class Cutscene extends Mission
         @phase = @phases.MOVE_TO_PROBE
     )
 
-    @m3 = @_getM("AAAAHHHHH!",
+    @m3 = @_getM("It's spreading toward us! AAAAHHHHH!",
       () =>
         @m3.close()
         @phase = @phases.DESTROY
     )
 
   _getM: (message, onNext) ->
-    m = new Elements.MessageBox(0, 200, 250, 100, message,
+    w = 250
+    h = 50
+    m = new Elements.MessageBox(0, 200, w, h, message,
       {
         textAlign: 'left',
         vAlign: 'top',
@@ -99,11 +101,11 @@ class Cutscene extends Mission
         visible: false
       })
 
-    next = new Elements.Button(250 - 10, 10, 16, 16, onNext)
+    next = new Elements.Button(w - 12, h - 12, 16, 16, onNext)
     next.setDrawFunc(
       (ctx) =>
         loc = m.getActualLocation(next.x, next.y)
-        SHEET.drawSprite(SpriteNames.CLOSE, loc.x, loc.y, ctx, false)
+        SHEET.drawSprite(SpriteNames.NEXT, loc.x, loc.y, ctx, false)
     )
     m.addChild(next)
     cameraHudFrame.addChild(m)
