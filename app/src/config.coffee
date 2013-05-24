@@ -79,8 +79,8 @@ root.config =
     defenseLoc: {x: -80, y: 150}
   connectionStyle:
     normal:
-      visible: "rgba(128, 128, 128, 0.8)"
-      discovered: "rgba(128, 128, 128, 0.2)"
+      visible: "rgba(200, 200, 200, 0.8)"
+      discovered: "rgba(128, 128, 128, 0.5)"
       undiscovered: "rgba(128, 128, 128, 0.0)"
       stroke: "rgba(128, 128, 128, 0.5)"
       lineWidth: 2
@@ -357,6 +357,28 @@ root.config =
     missions:
       x: 0
       y: -400
+    mission:
+      x: 0
+      y: -400
+      menu:
+        w: 300
+        h: 100
+        message: "Mission\n\n" +
+                 "Estimated Time: 5-10 minutes"
+        textAlign: 'left'
+        vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 19
+        cancel:
+          x: 245
+          y: 100 - 15
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 100 - 15
+          w: 101
+          h: 20
     mission1:
       x: -400
       y: -750

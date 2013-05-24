@@ -164,9 +164,10 @@ newGame = (w, h, move) ->
 
 endTurn = () ->
   Logger.send()
-  game.endTurn()
-  UI.endTurn()
-  CurrentMission.onEndTurn()
+  if CurrentMission.canEndTurn()
+    game.endTurn()
+    UI.endTurn()
+    CurrentMission.onEndTurn()
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -432,7 +433,8 @@ main = ->
     if recording
       eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
 
-    if e.keyCode == KeyCodes.HOME
+    if CurrentMission.hasInput()
+    else if e.keyCode == KeyCodes.HOME
       Logger.logEvent("Pressed HOME")
       camera.setTarget(CurrentMission.getHomeTarget())
     else if e.keyCode == KeyCodes.SPACE
@@ -494,11 +496,14 @@ main = ->
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
-    pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
+    if CurrentMission.hasInput()
+      pointer = null
+    else
+      pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
       # Nothing on HUD frame is being hovered over
       pointer = cameraHudFrame.mouseMove(x, y)
-      if pointer is null
+      if pointer is null and not CurrentMission.hasInput()
         pointer = gameFrame.mouseMove(x, y)
       else
         gameFrame.mouseOut()
@@ -527,7 +532,8 @@ main = ->
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
 
-    mousepos = {x: x, y: y}
+    if not CurrentMission.hasInput()
+      mousepos = {x: x, y: y}
 
   clickHandler = (e) ->
     if recording
@@ -539,12 +545,16 @@ main = ->
     # msgBox.click(e.clientX, e.clientY)
     x = e.clientX
     y = e.clientY
-    if frameElement.click(x, y)
-      frameElement.mouseMove(x, y)
-    else if cameraHudFrame.click(x, y)
-      cameraHudFrame.mouseMove(x, y)
-    else if gameFrame.click(x, y)
-      gameFrame.mouseMove(x, y)
+    if CurrentMission.hasInput()
+      if cameraHudFrame.click(x, y)
+        cameraHudFrame.mouseMove(x, y)
+    else
+      if frameElement.click(x, y)
+        frameElement.mouseMove(x, y)
+      else if cameraHudFrame.click(x, y)
+        cameraHudFrame.mouseMove(x, y)
+      else if gameFrame.click(x, y)
+        gameFrame.mouseMove(x, y)
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
@@ -554,23 +564,30 @@ main = ->
         {clientX: e.clientX, clientY: e.clientY})
 
     if not frameElement.mouseDown(e.clientX, e.clientY) and
-        not cameraHudFrame.mouseDown(e.clientX, e.clientY)
+       not cameraHudFrame.mouseDown(e.clientX, e.clientY) and
+       not CurrentMission.hasInput()
       drag = true
       prevPos = {x: e.clientX, y: e.clientY}
       gameFrame.mouseDown(e.clientX, e.clientY)
 
-    mousedown = true
+    if not CurrentMission.hasInput()
+      mousedown = true
+
+    e.preventDefault()
 
   mouseUpHandler = (e) ->
     if recording
       eventRec.recordEvent("mouseUp", {})
 
-    drag = false
-    frameElement.mouseUp()
-    cameraHudFrame.mouseUp()
-    gameFrame.mouseUp()
+    if CurrentMission.hasInput()
+      cameraHudFrame.mouseUp()
+    else
+      drag = false
+      frameElement.mouseUp()
+      cameraHudFrame.mouseUp()
+      gameFrame.mouseUp()
 
-    mousedown = false
+      mousedown = false
 
   mouseOutHandler = (e) ->
     if recording
@@ -586,9 +603,10 @@ main = ->
       eventRec.recordEvent("mouseWheel",
         {wheelDelta: e.wheelDelta, detail: e.detail})
 
-    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-    nz = camera.zoom + delta * window.config.ZOOM_SPEED
-    camera.setZoom(nz)
+    if not CurrentMission.hasInput()
+      delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
+      nz = camera.zoom + delta * window.config.ZOOM_SPEED
+      camera.setZoom(nz)
 
   #window.onresize = onResize
 
@@ -619,11 +637,20 @@ main = ->
     document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
     document.body.addEventListener('mousewheel', mouseWheelHandler)
 
-  #if playback
-    #window.onresize = onResize
-    #window.resizeTo(size[0], size[1])
-    #window.onresize = null
-    #debug(window.innerWidth, window.innerHeight)
+    document.body.addEventListener('touchmove',
+      (e) =>
+        #mouseMoveHandler(e)
+        e.preventDefault()
+      false
+    )
+    ###
+    document.body.addEventListener('touchstart',
+      (e) =>
+        Logger.logEvent("touchstart", e)
+        mouseDownHandler(e)
+    )
+    document.body.addEventListener('touchend', mouseUpHandler)
+    ###
 
   ##################################################################################
   # Draw loop

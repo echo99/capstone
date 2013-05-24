@@ -24,9 +24,7 @@ class UserInterface
     @unitSelection = new UnitSelection()
     b = new Elements.Button(5 + 133/2, camera.height + 5 - 20/2, 133, 20)
     b.setClickHandler(() =>
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
+      endTurn()
     )
     b.setMouseUpHandler(() => b.setDirty())
     b.setMouseDownHandler(() => b.setDirty())

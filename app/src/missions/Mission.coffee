@@ -34,6 +34,17 @@ class Mission
   # @param [Number] y The y position of the mouse
   onMouseClick: (x, y) ->
 
+  # Returns whether or not the mission is disallowing things not on the
+  # cameraHudFrame to respond to input
+  #
+  # @return [Boolean] true if only the cameraHudFrame is permited to process input
+  hasInput: -> false
+
+  # Returns whether or not the user can end the turn
+  #
+  # @return [Boolean] true if the user can end the turn
+  canEndTurn: -> true
+
   # Returns the location where the camera should go when HOME is pushed.
   # This must return something.
   getHomeTarget: ->
@@ -272,53 +283,97 @@ class Mission
 
     return menuBox
 
-  ###
-  _createMenu: (settings, onStart, showCancel=true) ->
-    cancel = settings.cancel
-    start = settings.start
-    cancelButton = if showCancel
-      new Elements.Button(cancel.x, cancel.y, cancel.w, cancel.h)
-    else
-      null
-    menuBox = new Elements.MessageBox(0, 0,
-                                      settings.w, settings.h,
-                                      settings.message,
-                                      {
-                                        closeBtn: cancelButton,
-                                        textAlign: settings.textAlign,
-                                        vAlign: settings.vAlign,
-                                        font: settings.font
-                                        lineHeight: settings.lineHeight,
-                                        visible: false
-                                      })
-    if showCancel
-      cancelButton.setClickHandler(() =>
-        menuBox.close()
-      )
-      cancelButton.setDrawFunc((ctx) =>
-        loc = menuBox.getActualLocation(cancelButton.x, cancelButton.y)
-        if cancelButton.isPressed()
-          SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_HOVER,
-                           loc.x, loc.y, ctx, false)
-        else
-          SHEET.drawSprite(SpriteNames.CANCEL_BUTTON_IDLE,
-                           loc.x, loc.y, ctx, false)
-      )
+  _setupMissionMap: ->
+    map = {}
+    map.planets = []
 
-    startButton = new Elements.Button(start.x, start.y, start.w, start.h)
-    startButton.setClickHandler(onStart)
-    startButton.setDrawFunc((ctx) =>
-      loc = menuBox.getActualLocation(startButton.x, startButton.y)
-      if startButton.isPressed()
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_HOVER,
-                         loc.x, loc.y, ctx, false)
-      else
-        SHEET.drawSprite(SpriteNames.START_MISSION_BUTTON_IDLE,
-                         loc.x, loc.y, ctx, false)
-    )
+    p0 = new Planet(0,0)
+    game.addPlanet(p0)
 
-    menuBox.addChild(startButton)
-    cameraHudFrame.addChild(menuBox)
+    p1 = new Planet(600, 10)
+    game.addPlanet(p1)
 
-    return menuBox
-  ###
+    p2 = new Planet(300, 500)
+    game.addPlanet(p2)
+
+    p3 = new Planet(-200, 500)
+    game.addPlanet(p3)
+
+    p4 = new Planet(900, 500)
+    game.addPlanet(p4)
+
+    p5 = new Planet(50, 1000)
+    game.addPlanet(p5)
+
+    p6 = new Planet(-200, 1500)
+    game.addPlanet(p6)
+
+    p7 = new Planet(300, 1500)
+    game.addPlanet(p7)
+
+    p8 = new Planet(-200, 2000)
+    game.addPlanet(p8)
+
+    p9 = new Planet(300, 2200, 10, 1)
+    game.addPlanet(p9)
+
+    p10 = new Planet(-100, 2500, 20, 1)
+    game.addPlanet(p10)
+
+    p11 = new Planet(400, 2700)
+    game.addPlanet(p11)
+
+    p12 = new Planet(900, 3200)
+    game.addPlanet(p12)
+
+    p13 = new Planet(1300, 3700)
+    game.addPlanet(p13)
+
+    p14 = new Planet(1700, 4000)
+    game.addPlanet(p14)
+
+    game.setNeighbors(p0, p1)
+    game.setNeighbors(p0, p2)
+    game.setNeighbors(p0, p3)
+    game.setNeighbors(p1, p2)
+    game.setNeighbors(p1, p4)
+    game.setNeighbors(p2, p3)
+    game.setNeighbors(p2, p4)
+    game.setNeighbors(p2, p5)
+    game.setNeighbors(p3, p5)
+    game.setNeighbors(p5, p6)
+    game.setNeighbors(p5, p7)
+    game.setNeighbors(p6, p7)
+    game.setNeighbors(p6, p8)
+    game.setNeighbors(p8, p9)
+    game.setNeighbors(p8, p10)
+    game.setNeighbors(p9, p11)
+    game.setNeighbors(p9, p10)
+    game.setNeighbors(p10, p11)
+    game.setNeighbors(p11, p12)
+    game.setNeighbors(p12, p13)
+    game.setNeighbors(p13, p14)
+
+    map.planets.push(p0)
+    map.planets.push(p1)
+    map.planets.push(p2)
+    map.planets.push(p3)
+    map.planets.push(p4)
+    map.planets.push(p5)
+    map.planets.push(p6)
+    map.planets.push(p7)
+    map.planets.push(p8)
+    map.planets.push(p9)
+    map.planets.push(p10)
+    map.planets.push(p11)
+    map.planets.push(p12)
+    map.planets.push(p13)
+    map.planets.push(p14)
+
+    map.home = p0
+    map.station = p9
+    map.outpost = p10
+    map.probe = p11
+    map.fungus_start = p14
+
+    return map
