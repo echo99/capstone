@@ -92,6 +92,31 @@ class Elements.UIElement extends Module
     @actY = @y
     @positioning = 'default'
 
+  #================================================================================
+  #
+  #   .o88b. db   db d888888b db      d8888b.
+  #  d8P  Y8 88   88   `88'   88      88  `8D
+  #  8P      88ooo88    88    88      88   88
+  #  8b      88~~~88    88    88      88   88
+  #  Y8b  d8 88   88   .88.   88booo. 88  .8D
+  #   `Y88P' YP   YP Y888888P Y88888P Y8888D'
+  #
+  #  .88b  d88.  .d8b.  d8b   db d888888b d8888b.
+  #  88'YbdP`88 d8' `8b 888o  88   `88'   88  `8D
+  #  88  88  88 88ooo88 88V8o 88    88    88oodD'
+  #  88  88  88 88~~~88 88 V8o88    88    88~~~   C8888D
+  #  88  88  88 88   88 88  V888   .88.   88
+  #  YP  YP  YP YP   YP VP   V8P Y888888P 88
+  #
+  #  db    db db       .d8b.  d888888b d888888b  .d88b.  d8b   db
+  #  88    88 88      d8' `8b `~~88~~'   `88'   .8P  Y8. 888o  88
+  #  88    88 88      88ooo88    88       88    88    88 88V8o 88
+  #  88    88 88      88~~~88    88       88    88    88 88 V8o88
+  #  88b  d88 88booo. 88   88    88      .88.   `8b  d8' 88  V888
+  #  ~Y8888P' Y88888P YP   YP    YP    Y888888P  `Y88P'  VP   V8P
+  #
+  #================================================================================
+
   # Add a child element to this element
   #
   # @param [Elements.UIElement] elem
@@ -199,6 +224,55 @@ class Elements.UIElement extends Module
     @zIndicesRev = [0]
     @_childBuckets = {0: []}
 
+  # @private Update ordering of child elements when a child's z-index updates
+  #
+  # @param [Elements.UIElement] child
+  # @param [Number] lastZIndex
+  #
+  _updateChildOrdering: (child, lastZIndex) ->
+    # May be able to do this with calls to @removeChild and @addChild instead
+    # but this works for now
+    if lastZIndex of @_childBuckets
+      childBucket = @_childBuckets[lastZIndex]
+      console.log(childBucket)
+      index = childBucket.indexOf(child)
+      if index != -1
+        childBucket.splice(index, 1)
+    zIndex = child._zIndex
+    if zIndex in @zIndices
+      @_childBuckets[zIndex].push(child)
+    else
+      @zIndices.push(zIndex)
+      @zIndices.sort()
+      @zIndicesRev = @zIndices.slice(0)
+      @zIndicesRev.reverse()
+      @_childBuckets[zIndex] = [child]
+
+  #================================================================================
+  #
+  #  .d8888. d888888b  .d8b.  d888888b d88888b
+  #  88'  YP `~~88~~' d8' `8b `~~88~~' 88'
+  #  `8bo.      88    88ooo88    88    88ooooo
+  #    `Y8b.    88    88~~~88    88    88~~~~~
+  #  db   8D    88    88   88    88    88.
+  #  `8888Y'    YP    YP   YP    YP    Y88888P
+  #
+  #  .88b  d88.  .d8b.  d8b   db d888888b d8888b.
+  #  88'YbdP`88 d8' `8b 888o  88   `88'   88  `8D
+  #  88  88  88 88ooo88 88V8o 88    88    88oodD'
+  #  88  88  88 88~~~88 88 V8o88    88    88~~~   C8888D
+  #  88  88  88 88   88 88  V888   .88.   88
+  #  YP  YP  YP YP   YP VP   V8P Y888888P 88
+  #
+  #  db    db db       .d8b.  d888888b d888888b  .d88b.  d8b   db
+  #  88    88 88      d8' `8b `~~88~~'   `88'   .8P  Y8. 888o  88
+  #  88    88 88      88ooo88    88       88    88    88 88V8o 88
+  #  88    88 88      88~~~88    88       88    88    88 88 V8o88
+  #  88b  d88 88booo. 88   88    88      .88.   `8b  d8' 88  V888
+  #  ~Y8888P' Y88888P YP   YP    YP    Y888888P  `Y88P'  VP   V8P
+  #
+  #================================================================================
+
   # @private Set actual location of this element
   #
   # @param [Elements.UIElement] parent
@@ -254,25 +328,11 @@ class Elements.UIElement extends Module
   containsCoords: (coords) ->
     return @containsPoint(coords.x, coords.y)
 
-  # Sets the draw function for this element
-  #
-  # @param [Function] _drawFunc
-  #
-  setDrawFunc: (@_drawFunc) ->
-
-  # Sets the clearing function for this element
-  #
-  # @param [Function] _clearFunc
-  #
-  setClearFunc: (@_clearFunc) ->
-
   # [WIP] Set the positioning of this element. Setting this currently has no effect.
   #
   # @param [String] positioning Either `default` or `center`
   #
   setPositioning: (@positioning) ->
-
-
 
   # Open this element
   #
@@ -291,6 +351,93 @@ class Elements.UIElement extends Module
       @setDirty()
       @_closing = true
 
+  # Move this element to a new location
+  #
+  # @param [Number] newX
+  # @param [Number] newY
+  #
+  moveTo: (newX, newY) ->
+    if @visible
+      @_moving = true
+      @setDirty()
+    {x, y} = @getActualLocation(newX, newY)
+    @actX = x
+    @actY = y
+    @x = newX
+    @y = newY
+    for child in @_children
+      child?.setActualLocation(this)
+
+  # Set the z-index of the element
+  #
+  # @param [Number] zIndex (Must be an integer value)
+  #
+  setZIndex: (zIndex) ->
+    lastZIndex = @_zIndex
+    if lastZIndex != zIndex
+      @_zIndex = zIndex
+      if @_parent isnt null
+        @_parent._updateChildOrdering(this, lastZIndex)
+
+  # Set hovering state of the element
+  #
+  # @param [Boolean] hovering
+  #
+  setHovering: (hovering) ->
+    @_hovering = hovering
+
+  # Get the hover status of this element
+  #
+  # @return [Boolean] Whether or not this element is currently being hovered over
+  #
+  isHovered: ->
+    return @_hovering
+
+  # Get the pressed status of this element
+  #
+  # @return [Boolean] Whether or not this element is currently being pressed
+  #
+  isPressed: ->
+    return @_pressed and @_hovering
+
+  # Gets the relative location of the point to this element
+  #
+  # @param [Number] x
+  # @param [Number] y
+  # @return [Object] The coordinates `{'x': x, 'y': y}`
+  getRelativeLocation: (x, y) ->
+    return {'x': x, 'y': y}
+
+  # Gets the actual location of the on this element in relation to the root element
+  #
+  # @param [Number] x
+  # @param [Number] y
+  # @return [Object] The coordinates `{'x': x, 'y': y}`
+  getActualLocation: (x, y) ->
+    return {'x': @actX, 'y': @actY}
+
+  #================================================================================
+  #
+  #  d8888b. d8888b.  .d8b.  db   d8b   db d888888b d8b   db  d888b
+  #  88  `8D 88  `8D d8' `8b 88   I8I   88   `88'   888o  88 88' Y8b
+  #  88   88 88oobY' 88ooo88 88   I8I   88    88    88V8o 88 88
+  #  88   88 88`8b   88~~~88 Y8   I8I   88    88    88 V8o88 88  ooo
+  #  88  .8D 88 `88. 88   88 `8b d8'8b d8'   .88.   88  V888 88. ~8~
+  #  Y8888D' 88   YD YP   YP  `8b8' `8d8'  Y888888P VP   V8P  Y888P
+  #
+  #================================================================================
+
+  # Sets the draw function for this element
+  #
+  # @param [Function] _drawFunc
+  #
+  setDrawFunc: (@_drawFunc) ->
+
+  # Sets the clearing function for this element
+  #
+  # @param [Function] _clearFunc
+  #
+  setClearFunc: (@_clearFunc) ->
 
   # Call the draw function with the passed arguments
   #
@@ -350,24 +497,6 @@ class Elements.UIElement extends Module
   #
   _customDraw: (ctx, coords=null, zoom=1.0) ->
 
-  # Move this element to a new location
-  #
-  # @param [Number] newX
-  # @param [Number] newY
-  #
-  moveTo: (newX, newY) ->
-    if @visible
-      @_moving = true
-      @setDirty()
-    {x, y} = @getActualLocation(newX, newY)
-    @actX = x
-    @actY = y
-    @x = newX
-    @y = newY
-    for child in @_children
-      child?.setActualLocation(this)
-
-
   # Clear this element using a clear function
   #
   # @param [CanvasRenderingContext2D] ctx
@@ -409,6 +538,24 @@ class Elements.UIElement extends Module
         @setDirty()
       else
         @_parent?._handleDirtyChild(this)
+
+  #================================================================================
+  #
+  #  d88888b db    db d88888b d8b   db d888888b
+  #  88'     88    88 88'     888o  88 `~~88~~'
+  #  88ooooo Y8    8P 88ooooo 88V8o 88    88
+  #  88~~~~~ `8b  d8' 88~~~~~ 88 V8o88    88
+  #  88.      `8bd8'  88.     88  V888    88
+  #  Y88888P    YP    Y88888P VP   V8P    YP
+  #
+  #  db   db  .d8b.  d8b   db d8888b. db      d88888b d8888b. .d8888.
+  #  88   88 d8' `8b 888o  88 88  `8D 88      88'     88  `8D 88'  YP
+  #  88ooo88 88ooo88 88V8o 88 88   88 88      88ooooo 88oobY' `8bo.
+  #  88~~~88 88~~~88 88 V8o88 88   88 88      88~~~~~ 88`8b     `Y8b.
+  #  88   88 88   88 88  V888 88  .8D 88booo. 88.     88 `88. db   8D
+  #  YP   YP YP   YP VP   V8P Y8888D' Y88888P Y88888P 88   YD `8888Y'
+  #
+  #================================================================================
 
   # Call to element to check if it is clicked and executes click handlers if it
   # is
@@ -629,42 +776,23 @@ class Elements.UIElement extends Module
     # if
     @resizeHandler?()
 
-  # Set hovering state of the element
+  #================================================================================
   #
-  # @param [Boolean] hovering
+  #   .o88b.  .d88b.  db      db      d888888b .d8888. d888888b  .d88b.  d8b   db
+  #  d8P  Y8 .8P  Y8. 88      88        `88'   88'  YP   `88'   .8P  Y8. 888o  88
+  #  8P      88    88 88      88         88    `8bo.      88    88    88 88V8o 88
+  #  8b      88    88 88      88         88      `Y8b.    88    88    88 88 V8o88
+  #  Y8b  d8 `8b  d8' 88booo. 88booo.   .88.   db   8D   .88.   `8b  d8' 88  V888
+  #   `Y88P'  `Y88P'  Y88888P Y88888P Y888888P `8888Y' Y888888P  `Y88P'  VP   V8P
   #
-  setHovering: (hovering) ->
-    @_hovering = hovering
-
-  # Get the hover status of this element
+  #  d8888b. d88888b d888888b d88888b  .o88b. d888888b d888888b  .d88b.  d8b   db
+  #  88  `8D 88'     `~~88~~' 88'     d8P  Y8 `~~88~~'   `88'   .8P  Y8. 888o  88
+  #  88   88 88ooooo    88    88ooooo 8P         88       88    88    88 88V8o 88
+  #  88   88 88~~~~~    88    88~~~~~ 8b         88       88    88    88 88 V8o88
+  #  88  .8D 88.        88    88.     Y8b  d8    88      .88.   `8b  d8' 88  V888
+  #  Y8888D' Y88888P    YP    Y88888P  `Y88P'    YP    Y888888P  `Y88P'  VP   V8P
   #
-  # @return [Boolean] Whether or not this element is currently being hovered over
-  #
-  isHovered: ->
-    return @_hovering
-
-  # Get the pressed status of this element
-  #
-  # @return [Boolean] Whether or not this element is currently being pressed
-  #
-  isPressed: ->
-    return @_pressed and @_hovering
-
-  # Gets the relative location of the point to this element
-  #
-  # @param [Number] x
-  # @param [Number] y
-  # @return [Object] The coordinates `{'x': x, 'y': y}`
-  getRelativeLocation: (x, y) ->
-    return {'x': x, 'y': y}
-
-  # Gets the actual location of the on this element in relation to the root element
-  #
-  # @param [Number] x
-  # @param [Number] y
-  # @return [Object] The coordinates `{'x': x, 'y': y}`
-  getActualLocation: (x, y) ->
-    return {'x': @actX, 'y': @actY}
+  #================================================================================
 
   # Check if this element intersects the given rectangle
   # @abstract
@@ -685,40 +813,23 @@ class Elements.UIElement extends Module
   # @return [Boolean] Whether or not this elements intersects the given circle
   intersectsCircle: (x, y, r) ->
 
-  # Set the z-index of the element
+  # Check if this element intersects the given element
+  # @abstract
   #
-  # @param [Number] zIndex (Must be an integer value)
-  #
-  setZIndex: (zIndex) ->
-    lastZIndex = @_zIndex
-    if lastZIndex != zIndex
-      @_zIndex = zIndex
-      if @_parent isnt null
-        @_parent._updateChildOrdering(this, lastZIndex)
+  # @param [Elements.UIElement] element Element to check for 'collision' with
+  # @return [Boolean] Whether or not this element intersects the given element
+  intersectsElement: (element) ->
 
-  # @private Update ordering of child elements when a child's z-index updates
+  #================================================================================
   #
-  # @param [Elements.UIElement] child
-  # @param [Number] lastZIndex
+  #   .d88b.  d888888b db   db d88888b d8888b. .d8888.
+  #  .8P  Y8. `~~88~~' 88   88 88'     88  `8D 88'  YP
+  #  88    88    88    88ooo88 88ooooo 88oobY' `8bo.
+  #  88    88    88    88~~~88 88~~~~~ 88`8b     `Y8b.
+  #  `8b  d8'    88    88   88 88.     88 `88. db   8D
+  #   `Y88P'     YP    YP   YP Y88888P 88   YD `8888Y'
   #
-  _updateChildOrdering: (child, lastZIndex) ->
-    # May be able to do this with calls to @removeChild and @addChild instead
-    # but this works for now
-    if lastZIndex of @_childBuckets
-      childBucket = @_childBuckets[lastZIndex]
-      console.log(childBucket)
-      index = childBucket.indexOf(child)
-      if index != -1
-        childBucket.splice(index, 1)
-    zIndex = child._zIndex
-    if zIndex in @zIndices
-      @_childBuckets[zIndex].push(child)
-    else
-      @zIndices.push(zIndex)
-      @zIndices.sort()
-      @zIndicesRev = @zIndices.slice(0)
-      @zIndicesRev.reverse()
-      @_childBuckets[zIndex] = [child]
+  #================================================================================
 
   # Get the string representation of the UIElement
   #
