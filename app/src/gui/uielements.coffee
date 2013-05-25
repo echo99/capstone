@@ -42,6 +42,20 @@ class Elements.BoxElement extends Elements.UIElement
   getActualLocation: (x, y) ->
     return {'x': x+@actX+@cx, 'y': y+@actY+@cy}
 
+  # @see Elements.UIElement#intersectsRect
+  intersectsRect: (x, y, w, h) ->
+    dx = Math.abs(@x - x)
+    dy = Math.abs(@y - y)
+    return (dx <= @w/2 + w/2) and (dy <= @h/2 + h/2)
+
+  # @see Elements.UIElement#intersectsCircle
+  intersectsCircle: (x, y, r) ->
+    return @_circleRectIntersects(x, y, r, @x, @y, @w, @h)
+
+  # @see Elements.UIElement#intersectsElement
+  intersectsElement: (element) ->
+    return element.intersectsRect(@x, @y, @w, @h)
+
   # @see Elements.UIElement#toString
   toString: ->
     return "#{@constructor.name}: (#{@x}, #{@y}, #{@w}, #{@h})"
@@ -67,6 +81,21 @@ class Elements.RadialElement extends Elements.UIElement
     dx = Math.abs(@x - x)
     dy = Math.abs(@y - y)
     return dx*dx + dy*dy <= @r2
+
+  # @see Elements.UIElement#intersectsRect
+  intersectsRect: (x, y, w, h) ->
+    return @_circleRectIntersects(@x, @y, @r, x, y, w, h)
+
+  # @see Elements.UIElement#intersectsCircle
+  intersectsCircle: (x, y, r) ->
+    dx = @x - x
+    dy = @y - y
+    dist = r + @r
+    return dx*dx + dy*dy <= dist*dist
+
+  # @see Elements.UIElement#intersectsElement
+  intersectsElement: (element) ->
+    return element.intersectsCircle(@x, @y, @r)
 
   # @see Elements.UIElement#toString
   toString: ->
