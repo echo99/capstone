@@ -820,6 +820,33 @@ class Elements.UIElement extends Module
   # @return [Boolean] Whether or not this element intersects the given element
   intersectsElement: (element) ->
 
+  # Check if the given circle intersects the given rectangle
+  #
+  # @param [Number] cx x-coordinate of center of circle
+  # @param [Number] cy y-coordinate of center of circle
+  # @param [Number] cr Radius of circle
+  # @param [Number] rx x-coordinate of center of rectangle
+  # @param [Number] ry y-coordinate of center of rectangle
+  # @param [Number] rw Width of rectangle
+  # @param [Number] rh Height of rectangle
+  # @return [Boolean] Whether or not the circle and rectangle intersect
+  _circleRectIntersects: (cx, cy, cr, rx, ry, rw, rh) ->
+    dx = Math.abs(cx - rx)
+    dy = Math.abs(cy - ry)
+    hrh = rh/2
+    hrw = rw/2
+    # Check if circle is outside rectangle
+    if (dx > hrw + cr) or (dy > hrh + cr)
+      return false
+    # Check if circle is within rectangle
+    if dx <= hrw or dy <= hrh
+      return true
+    # Check if circle intersects a corner
+    cdx = dx - hrw
+    cdy = dy - hrh
+    cornerDistance_sq = cdx*cdx + cdy*cdy
+    return cornerDistance_sq <= (cr*cr)
+
   #================================================================================
   #
   #   .d88b.  d888888b db   db d88888b d8888b. .d8888.
