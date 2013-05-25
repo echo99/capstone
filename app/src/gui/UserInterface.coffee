@@ -1205,6 +1205,18 @@ class UserInterface
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
+      # Outline planet that outpost is sending resources to
+      if @selectedPlanet.hasOutpost() and @selectedPlanet.sendingResourcesTo()
+        ctx.strokeStyle = window.config.resourceTarget.color
+        ctx.lineWidth = window.config.resourceTarget.lineWidth
+        resourceTarget = @selectedPlanet.sendingResourcesTo()
+        loc = resourceTarget.location()
+        pos = camera.getScreenCoordinates(loc)
+        r = (window.config.planetRadius + window.config.resourceTarget.radius) *
+           camera.getZoom()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+        ctx.stroke()
 
     use = null
     if @hoveredPlanet and @hoveredPlanet.hasStation()

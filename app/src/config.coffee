@@ -123,6 +123,10 @@ root.config =
     color: "rgba(0, 255, 0, 0.8)"
     width: 2
     radius: 40
+  resourceTarget:
+    color: "rgba(0, 255, 255, 0.8)"
+    width: 2
+    radius: 30
   unitDisplay:
     location: {x: -220, y: -70}
     fill: "rgba(255, 255, 0, 0.5)"
