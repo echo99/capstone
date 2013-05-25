@@ -38,12 +38,22 @@ class Mission
   # cameraHudFrame to respond to input
   #
   # @return [Boolean] true if only the cameraHudFrame is permited to process input
-  hasInput: -> false
+  #hasInput: -> false
+
+  # Returns whether or not the user can interact with the game elements
+  #
+  # @return [Boolean] true if the user can interact with the game elements
+  canPlay: -> true
 
   # Returns whether or not the user can end the turn
   #
   # @return [Boolean] true if the user can end the turn
   canEndTurn: -> true
+
+  # Returns whether or not the user can move the camera
+  #
+  # #return [Boolean] true if the user can move the camera
+  canMove: -> true
 
   # Returns the location where the camera should go when HOME is pushed.
   # This must return something.
@@ -283,17 +293,65 @@ class Mission
 
     return menuBox
 
+  _getM: (message, onNext, w=250, h=50) ->
+    m = new Elements.MessageBox(0, 200, w, h, message,
+      {
+        textAlign: 'left',
+        vAlign: 'top',
+        font: window.config.windowStyle.defaultText.font,
+        lineHeight: 17
+        visible: false
+      })
+
+    next = new Elements.Button(w - 12, h - 12, 16, 16, onNext)
+    next.setDrawFunc(
+      (ctx) =>
+        loc = m.getActualLocation(next.x, next.y)
+        SHEET.drawSprite(SpriteNames.NEXT, loc.x, loc.y, ctx, false)
+    )
+    m.addChild(next)
+    cameraHudFrame.addChild(m)
+
+    return m
+
+  createSkipButton: (onSkip) ->
+    skip = @settings.skip
+    y = camera.height / 2 - skip.h / 2 - 5
+    button = new Elements.Button(0, y, skip.w, skip.h)
+    button.setClearFunc((ctx) =>
+      loc = {x: button.x+camera.width / 2, y: button.y + camera.height / 2}
+      ctx.clearRect(loc.x - button.w / 2,
+                    loc.y - button.h / 2,
+                    button.w, button.h)
+    )
+    button.setClickHandler(onSkip)
+    button.setMouseUpHandler(() => button.setDirty())
+    button.setMouseDownHandler(() => button.setDirty())
+    button.setMouseOutHandler(() => button.setDirty())
+    button.setDrawFunc((ctx) =>
+      button.y = camera.height / 2 - skip.h / 2 - 5
+      loc = {x: button.x+camera.width / 2, y: button.y + camera.height / 2}
+      if button.isPressed()
+        SHEET.drawSprite(SpriteNames.SKIP_BUTTON_HOVER, loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.SKIP_BUTTON_IDLE, loc.x, loc.y, ctx, false)
+    )
+
+    cameraHudFrame.addChild(button)
+
+    return button
+
   _setupMissionMap: ->
     map = {}
     map.planets = []
 
-    p0 = new Planet(0,0)
+    p0 = new Planet(0,0, 10, 2)
     game.addPlanet(p0)
 
-    p1 = new Planet(600, 10)
+    p1 = new Planet(600, 10, 30, 2)
     game.addPlanet(p1)
 
-    p2 = new Planet(300, 500)
+    p2 = new Planet(300, 500, 30, 1)
     game.addPlanet(p2)
 
     p3 = new Planet(-200, 500)
@@ -371,6 +429,7 @@ class Mission
     map.planets.push(p14)
 
     map.home = p0
+    map.home2 = p1
     map.station = p9
     map.outpost = p10
     map.probe = p11

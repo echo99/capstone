@@ -303,6 +303,8 @@ root.config =
     RALLY_BUTTON_HOVER: new AnimatedSprite(['rally_button_hover.png'])
     NEXT_STATION_BUTTON_IDLE: new AnimatedSprite(['next_station_button_idle.png'])
     NEXT_STATION_BUTTON_HOVER: new AnimatedSprite(['next_station_button_hover.png'])
+    SKIP_BUTTON_IDLE: new AnimatedSprite(['skip_button_idle.png'])
+    SKIP_BUTTON_HOVER: new AnimatedSprite(['skip_button_hover.png'])
   Missions:
     w: 244
     h: 60
@@ -330,6 +332,9 @@ root.config =
       h: 16
     menu:
       w: 50
+      h: 20
+    skip:
+      w: 42
       h: 20
     #one:
     two:

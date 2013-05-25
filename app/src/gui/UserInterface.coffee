@@ -26,6 +26,7 @@ class UserInterface
     b.setClickHandler(() =>
       endTurn()
     )
+    b.setClearFunc((ctx) => ctx.clearRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h))
     b.setMouseUpHandler(() => b.setDirty())
     b.setMouseDownHandler(() => b.setDirty())
     b.setMouseOutHandler(() => b.setDirty())
@@ -36,9 +37,21 @@ class UserInterface
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, b.x, b.y, ctx, false)
       else
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, b.x, b.y, ctx, false)
+
+      if not CurrentMission.canEndTurn()
+        ctx.strokeStyle = "rgb(255, 0, 0)"
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(b.x - 50, b.y - 9)
+        ctx.lineTo(b.x + 50, b.y + 9)
+
+        ctx.moveTo(b.x - 50, b.y + 9)
+        ctx.lineTo(b.x + 50, b.y - 9)
+        ctx.stroke()
     )
     b.setZIndex(100)
     frameElement.addChild(b)
+    @endTurnButton = b
 
     @nextStationButton = new Elements.Button(5 + 150/2, 230, 150, 20)
     @nextStationButton.setClearFunc((ctx) =>
@@ -1610,6 +1623,9 @@ class UserInterface
           e = {x: s.x + combatStyle.bad.distance, y: s.y}
           @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
             @_getDrawDamage(-report.defenseShipsLost, combatStyle.bad)))
+
+  refreshEndTurnButton: ->
+    @endTurnButton.setDirty()
 
   _getDrawDamage: (damage, style) ->
     text = ""

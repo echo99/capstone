@@ -433,37 +433,42 @@ main = ->
     if recording
       eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
 
-    if CurrentMission.hasInput()
-    else if e.keyCode == KeyCodes.HOME
-      Logger.logEvent("Pressed HOME")
-      camera.setTarget(CurrentMission.getHomeTarget())
-    else if e.keyCode == KeyCodes.SPACE
-      Logger.logEvent("Pressed SPACE")
-      endTurn()
-    else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
-      Logger.logEvent("Pressed +")
-      nz = camera.getZoom() + window.config.ZOOM_SPEED
-      camera.setZoom(nz)
-    else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
-      Logger.logEvent("Pressed -")
-      nz = camera.getZoom() - window.config.ZOOM_SPEED
-      camera.setZoom(nz)
-    else if e.keyCode == KeyCodes.STATION
-      Logger.logEvent("Pressed Q")
-      UI.gotoNextStation()
-    else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
-      Logger.logEvent("Pressed up")
-      camera.moveCameraByScreenDistance(0, 20)
-    else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
-      Logger.logEvent("Pressed left")
-      camera.moveCameraByScreenDistance(20, 0)
-    else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
-      Logger.logEvent("Pressed down")
-      camera.moveCameraByScreenDistance(0, -20)
-    else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
-      Logger.logEvent("Pressed right")
-      camera.moveCameraByScreenDistance(-20, 0)
-    #else if e.keyCode == KeyCodes.CHEAT
+    if CurrentMission.canPlay()
+      if e.keyCode == KeyCodes.HOME
+        Logger.logEvent("Pressed HOME")
+        camera.setTarget(CurrentMission.getHomeTarget())
+      else if e.keyCode == KeyCodes.STATION
+        Logger.logEvent("Pressed Q")
+        UI.gotoNextStation()
+
+    if CurrentMission.canEndTurn()
+      if e.keyCode == KeyCodes.SPACE
+        Logger.logEvent("Pressed SPACE")
+        endTurn()
+
+    if CurrentMission.canMove()
+      if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+        Logger.logEvent("Pressed +")
+        nz = camera.getZoom() + window.config.ZOOM_SPEED
+        camera.setZoom(nz)
+      else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+        Logger.logEvent("Pressed -")
+        nz = camera.getZoom() - window.config.ZOOM_SPEED
+        camera.setZoom(nz)
+      else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
+        Logger.logEvent("Pressed up")
+        camera.moveCameraByScreenDistance(0, 20)
+      else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
+        Logger.logEvent("Pressed left")
+        camera.moveCameraByScreenDistance(20, 0)
+      else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
+        Logger.logEvent("Pressed down")
+        camera.moveCameraByScreenDistance(0, -20)
+      else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
+        Logger.logEvent("Pressed right")
+        camera.moveCameraByScreenDistance(-20, 0)
+
+    #if e.keyCode == KeyCodes.CHEAT
     #  Logger.logEvent("Pressed CHEAT")
     #  cheat = not cheat
 
@@ -496,14 +501,14 @@ main = ->
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
-    if CurrentMission.hasInput()
+    if not CurrentMission.canPlay()
       pointer = null
     else
       pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
       # Nothing on HUD frame is being hovered over
       pointer = cameraHudFrame.mouseMove(x, y)
-      if pointer is null and not CurrentMission.hasInput()
+      if pointer is null and CurrentMission.canPlay()
         pointer = gameFrame.mouseMove(x, y)
       else
         gameFrame.mouseOut()
@@ -532,7 +537,7 @@ main = ->
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
 
-    if not CurrentMission.hasInput()
+    if CurrentMission.canMove()
       mousepos = {x: x, y: y}
 
   clickHandler = (e) ->
@@ -545,16 +550,16 @@ main = ->
     # msgBox.click(e.clientX, e.clientY)
     x = e.clientX
     y = e.clientY
-    if CurrentMission.hasInput()
-      if cameraHudFrame.click(x, y)
-        cameraHudFrame.mouseMove(x, y)
-    else
+    if CurrentMission.canPlay()
       if frameElement.click(x, y)
         frameElement.mouseMove(x, y)
       else if cameraHudFrame.click(x, y)
         cameraHudFrame.mouseMove(x, y)
       else if gameFrame.click(x, y)
         gameFrame.mouseMove(x, y)
+    else
+      if cameraHudFrame.click(x, y)
+        cameraHudFrame.mouseMove(x, y)
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
@@ -563,14 +568,23 @@ main = ->
       eventRec.recordEvent("mouseDown",
         {clientX: e.clientX, clientY: e.clientY})
 
-    if not frameElement.mouseDown(e.clientX, e.clientY) and
-       not cameraHudFrame.mouseDown(e.clientX, e.clientY) and
-       not CurrentMission.hasInput()
+    # The order here is important
+    #  - cameraHudFrame always works
+    #  - the other frames only work if canPlay() is true
+    #  - if no frames are pressed then the camera is draged if canMove() is true
+    c = cameraHudFrame.mouseDown(e.clientX, e.clientY)
+
+    f = false
+    if not c and CurrentMission.canPlay()
+      f = frameElement.mouseDown(e.clientX, e.clientY)
+
+    g = false
+    if not c and not f and CurrentMission.canPlay()
+      g = gameFrame.mouseDown(e.clientX, e.clientY)
+
+    if not c and not f and not g and CurrentMission.canMove()
       drag = true
       prevPos = {x: e.clientX, y: e.clientY}
-      gameFrame.mouseDown(e.clientX, e.clientY)
-
-    if not CurrentMission.hasInput()
       mousedown = true
 
     e.preventDefault()
@@ -579,14 +593,14 @@ main = ->
     if recording
       eventRec.recordEvent("mouseUp", {})
 
-    if CurrentMission.hasInput()
-      cameraHudFrame.mouseUp()
-    else
-      drag = false
+    cameraHudFrame.mouseUp()
+
+    if CurrentMission.canPlay()
       frameElement.mouseUp()
-      cameraHudFrame.mouseUp()
       gameFrame.mouseUp()
 
+    if CurrentMission.canMove()
+      drag = false
       mousedown = false
 
   mouseOutHandler = (e) ->
@@ -603,7 +617,7 @@ main = ->
       eventRec.recordEvent("mouseWheel",
         {wheelDelta: e.wheelDelta, detail: e.detail})
 
-    if not CurrentMission.hasInput()
+    if CurrentMission.canMove()
       delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
       nz = camera.zoom + delta * window.config.ZOOM_SPEED
       camera.setZoom(nz)
