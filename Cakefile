@@ -239,14 +239,20 @@ notify = (message, msgLvl) ->
         when MessageLevel.ERROR
           icon += 'dialog-error'
           time = 10000
-      spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time, 'Cake Status',
-        message]
+      spawn cmd, ['--hint=int:transient:1', '-i', icon, '-t', time,
+        'Cake Status', message]
 
 # Do a test run on the compiled JavaScript code using a simulated browser
 jsSanityCheck = (options, callback) ->
   # process.chdir(RHINO_DIR)
   options.verbose ?= 'verbose' of options
-  exec "java -jar #{RHINO_DIR}#{SLASH}js.jar -opt -1 #{RHINO_DIR}#{SLASH}testrun.js", (err, stdout, stderr) ->
+  cmd = 'java'
+  args = [
+    "-jar #{RHINO_DIR}#{SLASH}js.jar"
+    "-opt"
+    "-1 #{RHINO_DIR}#{SLASH}testrun.js"
+  ].join(' ')
+  exec "#{cmd} #{args}", (err, stdout, stderr) ->
     # console.log(stdout) if stdout and options.verbose
     console.log(stdout) if stdout
     console.error(stderr.red) if stderr
@@ -495,7 +501,8 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   files.push(Configs.CLOSURE_INTERN)
   # files = ['app/src/util/Logger.coffee']
   # files = ['app/src/util/Sprite.coffee']
-  # files = ['app/src/missions/ExterminationSmall.coffee', 'app/src/missions/ExterminationMedium.coffee']
+  # files = ['app/src/missions/ExterminationSmall.coffee',
+  #   'app/src/missions/ExterminationMedium.coffee']
   # files = ['app/src/util/Module.coffee', 'app/src/gui/Elements.UIElement.coffee']
 
   typechecker = require './modules/typecheck'

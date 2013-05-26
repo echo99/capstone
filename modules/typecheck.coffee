@@ -9,16 +9,19 @@ debug = (msg) ->
   if DEBUG_MODE
     console.log msg
 
-# Regex
-classRegex = /^class\s+(.*)/
-classExtendsRegex = /^class\s+(.*?)\s+extends\s+(.*)/
-commentLine = /^(\s*)#+\s*(.*)/
-multilineComment = /^(\s*)###+/
-requireLine = /^(\s*)#_require/
-# typeCheck = /@(require|param)/
-typeCheck = /@(return|param)\s+\[(.*?)\]\s*(.*)/
+# Regexes
+CLASS_REGEX = /^class\s+(.*)/
+SUBCLASS_REGEX = /^class\s+(.*?)\s+extends\s+(.*)/
+COMMENT_REGEX = /^(\s*)#+\s*(.*)/
+MULTI_COMMENT_REGEX = /^(\s*)###+/
+REQUIRE_REGEX = /^(\s*)#_require/
+# TYPE_DEF_REGEX = /@(require|param)/
+TYPE_DEF_REGEX = /@(return|param)\s+\[(.*?)\]\s*(.*)/
 openParam = /^\s+#\s+@param\s+\[(.*)/
 closeParam = /^\s+#\s+(.*?)\]/
+FUNCTION_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*(?:\((.*?)\))\s*(?:-|=)>/
+FUNCTION_OPEN_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*\((.*)/
+FUNCTION_CLOSE_REGEX = /^\s+(.*?)\)\s*(?:-|=)>/
 collectionType = /^(.*?)(?:\.)?<(.*)>$/
 objectType = /^\{(.*?)\}$/
 builtInTypes = ['boolean', 'string', 'number', 'list']
@@ -33,9 +36,9 @@ normalizeType = (type) ->
   # Check if type is a collection
   collectionMatch = type.match(collectionType)
   if collectionMatch
-    coll = normalizeType(collectionMatch[1])
+    outer = normalizeType(collectionMatch[1])
     inner = normalizeType(collectionMatch[2])
-    return "#{coll}.<#{inner}>"
+    return "#{outer}.<#{inner}>"
   # Normal type
   lcType = type.toLowerCase()
   if lcType in numberTypes
@@ -51,296 +54,352 @@ normalizeType = (type) ->
 
 codoToJsdoc = (files) ->
   buffer = ''
+  classes = []
+  superclasses = {}
+
+  # Convert each file separately
+  for file in files
+    fileBuffer = _codoToJsdoc(file, classes, superclasses)
+    buffer += fileBuffer
+
+  return [superclasses, classes, buffer]
+# end codoToJsdoc
+
+# Convert an individual CoffeeScript file
+# @modifies classes Adds classes found in the file
+# @modifies superclasses
+_codoToJsdoc = (file, classes, superclasses) ->
+  buffer = ''
   classBuffer = ''
   afterClassDecBuffer = ''
   nonTypeCommentBuffer = ''
   commentBuffer = []
   containsTypeDef = false
 
+  # Current state variables
   inClass = false
   curClass = ''
   classInd = 0
+  inTypeTag = false
+  inFunctionDef = false
 
-  classes = []
-  superclasses = {}
-  for file in files
-    contents = fs.readFileSync (file), 'utf8'
-    # contents = fs.readFileSync ('app/src/util/Sprite.coffee'), 'utf8'
-    # debug contents
-    lines = contents.split "\n"
-    inComment = false
-    inBlockComment = false
-    lastSpacing = ''
-    params = []
-    # Loop over each line
-    for line in lines
-      if line.length > 0 and not line.match(requireLine)
-        indentStr = (line.match(/^(\s*)/))[0]
-        indentation = indentStr.length
-        if inClass and indentation <= classInd
-          debug("not in class anymore!")
-          buffer += '###*\n'
-          buffer += '* @constructor\n'
-          classStr = curClass
-          if curClass of superclasses
-            buffer += "* @extends #{superclasses[curClass]}\n"
-            classStr += " extends #{superclasses[curClass]}"
-          buffer += '###\n'
-          classBuffer += "class #{classStr}\n"
-          buffer += classBuffer
-          buffer += afterClassDecBuffer
-          classBuffer = ''
-          afterClassDecBuffer = ''
-          inClass = false
-          inComment = false
-        # else
-        #   debug indentation + ': ' + line
-        matches = line.match(commentLine)
+  contents = fs.readFileSync (file), 'utf8'
+  # contents = fs.readFileSync ('app/src/util/Sprite.coffee'), 'utf8'
+  # debug contents
+  lines = contents.split "\n"
+  inComment = false
+  inBlockComment = false
+  lastSpacing = ''
+  indentStr = ''
+  params = []
 
-        if line.match(multilineComment)
-          if inBlockComment
-            inBlockComment = false
-          else
-            inBlockComment = true
+  # Helper functions
+  parseFunctionDef = (line) ->
+    # Line is a function, check for default parameters
+    parameters = line.match(FUNCTION_REGEX)[1]
+    params = parameters.split(/, */)
+    debug("checking params")
+    debug(params)
+    for param in params
+      if param.indexOf('=') > 0
+        debug "Checking #{param}"
+        debug(commentBuffer)
+        debug param.indexOf('=')
+        paramParts = param.split(/\s*=\s*/)
+        debug paramParts
+        paramName = paramParts[0]
+        paramDefault = paramParts[1]
+        if paramName.indexOf('@') == 0
+          paramName = paramName.substr(1)
+        newLines = []
+        foundDef = false
+        if commentBuffer.length > 1
+          for i in [1..commentBuffer.length-1]
+            commLine = commentBuffer[i]
+            unless commLine?
+              console.error 'Comment buffer:'
+              console.error commentBuffer
+              console.error "Line: #{i}"
+              console.error line
+            if commLine.indexOf(paramName) > 0
+              foundDef = true
+              debug "Found #{paramName} in '#{commLine}'"
+              commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
+              if paramDefault is 'null'
+                commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
+              break
+        unless foundDef
+          type = if paramDefault is 'null' then '?*=' else '*='
+          newLines.push(indentStr + "* @param {#{type}} #{paramName}\n")
+        commentBuffer.push.apply(commentBuffer, newLines)
 
-        if not inBlockComment and matches and not line.match(multilineComment)
-          # Line is a comment
-          spacing = matches[1]
-          comment = matches[2]
-          # debug "Spacing: #{spacing}|"
-          # debug "Comment: #{comment}"
-          if not inComment
-            inComment = true
-            commentBuffer.push spacing + '###*\n'
-          if line.match(typeCheck)
-            typeMatches = line.match(typeCheck)
-            containsTypeDef = true
-            tag = typeMatches[1]
-            type = typeMatches[2]
-            desc = typeMatches[3]
-
-            if type.match(collectionType)
-              types = type.match(collectionType)
-              outer = types[1]
-              # if outer.toLowerCase() not in builtInTypes
-              #   outer = 'function(new:' + outer + ')'
-              # if outer.toLowerCase() in numberTypes
-              #   outer = 'number'
-              outer = normalizeType(outer)
-              inner = types[2]
-              type = outer + '.<'
-              closing = '>'
-              while inner.match(collectionType)
-                types = inner.match(collectionType)
-                outer = types[1]
-                # if outer.toLowerCase() not in builtInTypes
-                #   outer = 'function(new:' + outer + ')'
-                # if outer.toLowerCase() in numberTypes
-                #   outer = 'number'
-                outer = normalizeType(outer)
-                inner = types[2]
-                type += outer + '.<'
-                closing += '>'
-              # if inner.toLowerCase() not in builtInTypes
-              #   inner = 'function(new:' + inner + ')'
-              # if inner.toLowerCase() in numberTypes
-              #     inner = 'number'
-              inner = normalizeType(inner)
-              type += inner + closing
-            else if type.match(objectType)
-              for jsType in builtInTypes
-                type = type.replace(new RegExp(jsType, 'ig'), jsType)
-              for numType in numberTypes
-                type = type.replace(new RegExp(numType, 'ig'), 'number')
-              # for invalType, repl of replaceTypes
-              #   type = type.replace(new RegExp(': ?' + invalType, 'ig'), repl)
-            else
-              # if type.toLowerCase() in numberTypes
-              #   type = 'number'
-              type = normalizeType(type)
-            if type
-              commentBuffer.push "#{spacing}* @#{tag} \{#{type}\} #{desc}\n"
-            else
-              commentBuffer.push "#{spacing}* @#{tag} #{desc}\n"
-            params.push
-              tag: tag
-              type: type
-            # commentBuffer += spacing + '* ' + comment + '\n'
-          else
-            commentBuffer.push spacing + '* ' + comment + '\n'
-          nonTypeCommentBuffer += line + '\n'
-          lastSpacing = spacing
-        else
-          # Line is not a comment
-          if inComment
-            # Exit comment
-            commentBuffer.push lastSpacing + '###\n'
-
-            if line.match(/[a-zA-Z0-9_]+\s*:\s*(?:\(.*?\))\s*(?:-|=)>/)
-              # Line is a function, check for default parameters
-              parameters = line.match(/[a-zA-Z0-9_]+\s*:\s*(?:\((.*?)\))\s*(?:-|=)>/)[1]
-              params = parameters.split(/, */)
-              debug("checking params")
-              debug(params)
-              for param in params
-                if param.indexOf('=') > 0
-                  debug "Checking #{param}"
-                  debug(commentBuffer)
-                  debug param.indexOf('=')
-                  paramParts = param.split(/\s*=\s*/)
-                  debug paramParts
-                  paramName = paramParts[0]
-                  paramDefault = paramParts[1]
-                  if paramName.indexOf('@') == 0
-                    paramName = paramName.substr(1)
-                  for i in [1..commentBuffer.length-1]
-                    commLine = commentBuffer[i]
-                    if commLine.indexOf(paramName) > 0
-                      debug "Found #{paramName} in '#{commLine}'"
-                      commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
-                      if paramDefault is 'null'
-                        commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
-                      break
-
-            if line.indexOf('constructor:') > 0
-              # Found constructor!
-              # Put the constructor documentation before the class definition so
-              # Google closure can see it
-              # debug commentBuffer.length
-              trimmedBuffer = []
-              for commLine in commentBuffer
-                # debug i
-                # debug(commentBuffer[i])
-                # debug commLine.replace(/^\s+/, '')
-                trimmedBuffer.push commLine.replace(/^\s+/g, '')
-              last = trimmedBuffer.pop()
-              trimmedBuffer.push '* @constructor\n'
-              classStr = curClass
-              if curClass of superclasses
-                trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
-                classStr += " extends #{superclasses[curClass]}"
-              trimmedBuffer.push(last)
-              classBuffer += trimmedBuffer.join('')
-              classBuffer += "class #{classStr}\n"
-              buffer += classBuffer
-              buffer += afterClassDecBuffer
-              # buffer += line + '\n'
-              classBuffer = ''
-              afterClassDecBuffer = ''
-              inClass = false
-            else
-              if containsTypeDef
-                if inClass
-                  afterClassDecBuffer += commentBuffer.join('')
-                else
-                  buffer += commentBuffer.join('')
-              else
-                if inClass
-                  afterClassDecBuffer += nonTypeCommentBuffer
-                else
-                  buffer += nonTypeCommentBuffer
-            commentBuffer = []
-            nonTypeCommentBuffer = ''
-            inComment = false
-            containsTypeDef = false
-          else if line.indexOf('constructor:') > 0 and not inBlockComment
-            # Found constructor!
-            # Put the constructor documentation before the class definition so
-            # Google closure can see it
-            # debug commentBuffer.length
-            # trimmedBuffer = []
-            # for commLine in commentBuffer
-            #   # debug i
-            #   # debug(commentBuffer[i])
-            #   # debug commLine.replace(/^\s+/, '')
-            #   trimmedBuffer.push commLine.replace(/^\s+/g, '')
-            trimmedBuffer = [
-              '###*\n'
-              '* @constructor\n'
-            ]
-            classStr = curClass
-            if curClass of superclasses
-              trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
-              classStr += " extends #{superclasses[curClass]}"
-            trimmedBuffer.push('###\n')
-            classBuffer += trimmedBuffer.join('')
-            classBuffer += "class #{classStr}\n"
-            buffer += classBuffer
-            buffer += afterClassDecBuffer
-            # buffer += line + '\n'
-            classBuffer = ''
-            afterClassDecBuffer = ''
-            inClass = false
-          if line.match(classRegex) and not inBlockComment
-            if line.match(classExtendsRegex)
-              matches = line.match(classExtendsRegex)
-              curClass = matches[1]
-              superClass = matches[2]
-              superclasses[curClass] = superClass
-            else
-              matches = line.match(classRegex)
-              # buffer += matches[1] + '\n'
-              curClass = matches[1]
-            classes.push(curClass)
-            inClass = true
-            debug("In class #{curClass}")
-            classInd = indentation
-            debug("Indentation level #{classInd}")
-          else
-            if line.match(/\{.*?\} = .*/)
-              shortHandObjAssignments = line.match(/\{(.*?)\} = (.*)/)
-              vars = shortHandObjAssignments[1].split(', ')
-              obj = shortHandObjAssignments[2]
-              newlines = ''
-              for assignedVar in vars
-                newlines += indentStr + "#{assignedVar} = #{obj}['#{assignedVar}']\n"
-              line = newlines
-            if inClass
-              afterClassDecBuffer += line + '\n'
-            else
-              buffer += line + '\n'
-      else
-        if inComment
-          # Exit comment
-          commentBuffer.push lastSpacing + '###\n'
-          if containsTypeDef
-            if inClass
-              afterClassDecBuffer += commentBuffer.join('')
-            else
-              buffer += commentBuffer.join('')
-          else
-            if inClass
-              afterClassDecBuffer += nonTypeCommentBuffer
-            else
-              buffer += nonTypeCommentBuffer
-          commentBuffer = []
-          nonTypeCommentBuffer = ''
-          inComment = false
-          containsTypeDef = false
-        else
-          if inClass
-            afterClassDecBuffer += '\n'
-          else
-            buffer += '\n'
-    # debug buffer
-    if inClass
-      debug("Reached end of file!")
-      buffer += '###\n'
-      buffer += '* @constructor\n'
+  exitComment = (line) ->
+    # commentBuffer.push lastSpacing + '###\n'
+    if line.match(FUNCTION_REGEX)
+      # Line is a function, check for default parameters
+      parseFunctionDef(line)
+      # parameters = line.match(/[a-zA-Z0-9_]+\s*:\s*(?:\((.*?)\))\s*(?:-|=)>/)[1]
+      # params = parameters.split(/, */)
+      # debug("checking params")
+      # debug(params)
+      # for param in params
+      #   if param.indexOf('=') > 0
+      #     debug "Checking #{param}"
+      #     debug(commentBuffer)
+      #     debug param.indexOf('=')
+      #     paramParts = param.split(/\s*=\s*/)
+      #     debug paramParts
+      #     paramName = paramParts[0]
+      #     paramDefault = paramParts[1]
+      #     if paramName.indexOf('@') == 0
+      #       paramName = paramName.substr(1)
+      #     for i in [1..commentBuffer.length-1]
+      #       commLine = commentBuffer[i]
+      #       if commLine.indexOf(paramName) > 0
+      #         debug "Found #{paramName} in '#{commLine}'"
+      #         commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
+      #         if paramDefault is 'null'
+      #           commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
+      #         break
+    commentBuffer.push lastSpacing + '###\n'
+    if line.indexOf('constructor:') > 0
+      # Found constructor!
+      # Put the constructor documentation before the class definition so
+      # Google closure can see it
+      # debug commentBuffer.length
+      trimmedBuffer = []
+      for commLine in commentBuffer
+        # debug i
+        # debug(commentBuffer[i])
+        # debug commLine.replace(/^\s+/, '')
+        trimmedBuffer.push commLine.replace(/^\s+/g, '')
+      last = trimmedBuffer.pop()
+      trimmedBuffer.push '* @constructor\n'
       classStr = curClass
       if curClass of superclasses
-        buffer += "* @extends #{superclasses[curClass]}\n"
+        trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
         classStr += " extends #{superclasses[curClass]}"
-      buffer += '###\n'
+      trimmedBuffer.push(last)
+      classBuffer += trimmedBuffer.join('')
       classBuffer += "class #{classStr}\n"
       buffer += classBuffer
       buffer += afterClassDecBuffer
+      # buffer += line + '\n'
       classBuffer = ''
       afterClassDecBuffer = ''
       inClass = false
-      inComment = false
-  return [superclasses, classes, buffer]
-# end codoToJsdoc
+    else
+      if containsTypeDef
+        if inClass
+          afterClassDecBuffer += commentBuffer.join('')
+        else
+          buffer += commentBuffer.join('')
+      else
+        if inClass
+          afterClassDecBuffer += nonTypeCommentBuffer
+        else
+          buffer += nonTypeCommentBuffer
+    commentBuffer = []
+    nonTypeCommentBuffer = ''
+    inComment = false
+    containsTypeDef = false
+    # buffers = [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer]
+    # flags = [inComment, inClass, containsTypeDef]
+    # return [buffer, buffers, flags]
+
+  # Loop over each line
+  for line in lines
+    if line.length > 0 and not line.match(REQUIRE_REGEX)
+      indentStr = (line.match(/^(\s*)/))[0]
+      indentation = indentStr.length
+      if inClass and indentation <= classInd
+        debug("not in class anymore!")
+        buffer += '###*\n'
+        buffer += '* @constructor\n'
+        classStr = curClass
+        if curClass of superclasses
+          buffer += "* @extends #{superclasses[curClass]}\n"
+          classStr += " extends #{superclasses[curClass]}"
+        buffer += '###\n'
+        classBuffer += "class #{classStr}\n"
+        buffer += classBuffer
+        buffer += afterClassDecBuffer
+        classBuffer = ''
+        afterClassDecBuffer = ''
+        inClass = false
+        inComment = false
+      # else
+      #   debug indentation + ': ' + line
+      matches = line.match(COMMENT_REGEX)
+
+      if line.match(MULTI_COMMENT_REGEX)
+        if inBlockComment
+          inBlockComment = false
+        else
+          inBlockComment = true
+
+      if not inBlockComment and matches and not line.match(MULTI_COMMENT_REGEX)
+        # Line is a comment
+        spacing = matches[1]
+        comment = matches[2]
+        # debug "Spacing: #{spacing}|"
+        # debug "Comment: #{comment}"
+        if not inComment
+          inComment = true
+          commentBuffer.push spacing + '###*\n'
+        if line.match(TYPE_DEF_REGEX)
+          typeMatches = line.match(TYPE_DEF_REGEX)
+          containsTypeDef = true
+          tag = typeMatches[1]
+          type = typeMatches[2]
+          desc = typeMatches[3]
+
+          if type.match(objectType)
+            for jsType in builtInTypes
+              type = type.replace(new RegExp(jsType, 'ig'), jsType)
+            for numType in numberTypes
+              type = type.replace(new RegExp(numType, 'ig'), 'number')
+            # for invalType, repl of replaceTypes
+            #   type = type.replace(new RegExp(': ?' + invalType, 'ig'), repl)
+          else
+            # if type.toLowerCase() in numberTypes
+            #   type = 'number'
+            type = normalizeType(type)
+          if type
+            commentBuffer.push "#{spacing}* @#{tag} \{#{type}\} #{desc}\n"
+          else
+            commentBuffer.push "#{spacing}* @#{tag} #{desc}\n"
+          params.push
+            tag: tag
+            type: type
+          # commentBuffer += spacing + '* ' + comment + '\n'
+        else
+          commentBuffer.push spacing + '* ' + comment + '\n'
+        nonTypeCommentBuffer += line + '\n'
+        lastSpacing = spacing
+      else
+        # Line is not a comment
+        if inComment
+          # Exit comment
+          # buffers = [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer]
+          # flags = [inComment, inClass, containsTypeDef]
+          # [str, buffers, flags] = _exitComment(line, lastSpacing, curClass, superclasses, buffers, flags)
+          # buffer += str
+          # [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer] = buffers
+          # [inComment, inClass, containsTypeDef] = flags
+          exitComment(line)
+        else if line.indexOf('constructor:') > 0 and not inBlockComment
+          # Found constructor!
+          # Put the constructor documentation before the class definition so
+          # Google closure can see it
+          # debug commentBuffer.length
+          # trimmedBuffer = []
+          # for commLine in commentBuffer
+          #   # debug i
+          #   # debug(commentBuffer[i])
+          #   # debug commLine.replace(/^\s+/, '')
+          #   trimmedBuffer.push commLine.replace(/^\s+/g, '')
+          trimmedBuffer = [
+            '###*\n'
+            '* @constructor\n'
+          ]
+          commentBuffer = trimmedBuffer
+          parseFunctionDef(line) if line.match(FUNCTION_REGEX)
+          trimmedBuffer = commentBuffer
+          classStr = curClass
+          if curClass of superclasses
+            trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
+            classStr += " extends #{superclasses[curClass]}"
+          trimmedBuffer.push('###\n')
+          classBuffer += trimmedBuffer.join('')
+          classBuffer += "class #{classStr}\n"
+          buffer += classBuffer
+          buffer += afterClassDecBuffer
+          # buffer += line + '\n'
+          classBuffer = ''
+          afterClassDecBuffer = ''
+          inClass = false
+          commentBuffer = []
+        else if line.match(FUNCTION_REGEX) and not inBlockComment
+          # Add default documentation to function that's missing it
+          commentBuffer = [indentStr + '###*\n']
+          parseFunctionDef(line)
+          commentBuffer.push(indentStr + '###\n')
+          if inClass
+            afterClassDecBuffer += commentBuffer.join('')
+          else
+            buffer += commentBuffer.join('')
+          commentBuffer = []
+        if line.match(CLASS_REGEX) and not inBlockComment
+          if line.match(SUBCLASS_REGEX)
+            matches = line.match(SUBCLASS_REGEX)
+            curClass = matches[1]
+            superClass = matches[2]
+            superclasses[curClass] = superClass
+          else
+            matches = line.match(CLASS_REGEX)
+            # buffer += matches[1] + '\n'
+            curClass = matches[1]
+          classes.push(curClass)
+          inClass = true
+          debug("In class #{curClass}")
+          classInd = indentation
+          debug("Indentation level #{classInd}")
+        else
+          if line.match(/\{.*?\} = .*/)
+            shortHandObjAssignments = line.match(/\{(.*?)\} = (.*)/)
+            vars = shortHandObjAssignments[1].split(', ')
+            obj = shortHandObjAssignments[2]
+            newlines = ''
+            for assignedVar in vars
+              newlines += indentStr + "#{assignedVar} = #{obj}['#{assignedVar}']\n"
+            line = newlines
+          if inClass
+            afterClassDecBuffer += line + '\n'
+          else
+            buffer += line + '\n'
+    else
+      if inComment
+        # Exit comment
+        commentBuffer.push lastSpacing + '###\n'
+        if containsTypeDef
+          if inClass
+            afterClassDecBuffer += commentBuffer.join('')
+          else
+            buffer += commentBuffer.join('')
+        else
+          if inClass
+            afterClassDecBuffer += nonTypeCommentBuffer
+          else
+            buffer += nonTypeCommentBuffer
+        commentBuffer = []
+        nonTypeCommentBuffer = ''
+        inComment = false
+        containsTypeDef = false
+      else
+        if inClass
+          afterClassDecBuffer += '\n'
+        else
+          buffer += '\n'
+  # debug buffer
+  if inClass
+    debug("Reached end of file!")
+    buffer += '###\n'
+    buffer += '* @constructor\n'
+    classStr = curClass
+    if curClass of superclasses
+      buffer += "* @extends #{superclasses[curClass]}\n"
+      classStr += " extends #{superclasses[curClass]}"
+    buffer += '###\n'
+    classBuffer += "class #{classStr}\n"
+    buffer += classBuffer
+    buffer += afterClassDecBuffer
+    classBuffer = ''
+    afterClassDecBuffer = ''
+    inClass = false
+    inComment = false
+  return buffer
+# end _codoToJsdoc
 
 jsToClosure = (file, classes, superclasses) ->
   jsClassDec = /\n([^ .\n]+ = \(function\(.*\n\}\)\((.*?)\);)/g
