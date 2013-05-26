@@ -541,7 +541,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
         "--js #{files}"
         "--js_output_file #{TMP_GOOGJS_FILE}"
         "--jscomp_error checkTypes"
-        "--externs app#{SLASH}cfg#{SLASH}test.js"
+        "--externs app#{SLASH}cfg#{SLASH}externs.js"
       ].join(' ')
       exec "#{cmd} #{args}", (err, stdout, stderr) ->
         console.log stdout if stdout
