@@ -61,9 +61,12 @@ are two options to do so:
 1) Open `public/index.html` in any browser. For Chrome, you will have to
    disable web security to open local web files.
 
-2) Run `coffee server.coffee` from the root of the repository. This will start
-   a node server. Once it starts, you can open `http://localhost:8080` in any
-   browser to view the main page.
+2) Run `cake server` from the root of the repository. This will start a node
+   server with the default port of 8080. Once it starts, you can open
+   `http://localhost:8080` in any browser to view the main page. Optionally,
+   you can specify a different port by running `cake -p [PORT] server`.
+
+NOTE: Some features will only work properly when running from a local server.
 
 
 Coding Conventions
