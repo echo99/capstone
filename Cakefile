@@ -527,14 +527,21 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   builtInTypes = ['boolean', 'string', 'number', 'list']
   capTypes = ['CanvasRenderingContext2D', 'Array', 'Object']
   numberTypes = ['integer', 'double', 'float']
+  # @HACK For replacing invalid backend documented types
+  replaceTypes =
+    'visibility': 'Object'
+    'bool': 'boolean'
 
   normalizeType = (type) ->
-    if type.toLowerCase() in numberTypes
+    lcType = type.toLowerCase()
+    if lcType in numberTypes
       return 'number'
-    else if type.toLowerCase() in builtInTypes
-      return type.toLowerCase()
-    else if type.toLowerCase() is 'function'
+    else if lcType in builtInTypes
+      return lcType
+    else if lcType is 'function'
       return 'function(?)'
+    else if lcType of replaceTypes
+      return replaceTypes[lcType]
     else
       return type
 
@@ -629,6 +636,8 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
                 type = type.replace(new RegExp(jsType, 'ig'), jsType)
               for numType in numberTypes
                 type = type.replace(new RegExp(numType, 'ig'), 'number')
+              # for invalType, repl of replaceTypes
+              #   type = type.replace(new RegExp(': ?' + invalType, 'ig'), repl)
             else
               # if type.toLowerCase() in numberTypes
               #   type = 'number'
