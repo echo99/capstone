@@ -522,6 +522,8 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
   requireLine = /^(\s*)#_require/
   # typeCheck = /@(require|param)/
   typeCheck = /@(return|param)\s+\[(.*?)\]\s*(.*)/
+  openParam = /^\s+#\s+@param\s+\[(.*)/
+  closeParam = /^\s+#\s+(.*?)\]/
   collectionType = /(.*?)(?:\.)?<(.*)>/
   objectType = /^\{(.*?)\}$/
   builtInTypes = ['boolean', 'string', 'number', 'list']
@@ -995,6 +997,7 @@ task 'lint', 'Check CoffeeScript for lint using Coffeelint', (options) ->
     lintSource(options)
 
 task 'doc', 'Document the source code using Codo', (options) ->
+  initOptions(options)
   lastResortCodoFix = (cmd, callback=null) ->
     console.log('Documenting with codo failed'.red)
     try
@@ -1018,6 +1021,8 @@ task 'doc', 'Document the source code using Codo', (options) ->
     console.log("Documenting CoffeeScript in #{SRC_DIR} to doc...".yellow)
     checkGlobalModule 'Codo', 'codo', 'codo', false, (hasModule = false) ->
       cmd = "#{NODE_BIN_DIR}#{SLASH}codo"
+      if options['verbose']
+        cmd += ' -v'
       if hasModule
         exec "codo #{SRC_DIR}", (err, stdout, stderr) ->
           console.log(stdout)
@@ -1069,7 +1074,7 @@ task "test", "Run tests", (options) ->
 
 task "server", "Start the local server", (options) ->
   initOptions(options)
-  server = require './server'
+  server = require './modules/server'
   server.start(options['port'])
   # cmd = Commands.COFFEESCRIPT
   # args = ['server.coffee']
