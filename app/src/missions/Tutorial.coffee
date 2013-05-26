@@ -68,7 +68,10 @@ class Tutorial extends Mission
 
   destroy: ->
     cameraHudFrame.removeChild(@m1)
+    cameraHudFrame.removeChild(@m2)
     cameraHudFrame.removeChild(@skipButton)
+    cameraHudFrame.removeChild(@optionsMenu)
+    cameraHudFrame.removeChild(@menuButton)
 
     Logger.logEvent("Leaving The Mission from tutorial")
     Logger.send()
@@ -96,6 +99,11 @@ class Tutorial extends Mission
       () =>
         newMission(Challenge)
     )
+
+    restart = () => newMission(Cutscene)
+    @optionsMenu = @_createMenu(window.config.MainMenu.mission.menu,
+      restart, start=false, restart=true, quit=true, cancel=false, close=true)
+    @menuButton = @createCameraHUDMenuButton(@optionsMenu)
 
   # @see Mission#draw
   draw: (ctx, hudCtx) ->

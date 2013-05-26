@@ -76,7 +76,8 @@ class Cutscene extends Mission
     cameraHudFrame.removeChild(@m2)
     cameraHudFrame.removeChild(@m3)
     cameraHudFrame.removeChild(@skipButton)
-
+    cameraHudFrame.removeChild(@optionsMenu)
+    cameraHudFrame.removeChild(@menuButton)
 
     Logger.logEvent("Leaving The Mission from cutscene")
     Logger.send()
@@ -109,6 +110,11 @@ class Cutscene extends Mission
         newMission(Tutorial)
     )
 
+    restart = () => newMission(Cutscene)
+    @optionsMenu = @_createMenu(window.config.MainMenu.mission.menu,
+      restart, start=false, restart=true, quit=true, cancel=false, close=true)
+    @menuButton = @createCameraHUDMenuButton(@optionsMenu)
+
   _advanceTurn: ->
     if currentTime() - @lastTime > 1000
       endTurn()
@@ -133,7 +139,8 @@ class Cutscene extends Mission
         @_advanceTurn()
 
     if not @map.outpost.sendingResourcesTo() and
-       @map.outpost.hasOutpost() and @map.station.hasStation()
+       @map.outpost.hasOutpost() and @map.station.hasStation() and
+       (@map.outpost.resources() > 0 or @map.outpost.availableResources() > 0)
       @map.outpost.sendResources(@map.station)
 
   # @see Mission#onMouseMove
@@ -157,9 +164,7 @@ class Cutscene extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    if @map.planets[8].fungusStrength() > 0
-      camera.setTarget(@map.planets[8].location())
-    else if @map.planets[9].fungusStrength() > 0
+    if @map.planets[9].fungusStrength() > 0
       camera.setTarget(@map.planets[9].location())
     else if @map.planets[10].fungusStrength() > 0
       camera.setTarget(@map.planets[10].location())
@@ -170,3 +175,8 @@ class Cutscene extends Mission
 
     if not @map.station.hasStation() and not @map.outpost.hasOutpost()
       newMission(Tutorial)
+
+    if @map.planets[8].fungusStrength() > 0
+      @map.planets[8].setFungus(0)
+      @map.planets[8]._lastSeenFungus = 0
+      UI.endTurn()

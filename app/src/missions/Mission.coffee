@@ -314,6 +314,66 @@ class Mission
 
     return m
 
+  createCameraHUDMenuButton: (theMenu) ->
+    menu = @settings.menu
+    x = camera.width / 2 - menu.w / 2 - 5
+    y = -camera.height / 2 + menu.h / 2 + 5
+    menuButton = new Elements.Button(x, y, menu.w, menu.h)
+    menuButton.setClearFunc((ctx) =>
+      ctx.clearRect(menuButton.x - menuButton.w / 2,
+                    menuButton.y - menuButton.h / 2,
+                    menuButton.w, menuButton.h)
+    )
+    menuButton.setClickHandler(() =>
+      if theMenu.visible
+        theMenu.close()
+      else
+        theMenu.open()
+    )
+    menuButton.setMouseUpHandler(() => menuButton.setDirty())
+    menuButton.setMouseDownHandler(() => menuButton.setDirty())
+    menuButton.setMouseOutHandler(() => menuButton.setDirty())
+    menuButton.setDrawFunc((ctx) =>
+      menuButton.x = camera.width / 2 - menu.w / 2 - 5
+      menuButton.y = -camera.height / 2 + menu.h / 2 + 5
+      loc = {x: menuButton.x+camera.width / 2, y: menuButton.y+camera.height / 2}
+      if menuButton.isPressed()
+        SHEET.drawSprite(SpriteNames.MENU_BUTTON_HOVER, loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.MENU_BUTTON_IDLE, loc.x, loc.y, ctx, false)
+    )
+
+    cameraHudFrame.addChild(menuButton)
+
+    return menuButton
+
+  createSkipButton: (onSkip) ->
+    skip = @settings.skip
+    y = camera.height / 2 - skip.h / 2 - 5
+    button = new Elements.Button(0, y, skip.w, skip.h)
+    button.setClearFunc((ctx) =>
+      loc = {x: button.x+camera.width / 2, y: button.y + camera.height / 2}
+      ctx.clearRect(loc.x - button.w / 2,
+                    loc.y - button.h / 2,
+                    button.w, button.h)
+    )
+    button.setClickHandler(onSkip)
+    button.setMouseUpHandler(() => button.setDirty())
+    button.setMouseDownHandler(() => button.setDirty())
+    button.setMouseOutHandler(() => button.setDirty())
+    button.setDrawFunc((ctx) =>
+      button.y = camera.height / 2 - skip.h / 2 - 5
+      loc = {x: button.x+camera.width / 2, y: button.y + camera.height / 2}
+      if button.isPressed()
+        SHEET.drawSprite(SpriteNames.SKIP_BUTTON_HOVER, loc.x, loc.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.SKIP_BUTTON_IDLE, loc.x, loc.y, ctx, false)
+    )
+
+    cameraHudFrame.addChild(button)
+
+    return button
+
   createSkipButton: (onSkip) ->
     skip = @settings.skip
     y = camera.height / 2 - skip.h / 2 - 5
