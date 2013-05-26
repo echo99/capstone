@@ -1,5 +1,7 @@
 # Dependencies
 fs = require 'fs'
+path = require 'path'
+writefile = require 'writefile'
 
 # Flag for debugging the module
 DEBUG_MODE = false
@@ -57,19 +59,33 @@ codoToJsdoc = (files) ->
   classes = []
   superclasses = {}
 
+
+  compFiles = []
+  # mkdirp = require 'mkdirp'
   # Convert each file separately
   for file in files
     fileBuffer = _codoToJsdoc(file, classes, superclasses)
     buffer += fileBuffer
+    dir = path.dirname(file)
+    # , (exists) ->
+    # unless fs.existsSync('./tmp/' + dir)
+    #   fs.mkdirSync('./tmp/' + dir)
+    # fs.writeFile './tmp/' + file, fileBuffer
+    target = './tmp/' + file
+    writefile target, fileBuffer
+    if target.match(/\.coffee$/)
+      target = target.substr(0, target.length-7) + '.js'
+    compFiles.push(target)
 
-  return [superclasses, classes, buffer]
+
+  return [superclasses, classes, buffer, compFiles]
 # end codoToJsdoc
 
 # Convert an individual CoffeeScript file
 # @modifies classes Adds classes found in the file
 # @modifies superclasses
 _codoToJsdoc = (file, classes, superclasses) ->
-  buffer = ''
+  buffer = 'CLOSURE = true\n\n'
   classBuffer = ''
   afterClassDecBuffer = ''
   nonTypeCommentBuffer = ''
@@ -98,15 +114,15 @@ _codoToJsdoc = (file, classes, superclasses) ->
     # Line is a function, check for default parameters
     parameters = line.match(FUNCTION_REGEX)[1]
     params = parameters.split(/, */)
-    debug("checking params")
-    debug(params)
+    # debug("checking params")
+    # debug(params)
     for param in params
       if param.indexOf('=') > 0
-        debug "Checking #{param}"
-        debug(commentBuffer)
-        debug param.indexOf('=')
+        # debug "Checking #{param}"
+        # debug(commentBuffer)
+        # debug param.indexOf('=')
         paramParts = param.split(/\s*=\s*/)
-        debug paramParts
+        # debug paramParts
         paramName = paramParts[0]
         paramDefault = paramParts[1]
         if paramName.indexOf('@') == 0
@@ -123,7 +139,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
               console.error line
             if commLine.indexOf(paramName) > 0
               foundDef = true
-              debug "Found #{paramName} in '#{commLine}'"
+              # debug "Found #{paramName} in '#{commLine}'"
               commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
               if paramDefault is 'null'
                 commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
@@ -342,9 +358,9 @@ _codoToJsdoc = (file, classes, superclasses) ->
             curClass = matches[1]
           classes.push(curClass)
           inClass = true
-          debug("In class #{curClass}")
+          # debug("In class #{curClass}")
           classInd = indentation
-          debug("Indentation level #{classInd}")
+          # debug("Indentation level #{classInd}")
         else
           if line.match(/\{.*?\} = .*/)
             shortHandObjAssignments = line.match(/\{(.*?)\} = (.*)/)
@@ -402,6 +418,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
 # end _codoToJsdoc
 
 jsToClosure = (file, classes, superclasses) ->
+  debug 'Checking file ' + file
   jsClassDec = /\n([^ .\n]+ = \(function\(.*\n\}\)\((.*?)\);)/g
   # jsClassDec2 = /\n(([^ \n]+) = \(function\([^]*?\n\}\)\((.*?)\);)/
   jsClassDec2 = /\n([^ \n]+ = \(function\([^]*?\n\}\)\(.*?\);)/
@@ -417,6 +434,7 @@ jsToClosure = (file, classes, superclasses) ->
   parts = contents.split(jsClassDec2)
 
   header = parts[0].replace(/__extends.*/, '')
+  header = header.replace(/__bind.*/, '')
   headerLines = header.split('\n')
 
   index = 0
@@ -427,14 +445,27 @@ jsToClosure = (file, classes, superclasses) ->
     index++
 
   # varLine = headerLines[1]
-  if varLine.indexOf('var') == 0
+  if varLine?.indexOf('var') == 0
     globalVars = varLine.substr(4).split(', ')
+    lastVar = globalVars[globalVars.length-1]
+    end = ''
+    if lastVar.match(/,$/)
+      globalVars[globalVars.length-1] = lastVar.substr(0, lastVar.length-1)
+      end = ','
+    else if lastVar.match(/;$/)
+      globalVars[globalVars.length-1] = lastVar.substr(0, lastVar.length-1)
+      end = ';'
+    debug globalVars
     retainedVars = []
     for globalVar in globalVars
       if globalVar not in classes
         retainedVars.push(globalVar)
     # console.log(retainedVars)
-    line = 'var ' + retainedVars.join(';\n var ') + '\n'
+    debug retainedVars
+    if retainedVars.length > 0
+      line = 'var ' + retainedVars.join(';\n var ') + ';\n var'
+    else
+      line = 'var DUMMY_VAR, '
     # lines.unshift(line)
     headerLines[index] = line
   else

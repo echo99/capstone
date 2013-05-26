@@ -480,63 +480,72 @@ task 'check', 'Temporarily compiles coffee files to check syntax', ->
 
 
 task 'typecheck', 'Type check the compiled JavaScript code', ->
-  try
-    fs.mkdirSync('tmp')
-  catch e
-    null
+  tryRequire('writefile')
+  checkDep ->
+    try
+      fs.mkdirSync('tmp')
+    catch e
+      null
 
-  TMP_COFFEE_FILE = "tmp#{SLASH}tmp.coffee"
-  TMP_JS_FILE = "tmp#{SLASH}tmp.js"
-  TMP_GOOGJS_FILE = "tmp#{SLASH}compiled.coffee"
+    TMP_COFFEE_FILE = "tmp#{SLASH}tmp.coffee"
+    TMP_JS_FILE = "tmp#{SLASH}tmp.js"
+    TMP_GOOGJS_FILE = "tmp#{SLASH}compiled.coffee"
 
-  # # switch env
-  # #   when Environment.PRODUCTION
-  # #     files.unshift(Configs.PRODUCTION)
-  # #   when Environment.DEV
+    # # switch env
+    # #   when Environment.PRODUCTION
+    # #     files.unshift(Configs.PRODUCTION)
+    # #   when Environment.DEV
 
-  files = new Rehab().process './'+SRC_DIR
-  files.unshift(Configs.CLOSURE)
-  files.unshift(Configs.DEV)
-  files.unshift(Configs.DEFAULT)
-  files.push(Configs.CLOSURE_INTERN)
-  # files = ['app/src/util/Logger.coffee']
-  # files = ['app/src/util/Sprite.coffee']
-  # files = ['app/src/missions/ExterminationSmall.coffee',
-  #   'app/src/missions/ExterminationMedium.coffee']
-  # files = ['app/src/util/Module.coffee', 'app/src/gui/Elements.UIElement.coffee']
+    files = new Rehab().process './'+SRC_DIR
+    files.unshift(Configs.CLOSURE)
+    files.unshift(Configs.DEV)
+    files.unshift(Configs.DEFAULT)
+    files.push(Configs.CLOSURE_INTERN)
+    # files = ['app/src/util/Logger.coffee']
+    # files = ['app/src/util/Sprite.coffee']
+    # files = ['app/src/missions/ExterminationSmall.coffee',
+    #   'app/src/missions/ExterminationMedium.coffee']
+    # files = ['app/src/util/Module.coffee', 'app/src/gui/Elements.UIElement.coffee']
 
-  typechecker = require './modules/typecheck'
+    typechecker = require './modules/typecheck'
 
-  # Convert Codo-style documentation to jsDoc-compatible documentation and write
-  # results to temp file
-  console.log('Converting Codo to jsDoc...'.yellow)
-  [superclasses, classes, buffer] = typechecker.codoToJsdoc(files)
-  fs.writeFile TMP_COFFEE_FILE, buffer
+    # Convert Codo-style documentation to jsDoc-compatible documentation and write
+    # results to temp file
+    console.log('Converting Codo to jsDoc...'.yellow)
+    [superclasses, classes, buffer, compFiles] = typechecker.codoToJsdoc(files)
+    fs.writeFile TMP_COFFEE_FILE, buffer
 
-  # Compile CoffeeScript to temporary JavaScript file
-  console.log('Compiling source...'.yellow)
-  exec "coffee -cb #{TMP_COFFEE_FILE}", (err, stdout, stderr) ->
-    console.log stdout if stdout
-    console.error err if err
-
-    # Convert CoffeeScript-generated JavaScript to Closure-compatible JavaScript and
-    # rewrite to same file
-    console.log('Converting compiled JavaScript to Closure-compatible syntax...'.yellow)
-    buffer = typechecker.jsToClosure(TMP_JS_FILE, classes, superclasses)
-    fs.writeFile TMP_JS_FILE, buffer
-
-    # Run Google's Closure Compiler for the type checking features
-    console.log('Running Closure type checker...'.yellow)
-    cmd = "java"
-    args = [
-      "-jar vendor#{SLASH}tools#{SLASH}compiler.jar"
-      "--js #{TMP_JS_FILE}"
-      "--js_output_file #{TMP_GOOGJS_FILE}"
-      "--jscomp_error checkTypes"
-    ].join(' ')
-    exec "#{cmd} #{args}", (err, stdout, stderr) ->
+    # Compile CoffeeScript to temporary JavaScript file
+    console.log('Compiling source...'.yellow)
+    # exec "coffee -cb #{TMP_COFFEE_FILE}", (err, stdout, stderr) ->
+    exec "coffee -cb ./tmp", (err, stdout, stderr) ->
       console.log stdout if stdout
-      console.error stderr.red if stderr
+      console.error err if err
+
+      # Convert CoffeeScript-generated JavaScript to Closure-compatible JavaScript and
+      # rewrite to same file
+      console.log('Converting compiled JavaScript to Closure-compatible syntax...'.yellow)
+      # buffer = typechecker.jsToClosure(TMP_JS_FILE, classes, superclasses)
+      # fs.writeFile TMP_JS_FILE, buffer
+      for file in compFiles
+        buffer = typechecker.jsToClosure(file, classes, superclasses)
+        fs.writeFile file, buffer
+      files = compFiles.join(' ')
+
+      # Run Google's Closure Compiler for the type checking features
+      console.log('Running Closure type checker...'.yellow)
+      cmd = "java"
+      args = [
+        "-jar vendor#{SLASH}tools#{SLASH}compiler.jar"
+        # "--js #{TMP_JS_FILE}"
+        "--js #{files}"
+        "--js_output_file #{TMP_GOOGJS_FILE}"
+        "--jscomp_error checkTypes"
+        "--externs app#{SLASH}cfg#{SLASH}test.js"
+      ].join(' ')
+      exec "#{cmd} #{args}", (err, stdout, stderr) ->
+        console.log stdout if stdout
+        console.error stderr.red if stderr
 
 
 
