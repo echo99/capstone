@@ -84,6 +84,8 @@ class Elements.UIElement extends Module
     @_parent = null
     # @private @property [Object]
     @_properties = {}
+    ###* @type {?function(?, ?=, ?=)}
+    ###
     @_drawFunc = null
 
     @_removeQueue = []
