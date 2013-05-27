@@ -37,13 +37,10 @@ Browser =
 TESTING = window.TESTING?
 # debug("Testing flag: " + TESTING)
 
+# Other music:
+# - assets/audio/empty_space_stage1.ogg
+# - assets/audio/empty_space_stage2.ogg
 manifest = [
-  #   src: 'assets/audio/empty_space_stage1.ogg'
-  #   id: 'bgmusic1'
-  # ,
-  #   src: 'assets/audio/empty_space_stage2.ogg'
-  #   id: 'bgmusic2'
-  # ,
     src: 'assets/audio/dark_space.ogg|assets/audio/dark_space.mp3'
     id: 'bgmusic3'
 ]
@@ -67,7 +64,7 @@ createjs.Sound.registerManifest(manifest)
 
 # Load image and image data as soon as possible
 SHEET = null
-$.getJSON('assets/images/atlas.json', {}, (data) ->
+$.getJSON 'assets/images/atlas.json', {}, (data) ->
   SHEET = new SpriteSheet('assets/images/atlas.png')
   SHEET.loadImage ->
     as = new AtlasParser(SHEET, data)
@@ -75,7 +72,6 @@ $.getJSON('assets/images/atlas.json', {}, (data) ->
     IMAGE_LOADED = true
     if DOM_LOADED
       main()
-)
 
 # Execute after document is loaded
 $ ->
