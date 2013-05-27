@@ -1163,6 +1163,19 @@ class UserInterface
         ctx.font = window.config.windowStyle.defaultText.font
         ctx.fillStyle = window.config.windowStyle.defaultText.value
         ctx.fillText(text, x + 35, y + 24)
+      else if @hoveredPlanet.hasOutpost() and @hoveredPlanet.sendingResourcesTo()
+        # Outline planet that hovered planet with outpost is sending resources to
+        # @NOTE Not sure if this is a good place to put this
+        ctx.strokeStyle = window.config.resourceTarget.color
+        ctx.lineWidth = window.config.resourceTarget.lineWidth
+        resourceTarget = @hoveredPlanet.sendingResourcesTo()
+        loc = resourceTarget.location()
+        pos = camera.getScreenCoordinates(loc)
+        r = (window.config.planetRadius + window.config.resourceTarget.radius) *
+           camera.getZoom()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
+        ctx.stroke()
 
       hasAction = true
       if @lookingToSendResources
@@ -1228,7 +1241,7 @@ class UserInterface
         r = (window.config.planetRadius + window.config.resourceTarget.radius) *
            camera.getZoom()
         ctx.beginPath()
-        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
         ctx.stroke()
 
     use = null
