@@ -928,7 +928,7 @@ class Elements.DOMButton
   #
   setClickHandler: (@callback) ->
     if @enabled
-      @canvas.addEventListener('mousedown', @callback)
+      @canvas.addEventListener('mousedown', @callback, false)
     return this
 
   # Add a state sprite to the button
@@ -959,7 +959,7 @@ class Elements.DOMButton
       @canvas.style.cursor = 'pointer'
       @ctx.globalAlpha = 1
       @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
-      @canvas.addEventListener('mousedown', @callback)
+      @canvas.addEventListener('mousedown', @callback, false)
 
   # Disable this button
   #
@@ -971,4 +971,4 @@ class Elements.DOMButton
       @canvas.style.cursor = 'auto'
       @ctx.globalAlpha = 0.6
       @sheet.drawSprite(sprite, Math.round(@w/2), Math.round(@h/2), @ctx, false)
-      @canvas.removeEventListener('mousedown', @callback)
+      @canvas.removeEventListener('mousedown', @callback, false)

@@ -641,15 +641,15 @@ main = ->
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
   else
     window.onresize = onResize
-    document.body.addEventListener('keydown', keyDownListener)
+    document.body.addEventListener('keydown', keyDownListener, false)
     window.onbeforeunload = onBeforeUnload
-    surface.addEventListener('mousemove', mouseMoveHandler)
-    surface.addEventListener('click', clickHandler)
-    surface.addEventListener('mousedown', mouseDownHandler)
-    surface.addEventListener('mouseup', mouseUpHandler)
-    surface.addEventListener('mouseout', mouseOutHandler)
-    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
-    document.body.addEventListener('mousewheel', mouseWheelHandler)
+    surface.addEventListener('mousemove', mouseMoveHandler, false)
+    surface.addEventListener('click', clickHandler, false)
+    surface.addEventListener('mousedown', mouseDownHandler, false)
+    surface.addEventListener('mouseup', mouseUpHandler, false)
+    surface.addEventListener('mouseout', mouseOutHandler, false)
+    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler, false)
+    document.body.addEventListener('mousewheel', mouseWheelHandler, false)
 
     document.body.addEventListener('touchmove',
       (e) =>
