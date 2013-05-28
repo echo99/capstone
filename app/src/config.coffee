@@ -77,6 +77,10 @@ root.config =
     colonyLoc: {x: -230, y: -10}
     attackLoc: {x: -80, y: 70}
     defenseLoc: {x: -80, y: 150}
+  fungusMoveStyle:
+    fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
+    color: "rgba(255, 0, 0, 1)"
+    speed: 3
   connectionStyle:
     normal:
       visible: "rgba(200, 200, 200, 0.8)"

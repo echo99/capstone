@@ -468,8 +468,9 @@ class Planet
       @_fungusArriving += root.config.units.fungus.growthPerTurn
       @_fungusArriving += if Math.random() <
           root.config.units.fungus.growthChancePerTurn then 1 else 0
-      @_fungusReport.push({to: this, val: @_fungusArriving})
-  
+      if @_fungusArriving > 0
+        @_fungusReport.push({to: this, val: @_fungusArriving})
+
   # Fungus growth phase 1b.
   # Determines sporing for next turn.
   #
@@ -498,7 +499,7 @@ class Planet
           #   "+ #{planet._fungusArriving} ?= #{planet._fungusMaximumStrength}"
     for planetString, record of toMap
       @_fungusReport.push(record)
-  
+
   # Fungus growth phase 2.
   # Applies fungus changes determined from pass 1.
   # Resets the "maximum fungus strength on this planet" counter
