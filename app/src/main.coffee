@@ -192,10 +192,6 @@ drawBackground = (ctx, spritesheet, name) ->
 
 # Update the size of the frame and the canvases when the window size changes
 # @suppress {checkTypes}
-# @param [Element] frame
-# @param [Element...] canvases
-# @param [Number] width
-# @param [Number] height
 updateCanvases = (frame, canvases..., width, height) ->
   frameWidth = width
   frameHeight = height

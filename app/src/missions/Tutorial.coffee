@@ -102,6 +102,10 @@ class Tutorial extends Mission
   destroy: ->
     cameraHudFrame.removeChild(@m1)
     cameraHudFrame.removeChild(@m2)
+    cameraHudFrame.removeChild(@m3)
+    cameraHudFrame.removeChild(@m4)
+    cameraHudFrame.removeChild(@m5)
+    cameraHudFrame.removeChild(@m6)
     cameraHudFrame.removeChild(@skipButton)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
@@ -141,10 +145,14 @@ class Tutorial extends Mission
       () =>
         @m5.close()
         @m6.open()
+      250, 65
     )
 
-    @m6 = @_getM("We already have a probe so lets make a colony ship.",
+    @m6 = @_getM("We already have a probe so lets make a colony ship. " +
+                 "***End of walk through for now, press Skip to go to the last " +
+                 "part of the tutorial***",
       null
+      300, 65
     )
 
     @skipButton = @createSkipButton(

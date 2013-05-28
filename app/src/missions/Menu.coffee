@@ -19,11 +19,11 @@ class Menu extends Mission
 
     # Create planets:
     newGame(10000, 10000, true)
-    @Names = ["Home", "Mission", "Extermination",
+    @Names = ["Home", "Tutorial", "Extermination",
               "Small", "Medium", "Large", "Credits"]
     @Planets =
       Home: new Planet(@settings.home.x, @settings.home.y)
-      Mission: new Planet(@settings.mission.x, @settings.mission.y)
+      Tutorial: new Planet(@settings.mission.x, @settings.mission.y)
       Extermination: new Planet(@settings.extermination.x,
                                 @settings.extermination.y)
       Small: new Planet(@settings.small.x, @settings.small.y)
@@ -33,7 +33,7 @@ class Menu extends Mission
 
     # Add planets to game
     game.addPlanet(@Planets.Home)
-    game.addPlanet(@Planets.Mission)
+    game.addPlanet(@Planets.Tutorial)
     game.addPlanet(@Planets.Extermination)
     game.addPlanet(@Planets.Small)
     game.addPlanet(@Planets.Medium)
@@ -42,7 +42,7 @@ class Menu extends Mission
 
     # Add connections to game
     #game.setNeighbors(@Planets.Home, @Planets.Missions)
-    game.setNeighbors(@Planets.Home, @Planets.Mission)
+    game.setNeighbors(@Planets.Home, @Planets.Tutorial)
     game.setNeighbors(@Planets.Home, @Planets.Extermination)
     game.setNeighbors(@Planets.Home, @Planets.Credits)
     game.setNeighbors(@Planets.Extermination, @Planets.Small)
@@ -217,7 +217,7 @@ class Menu extends Mission
   _checkMissions: (p) ->
     @lastPlanet = p
     if p.sprite() != SpriteNames.PLANET_BLUE_FUNGUS
-      if @lastPlanet == @Planets.Mission
+      if @lastPlanet == @Planets.Tutorial
         Logger.logEvent("Showing mission menu")
         @missionMenu.open()
       else

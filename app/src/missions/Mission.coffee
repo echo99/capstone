@@ -325,8 +325,9 @@ class Mission
     y = -camera.height / 2 + menu.h / 2 + 5
     menuButton = new Elements.Button(x, y, menu.w, menu.h)
     menuButton.setClearFunc((ctx) =>
-      ctx.clearRect(menuButton.x - menuButton.w / 2,
-                    menuButton.y - menuButton.h / 2,
+      loc = {x: menuButton.x+camera.width / 2, y: menuButton.y + camera.height / 2}
+      ctx.clearRect(loc.x - menuButton.w / 2,
+                    loc.y - menuButton.h / 2,
                     menuButton.w, menuButton.h)
     )
     menuButton.setClickHandler(() =>
@@ -410,7 +411,7 @@ class Mission
     map = {}
     map.planets = []
 
-    p0 = new Planet(0,0, 10, 2)
+    p0 = new Planet(0, 0, 10, 2)
     game.addPlanet(p0)
 
     p1 = new Planet(600, 10, 30, 2)
@@ -419,22 +420,22 @@ class Mission
     p2 = new Planet(300, 500, 30, 1)
     game.addPlanet(p2)
 
-    p3 = new Planet(-200, 500)
+    p3 = new Planet(-200, 500, 11, 1)
     game.addPlanet(p3)
 
-    p4 = new Planet(900, 500)
+    p4 = new Planet(900, 500, 33, 1)
     game.addPlanet(p4)
 
-    p5 = new Planet(50, 1000)
+    p5 = new Planet(50, 1000, 19, 1)
     game.addPlanet(p5)
 
-    p6 = new Planet(-200, 1500)
+    p6 = new Planet(-200, 1500, 17, 1)
     game.addPlanet(p6)
 
-    p7 = new Planet(300, 1500)
+    p7 = new Planet(300, 1500, 34, 1)
     game.addPlanet(p7)
 
-    p8 = new Planet(-200, 2000)
+    p8 = new Planet(-200, 2000, 15, 1)
     game.addPlanet(p8)
 
     p9 = new Planet(300, 2200, 10, 1)
@@ -443,16 +444,16 @@ class Mission
     p10 = new Planet(-100, 2500, 20, 1)
     game.addPlanet(p10)
 
-    p11 = new Planet(400, 2700)
+    p11 = new Planet(400, 2700, 16, 1)
     game.addPlanet(p11)
 
-    p12 = new Planet(900, 3200)
+    p12 = new Planet(900, 3200, 42, 1)
     game.addPlanet(p12)
 
-    p13 = new Planet(1300, 3700)
+    p13 = new Planet(1300, 3700, 64, 1)
     game.addPlanet(p13)
 
-    p14 = new Planet(1700, 4000)
+    p14 = new Planet(1700, 4000, 1, 1)
     game.addPlanet(p14)
 
     game.setNeighbors(p0, p1)

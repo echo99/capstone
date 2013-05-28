@@ -373,7 +373,7 @@ root.config =
       menu:
         w: 300
         h: 100
-        message: "Mission\n\n" +
+        message: "Tutorial\n\n" +
                  "Estimated Time: 5-10 minutes"
         textAlign: 'left'
         vAlign: 'top'
