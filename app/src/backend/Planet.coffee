@@ -53,6 +53,7 @@ class Planet
       outpostLost: false
       stationLost: false
     }
+    @_fungusReport = []
 
   # GETTERS #
 
@@ -460,12 +461,26 @@ class Planet
     if @_resources < 0
       @_resources = 0
 
-  # Fungus growth phase 1.
-  # Determines growth and sporing for next turn.
+  # Fungus growth phase 1a.
+  # Determines growth for next turn.
   #
-  growPass1: ->
-    if @_fungusStrength > 0
-      @_fungusStrength += root.config.units.fungus.growthPerTurn
+  growPass1a: ->
+    @_fungusReport = []
+    if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
+        @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
+      null # No sporing or growing.
+    else if @_fungusStrength < @_fungusMaximumStrength
+      # Grow
+      @_fungusArriving += root.config.units.fungus.growthPerTurn
+      @_fungusArriving += if Math.random() <
+          root.config.units.fungus.growthChancePerTurn then 1 else 0
+      @_fungusReport.push({to: this, val: @_fungusArriving})
+  
+  # Fungus growth phase 1b.
+  # Determines sporing for next turn.
+  #
+  growPass1b: ->
+    toMap = {}
     if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
         @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
       null # No sporing or growing.
@@ -481,13 +496,15 @@ class Planet
           # but it should be okay
           planet._fungusArriving++
           @_fungusLeaving++
+          if planet.toString not in toMap
+            toMap[planet.toString] = {to: planet, val: 0}
+          prev = toMap[planet.toString]
+          toMap[planet.toString] = {to: prev.to, val: prev.val + 1}
           # console.log "#{planet._fungusStrength} - #{planet._fungusLeaving} " +
           #   "+ #{planet._fungusArriving} ?= #{planet._fungusMaximumStrength}"
-    else if @_fungusStrength < @_fungusMaximumStrength
-      # Grow
-      @_fungusArriving += if Math.random() <
-          root.config.units.fungus.growthChancePerTurn then 1 else 0
-
+    for planetString, record of toMap
+      @_fungusReport.push(record)
+  
   # Fungus growth phase 2.
   # Applies fungus changes determined from pass 1.
   # Resets the "maximum fungus strength on this planet" counter
@@ -838,9 +855,9 @@ class Planet
   # Creates a two-way link between this planet and another.
   #
   # @param [Planet] otherPlanet The planet to connect to @.
-  addNeighbor: (otherplanet) ->
-    @_adjacentPlanets.push(otherplanet)
-    otherplanet._adjacentPlanets.push(@)
+  addNeighbor: (otherPlanet) ->
+    @_adjacentPlanets.push(otherPlanet)
+    otherPlanet._adjacentPlanets.push(@)
 
   # HELPER FUNCTIONS #
 

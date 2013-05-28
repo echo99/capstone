@@ -114,7 +114,8 @@ class Game
     planet.resolveCombat() for planet in @_planets
     planet._fungusMaximumStrength = 0 for planet in @_planets
     planet.growPass3() for planet in @_planets
-    planet.growPass1() for planet in @_planets
+    planet.growPass1a() for planet in @_planets
+    planet.growPass1b() for planet in @_planets
     planet.growPass2() for planet in @_planets
     planet.growPass3() for planet in @_planets
     planet.buildUpkeep() for planet in @_planets
