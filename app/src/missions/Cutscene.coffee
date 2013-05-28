@@ -15,9 +15,9 @@ class Cutscene extends Mission
     @gameEnded = false
     ga('send', {
       'hitType': 'event',
-      'eventCategory': 'The Mission',
+      'eventCategory': 'The Mission Cutscene',
       'eventAction': 'Start'
-      'dimension1': 'The Mission',
+      'dimension1': 'The Mission Cutscene',
       'metric1': 1
     })
     Math.random = randSave

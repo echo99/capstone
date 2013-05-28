@@ -585,7 +585,8 @@ main = ->
       prevPos = {x: e.clientX, y: e.clientY}
       mousedown = true
 
-    e.preventDefault()
+    if e.preventDefault
+      e.preventDefault()
 
   mouseUpHandler = (e) ->
     if recording
