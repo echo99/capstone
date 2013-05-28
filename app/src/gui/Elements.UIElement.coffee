@@ -507,10 +507,23 @@ class Elements.UIElement extends Module
   #
   clear: (ctx, coords=null, zoom=1.0) ->
     # @dirty = false
+    @_parent?.updateChild(this)
     if coords is null
       @_clearFunc?(ctx)
     else
       @_clearFunc?(ctx, coords, zoom)
+
+  # Function to call when a child element is updated to see if anything needs to be
+  # redrawn
+  #
+  # @paramm [Elements.UIElement] elem
+  updateChild: (elem) ->
+    for child in children
+      if child.intersectsElement(elem)
+        child.setDirty(false)
+        @_hasDirtyChildren = true
+    if @_hasDirtyChildren
+      @_parent?._handleDirtyChild(this)
 
   # Set this element and all child elements to dirty
   #
