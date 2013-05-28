@@ -122,6 +122,6 @@ class ControlGroup
   #
   # @return [String] A string representing this ControlGroup.
   toString: ->
-    return "ControlGroup(id: [#{@_id}] route: [#{@_route}])"
+    return "ControlGroup(route: [#{@_route}])"
 
 root.ControlGroup = ControlGroup

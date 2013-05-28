@@ -373,6 +373,7 @@ class UserInterface
     button.setProperty("location",
       @stationMenu.getActualLocation(button.x, button.y))
     button.setClickHandler(() =>
+      ###
       if (probes and
           @selectedPlanet.numShips(window.config.units.probe) < unit.cost) or
           (not probes and @selectedPlanet.availableResources() < unit.cost)
@@ -386,6 +387,15 @@ class UserInterface
             @unitSelection.updateSelection(@selectedPlanet)
         else
           @selectedPlanet.build(unit)
+      ###
+      if unit == window.config.structures.station
+        @selectedPlanet.scheduleStation()
+      else if unit == window.config.structures.outpost
+        @selectedPlanet.scheduleOutpost()
+        if probes
+          @unitSelection.updateSelection(@selectedPlanet)
+      else
+        @selectedPlanet.build(unit)
     )
     button.setDrawFunc((ctx) =>
       loc = button.getProperty("location")
@@ -1602,8 +1612,10 @@ class UserInterface
     @lookingToSendResources = false
 
     combatStyle = window.config.combatStyle
+    fungusMoveStyle = window.config.fungusMoveStyle
     for p in game.getPlanets()
       report = p.getCombatReport()
+      pLoc = p.location()
       #vis = p.visibility()
       if (p.fungusOnPlanet() or report.fungusLost) and
          (p.humansOnPlanet() or report.probesLost or
@@ -1611,7 +1623,6 @@ class UserInterface
                                 report.attackShipsLost or
                                 report.defenseShipsLost)
          #vis == window.config.visibility.visible
-        pLoc = p.location()
 
         s = {x: pLoc.x + combatStyle.fungusLoc.x,
         y: pLoc.y + combatStyle.fungusLoc.y}
@@ -1649,8 +1660,29 @@ class UserInterface
           @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
             @_getDrawDamage(-report.defenseShipsLost, combatStyle.bad)))
 
+      report = p._fungusReport
+      for f in report
+        console.log(report)
+        if p == f.to
+          s = {x: pLoc.x + 70, y: pLoc.y - 70}
+          e = {x: pLoc.x + 70, y: pLoc.y - 200}
+        else
+          s = {x: pLoc.x, y: pLoc.y}
+          e = {x: f.to.location().x, y: f.to.location().y}
+        @movingElements.push(new MovingElement(s, e, fungusMoveStyle.speed,
+          @_getDrawDamage(f.val, fungusMoveStyle)))
+
   refreshEndTurnButton: ->
     @endTurnButton.setDirty()
+
+  _getFungusMove: (amount, style) ->
+    return (ctx, loc) =>
+      ctx.setFont(style.fontObj)
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = style.color
+      ctx.fillText(amount, loc.x, loc.y)
+
 
   _getDrawDamage: (damage, style) ->
     text = ""

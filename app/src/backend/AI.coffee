@@ -8,9 +8,9 @@ if exports?
 AI =
   # Finds a path based on a breadth first search
   #
-  # @param [Planet] start Current planet.
-  # @param [Planet] finish Destination planet.
-  # @param [boolean] avoidFungus Whether fungus-owned planets should be avoided.
+  # @param [Planet] start Start planet.
+  # @param [Planet] finish Finish planet.
+  # @param [Boolean] avoidFungus Whether fungus nodes should be included.
   getPath:(start, finish, avoidFungus = false) ->
     route = []
     q = []
