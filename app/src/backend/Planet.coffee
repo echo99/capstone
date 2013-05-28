@@ -233,8 +233,14 @@ class Planet
   # @return [] A representation of the fungus growth and
   #            sporing that occured on the last turn for this planet.
   getFungusReport: ->
-  getFungusReport: ->
     return @_fungusReport
+
+  # Returns the build queue.
+  #
+  # @return [] The current build queue.
+  #
+  getBuildQueue: ->
+    return @_buildQueue
 
   # SETTERS FOR USE BY GUI #
 
@@ -502,16 +508,11 @@ class Planet
           # but it should be okay
           planet._fungusArriving++
           @_fungusLeaving++
-          if planet.toString not in toMap
+          if planet.toString() not of toMap
             toMap[planet.toString()] = {to: planet, val: 0}
-          prev = toMap[planet.toString()]
-          toMap[planet.toString()] = {to: prev.to, val: prev.val + 1}
+          toMap[planet.toString()].val++
           # console.log "#{planet._fungusStrength} - #{planet._fungusLeaving} " +
           #   "+ #{planet._fungusArriving} ?= #{planet._fungusMaximumStrength}"
-    temp = ""
-    for planet, record of toMap
-      temp += "(" + record.to.toString() + ", " + record.val + ") "
-    console.log @_fungusLeaving + " " + temp
     for planetString, record of toMap
       @_fungusReport.push(record)
 
@@ -678,12 +679,12 @@ class Planet
                 @moveShips(0, 1, 0, 0, @_sendingUnitsTo)
               else throw new Error("Ship type unknown.")
     if @_buildQueue.length > 0
-      unit = buildQueue[0]
+      unit = @_buildQueue[0]
       if @_unitConstructing == null and @_turnsToComplete == 0 and @_availableResources >= unit.cost
         @_unitConstructing = unit
         @_availableResources -= unit.cost
         @_turnsToComplete = unit.turns
-        buildQueue.shift()
+        @_buildQueue.shift()
 
   # Create new resource carriers if sending and can afford it.
   # If there is not currently a path without fungus then stops sending.
