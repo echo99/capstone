@@ -100,6 +100,11 @@ class Tutorial extends Mission
     @startTime = currentTime()
 
   destroy: ->
+    @select_probe_1_arrow.destroy()
+    @move_probe_1_arrow.destroy()
+    @select_home_1_arrow.destroy()
+    @build_probe_arrow.destroy()
+    @endArrow.destroy()
     cameraHudFrame.removeChild(@m1)
     cameraHudFrame.removeChild(@m2)
     cameraHudFrame.removeChild(@m3)
