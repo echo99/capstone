@@ -139,7 +139,8 @@ _codoToJsdoc = (file, classes, superclasses) ->
               console.error commentBuffer
               console.error "Line: #{i}"
               console.error line
-            if commLine.indexOf(paramName) > 0
+            # if commLine.indexOf(paramName) > 0
+            if commLine.match(new RegExp('\\}\\s+' + paramName))
               foundDef = true
               # debug "Found #{paramName} in '#{commLine}'"
               commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
@@ -147,7 +148,10 @@ _codoToJsdoc = (file, classes, superclasses) ->
                 commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
               break
         unless foundDef
-          type = if paramDefault is 'null' then '?*=' else '*='
+          defaultType = '*='
+          if paramDefault.match(/^[0-9]+(?:.[0-9]+)?$/)
+            defaultType = 'number='
+          type = if paramDefault is 'null' then '?'+defaultType else defaultType
           newLines.push(indentStr + "* @param {#{type}} #{paramName}\n")
         commentBuffer.push.apply(commentBuffer, newLines)
 
