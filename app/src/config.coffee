@@ -79,7 +79,7 @@ root.config =
     defenseLoc: {x: -80, y: 150}
   fungusMoveStyle:
     fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
-    color: "rgba(255, 0, 0, 1)"
+    color: "rgba(255, 255, 0, 1)"
     speed: 3
   connectionStyle:
     normal:

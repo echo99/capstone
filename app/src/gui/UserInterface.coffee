@@ -1683,15 +1683,16 @@ class UserInterface
 
       report = p._fungusReport
       for f in report
-        console.log(report)
-        if p == f.to
-          s = {x: pLoc.x + 70, y: pLoc.y - 70}
-          e = {x: pLoc.x + 70, y: pLoc.y - 200}
-        else
-          s = {x: pLoc.x, y: pLoc.y}
-          e = {x: f.to.location().x, y: f.to.location().y}
-        @movingElements.push(new MovingElement(s, e, fungusMoveStyle.speed,
-          @_getDrawDamage(f.val, fungusMoveStyle)))
+        if p.visibility() == window.config.visibility.visible and
+           f.to.visibility() == window.config.visibility.visible
+          if p == f.to
+            s = {x: pLoc.x + 70, y: pLoc.y - 70}
+            e = {x: pLoc.x + 70, y: pLoc.y - 200}
+          else
+            s = {x: pLoc.x, y: pLoc.y}
+            e = {x: f.to.location().x, y: f.to.location().y}
+          @movingElements.push(new MovingElement(s, e, fungusMoveStyle.speed,
+            @_getDrawDamage(f.val, fungusMoveStyle)))
 
   refreshEndTurnButton: ->
     @endTurnButton.setDirty()
