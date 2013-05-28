@@ -678,12 +678,12 @@ class Planet
                 @moveShips(0, 1, 0, 0, @_sendingUnitsTo)
               else throw new Error("Ship type unknown.")
     if @_buildQueue.length > 0
-      unit = buildQueue[0]
+      unit = @_buildQueue[0]
       if @_unitConstructing == null and @_turnsToComplete == 0 and @_availableResources >= unit.cost
         @_unitConstructing = unit
         @_availableResources -= unit.cost
         @_turnsToComplete = unit.turns
-        buildQueue.shift()
+        @_buildQueue.shift()
 
   # Create new resource carriers if sending and can afford it.
   # If there is not currently a path without fungus then stops sending.

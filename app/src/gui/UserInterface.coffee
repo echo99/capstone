@@ -92,25 +92,25 @@ class UserInterface
     x = stationStyle.vert1x + winStyle.lineWidth
     y = winStyle.lineWidth / 2
     w = (stationStyle.vert2x - winStyle.lineWidth / 2) - x
-    h = (stationStyle.height / 2 - winStyle.lineWidth / 2) - y
+    h = (stationStyle.horiz1y - winStyle.lineWidth / 2) - y
     probeButton = @_getStationButton(x, y, w, h, window.config.units.probe)
 
     x = stationStyle.vert1x + winStyle.lineWidth
-    y = stationStyle.height / 2 + winStyle.lineWidth / 2
+    y = stationStyle.horiz1y + winStyle.lineWidth / 2
     w = (stationStyle.vert2x - winStyle.lineWidth / 2) - x
-    h = (stationStyle.height - winStyle.lineWidth / 2) - y
+    h = (stationStyle.horiz2y - winStyle.lineWidth / 2) - y
     colonyButton = @_getStationButton(x, y, w, h, window.config.units.colonyShip)
 
     x = stationStyle.vert2x + winStyle.lineWidth / 2
     y = winStyle.lineWidth / 2
-    w = (stationStyle.vert3x - winStyle.lineWidth / 2) - x
-    h = (stationStyle.height / 2 - winStyle.lineWidth / 2) - y
+    w = (stationStyle.width - winStyle.lineWidth / 2) - x
+    h = (stationStyle.horiz1y - winStyle.lineWidth / 2) - y
     attackButton = @_getStationButton(x, y, w, h, window.config.units.attackShip)
 
     x = stationStyle.vert2x + winStyle.lineWidth / 2
-    y = stationStyle.height / 2 + winStyle.lineWidth / 2
-    w = (stationStyle.vert3x - winStyle.lineWidth / 2) - x
-    h = (stationStyle.height - winStyle.lineWidth / 2) - y
+    y = stationStyle.horiz1y + winStyle.lineWidth / 2
+    w = (stationStyle.width - winStyle.lineWidth / 2) - x
+    h = (stationStyle.horiz2y - winStyle.lineWidth / 2) - y
     defenseButton = @_getStationButton(x, y, w, h, window.config.units.defenseShip)
 
     x = stationStyle.rallyLoc.x
@@ -449,20 +449,21 @@ class UserInterface
 
     # Draw dividers
     ctx.beginPath()
-    ctx.moveTo(loc.x, loc.y+h/2)
-    ctx.lineTo(loc.x+stationStyle.horizLength, loc.y+h/2)
+    ctx.moveTo(loc.x, loc.y+stationStyle.horiz1y)
+    ctx.lineTo(loc.x+w, loc.y+stationStyle.horiz1y)
+
+    ctx.moveTo(loc.x, loc.y+stationStyle.horiz2y)
+    ctx.lineTo(loc.x+w, loc.y+stationStyle.horiz2y)
 
     ctx.moveTo(loc.x+stationStyle.vert2x, loc.y)
-    ctx.lineTo(loc.x+stationStyle.vert2x, loc.y+h)
+    ctx.lineTo(loc.x+stationStyle.vert2x, loc.y+stationStyle.horiz2y)
 
-    ctx.moveTo(loc.x+stationStyle.vert3x, loc.y)
-    ctx.lineTo(loc.x+stationStyle.vert3x, loc.y+h)
     ctx.stroke()
 
     ctx.lineWidth = winStyle.lineWidth * 2
     ctx.beginPath()
     ctx.moveTo(loc.x+stationStyle.vert1x, loc.y)
-    ctx.lineTo(loc.x+stationStyle.vert1x, loc.y+h)
+    ctx.lineTo(loc.x+stationStyle.vert1x, loc.y+stationStyle.horiz2y)
     ctx.stroke()
 
     # Draw title block
@@ -506,6 +507,26 @@ class UserInterface
 
     @_drawUnitBlock(ctx, "Defense Ship", loc, window.config.units.defenseShip,
                     stationStyle.defense, SpriteNames.DEFENSE_SHIP)
+
+    # Draw queue block
+    x = loc.x+stationStyle.queueLoc.x
+    y = loc.y+stationStyle.queueLoc.y
+    ctx.fillText("Build queue:", x, y)
+
+    x = stationStyle.queueButtonLoc.x + loc.x
+    y = stationStyle.queueButtonLoc.y + loc.y
+    for unit in @selectedPlanet._buildQueue
+      switch unit
+        when window.config.units.probe
+          sprite = window.config.spriteNames.PROBE
+        when window.config.units.colonyShip
+          sprite = window.config.spriteNames.COLONY_SHIP
+        when window.config.units.attackShip
+          sprite = window.config.spriteNames.ATTACK_SHIP
+        when window.config.units.defenseShip
+          sprite = window.config.spriteNames.DEFENSE_SHIP
+      SHEET.drawSprite(sprite, x, y, ctx, false, stationStyle.queueButtonSize / 32)
+      x += stationStyle.queueButtonSize + stationStyle.queueButtonGap
 
     # Draw variables
     ctx.fillStyle = winStyle.defaultText.value

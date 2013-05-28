@@ -164,15 +164,22 @@ root.config =
     probeHeight: 80
   stationMenuStyle:
     location: {x: 120, y: 5}
-    width: 520
-    height: 140
-    horizLength: 435
+    width: 435 #520
+    height: 175
+    horiz1y: 70
+    horiz2y: 140
+    #horizLength: 435
     vert1x: 210
     vert2x: 322
-    vert3x: 435
+    #vert3x: 435
     titleLoc: {x: 10, y: 10}
     availableLoc: {x: 10, y: 45}
     buildingLoc: {x: 10, y: 80}
+    queueLoc: {x: 10, y: 150}
+    queueButtonLoc: {x: 100, y: 157}
+    queueButtonSize: 20
+    queueButtonCount: 13
+    queueButtonGap: 6
     cancelLoc: {x: 60, y: 125}
     cancelSize: {w: 60, h: 20}
     probe:
