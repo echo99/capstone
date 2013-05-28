@@ -54,6 +54,7 @@ class Planet
       stationLost: false
     }
     @_fungusReport = []
+    @_buildQueue = []
 
   # GETTERS #
 
@@ -227,6 +228,14 @@ class Planet
   getCombatReport: ->
     return @_combatReport
 
+  # Returns the combat report for the last turn.
+  #
+  # @return [] A representation of the fungus growth and
+  #            sporing that occured on the last turn for this planet.
+  getFungusReport: ->
+  getFungusReport: ->
+    return @_fungusReport
+
   # SETTERS FOR USE BY GUI #
 
   # Set sprite
@@ -337,6 +346,8 @@ class Planet
   #
   # @throw [Error] if the unit is not valid or there is not enough resources.
   scheduleUnit: (unit) ->
+    if @_unitConstructing != null
+      throw new Error("Another unit is currently being built.")
     if isStructure == undefined
       throw new Error("This is not a unit.")
     if isStructure
@@ -468,8 +479,9 @@ class Planet
       @_fungusArriving += root.config.units.fungus.growthPerTurn
       @_fungusArriving += if Math.random() <
           root.config.units.fungus.growthChancePerTurn then 1 else 0
-      @_fungusReport.push({to: this, val: @_fungusArriving})
-  
+      if @_fungusArriving > 0
+        @_fungusReport.push({to: this, val: @_fungusArriving})
+
   # Fungus growth phase 1b.
   # Determines sporing for next turn.
   #
@@ -491,14 +503,18 @@ class Planet
           planet._fungusArriving++
           @_fungusLeaving++
           if planet.toString not in toMap
-            toMap[planet.toString] = {to: planet, val: 0}
-          prev = toMap[planet.toString]
-          toMap[planet.toString] = {to: prev.to, val: prev.val + 1}
+            toMap[planet.toString()] = {to: planet, val: 0}
+          prev = toMap[planet.toString()]
+          toMap[planet.toString()] = {to: prev.to, val: prev.val + 1}
           # console.log "#{planet._fungusStrength} - #{planet._fungusLeaving} " +
           #   "+ #{planet._fungusArriving} ?= #{planet._fungusMaximumStrength}"
+    temp = ""
+    for planet, record of toMap
+      temp += "(" + record.to.toString() + ", " + record.val + ") "
+    console.log @_fungusLeaving + " " + temp
     for planetString, record of toMap
       @_fungusReport.push(record)
-  
+
   # Fungus growth phase 2.
   # Applies fungus changes determined from pass 1.
   # Resets the "maximum fungus strength on this planet" counter
@@ -621,6 +637,7 @@ class Planet
       @_outpost = false
       @_turnsToComplete = 0
       @_unitConstructing = null
+      @_buildQueue = []
 
   # Build upkeep method.
   # Called at the end of turn to advance building on the unit under
@@ -660,6 +677,13 @@ class Planet
               when root.config.units.defenseShip
                 @moveShips(0, 1, 0, 0, @_sendingUnitsTo)
               else throw new Error("Ship type unknown.")
+    if @_buildQueue.length > 0
+      unit = buildQueue[0]
+      if @_unitConstructing == null and @_turnsToComplete == 0 and @_availableResources >= unit.cost
+        @_unitConstructing = unit
+        @_availableResources -= unit.cost
+        @_turnsToComplete = unit.turns
+        buildQueue.shift()
 
   # Create new resource carriers if sending and can afford it.
   # If there is not currently a path without fungus then stops sending.
@@ -789,23 +813,46 @@ class Planet
   # INGAME COMMANDS #
 
   # Causes a unit to be built, sets relevant fields.
+  # If the unit cannot be built immediately, it goes onto a build queue.
   #
-  # @param [String] name The type of unit to be built.
+  # @param [String] unit The type of unit to be built.
   #
   # @throw [Error] If there is no station.
   # @throw [Error] If construction is already under way.
   # @throw [Error] If there are not enough resources.
-  build: (name) ->
-    if @_station == false
+  build: (unit) ->
+    if unit.isStructure
+      throw new Error("Structures cannot be built using this function.")
+    else if @_station == false
+      throw new Error("Planet has no station to build ships.")
+    else if @_unitConstructing != null or @_turnsToComplete != 0 or @_availableResources < unit.cost
+      @_buildQueue.push(unit)
+    else
+      @_unitConstructing = unit
+      @_availableResources -= unit.cost
+      @_turnsToComplete = unit.turns
+
+  # Causes a unit to be built, sets relevant fields.
+  # Fails if this unit cannot be scheduled immediately.
+  #
+  # @param [String] unit The type of unit to be built.
+  #
+  # @throw [Error] If there is no station.
+  # @throw [Error] If construction is already under way.
+  # @throw [Error] If there are not enough resources.
+  buildNoQueue: (unit) ->
+    if unit.isStructure
+      throw new Error("Structures cannot be built using this function.")
+    else if @_station == false
       throw new Error("Planet has no station to build ships.")
     else if @_unitConstructing != null or @_turnsToComplete != 0
       throw new Error("Planet is already constructing something else.")
-    else if @_availableResources < name.cost
+    else if @_availableResources < unit.cost
       throw new Error("Not enough available resources.")
     else
-      @_unitConstructing = name
-      @_availableResources -= name.cost
-      @_turnsToComplete = name.turns
+      @_unitConstructing = unit
+      @_availableResources -= unit.cost
+      @_turnsToComplete = unit.turns
 
 
   # Creates a control group at the current planet.
