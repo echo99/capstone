@@ -518,7 +518,7 @@ class Elements.UIElement extends Module
   #
   # @paramm [Elements.UIElement] elem
   updateChild: (elem) ->
-    for child in children
+    for child in @_children
       if child.intersectsElement(elem)
         child.setDirty(false)
         @_hasDirtyChildren = true
