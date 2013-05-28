@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null
+playback = ""
 ###
 $.getJSON('recorded_games/replay.json', {}, (data) ->
   console.log("data: ", data.file)
@@ -148,14 +148,15 @@ determineWin7 = ->
 determineWin7()
 
 newMission = (mission, desc=false) ->
-  CurrentMission.destroy()
-  UI.destroy()
-  if UI == null
-    UI = new UserInterface()
+  if CurrentMission
+    CurrentMission.destroy()
+    UI.destroy()
+    if UI == null
+      UI = new UserInterface()
   CurrentMission = new mission(desc)
   #window.onresize()
 
-newGame = (w, h, move) ->
+newGame = (w, h, move=false) ->
   game = new Game(w, h, move)
 
 endTurn = () ->
@@ -209,7 +210,7 @@ updateCanvases = (frame, canvases..., width, height) ->
 main = ->
   seed = Math.seedrandom()
   recording = false
-  if playback != null
+  if playback
     eventPlay = new EventPlayback(playback)
   else if Math.random() < RECORD_CHANCE
     window.player_id = currentTime()
@@ -304,7 +305,7 @@ main = ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
   UI = new UserInterface()
-  CurrentMission = new Menu()
+  CurrentMission = newMission(Menu)#new Menu()
 
   sheet = SHEET
   if sheet == null

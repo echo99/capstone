@@ -1,4 +1,5 @@
 #_require Mission
+#_require ../util/ArrowElement
 
 class Tutorial extends Mission
   # @see Mission#reset
@@ -60,9 +61,41 @@ class Tutorial extends Mission
     @phases =
       INTRO: 0
       MOVE: 1
-      STEP_1: 2
+      TUT: 2
+      #SELECT_PROBE_1: 3
+      #MOVE_PROBE_1: 4
+      END: 100
 
     @phase = @phases.INTRO
+
+    h = @home.location()
+    @select_probe_1_arrow = new ArrowElement(
+      {x: h.x - 250, y: h.y - 100},
+      {x: h.x - 300, y: h.y - 150}, 5, 30)
+    @select_probe_1_arrow.close()
+
+    p = @map.planets[3].location()
+    @move_probe_1_arrow = new ArrowElement(
+      {x: p.x - 75, y: p.y - 75},
+      {x: p.x - 125, y: p.y - 125}, 5, 30)
+    @move_probe_1_arrow.close()
+
+    @select_home_1_arrow = new ArrowElement(
+      {x: h.x - 75, y: h.y - 75},
+      {x: h.x - 125, y: h.y - 125}, 5, 30)
+    @select_home_1_arrow.close()
+
+    @build_probe_arrow = new ArrowElement(
+      {x: 350, y: 50},
+      {x: 300, y: 50}, 5, 30, true)
+    @build_probe_arrow.close()
+
+    @endArrow = new ArrowElement(
+      {x: 50, y: camera.height - 30},
+      {x: 50, y: camera.height - 30 - 50}, 3, 30, true)
+    @endArrow.close()
+
+    @currentArrow = null
 
     @startTime = currentTime()
 
@@ -90,9 +123,28 @@ class Tutorial extends Mission
                  "Zoom: Mouse wheel or +/-",
       () =>
         @m2.close()
-        @phase = @phases.STEP_1
-        UI.refreshEndTurnButton()
+        @m3.open()
+        @phase = @phases.TUT
       300, 80
+    )
+    @m3 = @_getM("In order to explore the map we need probes, lets move the one " +
+                 "we have and build another one.", null, 250, 65)
+    @m4 = @_getM("Notice that one of the Stations doesn't have many resources " +
+                  "remaining...",
+      () =>
+        @m4.close()
+        @m5.open()
+    )
+
+    @m5 = @_getM("This can be fixed with an Outpost, which requires a colony " +
+                 "ship and a probe to build...",
+      () =>
+        @m5.close()
+        @m6.open()
+    )
+
+    @m6 = @_getM("We already have a probe so lets make a colony ship.",
+      null
     )
 
     @skipButton = @createSkipButton(
@@ -113,10 +165,65 @@ class Tutorial extends Mission
 
   # @see Mission#onMouseClick
   onMouseClick: (x, y) ->
+    #switch @phase
+    #  when @phases.MOVE_PROBE_1
+    #    @_checkMoveProbeArrows()
+    if @phase > @phases.MOVE
+      switch UI.turns
+        when 0
+          @_checkMoveProbeArrows()
+        when 1
+          if not @m4.visible and not @m5.visible and not @m6.visible
+            @m3.close()
+            @m4.open()
+          @endArrow.close()
+
+    UI.refreshEndTurnButton()
+
+  _checkMoveProbeArrows: ->
+    if @_probeSelected()
+      @select_probe_1_arrow.close()
+      @move_probe_1_arrow.open()
+      @select_home_1_arrow.close()
+      @build_probe_arrow.close()
+      @endArrow.close()
+    else if @home.numShips(window.config.units.probe) > 0
+      @select_probe_1_arrow.open()
+      @move_probe_1_arrow.close()
+      @select_home_1_arrow.close()
+      @build_probe_arrow.close()
+      @endArrow.close()
+    else if UI.selectedPlanet != @home and not @home.isBuilding()
+      @select_probe_1_arrow.close()
+      @move_probe_1_arrow.close()
+      @select_home_1_arrow.open()
+      @build_probe_arrow.close()
+      @endArrow.close()
+    else if @home.buildUnit() != window.config.units.probe
+      @select_probe_1_arrow.close()
+      @move_probe_1_arrow.close()
+      @select_home_1_arrow.close()
+      @build_probe_arrow.open()
+      @endArrow.close()
+    else
+      @select_probe_1_arrow.close()
+      @move_probe_1_arrow.close()
+      @select_home_1_arrow.close()
+      @build_probe_arrow.close()
+      @endArrow.open()
+
+  _probeSelected: ->
+    for p in game.getPlanets()
+      units = p.unitSelection
+      for row in units.probes
+        for stack in row
+          if stack.isSelected() and stack.getCount() > 0
+            return true
 
   # @see Mission#canEndTurn
   canEndTurn: ->
-    @phase > @phases.MOVE
+    @endArrow.element.visible
+    #@phase > @phases.MOVE
 
   # @see Mission#canMove
   canMove: ->

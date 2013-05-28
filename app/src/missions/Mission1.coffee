@@ -222,7 +222,6 @@ class Mission1 extends Mission
       })
     cameraHudFrame.addChild(@foundA2Message)
 
-
   # @see Mission#draw
   draw: (ctx, hudCtx) ->
     switch @failure

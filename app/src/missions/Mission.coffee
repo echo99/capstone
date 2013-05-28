@@ -293,6 +293,10 @@ class Mission
 
     return menuBox
 
+  # @param [String] message
+  # @param [Function] onNext
+  # @param [Number] w
+  # @param [Number] h
   _getM: (message, onNext, w=250, h=50) ->
     m = new Elements.MessageBox(0, 200, w, h, message,
       {
@@ -303,13 +307,14 @@ class Mission
         visible: false
       })
 
-    next = new Elements.Button(w - 12, h - 12, 16, 16, onNext)
-    next.setDrawFunc(
-      (ctx) =>
-        loc = m.getActualLocation(next.x, next.y)
-        SHEET.drawSprite(SpriteNames.NEXT, loc.x, loc.y, ctx, false)
-    )
-    m.addChild(next)
+    if onNext != null
+      next = new Elements.Button(w - 12, h - 12, 16, 16, onNext)
+      next.setDrawFunc(
+        (ctx) =>
+          loc = m.getActualLocation(next.x, next.y)
+          SHEET.drawSprite(SpriteNames.NEXT, loc.x, loc.y, ctx, false)
+      )
+      m.addChild(next)
     cameraHudFrame.addChild(m)
 
     return m

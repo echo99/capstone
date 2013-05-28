@@ -1682,7 +1682,7 @@ class MovingElement
     @dir = {x: vec.x / @length * @speed, y: vec.y / @length * @speed}
     @element = new Elements.BoxElement(@current.x, @current.y, 0, 0)
     @element.setDrawFunc(@draw)
-    @element.setClearFunc(@clear)
+    #@element.setClearFunc(@clear)
     @element.visible = true
     gameFrame.addChild(@element)
 
