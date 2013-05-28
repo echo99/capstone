@@ -79,8 +79,8 @@ root.config =
     defenseLoc: {x: -80, y: 150}
   connectionStyle:
     normal:
-      visible: "rgba(128, 128, 128, 0.8)"
-      discovered: "rgba(128, 128, 128, 0.2)"
+      visible: "rgba(200, 200, 200, 0.8)"
+      discovered: "rgba(128, 128, 128, 0.5)"
       undiscovered: "rgba(128, 128, 128, 0.0)"
       stroke: "rgba(128, 128, 128, 0.5)"
       lineWidth: 2
@@ -123,6 +123,10 @@ root.config =
     color: "rgba(0, 255, 0, 0.8)"
     width: 2
     radius: 40
+  resourceTarget:
+    color: "rgba(0, 255, 255, 0.7)"
+    width: 2
+    radius: 30
   unitDisplay:
     location: {x: -220, y: -70}
     fill: "rgba(255, 255, 0, 0.5)"
@@ -233,6 +237,11 @@ root.config =
     PROBE: new AnimatedSprite(['probe.png'])
     PLANET_BLUE: new AnimatedSprite(['planet_blue.png'])
     PLANET_BLUE_FUNGUS: new AnimatedSprite(['planet_blue_fungus.png'])
+    PLANET_BLUE_FUNGUS_MAX: new AnimatedSprite(
+      ['planet_blue_fungus_max_1.png', 'planet_blue_fungus_max_2.png',
+       'planet_blue_fungus_max_3.png', 'planet_blue_fungus_max_4.png',
+       'planet_blue_fungus_max_5.png', 'planet_blue_fungus_max_6.png',
+       'planet_blue_fungus_max_7.png', 'planet_blue_fungus_max_8.png'], 1)
     PLANET_INVISIBLE: new AnimatedSprite(['planet_invisible.png'])
     PLANET_INVISIBLE_FUNGUS: new AnimatedSprite(['planet_invisible_fungus.png'])
     TITLE: new AnimatedSprite(['title.png'])
@@ -241,6 +250,7 @@ root.config =
     MUTED: new AnimatedSprite(['muted_button.png'])
     UNMUTED: new AnimatedSprite(['unmuted_button.png'])
     CLOSE: new AnimatedSprite(['close_button.png'])
+    NEXT: new AnimatedSprite(['next_button.png'])
     FEEDBACK: new AnimatedSprite(['feedback_button_hover.png'])
     OUTPOST_GATHERING: new AnimatedSprite(['outpost_buildings_gathering_1.png',
       'outpost_buildings_gathering_2.png'], 20)
@@ -297,6 +307,8 @@ root.config =
     RALLY_BUTTON_HOVER: new AnimatedSprite(['rally_button_hover.png'])
     NEXT_STATION_BUTTON_IDLE: new AnimatedSprite(['next_station_button_idle.png'])
     NEXT_STATION_BUTTON_HOVER: new AnimatedSprite(['next_station_button_hover.png'])
+    SKIP_BUTTON_IDLE: new AnimatedSprite(['skip_button_idle.png'])
+    SKIP_BUTTON_HOVER: new AnimatedSprite(['skip_button_hover.png'])
   Missions:
     w: 244
     h: 60
@@ -325,6 +337,9 @@ root.config =
     menu:
       w: 50
       h: 20
+    skip:
+      w: 42
+      h: 20
     #one:
     two:
       startingProbes: 7
@@ -352,6 +367,28 @@ root.config =
     missions:
       x: 0
       y: -400
+    mission:
+      x: 0
+      y: -400
+      menu:
+        w: 300
+        h: 100
+        message: "Tutorial\n\n" +
+                 "Estimated Time: 5-10 minutes"
+        textAlign: 'left'
+        vAlign: 'top'
+        font: "15px Arial"
+        lineHeight: 19
+        cancel:
+          x: 245
+          y: 100 - 15
+          w: 60
+          h: 20
+        start:
+          x: 145
+          y: 100 - 15
+          w: 101
+          h: 20
     mission1:
       x: -400
       y: -750

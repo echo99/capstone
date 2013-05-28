@@ -14,7 +14,7 @@
 RECORD_CHANCE = 1
 # Set playback to a string holding a file name that is a recorded game
 # to play that game back instead of playing the game yourself
-playback = null
+playback = ""
 ###
 $.getJSON('recorded_games/replay.json', {}, (data) ->
   console.log("data: ", data.file)
@@ -22,7 +22,7 @@ $.getJSON('recorded_games/replay.json', {}, (data) ->
 )
 ###
 
-window.player_id
+window.player_id = null
 
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
@@ -37,13 +37,10 @@ Browser =
 TESTING = window.TESTING?
 # debug("Testing flag: " + TESTING)
 
+# Other music:
+# - assets/audio/empty_space_stage1.ogg
+# - assets/audio/empty_space_stage2.ogg
 manifest = [
-  #   src: 'assets/audio/empty_space_stage1.ogg'
-  #   id: 'bgmusic1'
-  # ,
-  #   src: 'assets/audio/empty_space_stage2.ogg'
-  #   id: 'bgmusic2'
-  # ,
     src: 'assets/audio/dark_space.ogg|assets/audio/dark_space.mp3'
     id: 'bgmusic3'
 ]
@@ -67,7 +64,7 @@ createjs.Sound.registerManifest(manifest)
 
 # Load image and image data as soon as possible
 SHEET = null
-$.getJSON('assets/images/atlas.json', {}, (data) ->
+$.getJSON 'assets/images/atlas.json', {}, (data) ->
   SHEET = new SpriteSheet('assets/images/atlas.png')
   SHEET.loadImage ->
     as = new AtlasParser(SHEET, data)
@@ -75,7 +72,6 @@ $.getJSON('assets/images/atlas.json', {}, (data) ->
     IMAGE_LOADED = true
     if DOM_LOADED
       main()
-)
 
 # Execute after document is loaded
 $ ->
@@ -90,8 +86,16 @@ KeyCodes =
   MINUS: 189 # zoom out
   ADD: 107 # zoom in
   SUB: 109 # zoom out
-  STATION: 83 # select next idle station
+  STATION: 81 # select next idle station
   CHEAT: 67
+  W: 87 # move camera up
+  UP: 38 # move camera up
+  A: 65 # move left
+  LEFT: 37 # move left
+  S: 83 # move down
+  DOWN: 40 # move down
+  D: 68 # move right
+  RIGHT: 39 #move right
 
 cheat = false
 
@@ -144,21 +148,23 @@ determineWin7 = ->
 determineWin7()
 
 newMission = (mission, desc=false) ->
-  CurrentMission.destroy()
-  UI.destroy()
-  if UI == null
-    UI = new UserInterface()
+  if CurrentMission
+    CurrentMission.destroy()
+    UI.destroy()
+    if UI == null
+      UI = new UserInterface()
   CurrentMission = new mission(desc)
   #window.onresize()
 
-newGame = (w, h, move) ->
+newGame = (w, h, move=false) ->
   game = new Game(w, h, move)
 
 endTurn = () ->
   Logger.send()
-  game.endTurn()
-  UI.endTurn()
-  CurrentMission.onEndTurn()
+  if CurrentMission.canEndTurn()
+    game.endTurn()
+    UI.endTurn()
+    CurrentMission.onEndTurn()
 
 # Draw the background
 drawBackground = (ctx, spritesheet, name) ->
@@ -185,6 +191,7 @@ drawBackground = (ctx, spritesheet, name) ->
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 # Update the size of the frame and the canvases when the window size changes
+# @suppress {checkTypes}
 updateCanvases = (frame, canvases..., width, height) ->
   frameWidth = width
   frameHeight = height
@@ -199,7 +206,7 @@ updateCanvases = (frame, canvases..., width, height) ->
 main = ->
   seed = Math.seedrandom()
   recording = false
-  if playback != null
+  if playback
     eventPlay = new EventPlayback(playback)
   else if Math.random() < RECORD_CHANCE
     window.player_id = currentTime()
@@ -294,7 +301,7 @@ main = ->
   #   hudCtx.clearRect(msgBox.x-3, msgBox.y-3, msgBox.w+6, msgBox.h+6)
   #   msgBox.draw(hudCtx)
   UI = new UserInterface()
-  CurrentMission = new Menu()
+  CurrentMission = newMission(Menu)#new Menu()
 
   sheet = SHEET
   if sheet == null
@@ -424,24 +431,42 @@ main = ->
     if recording
       eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
 
-    if e.keyCode == KeyCodes.HOME
-      Logger.logEvent("Pressed HOME")
-      camera.setTarget(CurrentMission.getHomeTarget())
-    else if e.keyCode == KeyCodes.SPACE
-      Logger.logEvent("Pressed SPACE")
-      endTurn()
-    else if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
-      Logger.logEvent("Pressed +")
-      nz = camera.getZoom() + window.config.ZOOM_SPEED
-      camera.setZoom(nz)
-    else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
-      Logger.logEvent("Pressed -")
-      nz = camera.getZoom() - window.config.ZOOM_SPEED
-      camera.setZoom(nz)
-    else if e.keyCode == KeyCodes.STATION
-      Logger.logEvent("Pressed S")
-      UI.gotoNextStation()
-    #else if e.keyCode == KeyCodes.CHEAT
+    if CurrentMission.canPlay()
+      if e.keyCode == KeyCodes.HOME
+        Logger.logEvent("Pressed HOME")
+        camera.setTarget(CurrentMission.getHomeTarget())
+      else if e.keyCode == KeyCodes.STATION
+        Logger.logEvent("Pressed Q")
+        UI.gotoNextStation()
+
+    if CurrentMission.canEndTurn()
+      if e.keyCode == KeyCodes.SPACE
+        Logger.logEvent("Pressed SPACE")
+        endTurn()
+
+    if CurrentMission.canMove()
+      if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+        Logger.logEvent("Pressed +")
+        nz = camera.getZoom() + window.config.ZOOM_SPEED
+        camera.setZoom(nz)
+      else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+        Logger.logEvent("Pressed -")
+        nz = camera.getZoom() - window.config.ZOOM_SPEED
+        camera.setZoom(nz)
+      else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
+        Logger.logEvent("Pressed up")
+        camera.moveCameraByScreenDistance(0, 20)
+      else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
+        Logger.logEvent("Pressed left")
+        camera.moveCameraByScreenDistance(20, 0)
+      else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
+        Logger.logEvent("Pressed down")
+        camera.moveCameraByScreenDistance(0, -20)
+      else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
+        Logger.logEvent("Pressed right")
+        camera.moveCameraByScreenDistance(-20, 0)
+
+    #if e.keyCode == KeyCodes.CHEAT
     #  Logger.logEvent("Pressed CHEAT")
     #  cheat = not cheat
 
@@ -474,11 +499,14 @@ main = ->
     y = e.clientY
     UI.onMouseMove(x, y)
     CurrentMission.onMouseMove(x, y)
-    pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
+    if not CurrentMission.canPlay()
+      pointer = null
+    else
+      pointer = frameElement.mouseMove(x, y)#msgBox.mouseMove(x, y)
     if pointer is null
       # Nothing on HUD frame is being hovered over
       pointer = cameraHudFrame.mouseMove(x, y)
-      if pointer is null
+      if pointer is null and CurrentMission.canPlay()
         pointer = gameFrame.mouseMove(x, y)
       else
         gameFrame.mouseOut()
@@ -507,7 +535,8 @@ main = ->
       # camera.setPosition(coords.x, coords.y)
       # camera.setPosition(camera.x+difx/camera.zoom, camera.y+dify/camera.zoom)
 
-    mousepos = {x: x, y: y}
+    if CurrentMission.canMove()
+      mousepos = {x: x, y: y}
 
   clickHandler = (e) ->
     if recording
@@ -519,12 +548,16 @@ main = ->
     # msgBox.click(e.clientX, e.clientY)
     x = e.clientX
     y = e.clientY
-    if frameElement.click(x, y)
-      frameElement.mouseMove(x, y)
-    else if cameraHudFrame.click(x, y)
-      cameraHudFrame.mouseMove(x, y)
-    else if gameFrame.click(x, y)
-      gameFrame.mouseMove(x, y)
+    if CurrentMission.canPlay()
+      if frameElement.click(x, y)
+        frameElement.mouseMove(x, y)
+      else if cameraHudFrame.click(x, y)
+        cameraHudFrame.mouseMove(x, y)
+      else if gameFrame.click(x, y)
+        gameFrame.mouseMove(x, y)
+    else
+      if cameraHudFrame.click(x, y)
+        cameraHudFrame.mouseMove(x, y)
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
@@ -533,24 +566,41 @@ main = ->
       eventRec.recordEvent("mouseDown",
         {clientX: e.clientX, clientY: e.clientY})
 
-    if not frameElement.mouseDown(e.clientX, e.clientY) and
-        not cameraHudFrame.mouseDown(e.clientX, e.clientY)
+    # The order here is important
+    #  - cameraHudFrame always works
+    #  - the other frames only work if canPlay() is true
+    #  - if no frames are pressed then the camera is draged if canMove() is true
+    c = cameraHudFrame.mouseDown(e.clientX, e.clientY)
+
+    f = false
+    if not c and CurrentMission.canPlay()
+      f = frameElement.mouseDown(e.clientX, e.clientY)
+
+    g = false
+    if not c and not f and CurrentMission.canPlay()
+      g = gameFrame.mouseDown(e.clientX, e.clientY)
+
+    if not c and not f and not g and CurrentMission.canMove()
       drag = true
       prevPos = {x: e.clientX, y: e.clientY}
-      gameFrame.mouseDown(e.clientX, e.clientY)
+      mousedown = true
 
-    mousedown = true
+    if e.preventDefault
+      e.preventDefault()
 
   mouseUpHandler = (e) ->
     if recording
       eventRec.recordEvent("mouseUp", {})
 
-    drag = false
-    frameElement.mouseUp()
     cameraHudFrame.mouseUp()
-    gameFrame.mouseUp()
 
-    mousedown = false
+    if CurrentMission.canPlay()
+      frameElement.mouseUp()
+      gameFrame.mouseUp()
+
+    if CurrentMission.canMove()
+      drag = false
+      mousedown = false
 
   mouseOutHandler = (e) ->
     if recording
@@ -566,9 +616,10 @@ main = ->
       eventRec.recordEvent("mouseWheel",
         {wheelDelta: e.wheelDelta, detail: e.detail})
 
-    delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
-    nz = camera.zoom + delta * window.config.ZOOM_SPEED
-    camera.setZoom(nz)
+    if CurrentMission.canMove()
+      delta = Math.max(-1, Math.min(1, (e.wheelDelta or -e.detail)))
+      nz = camera.zoom + delta * window.config.ZOOM_SPEED
+      camera.setZoom(nz)
 
   #window.onresize = onResize
 
@@ -589,21 +640,30 @@ main = ->
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
   else
     window.onresize = onResize
-    document.body.addEventListener('keydown', keyDownListener)
+    document.body.addEventListener('keydown', keyDownListener, false)
     window.onbeforeunload = onBeforeUnload
-    surface.addEventListener('mousemove', mouseMoveHandler)
-    surface.addEventListener('click', clickHandler)
-    surface.addEventListener('mousedown', mouseDownHandler)
-    surface.addEventListener('mouseup', mouseUpHandler)
-    surface.addEventListener('mouseout', mouseOutHandler)
-    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler)
-    document.body.addEventListener('mousewheel', mouseWheelHandler)
+    surface.addEventListener('mousemove', mouseMoveHandler, false)
+    surface.addEventListener('click', clickHandler, false)
+    surface.addEventListener('mousedown', mouseDownHandler, false)
+    surface.addEventListener('mouseup', mouseUpHandler, false)
+    surface.addEventListener('mouseout', mouseOutHandler, false)
+    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler, false)
+    document.body.addEventListener('mousewheel', mouseWheelHandler, false)
 
-  #if playback
-    #window.onresize = onResize
-    #window.resizeTo(size[0], size[1])
-    #window.onresize = null
-    #debug(window.innerWidth, window.innerHeight)
+    document.body.addEventListener('touchmove',
+      (e) =>
+        #mouseMoveHandler(e)
+        e.preventDefault()
+      false
+    )
+    ###
+    document.body.addEventListener('touchstart',
+      (e) =>
+        Logger.logEvent("touchstart", e)
+        mouseDownHandler(e)
+    )
+    document.body.addEventListener('touchend', mouseUpHandler)
+    ###
 
   ##################################################################################
   # Draw loop

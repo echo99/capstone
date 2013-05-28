@@ -4,30 +4,26 @@
 # This mission acts as our games main menu
 class Menu extends Mission
   settings: window.config.MainMenu
-  numMissions: 3
   # @see Mission#reset
   reset: ->
     Logger.logEvent("Starting the Menu")
     # Load user progress
-    @progress = localStorage["progress"]
+    @progress = localStorage["mission_complete"]
     if not @progress
-      @progress = 1
-      localStorage["progress"] = 1
-    @seenGameComplete = localStorage["complete"]
+      @progress = false
+      localStorage["mission_complete"] = false
+    @seenGameComplete = localStorage["seen_complete"]
     if not @seenGameComplete
       @seenGameComplete = false
-      localStorage["complete"] = false
+      localStorage["seen_complete"] = false
 
     # Create planets:
     newGame(10000, 10000, true)
-    @Names = ["Home", "Missions", "Mission 1", "Mission 2", "Mission 3",
-              "Extermination", "Small", "Medium", "Large", "Credits"]
+    @Names = ["Home", "Tutorial", "Extermination",
+              "Small", "Medium", "Large", "Credits"]
     @Planets =
       Home: new Planet(@settings.home.x, @settings.home.y)
-      Missions: new Planet(@settings.missions.x, @settings.missions.y)
-      Mission1: new Planet(@settings.mission1.x, @settings.mission1.y)
-      Mission2: new Planet(@settings.mission2.x, @settings.mission2.y)
-      Mission3: new Planet(@settings.mission3.x, @settings.mission3.y)
+      Tutorial: new Planet(@settings.mission.x, @settings.mission.y)
       Extermination: new Planet(@settings.extermination.x,
                                 @settings.extermination.y)
       Small: new Planet(@settings.small.x, @settings.small.y)
@@ -35,18 +31,9 @@ class Menu extends Mission
       Large: new Planet(@settings.large.x, @settings.large.y)
       Credits: new Planet(-400, 150)
 
-    if @progress < 2
-      @Planets.Mission2.setSprite(SpriteNames.PLANET_BLUE_FUNGUS)
-    if @progress < 3
-      @Planets.Mission3.setSprite(SpriteNames.PLANET_BLUE_FUNGUS)
-    # TODO: other missions
-
     # Add planets to game
     game.addPlanet(@Planets.Home)
-    game.addPlanet(@Planets.Missions)
-    game.addPlanet(@Planets.Mission1)
-    game.addPlanet(@Planets.Mission2)
-    game.addPlanet(@Planets.Mission3)
+    game.addPlanet(@Planets.Tutorial)
     game.addPlanet(@Planets.Extermination)
     game.addPlanet(@Planets.Small)
     game.addPlanet(@Planets.Medium)
@@ -54,12 +41,10 @@ class Menu extends Mission
     game.addPlanet(@Planets.Credits)
 
     # Add connections to game
-    game.setNeighbors(@Planets.Home, @Planets.Missions)
+    #game.setNeighbors(@Planets.Home, @Planets.Missions)
+    game.setNeighbors(@Planets.Home, @Planets.Tutorial)
     game.setNeighbors(@Planets.Home, @Planets.Extermination)
     game.setNeighbors(@Planets.Home, @Planets.Credits)
-    game.setNeighbors(@Planets.Missions, @Planets.Mission1)
-    game.setNeighbors(@Planets.Missions, @Planets.Mission2)
-    game.setNeighbors(@Planets.Missions, @Planets.Mission3)
     game.setNeighbors(@Planets.Extermination, @Planets.Small)
     game.setNeighbors(@Planets.Extermination, @Planets.Medium)
     game.setNeighbors(@Planets.Extermination, @Planets.Large)
@@ -77,9 +62,6 @@ class Menu extends Mission
     UI.initialize(true, false, false)
 
     # Set visibilities
-    @Planets.Mission1.setVisibility(window.config.visibility.discovered)
-    @Planets.Mission2.setVisibility(window.config.visibility.discovered)
-    @Planets.Mission3.setVisibility(window.config.visibility.discovered)
     @Planets.Small.setVisibility(window.config.visibility.discovered)
     @Planets.Medium.setVisibility(window.config.visibility.discovered)
     @Planets.Large.setVisibility(window.config.visibility.discovered)
@@ -87,9 +69,7 @@ class Menu extends Mission
     @_selectProbe()
 
   destroy: ->
-    cameraHudFrame.removeChild(@mission1Menu)
-    cameraHudFrame.removeChild(@mission2Menu)
-    cameraHudFrame.removeChild(@mission3Menu)
+    cameraHudFrame.removeChild(@missionMenu)
     cameraHudFrame.removeChild(@smallMenu)
     cameraHudFrame.removeChild(@mediumMenu)
     cameraHudFrame.removeChild(@largeMenu)
@@ -101,17 +81,9 @@ class Menu extends Mission
     Logger.send()
 
   _initMenus: ->
-    @mission1Menu = @_createMenu(@settings.mission1.menu,
+    @missionMenu = @_createMenu(@settings.mission.menu,
       () =>
-        newMission(Mission1)
-      start=true, restart=false, quit=false, cancel=true, close=false)
-    @mission2Menu = @_createMenu(@settings.mission2.menu,
-      () =>
-        newMission(Mission2)
-      start=true, restart=false, quit=false, cancel=true, close=false)
-    @mission3Menu = @_createMenu(@settings.mission3.menu,
-      () =>
-        newMission(Mission3)
+        newMission(Cutscene)
       start=true, restart=false, quit=false, cancel=true, close=false)
     @smallMenu = @_createMenu(@settings.small.menu,
       () =>
@@ -156,13 +128,13 @@ class Menu extends Mission
       })
     cameraHudFrame.addChild(@creditsMenu)
 
-    if @progress > @numMissions and @seenGameComplete == 'false'
+    if @progress == 'true' and @seenGameComplete == 'false'
       Logger.logEvent("Showing mission complete menu")
       close = new Elements.Button(500 - 10, 10, 16, 16,
         () =>
           @gameCompleteMenu.close()
           @seenGameComplete = true
-          localStorage["complete"] = true
+          localStorage["seen_complete"] = true
       )
       close.setDrawFunc(
         (ctx) =>
@@ -192,14 +164,7 @@ class Menu extends Mission
     ctx.fillStyle = winStyle.labelText.color
     ctx.textAlign = 'center'
     for p in @Names
-      if p == "Mission 1"
-        planet = @Planets["Mission1"]
-      else if p == "Mission 2"
-        planet = @Planets["Mission2"]
-      else if p == "Mission 3"
-        planet = @Planets["Mission3"]
-      else
-        planet = @Planets[p]
+      planet = @Planets[p]
       if planet.numShips(window.config.units.probe) == 0 and
          planet.visibility() == window.config.visibility.visible
         loc = planet.location()
@@ -234,23 +199,10 @@ class Menu extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
-    found = false
     for p in game.getPlanets()
-      inGroup = false
-      for c in p.getControlGroups()
-        if c.probes() == 1
-          inGroup = true
-          break
-      if p.numShips(window.config.units.probe) == 1 or inGroup
-        found = true
+      if p.numShips(window.config.units.probe) == 1
         @_checkMissions(p)
         break
-
-    if not found
-      @Planets.Missions.addShips(window.config.units.probe, 1)
-      @lastPlanet = @Planets.Missions
-      camera.setTarget(@lastPlanet.location())
-      endTurn()
 
     @_selectProbe()
 
@@ -265,21 +217,11 @@ class Menu extends Mission
   _checkMissions: (p) ->
     @lastPlanet = p
     if p.sprite() != SpriteNames.PLANET_BLUE_FUNGUS
-      if @lastPlanet == @Planets.Mission1
-        Logger.logEvent("Showing mission 1 menu")
-        @mission1Menu.open()
+      if @lastPlanet == @Planets.Tutorial
+        Logger.logEvent("Showing mission menu")
+        @missionMenu.open()
       else
-        @mission1Menu.close()
-      if @lastPlanet == @Planets.Mission2
-        Logger.logEvent("Showing mission 2 menu")
-        @mission2Menu.open()
-      else
-        @mission2Menu.close()
-      if @lastPlanet == @Planets.Mission3
-        Logger.logEvent("Showing mission 3 menu")
-        @mission3Menu.open()
-      else
-        @mission3Menu.close()
+        @missionMenu.close()
       if @lastPlanet == @Planets.Small
         Logger.logEvent("Showing extermination small menu")
         @smallMenu.open()

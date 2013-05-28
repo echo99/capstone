@@ -250,7 +250,7 @@ class Planet
   # Immediately adds the specified number of the specified type of ship to
   # those on the planet.  This does not incur a resource cost or build delay.
   #
-  # @param [{cost: Integer, turns: Integer, attack: Double, defense: Double, isStructure: true}] type The type of ship to build.
+  # @param [{cost: Integer, turns: Integer, attack: Double, defense: Double, isStructure: Boolean}] type The type of ship to build.
   # @param [Integer] number The number of ships to build.
   #
   # @throw [Error] if type is not one of root.config.unit.*
@@ -390,12 +390,6 @@ class Planet
       throw new Error("Tried to cancel sending resources, no such job.")
     @_sendingResourcesTo = null
     @_nextSend = null
-
-  # Returns the planet we are sending resources to.
-  #
-  # @return [Planet] Last planet in supply chain.
-  sendingResourcesTo: ->
-    @_sendingResourcesTo
 
   # Returns the first planet to send resources to.
   #
@@ -755,7 +749,7 @@ class Planet
        @_attackShips > 0 or
        @_defenseShips > 0 or
        @_colonies > 0 or
-       @_station or @_outpost or 
+       @_station or @_outpost or
        @_unitConstructing == root.config.structures.outpost
       # If it isn't visible make it visible and update both last seen.
       if !@_hasBeenSeen

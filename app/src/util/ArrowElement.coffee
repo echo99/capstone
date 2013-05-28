@@ -8,9 +8,12 @@ class ArrowElement
     @_dir = {x: @dir.x, y: @dir.y}
     @element = new Elements.BoxElement(@current.x, @current.y, 0, 0)
     @element.setDrawFunc(@draw)
-    #@element.setClearFunc(@clear)
+    @element.setClearFunc(@clear)
     @element.visible = true
-    gameFrame.addChild(@element)
+    if @onHud
+      cameraHudFrame.addChild(@element)
+    else
+      gameFrame.addChild(@element)
 
     c = Math.cos(window.config.arrowStyle.angle)
     s = Math.sin(window.config.arrowStyle.angle)
@@ -26,7 +29,15 @@ class ArrowElement
   open: ->
     @element.open()
 
+  clear: (ctx) =>
+    x = Math.min(@start.x, @end.x) - @length - 10
+    y = Math.min(@start.y, @end.y) - @length - 10
+    w = Math.max(@start.x, @end.x) - x + @length
+    h = Math.max(@start.y, @end.y) - y + @length
+    ctx.clearRect(x, y, w, h)
+
   _drawArrow: (ctx, loc) =>
+    #@clear(ctx)
     ctx.strokeStyle = window.config.arrowStyle.color
     ctx.lineWidth = window.config.arrowStyle.width
     ctx.lineJoin = 'round'

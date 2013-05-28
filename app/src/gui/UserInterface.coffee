@@ -24,10 +24,9 @@ class UserInterface
     @unitSelection = new UnitSelection()
     b = new Elements.Button(5 + 133/2, camera.height + 5 - 20/2, 133, 20)
     b.setClickHandler(() =>
-      game.endTurn()
-      UI.endTurn()
-      CurrentMission.onEndTurn()
+      endTurn()
     )
+    b.setClearFunc((ctx) => ctx.clearRect(b.x - b.w/2, b.y - b.h/2, b.w, b.h))
     b.setMouseUpHandler(() => b.setDirty())
     b.setMouseDownHandler(() => b.setDirty())
     b.setMouseOutHandler(() => b.setDirty())
@@ -38,9 +37,21 @@ class UserInterface
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_HOVER, b.x, b.y, ctx, false)
       else
         SHEET.drawSprite(SpriteNames.END_TURN_BUTTON_IDLE, b.x, b.y, ctx, false)
+
+      if not CurrentMission.canEndTurn()
+        ctx.strokeStyle = "rgb(255, 0, 0)"
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(b.x - 50, b.y - 9)
+        ctx.lineTo(b.x + 50, b.y + 9)
+
+        ctx.moveTo(b.x - 50, b.y + 9)
+        ctx.lineTo(b.x + 50, b.y - 9)
+        ctx.stroke()
     )
     b.setZIndex(100)
     frameElement.addChild(b)
+    @endTurnButton = b
 
     @nextStationButton = new Elements.Button(5 + 150/2, 230, 150, 20)
     @nextStationButton.setClearFunc((ctx) =>
@@ -978,7 +989,10 @@ class UserInterface
           SHEET.drawSprite(p.sprite(), loc.x, loc.y, ctx)
         else if (@showAll and p.fungusStrength() > 0) or
            (p._lastSeenFungus and not @showAll)
-          SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
+          if (p.fungusStrength() == p._fungusMaximumStrength)
+            SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS_MAX, loc.x, loc.y, ctx)
+          else
+            SHEET.drawSprite(SpriteNames.PLANET_BLUE_FUNGUS, loc.x, loc.y, ctx)
         else
           SHEET.drawSprite(SpriteNames.PLANET_BLUE, loc.x, loc.y, ctx)
       else if cheat
@@ -1149,6 +1163,19 @@ class UserInterface
         ctx.font = window.config.windowStyle.defaultText.font
         ctx.fillStyle = window.config.windowStyle.defaultText.value
         ctx.fillText(text, x + 35, y + 24)
+      else if @hoveredPlanet.hasOutpost() and @hoveredPlanet.sendingResourcesTo()
+        # Outline planet that hovered planet with outpost is sending resources to
+        # @NOTE Not sure if this is a good place to put this
+        ctx.strokeStyle = window.config.resourceTarget.color
+        ctx.lineWidth = window.config.resourceTarget.lineWidth
+        resourceTarget = @hoveredPlanet.sendingResourcesTo()
+        loc = resourceTarget.location()
+        pos = camera.getScreenCoordinates(loc)
+        r = (window.config.planetRadius + window.config.resourceTarget.radius) *
+           camera.getZoom()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
+        ctx.stroke()
 
       hasAction = true
       if @lookingToSendResources
@@ -1204,6 +1231,18 @@ class UserInterface
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
       ctx.stroke()
+      # Outline planet that outpost is sending resources to
+      if @selectedPlanet.hasOutpost() and @selectedPlanet.sendingResourcesTo()
+        ctx.strokeStyle = window.config.resourceTarget.color
+        ctx.lineWidth = window.config.resourceTarget.lineWidth
+        resourceTarget = @selectedPlanet.sendingResourcesTo()
+        loc = resourceTarget.location()
+        pos = camera.getScreenCoordinates(loc)
+        r = (window.config.planetRadius + window.config.resourceTarget.radius) *
+           camera.getZoom()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
+        ctx.stroke()
 
     use = null
     if @hoveredPlanet and @hoveredPlanet.hasStation()
@@ -1610,6 +1649,9 @@ class UserInterface
           @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
             @_getDrawDamage(-report.defenseShipsLost, combatStyle.bad)))
 
+  refreshEndTurnButton: ->
+    @endTurnButton.setDirty()
+
   _getDrawDamage: (damage, style) ->
     text = ""
     if damage > 0
@@ -1640,7 +1682,7 @@ class MovingElement
     @dir = {x: vec.x / @length * @speed, y: vec.y / @length * @speed}
     @element = new Elements.BoxElement(@current.x, @current.y, 0, 0)
     @element.setDrawFunc(@draw)
-    @element.setClearFunc(@clear)
+    #@element.setClearFunc(@clear)
     @element.visible = true
     gameFrame.addChild(@element)
 
