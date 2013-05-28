@@ -21,6 +21,7 @@ REQUIRE_REGEX = /^(\s*)#_require/
 TYPE_DEF_REGEX = /@(return|param)\s+\[(.*?)\]\s*(.*)/
 openParam = /^\s+#\s+@param\s+\[(.*)/
 closeParam = /^\s+#\s+(.*?)\]/
+SUPPRESS_REGEX = /@suppress\s+/
 FUNCTION_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*(?:\((.*?)\))\s*(?:-|=)>/
 FUNCTION_OPEN_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*\((.*)/
 FUNCTION_CLOSE_REGEX = /^\s+(.*?)\)\s*(?:-|=)>/
@@ -91,6 +92,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
   nonTypeCommentBuffer = ''
   commentBuffer = []
   containsTypeDef = false
+  containsSuppress = false
 
   # Current state variables
   inClass = false
@@ -205,7 +207,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
       afterClassDecBuffer = ''
       inClass = false
     else
-      if containsTypeDef
+      if containsTypeDef or containsSuppress
         if inClass
           afterClassDecBuffer += commentBuffer.join('')
         else
@@ -219,6 +221,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
     nonTypeCommentBuffer = ''
     inComment = false
     containsTypeDef = false
+    containsSuppress = false
     # buffers = [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer]
     # flags = [inComment, inClass, containsTypeDef]
     # return [buffer, buffers, flags]
@@ -290,6 +293,8 @@ _codoToJsdoc = (file, classes, superclasses) ->
             type: type
           # commentBuffer += spacing + '* ' + comment + '\n'
         else
+          if line.match(SUPPRESS_REGEX)
+            containsSuppress = true
           commentBuffer.push spacing + '* ' + comment + '\n'
         nonTypeCommentBuffer += line + '\n'
         lastSpacing = spacing
@@ -378,7 +383,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
       if inComment
         # Exit comment
         commentBuffer.push lastSpacing + '###\n'
-        if containsTypeDef
+        if containsTypeDef or containsSuppress
           if inClass
             afterClassDecBuffer += commentBuffer.join('')
           else
@@ -392,6 +397,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
         nonTypeCommentBuffer = ''
         inComment = false
         containsTypeDef = false
+        containsSuppress = false
       else
         if inClass
           afterClassDecBuffer += '\n'
