@@ -97,10 +97,26 @@ class Tutorial extends Mission
     @move_planet_3_arrow.close()
 
     p = @map.planets[5].location()
+    @select_probe_5_arrow = new ArrowElement(
+      {x: p.x - 250, y: p.y - 100},
+      {x: p.x - 300, y: p.y - 150}, 5, 30)
+    @select_probe_5_arrow.close()
+
     @move_planet_5_arrow = new ArrowElement(
       {x: p.x - 75, y: p.y - 75},
       {x: p.x - 125, y: p.y - 125}, 5, 30)
     @move_planet_5_arrow.close()
+
+    p = @map.planets[6].location()
+    @select_probe_6_arrow = new ArrowElement(
+      {x: p.x - 250, y: p.y - 100},
+      {x: p.x - 300, y: p.y - 150}, 5, 30)
+    @select_probe_6_arrow.close()
+
+    @move_planet_6_arrow = new ArrowElement(
+      {x: p.x - 75, y: p.y - 75},
+      {x: p.x - 125, y: p.y - 125}, 5, 30)
+    @move_planet_6_arrow.close()
 
     @build_probe_arrow = new ArrowElement(
       {x: 340, y: 50},
@@ -129,8 +145,11 @@ class Tutorial extends Mission
   destroy: ->
     @select_probe_0_arrow.destroy()
     @select_probe_3_arrow.destroy()
+    @select_probe_5_arrow.destroy()
+    @select_probe_6_arrow.destroy()
     @move_planet_3_arrow.destroy()
     @move_planet_5_arrow.destroy()
+    @move_planet_6_arrow.destroy()
     @select_home_1_arrow.destroy()
     @select_home_2_arrow.destroy()
     @build_probe_arrow.destroy()
@@ -204,6 +223,10 @@ class Tutorial extends Mission
         300, 65
     )
 
+    @m9 = @_getM("Lets keep moving the probe as well.",
+      null
+    )
+
     @skipButton = @createSkipButton(
       () =>
         newMission(Challenge)
@@ -235,11 +258,10 @@ class Tutorial extends Mission
           else
             @endArrow.close()
         when 2
-          if not @m8.visible
+          if not @m8.visible and not @m9.visible
             @m7.close()
             @m8.open()
-            camera.setTarget(@home2.location())
-          if @m8.visible
+          if @m8.visible or @m9.visible
             @_checkTurn2Arrows()
         when 3
           @endArrow.close()
@@ -251,14 +273,36 @@ class Tutorial extends Mission
        @home2.buildUnit() != window.config.units.attackShip
       @select_home_2_arrow.open()
       @build_attack_arrow.close()
+      @select_probe_5_arrow.close()
+      @move_planet_6_arrow.close()
       @endArrow.close()
+      camera.setTarget(@home2.location())
     else if @home2.buildUnit() != window.config.units.attackShip
       @select_home_2_arrow.close()
       @build_attack_arrow.open()
+      @select_probe_5_arrow.close()
+      @move_planet_6_arrow.close()
       @endArrow.close()
+    else if @_probeSelected(@map.planets[5])
+      @select_home_2_arrow.close()
+      @build_attack_arrow.close()
+      @select_probe_5_arrow.close()
+      @move_planet_6_arrow.open()
+      @endArrow.close()
+    else if @map.planets[5].numShips(window.config.units.probe) > 0
+      @select_home_2_arrow.close()
+      @build_attack_arrow.close()
+      @select_probe_5_arrow.open()
+      @move_planet_6_arrow.close()
+      @endArrow.close()
+      @m8.close()
+      @m9.open()
+      camera.setTarget(@map.planets[5].location())
     else
       @select_home_2_arrow.close()
       @build_attack_arrow.close()
+      @select_probe_5_arrow.close()
+      @move_planet_6_arrow.close()
       @endArrow.open()
 
   _checkTurn1Arrows: ->
