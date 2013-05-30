@@ -81,6 +81,7 @@ root.config =
     fontObj: {sizeVal: 15, unit: "px", family: "Arial"}
     color: "rgba(255, 255, 0, 1)"
     speed: 3
+  movingElementLife: 5
   connectionStyle:
     normal:
       visible: "rgba(200, 200, 200, 0.8)"

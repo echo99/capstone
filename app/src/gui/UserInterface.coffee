@@ -1692,6 +1692,9 @@ class UserInterface
           @movingElements.push(new MovingElement(s, e, fungusMoveStyle.speed,
             @_getDrawDamage(f.val, fungusMoveStyle)))
 
+    for el in @movingElements
+      el.endTurn()
+
   refreshEndTurnButton: ->
     @endTurnButton.setDirty()
 
@@ -1737,6 +1740,7 @@ class MovingElement
     #@element.setClearFunc(@clear)
     @element.visible = true
     gameFrame.addChild(@element)
+    @life = window.config.movingElementLife
 
   draw: (ctx) =>
     loc =
@@ -1756,3 +1760,8 @@ class MovingElement
   destroy: ->
     @element.destroy()
     UI.movingElements = UI.movingElements.filter((e) => e != @)
+
+  endTurn: ->
+    @life--
+    if @life == 0
+      @destroy()
