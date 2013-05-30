@@ -60,20 +60,20 @@ class Planet
 
   # Returns the string representation of the planet.
   #
-  # @return [String] String representation of planet
+  # @return [string] String representation of planet
   #
   toString: ->
     return "Planet(#{@_x}, #{@_y}, #{@_resources}, #{@_rate})"
 
   # Returns the sprite used to display this planet
   #
-  # @return [Integer] The sprite used to display this planet
+  # @return [AnimatedSprite] The sprite used to display this planet
   sprite: ->
     @_sprite
 
   # Returns the (x, y) location of the planet.
   #
-  # @return [Array.<Integer>] Location of planet
+  # @return [{x: number, y: number}] Location of planet
   #
   location: ->
     return {x: @_x, y: @_y}
@@ -82,7 +82,7 @@ class Planet
   #
   # @param [Planet] planet The other planet
   #
-  # @return [Double] The distance between this planet and the specified planet.
+  # @return [number] The distance between this planet and the specified planet.
   #
   distance: (planet) ->
     oX = planet.location().x
@@ -92,7 +92,7 @@ class Planet
   # Returns the last-known amount of (unharvested) resources left on the planet.
   # This resource count is updated if a probe or outpost/station is on the planet.
   #
-  # @return [Integer] The last-known count of (unharvested) resources
+  # @return [?number] The last-known count of (unharvested) resources
   # left on the planet.
   #
   resources: ->
@@ -100,7 +100,7 @@ class Planet
 
   # Returns the resource collection rate of the planet.
   #
-  # @return [Integer] The planet's rate.
+  # @return [number] The planet's rate.
   #
   rate: ->
     return @_rate
@@ -108,7 +108,7 @@ class Planet
   # Returns the amount of usable resources on the planet's station,
   # or zero if no station exists.
   #
-  # @return [Integer] The amount of usable resources on the planet.
+  # @return [number] The amount of usable resources on the planet.
   #
   availableResources: ->
     return @_availableResources
@@ -136,7 +136,7 @@ class Planet
   #
   # @param [Visibility] type The specified type
   #
-  # @return [Integer] The number of ships of the specified type.
+  # @return [number] The number of ships of the specified type.
   #
   # @throw [Error] If the ship type is not one of Visibility
   #
@@ -150,34 +150,34 @@ class Planet
 
   # Returns the current fungus strength on the planet.
   #
-  # @return [Integer] The current fungus strength.
+  # @return [number] The current fungus strength.
   #
   fungusStrength: ->
     return @_fungusStrength
 
   # True if there is a unit or structure on the planet
   #
-  # @return [Boolean] True if any humans around.
+  # @return [boolean] True if any humans around.
   humansOnPlanet: ->
     @_station or @_outpost or
     @_probes > 0 or @_attackShips > 0 or @_defenseShips > 0 or @_colonies > 0
 
   # True if there is fungus on the planet
   #
-  # @return [Boolean] True if any fungus around.
+  # @return [boolean] True if any fungus around.
   fungusOnPlanet: ->
     @_fungusStrength > 0
 
   # Returns whether the planet has an outpost.
   #
-  # @return [Boolean] True if the planet has an outpost.
+  # @return [boolean] True if the planet has an outpost.
   #
   hasOutpost: ->
     return @_outpost
 
   # Returns whether the planet has a station.
   #
-  # @return [Boolean] True if the planet has a station.
+  # @return [boolean] True if the planet has a station.
   #
   hasStation: ->
     return @_station
@@ -198,7 +198,7 @@ class Planet
   # Returns the number of turns left for construction to complete
   # on this planet, or 0 if nothing is being constructed.
   #
-  # @return [Integer] The number of turns left for construction.
+  # @return [number] The number of turns left for construction.
   #
   buildStatus: ->
     return @_turnsToComplete
@@ -213,7 +213,7 @@ class Planet
 
   # Returns whether a unit is being constructed at this planet.
   #
-  # @return [Boolean] True if a unit is being constructed.
+  # @return [boolean] True if a unit is being constructed.
   #
   isBuilding: ->
     if @_unitConstructing is null or @_turnsToComplete is 0
@@ -265,8 +265,8 @@ class Planet
   # Immediately adds the specified number of the specified type of ship to
   # those on the planet.  This does not incur a resource cost or build delay.
   #
-  # @param [{cost: Integer, turns: Integer, attack: Double, defense: Double, isStructure: Boolean}] type The type of ship to build.
-  # @param [Integer] number The number of ships to build.
+  # @param [{cost: number, turns: number, attack: number, defense: number, isStructure: boolean}] type The type of ship to build.
+  # @param [number] number The number of ships to build.
   #
   # @throw [Error] if type is not one of root.config.unit.*
   #
@@ -581,7 +581,7 @@ class Planet
     humanDamage += @rollForDamage(root.config.units.defenseShip.attack,
                                   @_defenseShips)
     humanDamage += @rollForDamage(root.config.units.colonyShip.attack,
-                                  @_colonyShips)
+                                  @_colonies)
     humanDamage += @rollForDamage(root.config.units.probe.attack, @_probes)
     @_combatReport.humanDamage = humanDamage
     # Roll for defense rating
@@ -593,7 +593,7 @@ class Planet
     humanDefense += @rollForDamage(root.config.units.defenseShip.defense,
                                    @_defenseShips)
     humanDefense += @rollForDamage(root.config.units.colonyShip.defense,
-                                   @_colonyShips)
+                                   @_colonies)
     humanDefense += @rollForDamage(root.config.units.probe.defense, @_probes)
     @_combatReport.humanDefense = humanDefense
     console.log("Fungus rolled " + fungusDamage + "damage")
@@ -672,7 +672,7 @@ class Planet
             when root.config.structures.station
               @_station = true
               @_outpost = false
-            when root.config.structures.warpgate then @_warpgate = true
+            when root.config.structures.warpGate then @_warpgate = true
             else throw new Error("Invalid structure, it ain't one.")
         else
           switch unit
@@ -831,11 +831,9 @@ class Planet
   # Causes a unit to be built, sets relevant fields.
   # If the unit cannot be built immediately, it goes onto a build queue.
   #
-  # @param [String] unit The type of unit to be built.
+  # @param [{cost: number, turns: number, attack: number, defense: number, isStructure: boolean}] unit The type of unit to be built.
   #
   # @throw [Error] If there is no station.
-  # @throw [Error] If construction is already under way.
-  # @throw [Error] If there are not enough resources.
   build: (unit) ->
     if unit.isStructure
       throw new Error("Structures cannot be built using this function.")
@@ -853,7 +851,7 @@ class Planet
   # Causes a unit to be built, sets relevant fields.
   # Fails if this unit cannot be scheduled immediately.
   #
-  # @param [String] unit The type of unit to be built.
+  # @param [{cost: number, turns: number, attack: number, defense: number, isStructure: boolean}] unit The type of unit to be built.
   #
   # @throw [Error] If there is no station.
   # @throw [Error] If construction is already under way.
@@ -876,10 +874,10 @@ class Planet
   # Creates a control group at the current planet.
   # Does nothing if dest == @.
   #
-  # @param [Integer] attackShips Number of attack ships to add to control group.
-  # @param [Integer] defenseShips Number of defense ships to add to control group.
-  # @param [Integer] probes Number of probes to add to control group.
-  # @param [Integer] colonies Number of colony ships to add to control group.
+  # @param [number] attackShips Number of attack ships to add to control group.
+  # @param [number] defenseShips Number of defense ships to add to control group.
+  # @param [number] probes Number of probes to add to control group.
+  # @param [number] colonies Number of colony ships to add to control group.
   # @param [Planet] dest The control group's intended destination.
   #
   # @throw [Error]  If there are not enough ships on the planet.
@@ -961,10 +959,10 @@ class Planet
 
   # Given a chance of success and a number of units, determine one roll.
   #
-  # @param [Double] power The chance of success (between 0 and 1)
-  # @param [Integer] quantity The number of units attempting to attack/defend
+  # @param [number] power The chance of success (between 0 and 1)
+  # @param [number] quantity The number of units attempting to attack/defend
   #
-  # @return [Integer] The number of units which succeed.
+  # @return [number] The number of units which succeed.
   rollForDamage: (power, quantity) ->
     total = 0
     for x in [0...quantity] by 1
@@ -973,9 +971,9 @@ class Planet
         total++
     return total
 
-   # Returns true if this planet contains probes including control groups.
+  # Returns true if this planet contains probes including control groups.
   #
-  # @return [Bool] Whether or not this planet contains probes.
+  # @return [boolean] Whether or not this planet contains probes.
   hasProbes: ->
     if @_probes > 0
       return true
@@ -986,7 +984,7 @@ class Planet
 
   # Returns true if any adjacent planets contain probes.
   #
-  # @return [Bool] Whether or not any adjacent planets contain probes.
+  # @return [boolean] Whether or not any adjacent planets contain probes.
   neighborsHaveProbes: ->
     for planet in @_adjacentPlanets
       if planet.hasProbes()
@@ -1003,7 +1001,7 @@ class Planet
       throw new Error "Less than 0 defense ships"
     if @_probes < 0
       throw new Error "Less than 0 probes"
-    if @_colonys < 0
+    if @_colonies < 0
       throw new Error "less than 0 colony ships"
     if @_fungusStrength < 0
       throw new Error "negative fungus strength"
