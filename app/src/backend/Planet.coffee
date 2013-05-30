@@ -459,6 +459,20 @@ class Planet
     else
       throw new Error("Tried to remove control group that doesn't exist")
 
+  # Clears the build queue.
+  #
+  clearBuildQueue: ->
+    if @_buildQueue.length > 0
+      @_buildQueue.splice(0, @_buildQueue.length)
+
+  # Removes an element, specified by index, from the build queue.
+  # If the specified index is invalid, nothing occurs.
+  #
+  # @param [Number] index The index to be removed from the build queue
+  removeFromBuildQueue:(index) ->
+    if 0 <= index < @_buildQueue.length
+      @_buildQueue.splice(index, 1)
+
   # UPKEEP #
 
 
@@ -680,7 +694,8 @@ class Planet
               else throw new Error("Ship type unknown.")
     if @_buildQueue.length > 0
       unit = @_buildQueue[0]
-      if @_unitConstructing == null and @_turnsToComplete == 0 and @_availableResources >= unit.cost
+      if @_unitConstructing == null and @_turnsToComplete == 0 and
+          @_availableResources >= unit.cost
         @_unitConstructing = unit
         @_availableResources -= unit.cost
         @_turnsToComplete = unit.turns
@@ -826,7 +841,9 @@ class Planet
       throw new Error("Structures cannot be built using this function.")
     else if @_station == false
       throw new Error("Planet has no station to build ships.")
-    else if @_unitConstructing != null or @_turnsToComplete != 0 or @_availableResources < unit.cost
+    else if @_unitConstructing != null or
+        @_turnsToComplete != 0 or
+        @_availableResources < unit.cost
       @_buildQueue.push(unit)
     else
       @_unitConstructing = unit
