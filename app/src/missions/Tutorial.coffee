@@ -69,26 +69,53 @@ class Tutorial extends Mission
     @phase = @phases.INTRO
 
     h = @home.location()
-    @select_probe_1_arrow = new ArrowElement(
-      {x: h.x - 250, y: h.y - 100},
-      {x: h.x - 300, y: h.y - 150}, 5, 30)
-    @select_probe_1_arrow.close()
-
-    p = @map.planets[3].location()
-    @move_probe_1_arrow = new ArrowElement(
-      {x: p.x - 75, y: p.y - 75},
-      {x: p.x - 125, y: p.y - 125}, 5, 30)
-    @move_probe_1_arrow.close()
-
     @select_home_1_arrow = new ArrowElement(
       {x: h.x - 75, y: h.y - 75},
       {x: h.x - 125, y: h.y - 125}, 5, 30)
     @select_home_1_arrow.close()
 
+    @select_probe_0_arrow = new ArrowElement(
+      {x: h.x - 250, y: h.y - 100},
+      {x: h.x - 300, y: h.y - 150}, 5, 30)
+    @select_probe_0_arrow.close()
+
+    h = @home2.location()
+    @select_home_2_arrow = new ArrowElement(
+      {x: h.x - 75, y: h.y - 75},
+      {x: h.x - 125, y: h.y - 125}, 5, 30)
+    @select_home_2_arrow.close()
+
+    p = @map.planets[3].location()
+    @select_probe_3_arrow = new ArrowElement(
+      {x: p.x - 250, y: p.y - 100},
+      {x: p.x - 300, y: p.y - 150}, 5, 30)
+    @select_probe_3_arrow.close()
+
+    @move_planet_3_arrow = new ArrowElement(
+      {x: p.x - 75, y: p.y - 75},
+      {x: p.x - 125, y: p.y - 125}, 5, 30)
+    @move_planet_3_arrow.close()
+
+    p = @map.planets[5].location()
+    @move_planet_5_arrow = new ArrowElement(
+      {x: p.x - 75, y: p.y - 75},
+      {x: p.x - 125, y: p.y - 125}, 5, 30)
+    @move_planet_5_arrow.close()
+
     @build_probe_arrow = new ArrowElement(
-      {x: 350, y: 50},
-      {x: 300, y: 50}, 5, 30, true)
+      {x: 340, y: 50},
+      {x: 290, y: 50}, 5, 30, true)
     @build_probe_arrow.close()
+
+    @build_colony_arrow = new ArrowElement(
+      {x: 340, y: 110},
+      {x: 290, y: 110}, 5, 30, true)
+    @build_colony_arrow.close()
+
+    @build_attack_arrow = new ArrowElement(
+      {x: 540, y: 50},
+      {x: 590, y: 50}, 5, 30, true)
+    @build_attack_arrow.close()
 
     @endArrow = new ArrowElement(
       {x: 50, y: camera.height - 30},
@@ -100,10 +127,15 @@ class Tutorial extends Mission
     @startTime = currentTime()
 
   destroy: ->
-    @select_probe_1_arrow.destroy()
-    @move_probe_1_arrow.destroy()
+    @select_probe_0_arrow.destroy()
+    @select_probe_3_arrow.destroy()
+    @move_planet_3_arrow.destroy()
+    @move_planet_5_arrow.destroy()
     @select_home_1_arrow.destroy()
+    @select_home_2_arrow.destroy()
     @build_probe_arrow.destroy()
+    @build_colony_arrow.destroy()
+    @build_attack_arrow.destroy()
     @endArrow.destroy()
     cameraHudFrame.removeChild(@m1)
     cameraHudFrame.removeChild(@m2)
@@ -111,6 +143,8 @@ class Tutorial extends Mission
     cameraHudFrame.removeChild(@m4)
     cameraHudFrame.removeChild(@m5)
     cameraHudFrame.removeChild(@m6)
+    cameraHudFrame.removeChild(@m7)
+    cameraHudFrame.removeChild(@m8)
     cameraHudFrame.removeChild(@skipButton)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
@@ -153,11 +187,21 @@ class Tutorial extends Mission
       250, 65
     )
 
-    @m6 = @_getM("We already have a probe so lets make a colony ship. " +
-                 "***End of walk through for now, press Skip to go to the last " +
-                 "part of the tutorial***",
+    @m6 = @_getM("We already have a probe so lets make a colony ship."
       null
-      300, 65
+      #300, 65
+    )
+
+    @m7 = @_getM("Good, that's going to take a few turns to finish so lets " +
+                 "continue to explore with our probe."
+      null
+        250, 65
+    )
+
+    @m8 = @_getM("Now our other Station has enough resouces for an attack ship. " +
+                 "Because we'll encounter the fungus soon we should make one."
+      null
+        300, 65
     )
 
     @skipButton = @createSkipButton(
@@ -178,9 +222,6 @@ class Tutorial extends Mission
 
   # @see Mission#onMouseClick
   onMouseClick: (x, y) ->
-    #switch @phase
-    #  when @phases.MOVE_PROBE_1
-    #    @_checkMoveProbeArrows()
     if @phase > @phases.MOVE
       switch UI.turns
         when 0
@@ -189,49 +230,111 @@ class Tutorial extends Mission
           if not @m4.visible and not @m5.visible and not @m6.visible
             @m3.close()
             @m4.open()
+          if @m6.visible or @m7.visible
+            @_checkTurn1Arrows()
+          else
+            @endArrow.close()
+        when 2
+          if not @m8.visible
+            @m7.close()
+            @m8.open()
+            camera.setTarget(@home2.location())
+          if @m8.visible
+            @_checkTurn2Arrows()
+        when 3
           @endArrow.close()
 
     UI.refreshEndTurnButton()
 
+  _checkTurn2Arrows: ->
+    if UI.selectedPlanet != @home2 and
+       @home2.buildUnit() != window.config.units.attackShip
+      @select_home_2_arrow.open()
+      @build_attack_arrow.close()
+      @endArrow.close()
+    else if @home2.buildUnit() != window.config.units.attackShip
+      @select_home_2_arrow.close()
+      @build_attack_arrow.open()
+      @endArrow.close()
+    else
+      @select_home_2_arrow.close()
+      @build_attack_arrow.close()
+      @endArrow.open()
+
+  _checkTurn1Arrows: ->
+    if UI.selectedPlanet != @home and
+       @home.buildUnit() != window.config.units.colonyShip
+      @select_home_1_arrow.open()
+      @build_colony_arrow.close()
+      @select_probe_3_arrow.close()
+      @move_planet_5_arrow.close()
+      @endArrow.close()
+    else if @home.buildUnit() != window.config.units.colonyShip
+      @select_home_1_arrow.close()
+      @build_colony_arrow.open()
+      @select_probe_3_arrow.close()
+      @move_planet_5_arrow.close()
+      @endArrow.close()
+    else if @_probeSelected(@map.planets[3])
+      @select_home_1_arrow.close()
+      @build_colony_arrow.close()
+      @select_probe_3_arrow.close()
+      @move_planet_5_arrow.open()
+      @endArrow.close()
+    else if @map.planets[3].numShips(window.config.units.probe) > 0
+      @select_home_1_arrow.close()
+      @build_colony_arrow.close()
+      @select_probe_3_arrow.open()
+      @move_planet_5_arrow.close()
+      @endArrow.close()
+      @m6.close()
+      @m7.open()
+      camera.setTarget(@map.planets[3].location())
+    else
+      @select_home_1_arrow.close()
+      @build_colony_arrow.close()
+      @select_probe_3_arrow.close()
+      @move_planet_5_arrow.close()
+      @endArrow.open()
+
   _checkMoveProbeArrows: ->
-    if @_probeSelected()
-      @select_probe_1_arrow.close()
-      @move_probe_1_arrow.open()
+    if @_probeSelected(@home)
+      @select_probe_0_arrow.close()
+      @move_planet_3_arrow.open()
       @select_home_1_arrow.close()
       @build_probe_arrow.close()
       @endArrow.close()
     else if @home.numShips(window.config.units.probe) > 0
-      @select_probe_1_arrow.open()
-      @move_probe_1_arrow.close()
+      @select_probe_0_arrow.open()
+      @move_planet_3_arrow.close()
       @select_home_1_arrow.close()
       @build_probe_arrow.close()
       @endArrow.close()
     else if UI.selectedPlanet != @home and not @home.isBuilding()
-      @select_probe_1_arrow.close()
-      @move_probe_1_arrow.close()
+      @select_probe_0_arrow.close()
+      @move_planet_3_arrow.close()
       @select_home_1_arrow.open()
       @build_probe_arrow.close()
       @endArrow.close()
     else if @home.buildUnit() != window.config.units.probe
-      @select_probe_1_arrow.close()
-      @move_probe_1_arrow.close()
+      @select_probe_0_arrow.close()
+      @move_planet_3_arrow.close()
       @select_home_1_arrow.close()
       @build_probe_arrow.open()
       @endArrow.close()
     else
-      @select_probe_1_arrow.close()
-      @move_probe_1_arrow.close()
+      @select_probe_0_arrow.close()
+      @move_planet_3_arrow.close()
       @select_home_1_arrow.close()
       @build_probe_arrow.close()
       @endArrow.open()
 
-  _probeSelected: ->
-    for p in game.getPlanets()
-      units = p.unitSelection
-      for row in units.probes
-        for stack in row
-          if stack.isSelected() and stack.getCount() > 0
-            return true
+  _probeSelected: (planet) ->
+    units = planet.unitSelection
+    for row in units.probes
+      for stack in row
+        if stack.isSelected() and stack.getCount() > 0
+          return true
 
   # @see Mission#canEndTurn
   canEndTurn: ->
