@@ -228,6 +228,11 @@ class Elements.Frame extends Elements.UIElement
       for child in children
         child.draw(@ctx) # if child.dirty or child._hasDirtyChildren
 
+  # Update the frame's children
+  updateChildren: ->
+    for child in @_children
+      child.update(@ctx)
+
 
 # Frame for holding all elements that need to be drawn relative to the center
 # of the screen
@@ -294,6 +299,10 @@ class Elements.CameraFrame extends Elements.UIElement
           #   console.log("Drawing: " + child)
           child.draw(@ctx, null, null, true)
 
+  # Update the frame's children
+  updateChildren: ->
+    for child in @_children
+      child.update(@ctx)
 
 
 # Frame for holding all elements in the game
@@ -332,6 +341,12 @@ class Elements.GameFrame extends Elements.UIElement
           coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
           # if @camera.onScreen(coords)
           child.draw(@ctx, coords, @camera.getZoom(), true)
+
+  # Update the frame's children
+  updateChildren: ->
+    for child in @_children
+      coords = @camera.getScreenCoordinates({x: child.x, y: child.y})
+      child.update(@ctx, coords, @camera.getZoom())
 
 
 # A class for holding text

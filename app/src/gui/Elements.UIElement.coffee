@@ -53,6 +53,9 @@ class Elements.UIElement extends Module
   # @property [Boolean] Flag for if the elemnt needs to be redrawn
   dirty: true
 
+  # @property [Boolean] Flag for if the element needs to be updated
+  needsUpdating: false
+
   _hasDirtyChildren: false
 
   # Create a new UI element
@@ -87,6 +90,9 @@ class Elements.UIElement extends Module
     ###* @type {?function(?, ?=, ?=)}
     ###
     @_drawFunc = null
+    ###* @type {?function(?, ?=, ?=)}
+    ###
+    @_updateFunc = null
 
     @_removeQueue = []
 
@@ -441,6 +447,12 @@ class Elements.UIElement extends Module
   #
   setClearFunc: (@_clearFunc) ->
 
+  # Sets the update function for this element
+  #
+  # @param [Function] _updateFunc
+  #
+  setUpdateFunc: (@_updateFunc) ->
+
   # Call the draw function with the passed arguments
   #
   # @param [CanvasRenderingContext2D] ctx
@@ -450,12 +462,13 @@ class Elements.UIElement extends Module
   #
   draw: (ctx, coords=null, zoom=1.0, forceDraw=false) ->
     @_emptyRemoveQueue(ctx)
-    if @_closing
-      @_closing = false
-      @visible = false
-      @clear(ctx, coords, zoom)
-      @setDirty()
-    else if @visible
+    # if @_closing
+    #   @_closing = false
+    #   @visible = false
+    #   @clear(ctx, coords, zoom)
+    #   @setDirty()
+    # else if @visible
+    if @visible
       if @dirty or forceDraw
         if @_moving
           @clear(ctx, coords, zoom)
@@ -512,6 +525,28 @@ class Elements.UIElement extends Module
       @_clearFunc?(ctx)
     else
       @_clearFunc?(ctx, coords, zoom)
+
+  # Update this element
+  #
+  # @param [CanvasRenderingContext2D] ctx
+  # @param [Object] coords The coordinates to draw to
+  # @param [Number] zoom The current zoom
+  #
+  update: (ctx, coords=null, zoom=1.0) ->
+    # if @needsUpdating
+    #   @_parent?.updateChild(this)
+    if coords is null
+      @_updateFunc?(ctx)
+    else
+      @_updateFunc?(ctx, coords, zoom)
+    if @_closing
+      @_closing = false
+      @visible = false
+      @clear(ctx, coords, zoom)
+      @setDirty()
+    for child in @_children
+      child.update(ctx, coords, zoom)
+    # @needsUpdating = false
 
   # Function to call when a child element is updated to see if anything needs to be
   # redrawn
