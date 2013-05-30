@@ -182,6 +182,14 @@ class UserInterface
     @stationMenu.addChild(cancelBuild)
     @stationMenu.addChild(stationRally)
     @stationMenu.addChild(stationCancelRally)
+    l = stationStyle.queueButtonLoc
+    x = l.x
+    @queueButtons = []
+    for i in [0...stationStyle.queueButtonCount]
+      qb = @_getQueueButton(x, l.y, stationStyle.queueButtonSize, i)
+      @queueButtons.push(qb)
+      @stationMenu.addChild(qb)
+      x += stationStyle.queueButtonSize + stationStyle.queueButtonGap
     @stationMenu.setProperty("cancelButton", cancelBuild)
     @stationMenu.setProperty("cancelOpen", false)
     @stationMenu.setProperty("rallyButton", stationRally)
@@ -411,6 +419,27 @@ class UserInterface
     )
     return button
 
+  _getQueueButton: (x, y, s, index) ->
+    button = new Elements.Button(x, y, s, s)
+    button.setProperty("location",
+      @stationMenu.getActualLocation(button.x, button.y))
+    button.setClickHandler(() =>
+      @selectedPlanet.removeFromBuildQueue(index)
+    )
+    button.setDrawFunc((ctx) =>
+      loc = button.getProperty("location")
+      ctx.strokeStyle = window.config.unitDisplay.stroke
+      ctx.lineWidth = window.config.unitDisplay.lineWidth
+      ctx.lineJoin = window.config.unitDisplay.lineJoin
+      x = loc.x
+      y = loc.y
+      w = button.w
+      h = button.h
+      if button.isHovered()
+        ctx.strokeRect(x - w/2, y - h /2, w, h)
+    )
+    return button
+
   _clearMenu: (style) =>
     (ctx) =>
       winStyle = window.config.windowStyle
@@ -521,9 +550,9 @@ class UserInterface
           when window.config.units.defenseShip
             sprite = window.config.spriteNames.DEFENSE_SHIP
         SHEET.drawSprite(sprite, x, y, ctx, false, stationStyle.queueButtonSize/32)
-        #queueButton[i].open()
-      #else
-      #  queueButton[i].close()
+        @queueButtons[i].open()
+      else
+        @queueButtons[i].close()
       x += stationStyle.queueButtonSize + stationStyle.queueButtonGap
 
     # Draw variables

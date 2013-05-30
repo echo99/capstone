@@ -164,6 +164,7 @@ class Tutorial extends Mission
     cameraHudFrame.removeChild(@m6)
     cameraHudFrame.removeChild(@m7)
     cameraHudFrame.removeChild(@m8)
+    cameraHudFrame.removeChild(@m9)
     cameraHudFrame.removeChild(@skipButton)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
