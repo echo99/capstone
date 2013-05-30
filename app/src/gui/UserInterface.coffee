@@ -1142,7 +1142,7 @@ class UserInterface
             ctx.fillStyle = window.config.carrierStyle.color
             ctx.beginPath()
             r = window.config.carrierStyle.radius * camera.getZoom()
-            ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI)
+            ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI, false)
             ctx.fill()
         ))
 
@@ -1156,7 +1156,7 @@ class UserInterface
               ctx.fillStyle = window.config.carrierStyle.color
               ctx.beginPath()
               r = window.config.carrierStyle.radius * camera.getZoom()
-              ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI)
+              ctx.arc(loc.x, loc.y, r, 0, 2*Math.PI, false)
               ctx.fill()
           ))
 
@@ -1245,7 +1245,7 @@ class UserInterface
         r = (window.config.planetRadius + window.config.selectionStyle.radius) *
              camera.getZoom()
         ctx.beginPath()
-        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+        ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
         ctx.stroke()
     else if @lookingToSendResources
       tooltipCtx.fillText("Select planet with station", x, y)
@@ -1258,7 +1258,7 @@ class UserInterface
       r = (window.config.planetRadius + window.config.selectionStyle.radius) *
            camera.getZoom()
       ctx.beginPath()
-      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
       ctx.stroke()
       # Outline planet that outpost is sending resources to
       if @selectedPlanet.hasOutpost() and @selectedPlanet.sendingResourcesTo()
@@ -1290,7 +1290,7 @@ class UserInterface
       r = (window.config.planetRadius + window.config.rallyPoint.radius) *
         camera.getZoom()
       ctx.beginPath()
-      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI)
+      ctx.arc(pos.x, pos.y, r, 0, 2*Math.PI, false)
       ctx.stroke()
 
       ctx.font = window.config.windowStyle.defaultText.font
@@ -1336,7 +1336,7 @@ class UserInterface
     r = (window.config.planetRadius + window.config.controlGroup.finishRadius) *
         camera.getZoom()
     ctx.beginPath()
-    ctx.arc(finish.x, finish.y, r, 0, 2*Math.PI)
+    ctx.arc(finish.x, finish.y, r, 0, 2*Math.PI, false)
     ctx.stroke()
 
     ctx.font = window.config.windowStyle.defaultText.font

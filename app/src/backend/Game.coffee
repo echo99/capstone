@@ -34,7 +34,7 @@ class Game
     @_planets.push(homePlanet)
     # Generate the rest of the planets.
     while @_planets.length != numplanets
-      if @_planets.length > @_numplanets
+      if @_planets.length > numplanets
         throw Error "TOO MANY PLANETS OMG"
       seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
       deltaX = Math.floor((Math.random() * 2 - 1) *
@@ -89,8 +89,8 @@ class Game
 
   # Make two planets neighbors.
   #
-  # @param [Planet] First new neighbor.
-  # @param [Planet] Second new neighbor.
+  # @param [Planet] planet1 new neighbor.
+  # @param [Planet] planet2 new neighbor.
   setNeighbors: (planet1, planet2) ->
     planet1.addNeighbor(planet2)
 
@@ -146,7 +146,7 @@ class Game
     if ret < root.config.resources.minResources
       ret = root.config.resources.minResources
     if ret > root.config.resources.maxResources
-      ret = root.config.resources.maxResouces
+      ret = root.config.resources.maxResources
     return ret
 
   # Returns a new value for a planet's rate according to mean and stdev
