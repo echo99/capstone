@@ -373,12 +373,8 @@ class UserInterface
     button.setProperty("location",
       @stationMenu.getActualLocation(button.x, button.y))
     button.setClickHandler(() =>
-      ###
-      if (probes and
-          @selectedPlanet.numShips(window.config.units.probe) < unit.cost) or
-          (not probes and @selectedPlanet.availableResources() < unit.cost)
-      else if @selectedPlanet.buildUnit() != null
-      else
+      if @selectedPlanet._buildQueue.length <
+         window.config.stationMenuStyle.queueButtonCount
         if unit == window.config.structures.station
           @selectedPlanet.scheduleStation()
         else if unit == window.config.structures.outpost
@@ -387,23 +383,20 @@ class UserInterface
             @unitSelection.updateSelection(@selectedPlanet)
         else
           @selectedPlanet.build(unit)
-      ###
-      if unit == window.config.structures.station
-        @selectedPlanet.scheduleStation()
-      else if unit == window.config.structures.outpost
-        @selectedPlanet.scheduleOutpost()
-        if probes
-          @unitSelection.updateSelection(@selectedPlanet)
-      else
-        @selectedPlanet.build(unit)
     )
     button.setDrawFunc((ctx) =>
       loc = button.getProperty("location")
-      if (probes and
-          @selectedPlanet.numShips(window.config.units.probe) < unit.cost) or
-          (not probes and @selectedPlanet.availableResources() < unit.cost)
+      if @selectedPlanet._buildQueue.length >=
+         window.config.stationMenuStyle.queueButtonCount
         ctx.strokeStyle = window.config.unitDisplay.red
-      else if @selectedPlanet.buildUnit() != null
+      else if probes and
+         @selectedPlanet.numShips(window.config.units.probe) < unit.cost
+        ctx.strokeStyle = window.config.unitDisplay.red
+      else if @selectedPlanet.hasOutpost() and not probes and
+         @selectedPlanet.availableResources() < unit.cost
+        ctx.strokeStyle = window.config.unitDisplay.red
+      else if (not probes and @selectedPlanet.availableResources() < unit.cost) or
+          @selectedPlanet.buildUnit() != null
         ctx.strokeStyle = window.config.unitDisplay.orange
       else
         ctx.strokeStyle = window.config.unitDisplay.stroke
@@ -515,17 +508,22 @@ class UserInterface
 
     x = stationStyle.queueButtonLoc.x + loc.x
     y = stationStyle.queueButtonLoc.y + loc.y
-    for unit in @selectedPlanet._buildQueue
-      switch unit
-        when window.config.units.probe
-          sprite = window.config.spriteNames.PROBE
-        when window.config.units.colonyShip
-          sprite = window.config.spriteNames.COLONY_SHIP
-        when window.config.units.attackShip
-          sprite = window.config.spriteNames.ATTACK_SHIP
-        when window.config.units.defenseShip
-          sprite = window.config.spriteNames.DEFENSE_SHIP
-      SHEET.drawSprite(sprite, x, y, ctx, false, stationStyle.queueButtonSize / 32)
+    for i in [0...stationStyle.queueButtonCount]
+      unit = @selectedPlanet._buildQueue[i]
+      if unit
+        switch unit
+          when window.config.units.probe
+            sprite = window.config.spriteNames.PROBE
+          when window.config.units.colonyShip
+            sprite = window.config.spriteNames.COLONY_SHIP
+          when window.config.units.attackShip
+            sprite = window.config.spriteNames.ATTACK_SHIP
+          when window.config.units.defenseShip
+            sprite = window.config.spriteNames.DEFENSE_SHIP
+        SHEET.drawSprite(sprite, x, y, ctx, false, stationStyle.queueButtonSize/32)
+        #queueButton[i].open()
+      #else
+      #  queueButton[i].close()
       x += stationStyle.queueButtonSize + stationStyle.queueButtonGap
 
     # Draw variables
@@ -1681,7 +1679,7 @@ class UserInterface
           @movingElements.push(new MovingElement(s, e, combatStyle.bad.speed,
             @_getDrawDamage(-report.defenseShipsLost, combatStyle.bad)))
 
-      report = p._fungusReport
+      report = p.getFungusReport()
       for f in report
         if p.visibility() == window.config.visibility.visible and
            f.to.visibility() == window.config.visibility.visible
@@ -1693,6 +1691,9 @@ class UserInterface
             e = {x: f.to.location().x, y: f.to.location().y}
           @movingElements.push(new MovingElement(s, e, fungusMoveStyle.speed,
             @_getDrawDamage(f.val, fungusMoveStyle)))
+
+    for el in @movingElements
+      el.endTurn()
 
   refreshEndTurnButton: ->
     @endTurnButton.setDirty()
@@ -1739,6 +1740,7 @@ class MovingElement
     #@element.setClearFunc(@clear)
     @element.visible = true
     gameFrame.addChild(@element)
+    @life = window.config.movingElementLife
 
   draw: (ctx) =>
     loc =
@@ -1758,3 +1760,8 @@ class MovingElement
   destroy: ->
     @element.destroy()
     UI.movingElements = UI.movingElements.filter((e) => e != @)
+
+  endTurn: ->
+    @life--
+    if @life == 0
+      @destroy()
