@@ -493,7 +493,7 @@ class Planet
     @_fungusReport = []
     if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
         @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
-      null # No sporing or growing.
+      # null # No sporing or growing.
     else if @_fungusStrength < @_fungusMaximumStrength
       # Grow
       @_fungusArriving += root.config.units.fungus.growthPerTurn
@@ -509,7 +509,7 @@ class Planet
     toMap = {}
     if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
         @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
-      null # No sporing or growing.
+      # null # No sporing or growing.
     else if @_fungusStrength >= @_fungusMaximumStrength and
         @_adjacentPlanets.length > 0
       # Spore
