@@ -23,7 +23,7 @@ REQUIRE_REGEX = /^(\s*)#_require/
 # TYPE_DEF_REGEX = /@(require|param)/
 TYPE_DEF_REGEX = /@(return|param)\s+\[(.*?)\]\s*(.*)/
 OPEN_PARAM_TAG_REGEX = /^\s+#\s+@param\s+\[(.*)/
-CLOSE_PARAM_TAG_REGEX = /^\s+#\s+(.*?)\]/
+CLOSE_PARAM_TAG_REGEX = /^\s+#\s+(.*?)\]\s*(.*)/
 SUPPRESS_REGEX = /@suppress\s+/
 FUNCTION_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*(?:\((.*?)\))\s*(?:-|=)>/
 FUNCTION_OPEN_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*\((.*)/
@@ -39,12 +39,21 @@ replaceTypes =
   'bool': 'boolean'
 
 normalizeType = (type) ->
+  # Check if type is an object
+  if type.match(objectType)
+    for jsType in builtInTypes
+      type = type.replace(new RegExp(jsType, 'ig'), jsType)
+    for numType in numberTypes
+      type = type.replace(new RegExp(numType, 'ig'), 'number')
+    return type
+
   # Check if type is a collection
   collectionMatch = type.match(collectionType)
   if collectionMatch
     outer = normalizeType(collectionMatch[1])
     inner = normalizeType(collectionMatch[2])
     return "#{outer}.<#{inner}>"
+
   # Normal type
   lcType = type.toLowerCase()
   if lcType in numberTypes
@@ -98,6 +107,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
   commentBuffer = []
   containsTypeDef = false
   containsSuppress = false
+  currentType = ''
 
   # Current state variables
   inClass = false
@@ -232,41 +242,59 @@ _codoToJsdoc = (file, classes, superclasses) ->
         # Line is a comment
         spacing = matches[1]
         comment = matches[2]
-        # debug "Spacing: #{spacing}|"
-        # debug "Comment: #{comment}"
-        if not inComment
-          inComment = true
-          commentBuffer.push spacing + '###*\n'
-        if line.match(TYPE_DEF_REGEX)
-          typeMatches = line.match(TYPE_DEF_REGEX)
-          containsTypeDef = true
-          tag = typeMatches[1]
-          type = typeMatches[2]
-          desc = typeMatches[3]
-
-          if type.match(objectType)
-            for jsType in builtInTypes
-              type = type.replace(new RegExp(jsType, 'ig'), jsType)
-            for numType in numberTypes
-              type = type.replace(new RegExp(numType, 'ig'), 'number')
-            # for invalType, repl of replaceTypes
-            #   type = type.replace(new RegExp(': ?' + invalType, 'ig'), repl)
+        if inTypeTag
+          if line.match(CLOSE_PARAM_TAG_REGEX)
+            matches = line.match(CLOSE_PARAM_TAG_REGEX)
+            currentType += matches[1].trim()
+            desc = matches[2]
+            inTypeTag = false
+            type = normalizeType(currentType)
+            currentType = ''
+            commentBuffer.push "#{spacing}* @param \{#{type}\} #{desc}\n"
           else
-            # if type.toLowerCase() in numberTypes
-            #   type = 'number'
-            type = normalizeType(type)
-          if type
-            commentBuffer.push "#{spacing}* @#{tag} \{#{type}\} #{desc}\n"
-          else
-            commentBuffer.push "#{spacing}* @#{tag} #{desc}\n"
-          params.push
-            tag: tag
-            type: type
-          # commentBuffer += spacing + '* ' + comment + '\n'
+            currentType += comment.trim()
         else
-          if line.match(SUPPRESS_REGEX)
+          # debug "Spacing: #{spacing}|"
+          # debug "Comment: #{comment}"
+          if not inComment
+            inComment = true
+            commentBuffer.push spacing + '###*\n'
+          if line.match(TYPE_DEF_REGEX)
+            typeMatches = line.match(TYPE_DEF_REGEX)
+            containsTypeDef = true
+            tag = typeMatches[1]
+            type = typeMatches[2]
+            desc = typeMatches[3]
+
+            type = normalizeType(type)
+
+            # if type.match(objectType)
+            #   for jsType in builtInTypes
+            #     type = type.replace(new RegExp(jsType, 'ig'), jsType)
+            #   for numType in numberTypes
+            #     type = type.replace(new RegExp(numType, 'ig'), 'number')
+            #   # for invalType, repl of replaceTypes
+            #   #   type = type.replace(new RegExp(': ?' + invalType, 'ig'), repl)
+            # else
+            #   # if type.toLowerCase() in numberTypes
+            #   #   type = 'number'
+            #   type = normalizeType(type)
+            if type
+              commentBuffer.push "#{spacing}* @#{tag} \{#{type}\} #{desc}\n"
+            else
+              commentBuffer.push "#{spacing}* @#{tag} #{desc}\n"
+            params.push
+              tag: tag
+              type: type
+            # commentBuffer += spacing + '* ' + comment + '\n'
+          else if line.match(OPEN_PARAM_TAG_REGEX)
+            containsTypeDef = true
+            inTypeTag = true
+            matches = line.match(OPEN_PARAM_TAG_REGEX)
+            currentType = matches[1].trim()
+          else if line.match(SUPPRESS_REGEX)
             containsSuppress = true
-          commentBuffer.push spacing + '* ' + comment + '\n'
+            commentBuffer.push spacing + '* ' + comment + '\n'
         nonTypeCommentBuffer += line + '\n'
         lastSpacing = spacing
       else
