@@ -24,7 +24,7 @@ REQUIRE_REGEX = /^(\s*)#_require/
 TYPE_DEF_REGEX = /@(return|param)\s+\[(.*?)\]\s*(.*)/
 OPEN_PARAM_TAG_REGEX = /^\s+#\s+@param\s+\[(.*)/
 CLOSE_PARAM_TAG_REGEX = /^\s+#\s+(.*?)\]\s*(.*)/
-SUPPRESS_REGEX = /@suppress\s+/
+SUPPRESS_REGEX = /@suppress\s+\((.*?)\)/
 FUNCTION_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*(?:\((.*?)\))\s*(?:-|=)>/
 FUNCTION_OPEN_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*\((.*)/
 FUNCTION_CLOSE_REGEX = /^\s+(.*?)\)\s*(?:-|=)>/
@@ -294,7 +294,9 @@ _codoToJsdoc = (file, classes, superclasses) ->
             currentType = matches[1].trim()
           else if line.match(SUPPRESS_REGEX)
             containsSuppress = true
-            commentBuffer.push spacing + '* ' + comment + '\n'
+            matches = line.match(SUPPRESS_REGEX)
+            suppressTypes = matches[1]
+            commentBuffer.push spacing + "* @suppress {#{suppressTypes}} \n"
         nonTypeCommentBuffer += line + '\n'
         lastSpacing = spacing
       else

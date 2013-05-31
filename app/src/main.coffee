@@ -191,7 +191,7 @@ drawBackground = (ctx, spritesheet, name) ->
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 # Update the size of the frame and the canvases when the window size changes
-# @suppress {checkTypes}
+# @suppress (checkTypes)
 updateCanvases = (frame, canvases..., width, height) ->
   frameWidth = width
   frameHeight = height

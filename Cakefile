@@ -546,7 +546,10 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
       ].join(' ')
       exec "#{cmd} #{args}", (err, stdout, stderr) ->
         console.log stdout if stdout
-        console.error stderr.red if stderr
+        if stderr
+          console.error stderr.red
+        else
+          console.log 'No type errors found!'.green
 
 
 

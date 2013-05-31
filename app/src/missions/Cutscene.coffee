@@ -151,6 +151,8 @@ class Cutscene extends Mission
 
   # @see Mission#hasInput
   #hasInput: -> true
+
+  # @see Mission#canPlay
   canPlay: -> false
 
   # @see Mission#canMove
