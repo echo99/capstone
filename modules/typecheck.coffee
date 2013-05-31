@@ -2,6 +2,7 @@
 fs = require 'fs'
 path = require 'path'
 writefile = require 'writefile'
+{Buffer} = require './buffer'
 
 # Flag for debugging the module
 DEBUG_MODE = false
@@ -15,12 +16,14 @@ debug = (msg) ->
 CLASS_REGEX = /^class\s+(.*)/
 SUBCLASS_REGEX = /^class\s+(.*?)\s+extends\s+(.*)/
 COMMENT_REGEX = /^(\s*)#+\s*(.*)/
-MULTI_COMMENT_REGEX = /^(\s*)###+/
+# This regex is not quite right...
+SINGLE_MULTI_COMMENT_REGEX = /^(\s*)###[^#]+###/
+MULTI_COMMENT_REGEX = /^(\s*)###(?:[^#]+)?$/
 REQUIRE_REGEX = /^(\s*)#_require/
 # TYPE_DEF_REGEX = /@(require|param)/
 TYPE_DEF_REGEX = /@(return|param)\s+\[(.*?)\]\s*(.*)/
-openParam = /^\s+#\s+@param\s+\[(.*)/
-closeParam = /^\s+#\s+(.*?)\]/
+OPEN_PARAM_TAG_REGEX = /^\s+#\s+@param\s+\[(.*)/
+CLOSE_PARAM_TAG_REGEX = /^\s+#\s+(.*?)\]/
 SUPPRESS_REGEX = /@suppress\s+/
 FUNCTION_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*(?:\((.*?)\))\s*(?:-|=)>/
 FUNCTION_OPEN_REGEX = /^\s*@?[a-zA-Z0-9_]+\s*(?:\:|=)\s*\((.*)/
@@ -60,7 +63,6 @@ codoToJsdoc = (files) ->
   classes = []
   superclasses = {}
 
-
   compFiles = []
   # mkdirp = require 'mkdirp'
   # Convert each file separately
@@ -86,9 +88,12 @@ codoToJsdoc = (files) ->
 # @modifies classes Adds classes found in the file
 # @modifies superclasses
 _codoToJsdoc = (file, classes, superclasses) ->
-  buffer = 'CLOSURE = true\n\n'
-  classBuffer = ''
-  afterClassDecBuffer = ''
+  # String buffers
+  currentBuffer = null
+  parsedFileBuffer = new Buffer('CLOSURE = true\n\n')
+  classDecBuffer = new Buffer()
+  afterClassDecBuffer = new Buffer()
+  # afterClassDecBuffer.clear()
   nonTypeCommentBuffer = ''
   commentBuffer = []
   containsTypeDef = false
@@ -116,15 +121,9 @@ _codoToJsdoc = (file, classes, superclasses) ->
     # Line is a function, check for default parameters
     parameters = line.match(FUNCTION_REGEX)[1]
     params = parameters.split(/, */)
-    # debug("checking params")
-    # debug(params)
     for param in params
       if param.indexOf('=') > 0
-        # debug "Checking #{param}"
-        # debug(commentBuffer)
-        # debug param.indexOf('=')
         paramParts = param.split(/\s*=\s*/)
-        # debug paramParts
         paramName = paramParts[0]
         paramDefault = paramParts[1]
         if paramName.indexOf('@') == 0
@@ -137,8 +136,7 @@ _codoToJsdoc = (file, classes, superclasses) ->
             unless commLine?
               console.error 'Comment buffer:'
               console.error commentBuffer
-              console.error "Line: #{i}"
-              console.error line
+              console.error "Line: #{i}: #{line}"
             # if commLine.indexOf(paramName) > 0
             if commLine.match(new RegExp('\\}\\s+' + paramName))
               foundDef = true
@@ -160,40 +158,14 @@ _codoToJsdoc = (file, classes, superclasses) ->
     if line.match(FUNCTION_REGEX)
       # Line is a function, check for default parameters
       parseFunctionDef(line)
-      # parameters = line.match(/[a-zA-Z0-9_]+\s*:\s*(?:\((.*?)\))\s*(?:-|=)>/)[1]
-      # params = parameters.split(/, */)
-      # debug("checking params")
-      # debug(params)
-      # for param in params
-      #   if param.indexOf('=') > 0
-      #     debug "Checking #{param}"
-      #     debug(commentBuffer)
-      #     debug param.indexOf('=')
-      #     paramParts = param.split(/\s*=\s*/)
-      #     debug paramParts
-      #     paramName = paramParts[0]
-      #     paramDefault = paramParts[1]
-      #     if paramName.indexOf('@') == 0
-      #       paramName = paramName.substr(1)
-      #     for i in [1..commentBuffer.length-1]
-      #       commLine = commentBuffer[i]
-      #       if commLine.indexOf(paramName) > 0
-      #         debug "Found #{paramName} in '#{commLine}'"
-      #         commentBuffer[i] = commLine.replace(/@param \{(.*?)\}/, '@param {$1=}')
-      #         if paramDefault is 'null'
-      #           commentBuffer[i] = commentBuffer[i].replace(/@param \{(.*?)\}/, '@param {?$1}')
-      #         break
     commentBuffer.push lastSpacing + '###\n'
     if line.indexOf('constructor:') > 0
       # Found constructor!
       # Put the constructor documentation before the class definition so
       # Google closure can see it
-      # debug commentBuffer.length
       trimmedBuffer = []
+      # Remove leading spaces
       for commLine in commentBuffer
-        # debug i
-        # debug(commentBuffer[i])
-        # debug commLine.replace(/^\s+/, '')
         trimmedBuffer.push commLine.replace(/^\s+/g, '')
       last = trimmedBuffer.pop()
       trimmedBuffer.push '* @constructor\n'
@@ -202,33 +174,27 @@ _codoToJsdoc = (file, classes, superclasses) ->
         trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
         classStr += " extends #{superclasses[curClass]}"
       trimmedBuffer.push(last)
-      classBuffer += trimmedBuffer.join('')
-      classBuffer += "class #{classStr}\n"
-      buffer += classBuffer
-      buffer += afterClassDecBuffer
-      # buffer += line + '\n'
-      classBuffer = ''
-      afterClassDecBuffer = ''
+      classDecBuffer.add(trimmedBuffer.join(''))
+      classDecBuffer.add("class #{classStr}\n")
+      parsedFileBuffer.addBuffer(classDecBuffer)
+      parsedFileBuffer.addBuffer afterClassDecBuffer
+      classDecBuffer.clear()
+      afterClassDecBuffer.clear()
       inClass = false
+      currentBuffer = parsedFileBuffer
     else
       if containsTypeDef or containsSuppress
-        if inClass
-          afterClassDecBuffer += commentBuffer.join('')
-        else
-          buffer += commentBuffer.join('')
+        currentBuffer.add commentBuffer.join('')
       else
-        if inClass
-          afterClassDecBuffer += nonTypeCommentBuffer
-        else
-          buffer += nonTypeCommentBuffer
+        currentBuffer.add nonTypeCommentBuffer
     commentBuffer = []
     nonTypeCommentBuffer = ''
     inComment = false
     containsTypeDef = false
     containsSuppress = false
-    # buffers = [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer]
-    # flags = [inComment, inClass, containsTypeDef]
-    # return [buffer, buffers, flags]
+
+
+  currentBuffer = parsedFileBuffer
 
   # Loop over each line
   for line in lines
@@ -237,19 +203,20 @@ _codoToJsdoc = (file, classes, superclasses) ->
       indentation = indentStr.length
       if inClass and indentation <= classInd
         debug("not in class anymore!")
-        buffer += '###*\n'
-        buffer += '* @constructor\n'
+        parsedFileBuffer.add '###*\n'
+        parsedFileBuffer.add '* @constructor\n'
         classStr = curClass
         if curClass of superclasses
-          buffer += "* @extends #{superclasses[curClass]}\n"
+          parsedFileBuffer.add "* @extends #{superclasses[curClass]}\n"
           classStr += " extends #{superclasses[curClass]}"
-        buffer += '###\n'
-        classBuffer += "class #{classStr}\n"
-        buffer += classBuffer
-        buffer += afterClassDecBuffer
-        classBuffer = ''
-        afterClassDecBuffer = ''
+        parsedFileBuffer.add '###\n'
+        classDecBuffer.add "class #{classStr}\n"
+        parsedFileBuffer.addBuffer classDecBuffer
+        parsedFileBuffer.addBuffer afterClassDecBuffer
+        classDecBuffer.clear()
+        afterClassDecBuffer.clear()
         inClass = false
+        currentBuffer = parsedFileBuffer
         inComment = false
       # else
       #   debug indentation + ': ' + line
@@ -306,12 +273,6 @@ _codoToJsdoc = (file, classes, superclasses) ->
         # Line is not a comment
         if inComment
           # Exit comment
-          # buffers = [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer]
-          # flags = [inComment, inClass, containsTypeDef]
-          # [str, buffers, flags] = _exitComment(line, lastSpacing, curClass, superclasses, buffers, flags)
-          # buffer += str
-          # [commentBuffer, classBuffer, afterClassDecBuffer, nonTypeCommentBuffer] = buffers
-          # [inComment, inClass, containsTypeDef] = flags
           exitComment(line)
         else if line.indexOf('constructor:') > 0 and not inBlockComment
           # Found constructor!
@@ -336,24 +297,22 @@ _codoToJsdoc = (file, classes, superclasses) ->
             trimmedBuffer.push "* @extends #{superclasses[curClass]}\n"
             classStr += " extends #{superclasses[curClass]}"
           trimmedBuffer.push('###\n')
-          classBuffer += trimmedBuffer.join('')
-          classBuffer += "class #{classStr}\n"
-          buffer += classBuffer
-          buffer += afterClassDecBuffer
-          # buffer += line + '\n'
-          classBuffer = ''
-          afterClassDecBuffer = ''
+          classDecBuffer.add(trimmedBuffer.join(''))
+          classDecBuffer.add("class #{classStr}\n")
+          parsedFileBuffer.addBuffer classDecBuffer
+          parsedFileBuffer.addBuffer afterClassDecBuffer
+          # parsedFileBuffer.add(line + '\n')
+          classDecBuffer.clear()
+          afterClassDecBuffer.clear()
           inClass = false
+          currentBuffer = parsedFileBuffer
           commentBuffer = []
         else if line.match(FUNCTION_REGEX) and not inBlockComment
           # Add default documentation to function that's missing it
           commentBuffer = [indentStr + '###*\n']
           parseFunctionDef(line)
           commentBuffer.push(indentStr + '###\n')
-          if inClass
-            afterClassDecBuffer += commentBuffer.join('')
-          else
-            buffer += commentBuffer.join('')
+          currentBuffer.add commentBuffer.join('')
           commentBuffer = []
         if line.match(CLASS_REGEX) and not inBlockComment
           if line.match(SUBCLASS_REGEX)
@@ -363,10 +322,11 @@ _codoToJsdoc = (file, classes, superclasses) ->
             superclasses[curClass] = superClass
           else
             matches = line.match(CLASS_REGEX)
-            # buffer += matches[1] + '\n'
+            # parsedFileBuffer.add(matches[1] + '\n')
             curClass = matches[1]
           classes.push(curClass)
           inClass = true
+          currentBuffer = afterClassDecBuffer
           # debug("In class #{curClass}")
           classInd = indentation
           # debug("Indentation level #{classInd}")
@@ -379,52 +339,32 @@ _codoToJsdoc = (file, classes, superclasses) ->
             for assignedVar in vars
               newlines += indentStr + "#{assignedVar} = #{obj}['#{assignedVar}']\n"
             line = newlines
-          if inClass
-            afterClassDecBuffer += line + '\n'
-          else
-            buffer += line + '\n'
+          currentBuffer.add line + '\n'
     else
       if inComment
         # Exit comment
-        commentBuffer.push lastSpacing + '###\n'
-        if containsTypeDef or containsSuppress
-          if inClass
-            afterClassDecBuffer += commentBuffer.join('')
-          else
-            buffer += commentBuffer.join('')
-        else
-          if inClass
-            afterClassDecBuffer += nonTypeCommentBuffer
-          else
-            buffer += nonTypeCommentBuffer
-        commentBuffer = []
-        nonTypeCommentBuffer = ''
-        inComment = false
-        containsTypeDef = false
-        containsSuppress = false
+        exitComment(line)
       else
-        if inClass
-          afterClassDecBuffer += '\n'
-        else
-          buffer += '\n'
+        currentBuffer.add '\n'
   # debug buffer
   if inClass
     debug("Reached end of file!")
-    buffer += '###\n'
-    buffer += '* @constructor\n'
+    parsedFileBuffer.add('###\n')
+    parsedFileBuffer.add('* @constructor\n')
     classStr = curClass
     if curClass of superclasses
-      buffer += "* @extends #{superclasses[curClass]}\n"
+      parsedFileBuffer.add("* @extends #{superclasses[curClass]}\n")
       classStr += " extends #{superclasses[curClass]}"
-    buffer += '###\n'
-    classBuffer += "class #{classStr}\n"
-    buffer += classBuffer
-    buffer += afterClassDecBuffer
-    classBuffer = ''
-    afterClassDecBuffer = ''
+    parsedFileBuffer.add('###\n')
+    classDecBuffer.add "class #{classStr}\n"
+    parsedFileBuffer.addBuffer classDecBuffer
+    parsedFileBuffer.addBuffer afterClassDecBuffer
+    classDecBuffer.clear()
+    afterClassDecBuffer.clear()
     inClass = false
     inComment = false
-  return buffer
+  # return buffer
+  return parsedFileBuffer.toString()
 # end _codoToJsdoc
 
 jsToClosure = (file, classes, superclasses) ->
@@ -539,7 +479,7 @@ jsToClosure = (file, classes, superclasses) ->
   return buffer
 # end jsToClosure
 
-# Export server functions
+# Export type checker functions
 module.exports =
   codoToJsdoc: codoToJsdoc
   jsToClosure: jsToClosure

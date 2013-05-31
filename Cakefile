@@ -489,7 +489,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
 
     TMP_COFFEE_FILE = "tmp#{SLASH}tmp.coffee"
     TMP_JS_FILE = "tmp#{SLASH}tmp.js"
-    TMP_GOOGJS_FILE = "tmp#{SLASH}compiled.coffee"
+    TMP_GOOGJS_FILE = "tmp#{SLASH}compiled.js"
 
     # # switch env
     # #   when Environment.PRODUCTION
@@ -513,12 +513,12 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
     # results to temp file
     console.log('Converting Codo to jsDoc...'.yellow)
     [superclasses, classes, buffer, compFiles] = typechecker.codoToJsdoc(files)
-    fs.writeFile TMP_COFFEE_FILE, buffer
+    # fs.writeFile TMP_COFFEE_FILE, buffer
 
     # Compile CoffeeScript to temporary JavaScript file
     console.log('Compiling source...'.yellow)
     # exec "coffee -cb #{TMP_COFFEE_FILE}", (err, stdout, stderr) ->
-    exec "coffee -cb ./tmp", (err, stdout, stderr) ->
+    exec "coffee -cb ./tmp/app", (err, stdout, stderr) ->
       console.log stdout if stdout
       console.error err if err
 
@@ -541,6 +541,7 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
         "--js #{files}"
         "--js_output_file #{TMP_GOOGJS_FILE}"
         "--jscomp_error checkTypes"
+        # "--jscomp_warning undefinedVars"
         "--externs app#{SLASH}cfg#{SLASH}externs.js"
       ].join(' ')
       exec "#{cmd} #{args}", (err, stdout, stderr) ->
