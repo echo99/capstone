@@ -30,11 +30,12 @@ class ArrowElement
     @element.open()
 
   clear: (ctx) =>
-    x = Math.min(@start.x, @end.x) - @length - 10
-    y = Math.min(@start.y, @end.y) - @length - 10
-    w = Math.max(@start.x, @end.x) - x + @length + 10
-    h = Math.max(@start.y, @end.y) - y + @length + 10
-    ctx.clearRect(x, y, w, h)
+    if @onHud
+      x = Math.min(@start.x, @end.x) - @length - 10
+      y = Math.min(@start.y, @end.y) - @length - 10
+      w = Math.max(@start.x, @end.x) - x + @length + 10
+      h = Math.max(@start.y, @end.y) - y + @length + 10
+      ctx.clearRect(x, y, w, h)
 
   _drawArrow: (ctx, loc) =>
     #@clear(ctx)
