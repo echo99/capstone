@@ -19,6 +19,15 @@ class UserInterface
   movingElements: []
   showAll: false
 
+  # Enum of text for the user interface
+  Text:
+    CUR_BUILD: 'Currently building:'
+    PROBES_AVAIL: 'Probes available:'
+    RES_AVAIL: 'Resources available:'
+    RES_COLL: 'Resources collected:'
+    RES_RATE: 'Collection rate:'
+    RES_REM: 'Resources remaining:'
+
   # Creates a new UserInterface
   constructor: () ->
     @unitSelection = new UnitSelection()
@@ -510,7 +519,7 @@ class UserInterface
     ctx.textBaseline = 'top'
     x = loc.x+stationStyle.availableLoc.x
     y = loc.y+stationStyle.availableLoc.y
-    ctx.fillText("Resources avaliable:", x, y)
+    ctx.fillText(@Text.RES_AVAIL, x, y)
 
     # Draw currently buiding block
     x = loc.x+stationStyle.buildingLoc.x
@@ -559,7 +568,7 @@ class UserInterface
     ctx.fillStyle = winStyle.defaultText.value
     resources = @selectedPlanet.availableResources()
     x = loc.x+stationStyle.availableLoc.x +
-        ctx.measureText("Resources avaliable:").width + 5
+        ctx.measureText(@Text.RES_AVAIL).width + 5
     y = loc.y+stationStyle.availableLoc.y
     ctx.fillText(resources, x, y)
 
@@ -580,7 +589,7 @@ class UserInterface
         sprite = SpriteNames.DEFENSE_SHIP
       else
         text = ""
-    w = ctx.measureText("Currently building:").width + 5
+    w = ctx.measureText(@Text.CUR_BUILD).width + 5
     ctx.fillText(text, x + w, y)
     if text != ""
       SHEET.drawSprite(sprite, x+w+40, y+35, ctx, false)
@@ -680,7 +689,7 @@ class UserInterface
     ctx.textBaseline = 'top'
     x = loc.x + outpostStyle.availableLoc.x
     y = loc.y + outpostStyle.availableLoc.y
-    ctx.fillText("Resources avaliable:", x, y)
+    ctx.fillText(@Text.RES_AVAIL, x, y)
 
     x = loc.x + outpostStyle.upgrade.labelLoc.x
     y = loc.y + outpostStyle.upgrade.labelLoc.y
@@ -717,7 +726,7 @@ class UserInterface
     ctx.fillStyle = winStyle.defaultText.value
     resources = @selectedPlanet.availableResources()
     x = loc.x + outpostStyle.availableLoc.x +
-        ctx.measureText("Resources avaliable:").width + 5
+        ctx.measureText(@Text.RES_AVAIL).width + 5
     y = loc.y + outpostStyle.availableLoc.y
     ctx.fillText(resources, x, y)
 
@@ -804,7 +813,7 @@ class UserInterface
     ctx.textBaseline = 'top'
     x = loc.x + colonyStyle.availableLoc.x
     y = loc.y + colonyStyle.availableLoc.y
-    ctx.fillText("Probes avaliable:", x, y)
+    ctx.fillText(@Text.PROBES_AVAIL, x, y)
 
     probes = @selectedPlanet.numShips(window.config.units.probe)
 
@@ -845,7 +854,7 @@ class UserInterface
     # Draw variables
     ctx.fillStyle = winStyle.defaultText.value
     x = loc.x + colonyStyle.availableLoc.x +
-        ctx.measureText("Probes avaliable:").width + 5
+        ctx.measureText(@Text.PROBES_AVAIL).width + 5
     y = loc.y + colonyStyle.availableLoc.y
     ctx.fillText(probes, x, y)
 
@@ -1088,9 +1097,9 @@ class UserInterface
           tRes = "#{r}"
           tRat = "#{rate}"
           if camera.getZoom() > window.config.displayCutoff
-            tAvb = "Resrouces Collected: " + tAvb
-            tRes = "Resources remaining: " + tRes
-            tRat = "Collection rate: " + tRat
+            tAvb = "#{@Text.RES_COLL} #{tAvb}"
+            tRes = "#{@Text.RES_REM} #{tRes}"
+            tRat = "#{@Text.RES_RATE} #{tRat}"
           if p.hasOutpost() or p.hasStation()
             if a > 0
               ctx.fillStyle = green
