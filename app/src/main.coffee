@@ -27,6 +27,7 @@ window.player_id = null
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
 DOM_LOADED = false
+soundLoaded = false
 
 BROWSER = BrowserDetect.browser
 Browser =
@@ -46,6 +47,7 @@ manifest = [
 ]
 
 bgmusic = null
+muteBtn = null
 
 numToLoad = manifest.length
 numLoaded = 0
@@ -57,8 +59,10 @@ createjs.Sound.addEventListener "loadComplete", ->
     debug('Finished loading sounds!')
     bgmusic = createjs.Sound.play('bgmusic3', createjs.Sound.INTERRUPT_NONE,
       10, 0, -1, 0.5)
-    # # Start it off muted
-    # bgmusic.mute(true)
+    soundLoaded = true
+    # Enable mute button if it was already created
+    if muteBtn?
+      muteBtn.enable()
 
 createjs.Sound.registerManifest(manifest)
 
@@ -191,7 +195,7 @@ drawBackground = (ctx, spritesheet, name) ->
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 # Update the size of the frame and the canvases when the window size changes
-# @suppress {checkTypes}
+# @suppress (checkTypes)
 updateCanvases = (frame, canvases..., width, height) ->
   frameWidth = width
   frameHeight = height
@@ -373,6 +377,8 @@ main = ->
       Logger.logEvent("Clicked MUTE")
       bgmusic.setMute(true)
       muteBtn.setState('muted')
+  unless soundLoaded
+    muteBtn.disable()
 
   # Set feedback button
   feedbackBtn = new Elements.DOMButton('feedback',
