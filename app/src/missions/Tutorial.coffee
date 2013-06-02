@@ -150,29 +150,32 @@ class Tutorial extends Mission
       {x: p.x - 125, y: p.y - 125}, 5, 30)
     @move_planet_8_arrow.close()
 
+    l = window.config.stationMenuStyle.location
     @build_probe_arrow = new ArrowElement(
-      {x: 340, y: 50},
-      {x: 290, y: 50}, 5, 30, true)
+      {x: l.x + 210, y: l.y + 40},
+      {x: l.x + 160, y: l.y + 40}, 5, 30, true)
     @build_probe_arrow.close()
 
     @build_colony_arrow = new ArrowElement(
-      {x: 340, y: 110},
-      {x: 290, y: 110}, 5, 30, true)
+      {x: l.x + 210, y: l.y + 100},
+      {x: l.x + 160, y: l.y + 100}, 5, 30, true)
     @build_colony_arrow.close()
 
     @build_attack_arrow = new ArrowElement(
-      {x: 540, y: 50},
-      {x: 590, y: 50}, 5, 30, true)
+      {x: l.x + 430, y: l.y + 40},
+      {x: l.x + 480, y: l.y + 40}, 5, 30, true)
     @build_attack_arrow.close()
 
+    l = window.config.colonyMenuStyle.location
     @build_structure_arrow = new ArrowElement(
-      {x: 325, y: 100},
-      {x: 375, y: 100}, 5, 30, true)
+      {x: l.x + 205, y: l.y + 95},
+      {x: l.x + 255, y: l.y + 95}, 5, 30, true)
     @build_structure_arrow.close()
 
+    l = window.config.outpostMenuStyle.location
     @send_resources_arrow = new ArrowElement(
-      {x: 310, y: 25},
-      {x: 360, y: 25}, 5, 30, true)
+      {x: l.x + 190, y: l.y + 20},
+      {x: l.x + 240, y: l.y + 20}, 5, 30, true)
     @send_resources_arrow.close()
 
     @endArrow = new ArrowElement(

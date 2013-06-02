@@ -2,8 +2,6 @@
 
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
-# TODO:
-#   - Deselect all units button (this might not be needed actually
 class UserInterface
   planetButtons: []
   hoveredPlanet: null
@@ -62,7 +60,27 @@ class UserInterface
     frameElement.addChild(b)
     @endTurnButton = b
 
-    @nextStationButton = new Elements.Button(5 + 150/2, 230, 150, 20)
+    @unitStatsButton = new Elements.Button(5 + 150/2, 15, 150, 20)
+    @unitStatsButton.setClearFunc((ctx) =>
+      ctx.clearRect(5, 230 - 10, 150, 20)
+    )
+    @unitStatsButton.setClickHandler(() => stats.jqmShow())
+    @unitStatsButton.setMouseUpHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setMouseDownHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setMouseOutHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setHoverHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setDrawFunc((ctx) =>
+      if @unitStatsButton.isPressed()
+        SHEET.drawSprite(SpriteNames.UNIT_STATS_BUTTON_HOVER,
+                         @unitStatsButton.x, @unitStatsButton.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.UNIT_STATS_BUTTON_IDLE,
+                         @unitStatsButton.x, @unitStatsButton.y, ctx, false)
+    )
+    @unitStatsButton.setZIndex(100)
+    frameElement.addChild(@unitStatsButton)
+
+    @nextStationButton = new Elements.Button(5*2 + 150*3/2, 15, 150, 20)
     @nextStationButton.setClearFunc((ctx) =>
       ctx.clearRect(5, 230 - 10, 150, 20)
     )

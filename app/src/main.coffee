@@ -133,6 +133,7 @@ tooltipCtx = null
 
 drag = false
 
+stats = null
 
 WIN7 = false
 
