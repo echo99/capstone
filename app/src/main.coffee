@@ -399,24 +399,7 @@ main = ->
     # catch e
     #   console.warn(e)
 
-  # Something
-  # div = document.createElement('div')
-  # div.appendChild(document.createTextNode("Unit stats"))
-  # div.className = 'unit-stats'
-  # table = document.createElement('table')
-  # row1 = document.createElement('tr')
-  # row2 = document.createElement('tr')
-  # td = document.createElement('td')
-  # canv = document.createElement('canvas')
-  # # div.className = 'unit-stats jqmWindow'
-  # td.appendChild(canv)
-  # row1.appendChild(td)
-  # table.appendChild(row1)
-  # div.appendChild(table)
-  # document.body.appendChild(div)
-  # innerctx = canv.getContext('2d')
-  # SHEET.drawSprite(SpriteNames.PROBE, 16, 16, innerctx, false)
-
+  # Fill in unit stats table
   statSprites =
     'probe-sprite':
       'prefix': 'probe'
@@ -450,19 +433,9 @@ main = ->
     unit = data['unit']
     prefix = data['prefix']
     atkField = document.getElementById("#{prefix}-atk")
-    atkField.appendChild(document.createTextNode(unit.attack))
+    atkField.appendChild(document.createTextNode(unit.attack*100))
     defField = document.getElementById("#{prefix}-def")
-    defField.appendChild(document.createTextNode(unit.defense))
-  # stats.jqmHide()
-
-  # SHEET.drawSprite(SpriteNames.PROBE, 16, 16,
-  #   document.getElementById('probe-sprite').getContext('2d'), false)
-  # SHEET.drawSprite(SpriteNames.COLONY_SHIP, 16, 16,
-  #   document.getElementById('colony-ship-sprite').getContext('2d'), false)
-  # SHEET.drawSprite(SpriteNames.ATTACK_SHIP, 16, 16,
-  #   document.getElementById('attack-ship-sprite').getContext('2d'), false)
-  # SHEET.drawSprite(SpriteNames.DEFENSE_SHIP, 16, 16,
-  #   document.getElementById('defense-ship-sprite').getContext('2d'), false)
+    defField.appendChild(document.createTextNode(unit.defense*100))
 
   # for playback mouse position drawing
   mousedown = false
