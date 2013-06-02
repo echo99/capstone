@@ -197,7 +197,7 @@ checkSyntax = (callback) ->
       console.error(err.toString().trim().red)
       notify("Build failed! Please check the terminal for details.",
         MessageLevel.ERROR) if WATCHING
-     callback not err
+     callback? not err
 
 # Helper for finding all source files
 getSourceFilePaths = (dirPath = SRC_DIR) ->
@@ -290,54 +290,57 @@ buildSource = (options, env=Environment.DEV, callback=null) ->
     BUILDING = true
     console.log(
         "Building project from #{SRC_DIR}#{SLASH}*.coffee to #{APP_JS}...".yellow)
-    # Try to compile all files individually first, to get a better
-    # error message, then if it succeeds, compile them all to one file
-    checkSyntax (passed) ->
-      BUILD_PASSED = passed
-      if passed
-        files = new Rehab().process './'+SRC_DIR
+    # # Try to compile all files individually first, to get a better
+    # # error message, then if it succeeds, compile them all to one file
+    # checkSyntax (passed) ->
+    #   BUILD_PASSED = passed
+    #   if passed
+    files = new Rehab().process './'+SRC_DIR
 
-        switch env
-          when Environment.PRODUCTION
-            files.unshift(Configs.PRODUCTION)
-          when Environment.DEV
-            files.unshift(Configs.DEV)
-        files.unshift(Configs.DEFAULT)
+    switch env
+      when Environment.PRODUCTION
+        files.unshift(Configs.PRODUCTION)
+      when Environment.DEV
+        files.unshift(Configs.DEV)
+    files.unshift(Configs.DEFAULT)
 
-        to_single_file = "--join #{APP_JS}"
-        from_files = "--compile #{files.join ' '}"
+    to_single_file = "--join #{APP_JS}"
+    from_files = "--compile #{files.join ' '}"
 
-        exec "coffee #{to_single_file} #{from_files}",
-          (err, stdout, stderr) ->
-            if err
-              # Should probably figure out way to handle this error
-              # However, if it got to this point, there should be no problems
-              console.error(err.toString().trim().red)
-            else
-              # notify("Build successful!", MessageLevel.INFO) if WATCHING
-              console.log('Build successful!'.green)
-              # console.log()
-            # Run the type checker. Doesn't seem like the best place for it
-            if options['no-rhino'] or not RUN_RHINO
-              invoke 'lint'
-              invoke 'doc' if not options['no-doc']
-              invoke 'typecheck'
+    exec "coffee #{to_single_file} #{from_files}",
+      (err, stdout, stderr) ->
+        if err
+          # # Should probably figure out way to handle this error
+          # # However, if it got to this point, there should be no problems
+          # console.error(err.toString().trim().red)
+
+          # Compile files individually to narrow down error
+          checkSyntax()
+        else
+          # notify("Build successful!", MessageLevel.INFO) if WATCHING
+          console.log('Build successful!'.green)
+          # console.log()
+          # Run the type checker. Doesn't seem like the best place for it
+          if options['no-rhino'] or not RUN_RHINO
+            invoke 'lint'
+            # invoke 'doc' if not options['no-doc']
+            invoke 'typecheck'
+            callback?()
+          else
+            console.log('Doing test run on compiled script...'.yellow)
+            jsSanityCheck options, (passed) ->
+              if passed
+                console.log('Test passed!'.green)
+                invoke 'lint'
+                invoke 'doc' if not options['no-doc']
+                invoke 'typecheck'
+              else
+                notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
+                console.error('Test run failed!'.red)
               callback?()
-            else
-              console.log('Doing test run on compiled script...'.yellow)
-              jsSanityCheck options, (passed) ->
-                if passed
-                  console.log('Test passed!'.green)
-                  invoke 'lint'
-                  invoke 'doc' if not options['no-doc']
-                  invoke 'typecheck'
-                else
-                  notify('Compiled app.js file failed to run!', MessageLevel.ERROR)
-                  console.error('Test run failed!'.red)
-                callback?()
-      else
-        invoke 'lint'
-      BUILDING = false
+      # else
+      #   invoke 'lint'
+        BUILDING = false
       # else
       #   console.log('Build failed!'.red)
       #   console.log()
@@ -548,6 +551,8 @@ task 'typecheck', 'Type check the compiled JavaScript code', ->
         console.log stdout if stdout
         if stderr
           console.error stderr.red
+          if WATCHING
+            notify('Type errors found!', MessageLevel.ERROR)
         else
           console.log 'No type errors found!'.green
 
