@@ -152,6 +152,8 @@ body {
   background-color: #333;
   color: white;
   text-align: left;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+  font-size: 16px;
 }
 
 .unit-stats table {
@@ -164,13 +166,16 @@ body {
 }
 
 .unit-stats th {
+  font-size: 18px;
   text-align: center;
 }
 
 .unit-stats th a {
   float: right;
+  margin-top: -5px;
+  font-size: 20px;
 }
 
 .desc {
-  font-size: 12px;
+  font-size: 14px;
 }
