@@ -164,7 +164,7 @@ root.config =
     height: 200
     probeHeight: 80
   stationMenuStyle:
-    location: {x: 120, y: 5}
+    location: {x: 5, y: 30}
     width: 435 #520
     height: 175
     horiz1y: 70
@@ -208,7 +208,7 @@ root.config =
     cancelRallyLoc: {x: 112, y: 20}
     cancelRallySize: {w: 60, h: 20}
   outpostMenuStyle:
-    location: {x: 120, y: 5}
+    location: {x: 5, y: 30}
     width: 200
     height: 120
     titleLoc: {x: 10, y: 10}
@@ -226,7 +226,7 @@ root.config =
     stopLoc: {x: 130, y: 20}
     stopSize: {w: 106, h: 20}
   colonyMenuStyle:
-    location: {x: 120, y: 5}
+    location: {x: 5, y: 30}
     width: 200
     height: 120
     titleLoc: {x: 10, y: 10}
@@ -321,6 +321,8 @@ root.config =
     NEXT_STATION_BUTTON_HOVER: new AnimatedSprite(['next_station_button_hover.png'])
     SKIP_BUTTON_IDLE: new AnimatedSprite(['skip_button_idle.png'])
     SKIP_BUTTON_HOVER: new AnimatedSprite(['skip_button_hover.png'])
+    UNIT_STATS_BUTTON_IDLE: new AnimatedSprite(['unit_stats_button_idle.png'])
+    UNIT_STATS_BUTTON_HOVER: new AnimatedSprite(['unit_stats_button_hover.png'])
   Missions:
     w: 244
     h: 60
@@ -577,7 +579,7 @@ root.config =
     probe:
       cost: 1
       turns: 1
-      attack: .05
+      attack: .001
       defense: .05
       isStructure: false
     colonyShip:

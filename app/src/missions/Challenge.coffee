@@ -57,10 +57,12 @@ class Challenge extends Mission
 
     #game.endTurn()
     UI.initialize()
+    UI.endTurn()
 
     @startTime = currentTime()
 
   destroy: ->
+    cameraHudFrame.removeChild(@m0)
     cameraHudFrame.removeChild(@m1)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
@@ -69,11 +71,21 @@ class Challenge extends Mission
     Logger.send()
 
   _initMenus: ->
+    @m0 = @_getM("Well, the attack ship did damage but got destroyed. " +
+                  "Defense ships can be used to make your ships survive longer. " +
+                  "We'll let you continue on your own now, don't forget to keep " +
+                  "making outposts so you don't run out of resources."
+      () =>
+        @m0.close()
+        @m1.open()
+      370, 80
+    )
+
     @m1 = @_getM("Exterminate all fungus.",
       () =>
         @m1.close()
     )
-    @m1.open()
+    @m0.open()
 
     restart = () => newMission(Cutscene)
     @optionsMenu = @_createMenu(window.config.MainMenu.mission.menu,
