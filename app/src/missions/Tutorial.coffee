@@ -228,6 +228,7 @@ class Tutorial extends Mission
     cameraHudFrame.removeChild(@m17)
     cameraHudFrame.removeChild(@m18)
     cameraHudFrame.removeChild(@m19)
+    cameraHudFrame.removeChild(@m20)
     cameraHudFrame.removeChild(@skipButton)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
@@ -341,6 +342,15 @@ class Tutorial extends Mission
       null
     )
 
+    @m20 = @_getM("Well, the attack ship did damage but got destroyed. " +
+                  "Defense ships can be used to make your ships survive longer. " +
+                  "We'll let you continue on your own now, don't forget to keep " +
+                  "making outposts so you don't run out of resources."
+      () =>
+        newMission(Challenge)
+      370, 80
+    )
+
     @skipButton = @createSkipButton(
       () =>
         newMission(Challenge)
@@ -441,7 +451,10 @@ class Tutorial extends Mission
         when 9
           window.config.units.attackShip.attack = 0.5
           window.config.units.fungus.attack = 0.5
-          newMission(Challenge)
+          if not @m20.visible
+            @m18.close()
+            @m19.close()
+            @m20.open()
 
     UI.refreshEndTurnButton()
 
