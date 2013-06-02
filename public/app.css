@@ -94,6 +94,17 @@ body {
   float: right;
 }
 
+.jqmOverlay {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
+}
+
 .notification {
   position: fixed;
   top: 40px;
@@ -132,19 +143,19 @@ body {
 
 .unit-stats {
   font-weight: normal;
-  width: 300px;
+  width: 310px;
   padding: 5px;
   position: absolute;
   top: 15%;
   left: 50%;
-  margin-left: -155px;
+  margin-left: -160px;
   background-color: #333;
   color: white;
   text-align: left;
 }
 
 .unit-stats table {
-  width: 300px;
+  width: 310px;
 }
 
 .unit-stats canvas {
@@ -158,4 +169,8 @@ body {
 
 .unit-stats th a {
   float: right;
+}
+
+.desc {
+  font-size: 12px;
 }

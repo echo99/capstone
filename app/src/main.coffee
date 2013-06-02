@@ -257,16 +257,26 @@ main = ->
   # debug(ctx.font)
 
   # feedback = $('#comments').jqm()
-  feedback = $('#comments').jqm({
-    ajax: 'fbcomments.html',
-    ajaxUpdate: false,
+  feedback = $('#comments').jqm(
+    ajax: 'fbcomments.html'
+    ajaxUpdate: false
     modal: true
-  })
+  )
   feedbackElem = document.getElementById('comments')
 
-  stats = $('#unit-stats').jqm({
+  stats = $('#unit-stats').jqm(
     modal: true
-  })
+    # @suppress (checkTypes)
+    onShow: (hash) ->
+      surface.blur()
+      # hash.w.css('opacity',0.88).show()
+      hash.w.show()
+    # @suppress (checkTypes)
+    onHide: (hash) ->
+      surface.focus()
+      hash.w.hide()
+      hash.o.remove()
+  )
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
@@ -433,9 +443,9 @@ main = ->
     unit = data['unit']
     prefix = data['prefix']
     atkField = document.getElementById("#{prefix}-atk")
-    atkField.appendChild(document.createTextNode(unit.attack*100))
+    atkField.appendChild(document.createTextNode("ATK: #{unit.attack*100}%"))
     defField = document.getElementById("#{prefix}-def")
-    defField.appendChild(document.createTextNode(unit.defense*100))
+    defField.appendChild(document.createTextNode("DEF: #{unit.defense*100}%"))
 
   # for playback mouse position drawing
   mousedown = false
@@ -443,6 +453,9 @@ main = ->
 
   ##################################################################################
   # Set event handlers
+
+  # Start with surface unfocused
+  surfaceFocused = false
 
   onResize = ->
     if recording
@@ -477,46 +490,52 @@ main = ->
     # debug("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
   keyDownListener = (e) ->
-    if recording
-      eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
+    if surfaceFocused
+      if recording
+        eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
 
-    if CurrentMission.canPlay()
-      if e.keyCode == KeyCodes.HOME
-        Logger.logEvent("Pressed HOME")
-        camera.setTarget(CurrentMission.getHomeTarget())
-      else if e.keyCode == KeyCodes.STATION
-        Logger.logEvent("Pressed Q")
-        UI.gotoNextStation()
-      else if e.keyCode == KeyCodes.U
-        # Should probably have a button for this instead
-        stats.jqmShow()
+      if CurrentMission.canPlay()
+        if e.keyCode == KeyCodes.HOME
+          Logger.logEvent("Pressed HOME")
+          camera.setTarget(CurrentMission.getHomeTarget())
+        else if e.keyCode == KeyCodes.STATION
+          Logger.logEvent("Pressed Q")
+          UI.gotoNextStation()
+        else if e.keyCode == KeyCodes.U
+          # Should probably have a button for this instead
+          stats.jqmShow()
 
-    if CurrentMission.canEndTurn()
-      if e.keyCode == KeyCodes.SPACE
-        Logger.logEvent("Pressed SPACE")
-        endTurn()
+      if CurrentMission.canEndTurn()
+        if e.keyCode == KeyCodes.SPACE
+          Logger.logEvent("Pressed SPACE")
+          endTurn()
 
-    if CurrentMission.canMove()
-      if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
-        Logger.logEvent("Pressed +")
-        nz = camera.getZoom() + window.config.ZOOM_SPEED
-        camera.setZoom(nz)
-      else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
-        Logger.logEvent("Pressed -")
-        nz = camera.getZoom() - window.config.ZOOM_SPEED
-        camera.setZoom(nz)
-      else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
-        Logger.logEvent("Pressed up")
-        camera.moveCameraByScreenDistance(0, 20)
-      else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
-        Logger.logEvent("Pressed left")
-        camera.moveCameraByScreenDistance(20, 0)
-      else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
-        Logger.logEvent("Pressed down")
-        camera.moveCameraByScreenDistance(0, -20)
-      else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
-        Logger.logEvent("Pressed right")
-        camera.moveCameraByScreenDistance(-20, 0)
+      if CurrentMission.canMove()
+        if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+          Logger.logEvent("Pressed +")
+          nz = camera.getZoom() + window.config.ZOOM_SPEED
+          camera.setZoom(nz)
+        else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+          Logger.logEvent("Pressed -")
+          nz = camera.getZoom() - window.config.ZOOM_SPEED
+          camera.setZoom(nz)
+        else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
+          Logger.logEvent("Pressed up")
+          camera.moveCameraByScreenDistance(0, 20)
+        else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
+          Logger.logEvent("Pressed left")
+          camera.moveCameraByScreenDistance(20, 0)
+        else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
+          Logger.logEvent("Pressed down")
+          camera.moveCameraByScreenDistance(0, -20)
+        else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
+          Logger.logEvent("Pressed right")
+          camera.moveCameraByScreenDistance(-20, 0)
+
+    else
+      # Surface not focused
+      if e.keyCode == KeyCodes.U
+        stats.jqmHide()
 
     #if e.keyCode == KeyCodes.CHEAT
     #  Logger.logEvent("Pressed CHEAT")
@@ -614,6 +633,9 @@ main = ->
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
   mouseDownHandler = (e) ->
+    # Give focus to the surface
+    surface.focus()
+
     if recording
       eventRec.recordEvent("mouseDown",
         {clientX: e.clientX, clientY: e.clientY})
@@ -673,6 +695,16 @@ main = ->
       nz = camera.zoom + delta * window.config.ZOOM_SPEED
       camera.setZoom(nz)
 
+  focusHandler = (e) ->
+    if recording
+      eventRec.recordEvent("focus", {})
+    surfaceFocused = true
+
+  blurHandler = (e) ->
+    if recording
+      eventRec.recordEvent("blur", {})
+    surfaceFocused = false
+
   #window.onresize = onResize
 
   if playback
@@ -690,6 +722,8 @@ main = ->
     eventPlay.registerEvent("mouseUp", mouseUpHandler)
     eventPlay.registerEvent("mouseOut", mouseOutHandler)
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
+    eventPlay.registerEvent("focus", focusHandler)
+    eventPlay.registerEvent("blur", blurHandler)
   else
     window.onresize = onResize
     document.body.addEventListener('keydown', keyDownListener, false)
@@ -699,8 +733,10 @@ main = ->
     surface.addEventListener('mousedown', mouseDownHandler, false)
     surface.addEventListener('mouseup', mouseUpHandler, false)
     surface.addEventListener('mouseout', mouseOutHandler, false)
-    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler, false)
-    document.body.addEventListener('mousewheel', mouseWheelHandler, false)
+    surface.addEventListener('DOMMouseScroll', mouseWheelHandler, false)
+    surface.addEventListener('mousewheel', mouseWheelHandler, false)
+    surface.addEventListener('focus', focusHandler, false)
+    surface.addEventListener('blur', blurHandler, false)
 
     document.body.addEventListener('touchmove',
       (e) =>

@@ -36,7 +36,7 @@
     <canvas class="game-canvas" id="canvas-hud"></canvas>
     <canvas class="game-canvas" id="canvas-camerahud"></canvas>
     <canvas class="game-canvas" id="canvas-tooltip"></canvas>
-    <canvas class="game-canvas" id="surface"></canvas>
+    <canvas class="game-canvas" id="surface" tabindex="0"></canvas>
   </div>
   <!--[if lt IE 9]>
   <div class="notification error">
@@ -57,6 +57,11 @@
   <div class="jqmWindow unit-stats" id="unit-stats">
     <table>
       <tr><th colspan="4">Unit Stats<a href="#" class="jqmClose">&times;</a></th></tr>
+      <tr><td colspan="4" class="desc">
+        *ATK = Chance to inflict 1 unit of dmg
+        <br />
+        *DEF = Chance to defend against 1 unit of dmg
+      </td></tr>
       <tr>
         <td colspan="2">Probe</td>
         <td colspan="2">Colony Ship</td>
@@ -64,15 +69,15 @@
       <tr class="stats">
         <td><canvas id="probe-sprite"></canvas></td>
         <td>
-          %ATK: <span id="probe-atk"></span>
-          <br>
-          %DEF: <span id="probe-def"></span>
+          <span id="probe-atk"></span>
+          <br />
+          <span id="probe-def"></span>
         </td>
         <td><canvas id="colony-ship-sprite"></canvas></td>
         <td>
-          %ATK: <span id="colony-ship-atk"></span>
-          <br>
-          %DEF: <span id="colony-ship-def"></span>
+          <span id="colony-ship-atk"></span>
+          <br />
+          <span id="colony-ship-def"></span>
         </td>
       </tr>
       <tr>
@@ -82,15 +87,15 @@
       <tr class="stats">
         <td><canvas id="attack-ship-sprite"></canvas></td>
         <td>
-          %ATK: <span id="attack-ship-atk"></span>
-          <br>
-          %DEF: <span id="attack-ship-def"></span>
+          <span id="attack-ship-atk"></span>
+          <br />
+          <span id="attack-ship-def"></span>
         </td>
         <td><canvas id="defense-ship-sprite"></canvas></td>
         <td>
-          %ATK: <span id="defense-ship-atk"></span>
-          <br>
-          %DEF: <span id="defense-ship-def"></span>
+          <span id="defense-ship-atk"></span>
+          <br />
+          <span id="defense-ship-def"></span>
         </td>
       </tr>
       <tr>
@@ -99,9 +104,9 @@
       <tr class="stats">
         <td></td>
         <td>
-          %ATK: <span id="fungus-atk"></span>
-          <br>
-          %DEF: <span id="fungus-def"></span>
+          <span id="fungus-atk"></span>
+          <br />
+          <span id="fungus-def"></span>
         </td>
       </tr>
     </table>
