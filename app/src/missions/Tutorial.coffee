@@ -84,6 +84,11 @@ class Tutorial extends Mission
       {x: h.x - 300, y: h.y - 50}, 5, 30)
     @select_colony_0_arrow.close()
 
+    @select_attack_0_arrow = new ArrowElement(
+      {x: h.x - 80, y: h.y + 50},
+      {x: h.x - 130, y: h.y - 0}, 5, 30)
+    @select_attack_0_arrow.close()
+
     h = @home2.location()
     @select_home_2_arrow = new ArrowElement(
       {x: h.x - 75, y: h.y - 75},
@@ -154,6 +159,11 @@ class Tutorial extends Mission
       {x: 375, y: 100}, 5, 30, true)
     @build_structure_arrow.close()
 
+    @send_resources_arrow = new ArrowElement(
+      {x: 310, y: 25},
+      {x: 360, y: 25}, 5, 30, true)
+    @send_resources_arrow.close()
+
     @endArrow = new ArrowElement(
       {x: 50, y: camera.height - 30},
       {x: 50, y: camera.height - 30 - 50}, 3, 30, true)
@@ -169,6 +179,7 @@ class Tutorial extends Mission
     @select_probe_5_arrow.destroy()
     @select_probe_6_arrow.destroy()
     @select_colony_0_arrow.destroy()
+    @select_attack_0_arrow.destroy()
     @select_attack_1_arrow.destroy()
     @move_planet_2_arrow.destroy()
     @move_planet_3_arrow.destroy()
@@ -180,6 +191,7 @@ class Tutorial extends Mission
     @build_colony_arrow.destroy()
     @build_attack_arrow.destroy()
     @build_structure_arrow.destroy()
+    @send_resources_arrow.destroy()
     @endArrow.destroy()
     cameraHudFrame.removeChild(@m1)
     cameraHudFrame.removeChild(@m2)
@@ -196,6 +208,11 @@ class Tutorial extends Mission
     cameraHudFrame.removeChild(@m13)
     cameraHudFrame.removeChild(@m14)
     cameraHudFrame.removeChild(@m15)
+    cameraHudFrame.removeChild(@m16)
+    cameraHudFrame.removeChild(@m17)
+    cameraHudFrame.removeChild(@m18)
+    cameraHudFrame.removeChild(@m19)
+    cameraHudFrame.removeChild(@m20)
     cameraHudFrame.removeChild(@skipButton)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
@@ -272,7 +289,7 @@ class Tutorial extends Mission
       300, 65
     )
 
-    @m12 = @_getM("Lets also start another attack ship.",
+    @m12 = @_getM("We should also start another attack ship.",
       null
     )
 
@@ -288,6 +305,31 @@ class Tutorial extends Mission
 
     @m15 = @_getM("Lets end the turn again.",
       null
+    )
+
+    @m16 = @_getM("Now that the outpost is complete it can be used to send any " +
+                  "resources that it gathers to the station.",
+      null
+      250, 65
+    )
+
+    @m17 = @_getM("Our other attack ship has also finished, so lets send it " +
+                  "forward as well",
+      null
+    )
+
+    @m18 = @_getM("Don't forget to keep advancing new ships.",
+      null
+    )
+
+    @m19 = @_getM("Now lets try sending in our attack ship.",
+      null
+    )
+
+    @m20 = @_getM("Well, the attack ship did damage but got destroyed. Better " +
+                  "make some defense ships so our attack ships last longer.",
+      null
+      250, 65
     )
 
     @skipButton = @createSkipButton(
@@ -313,6 +355,8 @@ class Tutorial extends Mission
         when 0
           @_checkMoveProbeArrows()
         when 1
+          if @map.planets[8].fungusStrength() != 0
+            @map.planets[8].setFungus(0)
           if not @m4.visible and not @m5.visible and not @m6.visible
             @m3.close()
             @m4.open()
@@ -321,44 +365,148 @@ class Tutorial extends Mission
           else
             @endArrow.close()
         when 2
+          if @map.planets[8].fungusStrength() != 0
+            @map.planets[8].setFungus(0)
           if not @m8.visible and not @m9.visible
+            @m4.close()
+            @m5.close()
+            @m6.close()
             @m7.close()
             @m8.open()
           if @m8.visible or @m9.visible
             @_checkTurn2Arrows()
         when 3
+          if @map.planets[8].fungusStrength() != 0
+            @map.planets[8].setFungus(0)
           if not @m10.visible
+            @m8.close()
             @m9.close()
             @m10.open()
             camera.setTarget(@home.location())
           if @m10.visible
             @_checkTurn3Arrows()
         when 4
+          if @map.planets[8].fungusStrength() != 0
+            @map.planets[8].setFungus(0)
           if not @m11.visible and not @m12.visible
             @m10.close()
             @m11.open()
           if @m11.visible or @m12.visible
             @_checkTurn4Arrows()
         when 5
+          if @map.planets[8].fungusStrength() != 0
+            @map.planets[8].setFungus(0)
           if not @m13.visible and not @m14.visible
+            @m11.close()
             @m12.close()
             @m13.open()
           if @m13.visible or @m14.visible
             @_checkTurn5Arrows()
         when 6
+          if @map.planets[8].fungusStrength() != 0
+            @map.planets[8].setFungus(0)
           if not @m15.visible
+            @m13.close()
             @m14.close()
             @m15.open()
           if @m15.visible
             @_checkTurn3Arrows()
         when 7
-          if @m15.visible
+          if @map.planets[8].fungusStrength() != 2
+            @map.planets[8].setFungus(2)
+          if not @m16.visible and not @m17.visible
             @m15.close()
-          @endArrow.close()
+            @m16.open()
+          if @m16.visible or @m17.visible
+            @_checkTurn7Arrows()
         when 8
+          if not @m18.visible and not @m19.visible
+            @m16.close()
+            @m17.close()
+            @m18.open()
+            camera.setTarget(@home2.location())
+          if @m18.visible or @m19.visible
+            @_checkTurn8Arrows()
           @endArrow.close()
 
     UI.refreshEndTurnButton()
+
+  _checkTurn8Arrows: ->
+    if @_attackSelected(@home2)
+      @select_attack_1_arrow.close()
+      @move_planet_6_arrow.open()
+
+      @endArrow.close()
+    else if @home2.numShips(window.config.units.attackShip) > 0
+      @select_attack_1_arrow.open()
+      @move_planet_6_arrow.close()
+
+      @endArrow.close()
+    else
+      @select_attack_1_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @endArrow.open()
+
+  _checkTurn7Arrows: ->
+    if UI.selectedPlanet != @map.planets[2] and
+       @map.planets[2].sendingResourcesTo() != @home
+      @move_planet_2_arrow.open()
+      @send_resources_arrow.close()
+      @select_home_1_arrow.close()
+
+      @select_attack_0_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @endArrow.close()
+    else if not @map.planets[2].sendingResourcesTo() and
+            not UI.lookingToSendResources
+      @move_planet_2_arrow.close()
+      @send_resources_arrow.open()
+      @select_home_1_arrow.close()
+
+      @select_attack_0_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @endArrow.close()
+    else if UI.lookingToSendResources
+      @move_planet_2_arrow.close()
+      @send_resources_arrow.close()
+      @select_home_1_arrow.open()
+
+      @select_attack_0_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @endArrow.close()
+    else if @_attackSelected(@home)
+      @move_planet_2_arrow.close()
+      @send_resources_arrow.close()
+      @select_home_1_arrow.close()
+
+      @select_attack_0_arrow.close()
+      @move_planet_6_arrow.open()
+
+      @endArrow.close()
+    else if @home.numShips(window.config.units.attackShip) > 0
+      @move_planet_2_arrow.close()
+      @send_resources_arrow.close()
+      @select_home_1_arrow.close()
+
+      @select_attack_0_arrow.open()
+      @move_planet_6_arrow.close()
+
+      @endArrow.close()
+      @m16.close()
+      @m17.open()
+    else
+      @move_planet_2_arrow.close()
+      @send_resources_arrow.close()
+      @select_home_1_arrow.close()
+
+      @select_attack_0_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @endArrow.open()
 
   _checkTurn5Arrows: ->
     if UI.selectedPlanet != @map.planets[2] and
@@ -448,8 +596,6 @@ class Tutorial extends Mission
     if @home.numShips(window.config.units.probe) > 0 and
        not @_probeSelected(@home)
       @select_probe_0_arrow.open()
-      @select_home_1_arrow.close()
-      @build_attack_arrow.close()
       @endArrow.close()
     else
       @select_probe_0_arrow.close()
@@ -457,8 +603,6 @@ class Tutorial extends Mission
 
     if @home.numShips(window.config.units.colonyShip) > 0 and
        not @_colonySelected(@home)
-      @select_home_1_arrow.close()
-      @build_attack_arrow.close()
       @select_colony_0_arrow.open()
       @endArrow.close()
       selected = false
@@ -466,8 +610,6 @@ class Tutorial extends Mission
       @select_colony_0_arrow.close()
 
     if selected
-      @select_home_1_arrow.close()
-      @build_attack_arrow.close()
       @move_planet_2_arrow.open()
     else
       @move_planet_2_arrow.close()
@@ -490,6 +632,10 @@ class Tutorial extends Mission
         @select_home_1_arrow.close()
         @build_attack_arrow.close()
         @endArrow.open()
+    else
+      @select_home_1_arrow.close()
+      @build_attack_arrow.close()
+      @endArrow.close()
 
   _checkTurn3Arrows: ->
     @endArrow.open()
@@ -636,3 +782,4 @@ class Tutorial extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
+    @onMouseClick(0,0)
