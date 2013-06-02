@@ -100,6 +100,7 @@ KeyCodes =
   DOWN: 40 # move down
   D: 68 # move right
   RIGHT: 39 #move right
+  U: 85 # show unit stats
 
 cheat = false
 
@@ -263,6 +264,10 @@ main = ->
   })
   feedbackElem = document.getElementById('comments')
 
+  stats = $('#unit-stats').jqm({
+    modal: true
+  })
+
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
   frameElement = new Elements.Frame(frame, hudCanvas)
@@ -394,6 +399,71 @@ main = ->
     # catch e
     #   console.warn(e)
 
+  # Something
+  # div = document.createElement('div')
+  # div.appendChild(document.createTextNode("Unit stats"))
+  # div.className = 'unit-stats'
+  # table = document.createElement('table')
+  # row1 = document.createElement('tr')
+  # row2 = document.createElement('tr')
+  # td = document.createElement('td')
+  # canv = document.createElement('canvas')
+  # # div.className = 'unit-stats jqmWindow'
+  # td.appendChild(canv)
+  # row1.appendChild(td)
+  # table.appendChild(row1)
+  # div.appendChild(table)
+  # document.body.appendChild(div)
+  # innerctx = canv.getContext('2d')
+  # SHEET.drawSprite(SpriteNames.PROBE, 16, 16, innerctx, false)
+
+  statSprites =
+    'probe-sprite':
+      'prefix': 'probe'
+      'sprite': SpriteNames.PROBE
+      'unit': config.units.probe
+    'colony-ship-sprite':
+      'prefix': 'colony-ship'
+      'sprite': SpriteNames.COLONY_SHIP
+      'unit': config.units.colonyShip
+    'attack-ship-sprite':
+      'prefix': 'attack-ship'
+      'sprite': SpriteNames.ATTACK_SHIP
+      'unit': config.units.attackShip
+    'defense-ship-sprite':
+      'prefix': 'defense-ship'
+      'sprite': SpriteNames.DEFENSE_SHIP
+      'unit': config.units.defenseShip
+    'fungus':
+      'prefix': 'fungus'
+      'sprite': null
+      'unit': config.units.fungus
+
+  for id, data of statSprites
+    sptName = data['sprite']
+    if sptName?
+      canv = document.getElementById(id)
+      spt = SHEET.getSprite(sptName)
+      canv.width = spt.w
+      canv.height = spt.h
+      SHEET.drawSprite(sptName, 16, 16, canv.getContext('2d'), false)
+    unit = data['unit']
+    prefix = data['prefix']
+    atkField = document.getElementById("#{prefix}-atk")
+    atkField.appendChild(document.createTextNode(unit.attack))
+    defField = document.getElementById("#{prefix}-def")
+    defField.appendChild(document.createTextNode(unit.defense))
+  # stats.jqmHide()
+
+  # SHEET.drawSprite(SpriteNames.PROBE, 16, 16,
+  #   document.getElementById('probe-sprite').getContext('2d'), false)
+  # SHEET.drawSprite(SpriteNames.COLONY_SHIP, 16, 16,
+  #   document.getElementById('colony-ship-sprite').getContext('2d'), false)
+  # SHEET.drawSprite(SpriteNames.ATTACK_SHIP, 16, 16,
+  #   document.getElementById('attack-ship-sprite').getContext('2d'), false)
+  # SHEET.drawSprite(SpriteNames.DEFENSE_SHIP, 16, 16,
+  #   document.getElementById('defense-ship-sprite').getContext('2d'), false)
+
   # for playback mouse position drawing
   mousedown = false
   mousepos = {x: 0, y: 0}
@@ -444,6 +514,9 @@ main = ->
       else if e.keyCode == KeyCodes.STATION
         Logger.logEvent("Pressed Q")
         UI.gotoNextStation()
+      else if e.keyCode == KeyCodes.U
+        # Should probably have a button for this instead
+        stats.jqmShow()
 
     if CurrentMission.canEndTurn()
       if e.keyCode == KeyCodes.SPACE
