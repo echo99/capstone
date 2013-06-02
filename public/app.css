@@ -129,3 +129,33 @@ body {
   border-color: #008709;
   color: #008709;
 }
+
+.unit-stats {
+  font-weight: normal;
+  width: 300px;
+  padding: 5px;
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  margin-left: -155px;
+  background-color: #333;
+  color: white;
+  text-align: left;
+}
+
+.unit-stats table {
+  width: 300px;
+}
+
+.unit-stats canvas {
+  width: 32;
+  height: 32;
+}
+
+.unit-stats th {
+  text-align: center;
+}
+
+.unit-stats th a {
+  float: right;
+}

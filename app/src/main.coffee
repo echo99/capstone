@@ -100,6 +100,7 @@ KeyCodes =
   DOWN: 40 # move down
   D: 68 # move right
   RIGHT: 39 #move right
+  U: 85 # show unit stats
 
 cheat = false
 
@@ -263,6 +264,10 @@ main = ->
   })
   feedbackElem = document.getElementById('comments')
 
+  stats = $('#unit-stats').jqm({
+    modal: true
+  })
+
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
   frameElement = new Elements.Frame(frame, hudCanvas)
@@ -394,6 +399,44 @@ main = ->
     # catch e
     #   console.warn(e)
 
+  # Fill in unit stats table
+  statSprites =
+    'probe-sprite':
+      'prefix': 'probe'
+      'sprite': SpriteNames.PROBE
+      'unit': config.units.probe
+    'colony-ship-sprite':
+      'prefix': 'colony-ship'
+      'sprite': SpriteNames.COLONY_SHIP
+      'unit': config.units.colonyShip
+    'attack-ship-sprite':
+      'prefix': 'attack-ship'
+      'sprite': SpriteNames.ATTACK_SHIP
+      'unit': config.units.attackShip
+    'defense-ship-sprite':
+      'prefix': 'defense-ship'
+      'sprite': SpriteNames.DEFENSE_SHIP
+      'unit': config.units.defenseShip
+    'fungus':
+      'prefix': 'fungus'
+      'sprite': null
+      'unit': config.units.fungus
+
+  for id, data of statSprites
+    sptName = data['sprite']
+    if sptName?
+      canv = document.getElementById(id)
+      spt = SHEET.getSprite(sptName)
+      canv.width = spt.w
+      canv.height = spt.h
+      SHEET.drawSprite(sptName, 16, 16, canv.getContext('2d'), false)
+    unit = data['unit']
+    prefix = data['prefix']
+    atkField = document.getElementById("#{prefix}-atk")
+    atkField.appendChild(document.createTextNode(unit.attack*100))
+    defField = document.getElementById("#{prefix}-def")
+    defField.appendChild(document.createTextNode(unit.defense*100))
+
   # for playback mouse position drawing
   mousedown = false
   mousepos = {x: 0, y: 0}
@@ -444,6 +487,9 @@ main = ->
       else if e.keyCode == KeyCodes.STATION
         Logger.logEvent("Pressed Q")
         UI.gotoNextStation()
+      else if e.keyCode == KeyCodes.U
+        # Should probably have a button for this instead
+        stats.jqmShow()
 
     if CurrentMission.canEndTurn()
       if e.keyCode == KeyCodes.SPACE
