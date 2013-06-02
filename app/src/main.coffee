@@ -623,16 +623,23 @@ main = ->
     # msgBox.click(e.clientX, e.clientY)
     x = e.clientX
     y = e.clientY
+    cursor = null
     if CurrentMission.canPlay()
       if frameElement.click(x, y)
-        frameElement.mouseMove(x, y)
+        cursor = frameElement.mouseMove(x, y)
       else if cameraHudFrame.click(x, y)
-        cameraHudFrame.mouseMove(x, y)
+        cursor = cameraHudFrame.mouseMove(x, y)
       else if gameFrame.click(x, y)
-        gameFrame.mouseMove(x, y)
+        cursor = gameFrame.mouseMove(x, y)
     else
       if cameraHudFrame.click(x, y)
-        cameraHudFrame.mouseMove(x, y)
+        cursor = cameraHudFrame.mouseMove(x, y)
+
+    # Reset cursor in case event is fired
+    if cursor?
+      surface.style.cursor = cursor
+    else
+      surface.style.cursor = 'auto'
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
