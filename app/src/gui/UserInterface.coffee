@@ -62,7 +62,7 @@ class UserInterface
 
     @unitStatsButton = new Elements.Button(5 + 150/2, 15, 150, 20)
     @unitStatsButton.setClearFunc((ctx) =>
-      ctx.clearRect(5, 230 - 10, 150, 20)
+      ctx.clearRect(@unitStatsButton.x-150/2, @unitStatsButton.y-20/2, 150, 20)
     )
     @unitStatsButton.setClickHandler(() => stats.jqmShow())
     @unitStatsButton.setMouseUpHandler(() => @unitStatsButton.setDirty())
@@ -82,7 +82,7 @@ class UserInterface
 
     @nextStationButton = new Elements.Button(5*2 + 150*3/2, 15, 150, 20)
     @nextStationButton.setClearFunc((ctx) =>
-      ctx.clearRect(5, 230 - 10, 150, 20)
+      ctx.clearRect(@nextStationButton.x-150/2, @nextStationButton.y-20/2, 150, 20)
     )
     @nextStationButton.setClickHandler(() => @gotoNextStation())
     @nextStationButton.setMouseUpHandler(() => @nextStationButton.setDirty())
