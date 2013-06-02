@@ -277,6 +277,8 @@ main = ->
       surface.focus()
       hash.w.hide()
       hash.o.remove()
+      if recording
+        eventRec.recordEvent("closeUnitStats", {})
   )
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
@@ -726,6 +728,7 @@ main = ->
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
     eventPlay.registerEvent("focus", focusHandler)
     eventPlay.registerEvent("blur", blurHandler)
+    eventPlay.registerEvent("closeUnitStats", -> stats.jqmHide())
   else
     window.onresize = onResize
     document.body.addEventListener('keydown', keyDownListener, false)
