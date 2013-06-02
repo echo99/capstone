@@ -139,6 +139,17 @@ class Tutorial extends Mission
       {x: p.x - 125, y: p.y - 125}, 5, 30)
     @move_planet_6_arrow.close()
 
+    @select_attack_6_arrow = new ArrowElement(
+      {x: p.x - 80, y: p.y + 50},
+      {x: p.x - 130, y: p.y - 0}, 5, 30)
+    @select_attack_6_arrow.close()
+
+    p = @map.planets[8].location()
+    @move_planet_8_arrow = new ArrowElement(
+      {x: p.x - 75, y: p.y - 75},
+      {x: p.x - 125, y: p.y - 125}, 5, 30)
+    @move_planet_8_arrow.close()
+
     @build_probe_arrow = new ArrowElement(
       {x: 340, y: 50},
       {x: 290, y: 50}, 5, 30, true)
@@ -181,10 +192,12 @@ class Tutorial extends Mission
     @select_colony_0_arrow.destroy()
     @select_attack_0_arrow.destroy()
     @select_attack_1_arrow.destroy()
+    @select_attack_6_arrow.destroy()
     @move_planet_2_arrow.destroy()
     @move_planet_3_arrow.destroy()
     @move_planet_5_arrow.destroy()
     @move_planet_6_arrow.destroy()
+    @move_planet_8_arrow.destroy()
     @select_home_1_arrow.destroy()
     @select_home_2_arrow.destroy()
     @build_probe_arrow.destroy()
@@ -212,7 +225,6 @@ class Tutorial extends Mission
     cameraHudFrame.removeChild(@m17)
     cameraHudFrame.removeChild(@m18)
     cameraHudFrame.removeChild(@m19)
-    cameraHudFrame.removeChild(@m20)
     cameraHudFrame.removeChild(@skipButton)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
@@ -314,7 +326,7 @@ class Tutorial extends Mission
     )
 
     @m17 = @_getM("Our other attack ship has also finished, so lets send it " +
-                  "forward as well",
+                  "forward as well.",
       null
     )
 
@@ -324,12 +336,6 @@ class Tutorial extends Mission
 
     @m19 = @_getM("Now lets try sending in our attack ship.",
       null
-    )
-
-    @m20 = @_getM("Well, the attack ship did damage but got destroyed. Better " +
-                  "make some defense ships so our attack ships last longer.",
-      null
-      250, 65
     )
 
     @skipButton = @createSkipButton(
@@ -412,6 +418,8 @@ class Tutorial extends Mission
           if @m15.visible
             @_checkTurn3Arrows()
         when 7
+          window.config.units.attackShip.attack = 1
+          window.config.units.fungus.attack = 1
           if @map.planets[8].fungusStrength() != 2
             @map.planets[8].setFungus(2)
           if not @m16.visible and not @m17.visible
@@ -427,7 +435,10 @@ class Tutorial extends Mission
             camera.setTarget(@home2.location())
           if @m18.visible or @m19.visible
             @_checkTurn8Arrows()
-          @endArrow.close()
+        when 9
+          window.config.units.attackShip.attack = 0.5
+          window.config.units.fungus.attack = 0.5
+          newMission(Challenge)
 
     UI.refreshEndTurnButton()
 
@@ -436,15 +447,42 @@ class Tutorial extends Mission
       @select_attack_1_arrow.close()
       @move_planet_6_arrow.open()
 
+      @select_attack_6_arrow.close()
+      @move_planet_8_arrow.close()
+
       @endArrow.close()
     else if @home2.numShips(window.config.units.attackShip) > 0
       @select_attack_1_arrow.open()
       @move_planet_6_arrow.close()
 
+      @select_attack_6_arrow.close()
+      @move_planet_8_arrow.close()
+
       @endArrow.close()
+    else if @_attackSelected(@map.planets[6])
+      @select_attack_1_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @select_attack_6_arrow.close()
+      @move_planet_8_arrow.open()
+
+      @endArrow.close()
+    else if @map.planets[6].numShips(window.config.units.attackShip) > 0
+      @select_attack_1_arrow.close()
+      @move_planet_6_arrow.close()
+
+      @select_attack_6_arrow.open()
+      @move_planet_8_arrow.close()
+
+      @endArrow.close()
+      @m18.close()
+      @m19.open()
     else
       @select_attack_1_arrow.close()
       @move_planet_6_arrow.close()
+
+      @select_attack_6_arrow.close()
+      @move_planet_8_arrow.close()
 
       @endArrow.open()
 
