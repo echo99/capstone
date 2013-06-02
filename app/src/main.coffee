@@ -428,9 +428,9 @@ main = ->
       'prefix': 'defense-ship'
       'sprite': SpriteNames.DEFENSE_SHIP
       'unit': config.units.defenseShip
-    'fungus':
+    'fungus-sprite':
       'prefix': 'fungus'
-      'sprite': null
+      'sprite': SpriteNames.PLANET_BLUE_FUNGUS
       'unit': config.units.fungus
 
   for id, data of statSprites
@@ -438,9 +438,10 @@ main = ->
     if sptName?
       canv = document.getElementById(id)
       spt = SHEET.getSprite(sptName)
-      canv.width = spt.w
-      canv.height = spt.h
-      SHEET.drawSprite(sptName, 16, 16, canv.getContext('2d'), false)
+      scale = Math.min(32 / spt.w, 32 / spt.h )
+      canv.width = 32
+      canv.height = 32
+      SHEET.drawSprite(sptName, 16, 16, canv.getContext('2d'), false, scale)
     unit = data['unit']
     prefix = data['prefix']
     atkField = document.getElementById("#{prefix}-atk")
