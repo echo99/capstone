@@ -68,13 +68,13 @@ body {
   padding: 12px;
 }
 
-.jqmWindow a {
-  color: #DDF;
+.jqmWindow a.jqmClose {
+  color: #999;
   text-decoration: none;
 }
 
-.jqmWindow a:hover {
-  color: #CCE;
+.jqmWindow a.jqmClose:hover {
+  color: #DDD;
   text-decoration: none;
 }
 
