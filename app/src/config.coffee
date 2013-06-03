@@ -507,7 +507,7 @@ root.config =
                  "Estimated Time: 5-10 minutes\n\n" +
                  "Task:\n" +
                  "  - Exterminate all fungus before it exterminates you.\n\n" +
-                 "Note: It is recommended that you complete the missions before " +
+                 "Note: It is recommended that you complete the tutorial before " +
                  "attempting this."
         textAlign: 'left'
         vAlign: 'top'
@@ -533,7 +533,7 @@ root.config =
                  "Estimated Time: 20-40 minutes\n\n" +
                  "Task:\n" +
                  "  - Exterminate all fungus before it exterminates you.\n\n" +
-                 "Note: It is recommended that you complete the missions before " +
+                 "Note: It is recommended that you complete the tutorial before " +
                  "attempting this."
         textAlign: 'left'
         vAlign: 'top'
@@ -559,7 +559,7 @@ root.config =
                  "Estimated Time: 60+ minutes\n\n" +
                  "Task:\n" +
                  "  - Exterminate all fungus before it exterminates you.\n\n" +
-                 "Note: It is recommended that you complete the missions before " +
+                 "Note: It is recommended that you complete the tutorial before " +
                  "attempting this."
         textAlign: 'left'
         vAlign: 'top'
