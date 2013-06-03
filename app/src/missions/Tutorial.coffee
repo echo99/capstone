@@ -254,7 +254,7 @@ class Tutorial extends Mission
         @phase = @phases.TUT
       300, 80
     )
-    @m3 = @_getM("In order to explore the map we need probes, lets move the one " +
+    @m3 = @_getM("In order to explore the map we need probes, let's move the one " +
                  "we have and build another one.", null, 250, 65)
     @m4 = @_getM("Notice that one of the Stations doesn't have many resources " +
                   "remaining...",
@@ -271,12 +271,12 @@ class Tutorial extends Mission
       250, 65
     )
 
-    @m6 = @_getM("We already have a probe so lets make a colony ship."
+    @m6 = @_getM("We already have a probe so let's make a colony ship."
       null
       #300, 65
     )
 
-    @m7 = @_getM("Good, that's going to take a few turns to finish so lets " +
+    @m7 = @_getM("Good, that's going to take a few turns to finish so let's " +
                  "continue to explore with our probe."
       null
       250, 65
@@ -288,18 +288,18 @@ class Tutorial extends Mission
       300, 65
     )
 
-    @m9 = @_getM("Lets keep moving the probe as well.",
+    @m9 = @_getM("Let's keep moving the probe as well.",
       null
     )
 
-    @m10 = @_getM("We'll leave the probe there for now, lets just end the turn " +
+    @m10 = @_getM("We'll leave the probe there for now, let's just end the turn " +
                   "again to finish the colony ship.",
       null
       250, 65
     )
 
     @m11 = @_getM("Now we can build an Outpost. We should pick a planet that " +
-                  "plenty of recources, lets try the one that hasn't been " +
+                  "has plenty of resources, let's try the one that hasn't been " +
                   "explored yet.",
       null
       300, 65
@@ -309,7 +309,7 @@ class Tutorial extends Mission
       null
     )
 
-    @m13 = @_getM("This should have enough recources for a while, lets build " +
+    @m13 = @_getM("This should have enough recources for a while, let's build " +
                   "the outpost here.",
       null
     )
@@ -319,7 +319,7 @@ class Tutorial extends Mission
       null
     )
 
-    @m15 = @_getM("Lets end the turn again.",
+    @m15 = @_getM("Let's end the turn again.",
       null
     )
 
@@ -329,7 +329,7 @@ class Tutorial extends Mission
       250, 65
     )
 
-    @m17 = @_getM("Our other attack ship has also finished, so lets send it " +
+    @m17 = @_getM("Our other attack ship has also finished, so let's send it " +
                   "forward as well.",
       null
     )
@@ -338,7 +338,7 @@ class Tutorial extends Mission
       null
     )
 
-    @m19 = @_getM("Now lets try sending in our attack ship.",
+    @m19 = @_getM("Now let's try sending in our attack ship.",
       null
     )
 

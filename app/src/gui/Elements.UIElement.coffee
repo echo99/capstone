@@ -358,6 +358,7 @@ class Elements.UIElement extends Module
     if @visible
       @setDirty()
       @_closing = true
+      @visible = false
 
   # Move this element to a new location
   #
@@ -541,7 +542,7 @@ class Elements.UIElement extends Module
       @_updateFunc?(ctx, coords, zoom)
     if @_closing
       @_closing = false
-      @visible = false
+      # @visible = false
       @clear(ctx, coords, zoom)
       @setDirty()
     for child in @_children
