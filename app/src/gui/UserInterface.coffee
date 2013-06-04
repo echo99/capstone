@@ -383,7 +383,7 @@ class UserInterface
     )
     frameElement.addChild(@turnCounter)
 
-    # TODO: remove when done with beta
+    ### TODO: remove when done with beta
     @beta = new Elements.BoxElement(camera.width - 5, 25, 0, 20)
     clearBeta = (ctx) =>
       w = ctx.measureText("Beta").width + 5
@@ -402,6 +402,7 @@ class UserInterface
       ctx.fillText("Beta", @beta.x, @beta.y)
     )
     frameElement.addChild(@beta)
+    ###
 
   _getStationButton: (x, y, w, h, unit, probes=false) ->
     button = new Elements.Button(x+w/2, y+h/2, w, h)
