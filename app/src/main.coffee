@@ -541,9 +541,9 @@ main = ->
       if e.keyCode == KeyCodes.U
         stats.jqmHide()
 
-    #if e.keyCode == KeyCodes.CHEAT
-    #  Logger.logEvent("Pressed CHEAT")
-    #  cheat = not cheat
+    if e.keyCode == KeyCodes.CHEAT
+      Logger.logEvent("Pressed CHEAT")
+      cheat = not cheat
 
   # Catch accidental leaving
   onBeforeUnload = (e) ->

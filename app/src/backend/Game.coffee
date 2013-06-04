@@ -19,7 +19,7 @@ class Game
   # @return [Planet] The home planet.
   #
   # @throw [Error] If the number of planets is not positive.
-  setup: (numplanets = 0) ->
+  setup: (numplanets = 0, spread = 10) ->
     # Sanitize inputs
     if numplanets < 1
       throw Error "Not positive number of planets requested."
@@ -45,7 +45,7 @@ class Game
       planetWeightList = []
       totalWeight = 0
       for planet in @_planets
-        totalWeight += Math.pow( (maxAdjacency - planet._adjacentPlanets.length), 10 )
+        totalWeight += Math.pow( (maxAdjacency - planet._adjacentPlanets.length), spread )
         planetWeightList.push( totalWeight )
 
       weightIndex = Math.random() * totalWeight

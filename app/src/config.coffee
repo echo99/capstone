@@ -633,8 +633,11 @@ root.config =
   minimumFungusDistance: 5000
   fungusInitialStrength: 1
   numberOfPlanetsInExterminateSmall: 20
+  spreadExterminateSmall: 0
   numberOfPlanetsInExterminateMedium: 50
+  spreadExterminateMedium: 2
   numberOfPlanetsInExterminateLarge: 100
+  spreadExterminateLarge: 10
   resources:
     homePlanetResources: 40
     homePlanetRate: 2

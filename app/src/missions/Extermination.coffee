@@ -5,6 +5,7 @@ class Extermination extends Mission
   #settings: window.config.MainMenu
   size: ""
   numPlanets: 0
+  spread: 0
   restart: null
 
   # @see Mission#reset
@@ -33,7 +34,7 @@ class Extermination extends Mission
 
     newGame(10000, 10000)
     # Create planets:
-    @home = game.setup(@numPlanets)
+    @home = game.setup(@numPlanets, @spread)
     @home.addStation()
 
     UI.initialize()

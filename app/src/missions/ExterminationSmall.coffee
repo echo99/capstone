@@ -6,4 +6,5 @@ class ExterminationSmall extends Extermination
     @restart = ExterminationSmall
     @size = "small"
     @numPlanets = window.config.numberOfPlanetsInExterminateSmall
+    @spread = window.config.spreadExterminateSmall
     super()
