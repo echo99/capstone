@@ -15,7 +15,7 @@ root.config =
   DRAG_TYPE: DRAG_TYPES[1]
   displayCutoff: 0.4
   windowStyle:
-    fill: "rgba(0, 37, 255, 0.5)"
+    fill: "rgba(0, 37, 255, 0.6)"
     stroke: "rgba(0, 37, 255, 1)"
     lineJoin: "bevel"
     lineWidth: 5
