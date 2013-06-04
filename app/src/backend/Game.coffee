@@ -36,11 +36,45 @@ class Game
     while @_planets.length != numplanets
       if @_planets.length > numplanets
         throw Error "TOO MANY PLANETS OMG"
-      seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
-      deltaX = Math.floor((Math.random() * 2 - 1) *
-                          root.config.minimumPlanetDistance)
-      deltaY = Math.floor(Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
-                          Math.pow(deltaX, 2)))
+
+      maxAdjacency = 0
+      for planet in @_planets
+        if planet._adjacentPlanets.length > maxAdjacency
+          maxAdjacency = planet._adjacentPlanets.length
+
+      planetWeightList = []
+      totalWeight = 0
+      for planet in @_planets
+        totalWeight += Math.pow( (maxAdjacency - planet._adjacentPlanets.length), 10 )
+        planetWeightList.push( totalWeight )
+
+      weightIndex = Math.random() * totalWeight
+      i = 0
+      while weightIndex > planetWeightList[i]
+        i++
+
+      seedPlanet = @_planets[i]
+
+      # seedPlanet = @_planets[Math.floor(Math.random() * @_planets.length)]
+      minDist = root.config.minimumPlanetDistance
+      maxDist = root.config.maximumAdjacencyDistance
+      a = 2 / (Math.pow( maxDist, 2 ) - Math.pow( minDist, 2 ) )
+      r = Math.sqrt( 2 * Math.random() / a + Math.pow( minDist, 2 ) )
+      theta = Math.random() * 2 * Math.PI
+      x = r * Math.cos( theta )
+      y = r * Math.sin( theta )
+      if x < 0
+        deltaX = Math.ceil( x )
+      else
+        deltaX = Math.floor( x )
+      if y < 0
+        deltaY = Math.ceil( y )
+      else
+        deltaY = Math.floor( y )
+      # deltaX = Math.floor((Math.random() * 2 - 1) *
+      #                     root.config.minimumPlanetDistance)
+      # deltaY = Math.floor(Math.sqrt(Math.pow(root.config.minimumPlanetDistance, 2) -
+      #                     Math.pow(deltaX, 2)))
       newX = seedPlanet.location().x + deltaX
       newY = seedPlanet.location().y + deltaY
       resources = @newResources()
@@ -171,10 +205,13 @@ class Game
       return false
     if location.y >= @height
       return false
+    isCloseEnough = false
     for other in @_planets
-      if planet.distance(other) < root.config.minimumPlanetDistance
+      dist = planet.distance( other )
+      if dist < root.config.minimumPlanetDistance
         return false
-    return true
+      isCloseEnough |= dist <= root.config.maximumAdjacencyDistance
+    return isCloseEnough
 
   # Checks all planets in the graph and makes neighbors of the close ones.
   makeAdjacent: (planet) ->
