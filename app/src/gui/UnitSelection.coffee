@@ -51,7 +51,7 @@ class UnitSelection
       h = window.config.selectionStyle.height
     @totalDisplay = new Elements.BoxElement(loc.x+w/2, loc.y+h/2, w, h)
     @totalDisplay.setDrawFunc(@_drawSelection)
-    frameElement.addChild(@totalDisplay)
+    #frameElement.addChild(@totalDisplay)
 
   # Initilizes the data structure that tracks which units are selected
   _initUnitSelection: (planet) ->

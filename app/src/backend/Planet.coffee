@@ -265,7 +265,8 @@ class Planet
   # Immediately adds the specified number of the specified type of ship to
   # those on the planet.  This does not incur a resource cost or build delay.
   #
-  # @param [{cost: number, turns: number, attack: number, defense: number, isStructure: boolean}] type The type of ship to build.
+  # @param [{cost: number, turns: number, attack: number,
+  #   defense: number, isStructure: boolean}] type The type of ship to build.
   # @param [number] number The number of ships to build.
   #
   # @throw [Error] if type is not one of root.config.unit.*
@@ -493,7 +494,7 @@ class Planet
     @_fungusReport = []
     if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
         @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
-      null # No sporing or growing.
+      # null # No sporing or growing.
     else if @_fungusStrength < @_fungusMaximumStrength
       # Grow
       @_fungusArriving += root.config.units.fungus.growthPerTurn
@@ -509,7 +510,7 @@ class Planet
     toMap = {}
     if @_fungusStrength == 0 or @_attackShips + @_defenseShips +
         @_probes + @_colonies > 0 or @_outpost or @_station or game._noGrow
-      null # No sporing or growing.
+      # null # No sporing or growing.
     else if @_fungusStrength >= @_fungusMaximumStrength and
         @_adjacentPlanets.length > 0
       # Spore
@@ -831,7 +832,8 @@ class Planet
   # Causes a unit to be built, sets relevant fields.
   # If the unit cannot be built immediately, it goes onto a build queue.
   #
-  # @param [{cost: number, turns: number, attack: number, defense: number, isStructure: boolean}] unit The type of unit to be built.
+  # @param [{cost: number, turns: number, attack: number,
+  #   defense: number, isStructure: boolean}] unit The type of unit to be built.
   #
   # @throw [Error] If there is no station.
   build: (unit) ->
@@ -851,7 +853,8 @@ class Planet
   # Causes a unit to be built, sets relevant fields.
   # Fails if this unit cannot be scheduled immediately.
   #
-  # @param [{cost: number, turns: number, attack: number, defense: number, isStructure: boolean}] unit The type of unit to be built.
+  # @param [{cost: number, turns: number, attack: number,
+  #   defense: number, isStructure: boolean}] unit The type of unit to be built.
   #
   # @throw [Error] If there is no station.
   # @throw [Error] If construction is already under way.

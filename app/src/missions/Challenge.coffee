@@ -17,51 +17,18 @@ class Challenge extends Mission
 
     # Create planets:
     @home = game.getPlanets()[0]
-    ###
-    newGame(10000, 10000)
-    @map = @_setupMissionMap()
-    @home = @map.home
-    @home.addShips(window.config.units.probe, 1)
-    @home.addStation()
-
-    @home2 = @map.home2
-    @home2.addStation()
-
-    @map.planets[5].setVisibility(window.config.visibility.discovered)
-    @map.planets[6].setVisibility(window.config.visibility.discovered)
-    @map.planets[7].setVisibility(window.config.visibility.discovered)
-    @map.planets[8].setVisibility(window.config.visibility.discovered)
-    @map.planets[9].setVisibility(window.config.visibility.discovered)
-    @map.planets[9].setFungus(1)
-    @map.planets[9]._lastSeenFungus = 1
-    @map.planets[10].setVisibility(window.config.visibility.discovered)
-    @map.planets[10].setFungus(1)
-    @map.planets[10]._lastSeenFungus = 1
-    @map.planets[11].setVisibility(window.config.visibility.discovered)
-    @map.planets[11].setFungus(1)
-    @map.planets[11]._lastSeenFungus = 1
-    @map.planets[12].setVisibility(window.config.visibility.discovered)
-    @map.planets[12].setFungus(1)
-    @map.planets[12]._lastSeenFungus = 1
-    @map.planets[13].setVisibility(window.config.visibility.discovered)
-    @map.planets[13].setFungus(1)
-    @map.planets[13]._lastSeenFungus = 1
-    @map.planets[14].setVisibility(window.config.visibility.discovered)
-    @map.planets[14].setFungus(1)
-    ###
-    #camera.setZoom(0.1)
-    #camera.setZoomTarget(0.5)
-    #camera.setTarget(@home.location())
 
     @_initMenus()
 
-    #game.endTurn()
     UI.initialize()
+    UI.endTurn()
 
     @startTime = currentTime()
 
   destroy: ->
     cameraHudFrame.removeChild(@m1)
+    cameraHudFrame.removeChild(@victoryMenu)
+    cameraHudFrame.removeChild(@failMenu)
     cameraHudFrame.removeChild(@optionsMenu)
     cameraHudFrame.removeChild(@menuButton)
 
@@ -76,6 +43,9 @@ class Challenge extends Mission
     @m1.open()
 
     restart = () => newMission(Cutscene)
+    next = () => newMission(Menu)
+    @victoryMenu = @createVictoryMenu(restart, next)
+    @failMenu = @createFailMenu(restart)
     @optionsMenu = @_createMenu(window.config.MainMenu.mission.menu,
       restart, start=false, restart=true, quit=true, cancel=false, close=true)
     @menuButton = @createCameraHUDMenuButton(@optionsMenu)
@@ -106,3 +76,72 @@ class Challenge extends Mission
 
   # @see Mission#onEndTurn
   onEndTurn: ->
+    hasFungus = false
+    for p in game.getPlanets()
+      if p.fungusStrength() > 0
+        hasFungus = true
+
+    hasAnything = false
+    for p in game.getPlanets()
+      if p.getControlGroups().length > 0 or p.humansOnPlanet() or
+          p.hasStation() or p.hasOutpost()
+        hasAnything = true
+        break
+
+    if not hasFungus
+      if not @gameEnded
+        @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
+        ga('send', {
+          'hitType': 'event',
+          'eventCategory': "The Mission Challenge",
+          'eventAction': 'Complete',
+          'eventLabel': 'Victory',
+          'dimension1': "The Mission Challenge",
+          'metric5': 1,
+          'metric2': 1
+        })
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': "The Mission Challenge",
+          'timingVar': 'Complete',
+          'timingValue': @endTime - @startTime,
+          'timingLabel': 'Victory'
+        })
+        Math.random = randSave
+        Logger.logEvent("Player successfully completed " + "The Mission Challenge",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns})
+      @gameEnded = true
+      UI.endGame()
+      @victoryMenu.open()
+
+    if not hasAnything
+      if not @gameEnded
+        @endTime = currentTime()
+        randSave = Math.random
+        Math.seedrandom()
+        ga('send', {
+          'hitType': 'event',
+          'eventCategory': "The Mission Challenge",
+          'eventAction': 'Complete',
+          'eventLabel': 'Fail',
+          'dimension1': "The Mission Challenge",
+          'metric6': 1,
+          'metric2': 1
+        })
+        ga('send', {
+          'hitType': 'timing',
+          'timingCategory': "The Mission Challenge",
+          'timingVar': 'Complete',
+          'timingValue': @endTime - @startTime,
+          'timingLabel': 'Fail'
+        })
+        Math.random = randSave
+        Logger.logEvent("Player failed " + "The Mission Challenge",
+                        {minutes: getMinutes(@endTime - @startTime)
+                        turns: UI.turns})
+      @gameEnded = true
+      UI.endGame()
+      @failMenu.open()

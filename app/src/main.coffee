@@ -27,6 +27,7 @@ window.player_id = null
 # Load the atlas and dom before doing anything else
 IMAGE_LOADED = false
 DOM_LOADED = false
+soundLoaded = false
 
 BROWSER = BrowserDetect.browser
 Browser =
@@ -46,6 +47,7 @@ manifest = [
 ]
 
 bgmusic = null
+muteBtn = null
 
 numToLoad = manifest.length
 numLoaded = 0
@@ -57,8 +59,10 @@ createjs.Sound.addEventListener "loadComplete", ->
     debug('Finished loading sounds!')
     bgmusic = createjs.Sound.play('bgmusic3', createjs.Sound.INTERRUPT_NONE,
       10, 0, -1, 0.5)
-    # # Start it off muted
-    # bgmusic.mute(true)
+    soundLoaded = true
+    # Enable mute button if it was already created
+    if muteBtn?
+      muteBtn.enable()
 
 createjs.Sound.registerManifest(manifest)
 
@@ -96,6 +100,7 @@ KeyCodes =
   DOWN: 40 # move down
   D: 68 # move right
   RIGHT: 39 #move right
+  U: 85 # show unit stats
 
 cheat = false
 
@@ -128,6 +133,7 @@ tooltipCtx = null
 
 drag = false
 
+stats = null
 
 WIN7 = false
 
@@ -191,7 +197,7 @@ drawBackground = (ctx, spritesheet, name) ->
       spritesheet.drawSprite(name, xPos, yPos, ctx, false)
 
 # Update the size of the frame and the canvases when the window size changes
-# @suppress {checkTypes}
+# @suppress (checkTypes)
 updateCanvases = (frame, canvases..., width, height) ->
   frameWidth = width
   frameHeight = height
@@ -252,12 +258,28 @@ main = ->
   # debug(ctx.font)
 
   # feedback = $('#comments').jqm()
-  feedback = $('#comments').jqm({
-    ajax: 'fbcomments.html',
-    ajaxUpdate: false,
+  feedback = $('#comments').jqm(
+    ajax: 'fbcomments.html'
+    ajaxUpdate: false
     modal: true
-  })
+  )
   feedbackElem = document.getElementById('comments')
+
+  stats = $('#unit-stats').jqm(
+    modal: true
+    # @suppress (checkTypes)
+    onShow: (hash) ->
+      surface.blur()
+      # hash.w.css('opacity',0.88).show()
+      hash.w.show()
+    # @suppress (checkTypes)
+    onHide: (hash) ->
+      surface.focus()
+      hash.w.hide()
+      hash.o.remove()
+      if recording
+        eventRec.recordEvent("closeUnitStats", {})
+  )
 
   # frameElement = new Elements.BoxElement(canvas.width/2, canvas.width/2,
   #   canvas.width, canvas.height)
@@ -373,6 +395,8 @@ main = ->
       Logger.logEvent("Clicked MUTE")
       bgmusic.setMute(true)
       muteBtn.setState('muted')
+  unless soundLoaded
+    muteBtn.disable()
 
   # Set feedback button
   feedbackBtn = new Elements.DOMButton('feedback',
@@ -388,12 +412,54 @@ main = ->
     # catch e
     #   console.warn(e)
 
+  # Fill in unit stats table
+  statSprites =
+    'probe-sprite':
+      'prefix': 'probe'
+      'sprite': SpriteNames.PROBE
+      'unit': config.units.probe
+    'colony-ship-sprite':
+      'prefix': 'colony-ship'
+      'sprite': SpriteNames.COLONY_SHIP
+      'unit': config.units.colonyShip
+    'attack-ship-sprite':
+      'prefix': 'attack-ship'
+      'sprite': SpriteNames.ATTACK_SHIP
+      'unit': config.units.attackShip
+    'defense-ship-sprite':
+      'prefix': 'defense-ship'
+      'sprite': SpriteNames.DEFENSE_SHIP
+      'unit': config.units.defenseShip
+    'fungus-sprite':
+      'prefix': 'fungus'
+      'sprite': SpriteNames.PLANET_BLUE_FUNGUS
+      'unit': config.units.fungus
+
+  for id, data of statSprites
+    sptName = data['sprite']
+    if sptName?
+      canv = document.getElementById(id)
+      spt = SHEET.getSprite(sptName)
+      scale = Math.min(32 / spt.w, 32 / spt.h )
+      canv.width = 32
+      canv.height = 32
+      SHEET.drawSprite(sptName, 16, 16, canv.getContext('2d'), false, scale)
+    unit = data['unit']
+    prefix = data['prefix']
+    atkField = document.getElementById("#{prefix}-atk")
+    atkField.appendChild(document.createTextNode("ATK: #{unit.attack*100}%"))
+    defField = document.getElementById("#{prefix}-def")
+    defField.appendChild(document.createTextNode("DEF: #{unit.defense*100}%"))
+
   # for playback mouse position drawing
   mousedown = false
   mousepos = {x: 0, y: 0}
 
   ##################################################################################
   # Set event handlers
+
+  # Start with surface unfocused
+  surfaceFocused = false
 
   onResize = ->
     if recording
@@ -428,43 +494,52 @@ main = ->
     # debug("New bg pos: #{bgCanvas.style.left} x #{bgCanvas.style.top}")
 
   keyDownListener = (e) ->
-    if recording
-      eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
+    if surfaceFocused
+      if recording
+        eventRec.recordEvent("keyDown", {keyCode: e.keyCode})
 
-    if CurrentMission.canPlay()
-      if e.keyCode == KeyCodes.HOME
-        Logger.logEvent("Pressed HOME")
-        camera.setTarget(CurrentMission.getHomeTarget())
-      else if e.keyCode == KeyCodes.STATION
-        Logger.logEvent("Pressed Q")
-        UI.gotoNextStation()
+      if CurrentMission.canPlay()
+        if e.keyCode == KeyCodes.HOME
+          Logger.logEvent("Pressed HOME")
+          camera.setTarget(CurrentMission.getHomeTarget())
+        else if e.keyCode == KeyCodes.STATION
+          Logger.logEvent("Pressed Q")
+          UI.gotoNextStation()
+        else if e.keyCode == KeyCodes.U
+          # Should probably have a button for this instead
+          stats.jqmShow()
 
-    if CurrentMission.canEndTurn()
-      if e.keyCode == KeyCodes.SPACE
-        Logger.logEvent("Pressed SPACE")
-        endTurn()
+      if CurrentMission.canEndTurn()
+        if e.keyCode == KeyCodes.SPACE
+          Logger.logEvent("Pressed SPACE")
+          endTurn()
 
-    if CurrentMission.canMove()
-      if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
-        Logger.logEvent("Pressed +")
-        nz = camera.getZoom() + window.config.ZOOM_SPEED
-        camera.setZoom(nz)
-      else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
-        Logger.logEvent("Pressed -")
-        nz = camera.getZoom() - window.config.ZOOM_SPEED
-        camera.setZoom(nz)
-      else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
-        Logger.logEvent("Pressed up")
-        camera.moveCameraByScreenDistance(0, 20)
-      else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
-        Logger.logEvent("Pressed left")
-        camera.moveCameraByScreenDistance(20, 0)
-      else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
-        Logger.logEvent("Pressed down")
-        camera.moveCameraByScreenDistance(0, -20)
-      else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
-        Logger.logEvent("Pressed right")
-        camera.moveCameraByScreenDistance(-20, 0)
+      if CurrentMission.canMove()
+        if e.keyCode == KeyCodes.PLUS or e.keyCode == KeyCodes.ADD
+          Logger.logEvent("Pressed +")
+          nz = camera.getZoom() + window.config.ZOOM_SPEED
+          camera.setZoom(nz)
+        else if e.keyCode == KeyCodes.MINUS or e.keyCode == KeyCodes.SUB
+          Logger.logEvent("Pressed -")
+          nz = camera.getZoom() - window.config.ZOOM_SPEED
+          camera.setZoom(nz)
+        else if e.keyCode == KeyCodes.W or e.keyCode == KeyCodes.UP
+          Logger.logEvent("Pressed up")
+          camera.moveCameraByScreenDistance(0, 20)
+        else if e.keyCode == KeyCodes.A or e.keyCode == KeyCodes.LEFT
+          Logger.logEvent("Pressed left")
+          camera.moveCameraByScreenDistance(20, 0)
+        else if e.keyCode == KeyCodes.S or e.keyCode == KeyCodes.DOWN
+          Logger.logEvent("Pressed down")
+          camera.moveCameraByScreenDistance(0, -20)
+        else if e.keyCode == KeyCodes.D or e.keyCode == KeyCodes.RIGHT
+          Logger.logEvent("Pressed right")
+          camera.moveCameraByScreenDistance(-20, 0)
+
+    else
+      # Surface not focused
+      if e.keyCode == KeyCodes.U
+        stats.jqmHide()
 
     #if e.keyCode == KeyCodes.CHEAT
     #  Logger.logEvent("Pressed CHEAT")
@@ -548,20 +623,30 @@ main = ->
     # msgBox.click(e.clientX, e.clientY)
     x = e.clientX
     y = e.clientY
+    cursor = null
     if CurrentMission.canPlay()
       if frameElement.click(x, y)
-        frameElement.mouseMove(x, y)
+        cursor = frameElement.mouseMove(x, y)
       else if cameraHudFrame.click(x, y)
-        cameraHudFrame.mouseMove(x, y)
+        cursor = cameraHudFrame.mouseMove(x, y)
       else if gameFrame.click(x, y)
-        gameFrame.mouseMove(x, y)
+        cursor = gameFrame.mouseMove(x, y)
     else
       if cameraHudFrame.click(x, y)
-        cameraHudFrame.mouseMove(x, y)
+        cursor = cameraHudFrame.mouseMove(x, y)
+
+    # Reset cursor in case event is fired
+    if cursor?
+      surface.style.cursor = cursor
+    else
+      surface.style.cursor = 'auto'
 
     CurrentMission.onMouseClick(e.clientX, e.clientY)
 
   mouseDownHandler = (e) ->
+    # Give focus to the surface
+    surface.focus()
+
     if recording
       eventRec.recordEvent("mouseDown",
         {clientX: e.clientX, clientY: e.clientY})
@@ -621,6 +706,16 @@ main = ->
       nz = camera.zoom + delta * window.config.ZOOM_SPEED
       camera.setZoom(nz)
 
+  focusHandler = (e) ->
+    if recording
+      eventRec.recordEvent("focus", {})
+    surfaceFocused = true
+
+  blurHandler = (e) ->
+    if recording
+      eventRec.recordEvent("blur", {})
+    surfaceFocused = false
+
   #window.onresize = onResize
 
   if playback
@@ -638,6 +733,9 @@ main = ->
     eventPlay.registerEvent("mouseUp", mouseUpHandler)
     eventPlay.registerEvent("mouseOut", mouseOutHandler)
     eventPlay.registerEvent("mouseWheel", mouseWheelHandler)
+    eventPlay.registerEvent("focus", focusHandler)
+    eventPlay.registerEvent("blur", blurHandler)
+    eventPlay.registerEvent("closeUnitStats", -> stats.jqmHide())
   else
     window.onresize = onResize
     document.body.addEventListener('keydown', keyDownListener, false)
@@ -647,8 +745,10 @@ main = ->
     surface.addEventListener('mousedown', mouseDownHandler, false)
     surface.addEventListener('mouseup', mouseUpHandler, false)
     surface.addEventListener('mouseout', mouseOutHandler, false)
-    document.body.addEventListener('DOMMouseScroll', mouseWheelHandler, false)
-    document.body.addEventListener('mousewheel', mouseWheelHandler, false)
+    surface.addEventListener('DOMMouseScroll', mouseWheelHandler, false)
+    surface.addEventListener('mousewheel', mouseWheelHandler, false)
+    surface.addEventListener('focus', focusHandler, false)
+    surface.addEventListener('blur', blurHandler, false)
 
     document.body.addEventListener('touchmove',
       (e) =>

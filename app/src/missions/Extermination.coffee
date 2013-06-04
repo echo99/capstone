@@ -86,11 +86,11 @@ class Extermination extends Mission
     hasAnything = false
     for p in game.getPlanets()
       if p.getControlGroups().length > 0 or p.humansOnPlanet() or
-         p.hasStation() or p.hasOutpost()
-         #p.numShips(window.config.units.probe) > 0 or
-         #p.numShips(window.config.units.colonyShip) > 0 or
-         #p.numShips(window.config.units.attackShip) > 0 or
-         #p.numShips(window.config.units.defenseShip) > 0
+          p.hasStation() or p.hasOutpost()
+        #p.numShips(window.config.units.probe) > 0 or
+        #p.numShips(window.config.units.colonyShip) > 0 or
+        #p.numShips(window.config.units.attackShip) > 0 or
+        #p.numShips(window.config.units.defenseShip) > 0
         hasAnything = true
         break
 

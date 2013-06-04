@@ -2,8 +2,6 @@
 
 # This class is resposible for drawing the game state and handling user
 # input related to the game directly.
-# TODO:
-#   - Deselect all units button (this might not be needed actually
 class UserInterface
   planetButtons: []
   hoveredPlanet: null
@@ -18,6 +16,15 @@ class UserInterface
   carrierCount: 0
   movingElements: []
   showAll: false
+
+  # Enum of text for the user interface
+  Text:
+    CUR_BUILD: 'Currently building:'
+    PROBES_AVAIL: 'Probes available:'
+    RES_AVAIL: 'Resources available:'
+    RES_COLL: 'Resources collected:'
+    RES_RATE: 'Collection rate:'
+    RES_REM: 'Resources remaining:'
 
   # Creates a new UserInterface
   constructor: () ->
@@ -53,9 +60,29 @@ class UserInterface
     frameElement.addChild(b)
     @endTurnButton = b
 
-    @nextStationButton = new Elements.Button(5 + 150/2, 230, 150, 20)
+    @unitStatsButton = new Elements.Button(5 + 150/2, 15, 150, 20)
+    @unitStatsButton.setClearFunc((ctx) =>
+      ctx.clearRect(@unitStatsButton.x-150/2, @unitStatsButton.y-20/2, 150, 20)
+    )
+    @unitStatsButton.setClickHandler(() => stats.jqmShow())
+    @unitStatsButton.setMouseUpHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setMouseDownHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setMouseOutHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setHoverHandler(() => @unitStatsButton.setDirty())
+    @unitStatsButton.setDrawFunc((ctx) =>
+      if @unitStatsButton.isPressed()
+        SHEET.drawSprite(SpriteNames.UNIT_STATS_BUTTON_HOVER,
+                         @unitStatsButton.x, @unitStatsButton.y, ctx, false)
+      else
+        SHEET.drawSprite(SpriteNames.UNIT_STATS_BUTTON_IDLE,
+                         @unitStatsButton.x, @unitStatsButton.y, ctx, false)
+    )
+    @unitStatsButton.setZIndex(100)
+    frameElement.addChild(@unitStatsButton)
+
+    @nextStationButton = new Elements.Button(5*2 + 150*3/2, 15, 150, 20)
     @nextStationButton.setClearFunc((ctx) =>
-      ctx.clearRect(5, 230 - 10, 150, 20)
+      ctx.clearRect(@nextStationButton.x-150/2, @nextStationButton.y-20/2, 150, 20)
     )
     @nextStationButton.setClickHandler(() => @gotoNextStation())
     @nextStationButton.setMouseUpHandler(() => @nextStationButton.setDirty())
@@ -182,6 +209,14 @@ class UserInterface
     @stationMenu.addChild(cancelBuild)
     @stationMenu.addChild(stationRally)
     @stationMenu.addChild(stationCancelRally)
+    l = stationStyle.queueButtonLoc
+    x = l.x
+    @queueButtons = []
+    for i in [0...stationStyle.queueButtonCount]
+      qb = @_getQueueButton(x, l.y, stationStyle.queueButtonSize, i)
+      @queueButtons.push(qb)
+      @stationMenu.addChild(qb)
+      x += stationStyle.queueButtonSize + stationStyle.queueButtonGap
     @stationMenu.setProperty("cancelButton", cancelBuild)
     @stationMenu.setProperty("cancelOpen", false)
     @stationMenu.setProperty("rallyButton", stationRally)
@@ -348,7 +383,7 @@ class UserInterface
     )
     frameElement.addChild(@turnCounter)
 
-    # TODO: remove when done with beta
+    ### TODO: remove when done with beta
     @beta = new Elements.BoxElement(camera.width - 5, 25, 0, 20)
     clearBeta = (ctx) =>
       w = ctx.measureText("Beta").width + 5
@@ -367,6 +402,7 @@ class UserInterface
       ctx.fillText("Beta", @beta.x, @beta.y)
     )
     frameElement.addChild(@beta)
+    ###
 
   _getStationButton: (x, y, w, h, unit, probes=false) ->
     button = new Elements.Button(x+w/2, y+h/2, w, h)
@@ -400,6 +436,27 @@ class UserInterface
         ctx.strokeStyle = window.config.unitDisplay.orange
       else
         ctx.strokeStyle = window.config.unitDisplay.stroke
+      ctx.lineWidth = window.config.unitDisplay.lineWidth
+      ctx.lineJoin = window.config.unitDisplay.lineJoin
+      x = loc.x
+      y = loc.y
+      w = button.w
+      h = button.h
+      if button.isHovered()
+        ctx.strokeRect(x - w/2, y - h /2, w, h)
+    )
+    return button
+
+  _getQueueButton: (x, y, s, index) ->
+    button = new Elements.Button(x, y, s, s)
+    button.setProperty("location",
+      @stationMenu.getActualLocation(button.x, button.y))
+    button.setClickHandler(() =>
+      @selectedPlanet.removeFromBuildQueue(index)
+    )
+    button.setDrawFunc((ctx) =>
+      loc = button.getProperty("location")
+      ctx.strokeStyle = window.config.unitDisplay.stroke
       ctx.lineWidth = window.config.unitDisplay.lineWidth
       ctx.lineJoin = window.config.unitDisplay.lineJoin
       x = loc.x
@@ -481,7 +538,7 @@ class UserInterface
     ctx.textBaseline = 'top'
     x = loc.x+stationStyle.availableLoc.x
     y = loc.y+stationStyle.availableLoc.y
-    ctx.fillText("Resources avaliable:", x, y)
+    ctx.fillText(@Text.RES_AVAIL, x, y)
 
     # Draw currently buiding block
     x = loc.x+stationStyle.buildingLoc.x
@@ -521,16 +578,16 @@ class UserInterface
           when window.config.units.defenseShip
             sprite = window.config.spriteNames.DEFENSE_SHIP
         SHEET.drawSprite(sprite, x, y, ctx, false, stationStyle.queueButtonSize/32)
-        #queueButton[i].open()
-      #else
-      #  queueButton[i].close()
+        @queueButtons[i].open()
+      else
+        @queueButtons[i].close()
       x += stationStyle.queueButtonSize + stationStyle.queueButtonGap
 
     # Draw variables
     ctx.fillStyle = winStyle.defaultText.value
     resources = @selectedPlanet.availableResources()
     x = loc.x+stationStyle.availableLoc.x +
-        ctx.measureText("Resources avaliable:").width + 5
+        ctx.measureText(@Text.RES_AVAIL).width + 5
     y = loc.y+stationStyle.availableLoc.y
     ctx.fillText(resources, x, y)
 
@@ -551,7 +608,7 @@ class UserInterface
         sprite = SpriteNames.DEFENSE_SHIP
       else
         text = ""
-    w = ctx.measureText("Currently building:").width + 5
+    w = ctx.measureText(@Text.CUR_BUILD).width + 5
     ctx.fillText(text, x + w, y)
     if text != ""
       SHEET.drawSprite(sprite, x+w+40, y+35, ctx, false)
@@ -651,7 +708,7 @@ class UserInterface
     ctx.textBaseline = 'top'
     x = loc.x + outpostStyle.availableLoc.x
     y = loc.y + outpostStyle.availableLoc.y
-    ctx.fillText("Resources avaliable:", x, y)
+    ctx.fillText(@Text.RES_AVAIL, x, y)
 
     x = loc.x + outpostStyle.upgrade.labelLoc.x
     y = loc.y + outpostStyle.upgrade.labelLoc.y
@@ -688,7 +745,7 @@ class UserInterface
     ctx.fillStyle = winStyle.defaultText.value
     resources = @selectedPlanet.availableResources()
     x = loc.x + outpostStyle.availableLoc.x +
-        ctx.measureText("Resources avaliable:").width + 5
+        ctx.measureText(@Text.RES_AVAIL).width + 5
     y = loc.y + outpostStyle.availableLoc.y
     ctx.fillText(resources, x, y)
 
@@ -775,7 +832,7 @@ class UserInterface
     ctx.textBaseline = 'top'
     x = loc.x + colonyStyle.availableLoc.x
     y = loc.y + colonyStyle.availableLoc.y
-    ctx.fillText("Probes avaliable:", x, y)
+    ctx.fillText(@Text.PROBES_AVAIL, x, y)
 
     probes = @selectedPlanet.numShips(window.config.units.probe)
 
@@ -816,7 +873,7 @@ class UserInterface
     # Draw variables
     ctx.fillStyle = winStyle.defaultText.value
     x = loc.x + colonyStyle.availableLoc.x +
-        ctx.measureText("Probes avaliable:").width + 5
+        ctx.measureText(@Text.PROBES_AVAIL).width + 5
     y = loc.y + colonyStyle.availableLoc.y
     ctx.fillText(probes, x, y)
 
@@ -1059,9 +1116,9 @@ class UserInterface
           tRes = "#{r}"
           tRat = "#{rate}"
           if camera.getZoom() > window.config.displayCutoff
-            tAvb = "Resrouces Collected: " + tAvb
-            tRes = "Resources remaining: " + tRes
-            tRat = "Collection rate: " + tRat
+            tAvb = "#{@Text.RES_COLL} #{tAvb}"
+            tRes = "#{@Text.RES_REM} #{tRes}"
+            tRat = "#{@Text.RES_RATE} #{tRat}"
           if p.hasOutpost() or p.hasStation()
             if a > 0
               ctx.fillStyle = green

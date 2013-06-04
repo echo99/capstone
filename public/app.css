@@ -68,13 +68,13 @@ body {
   padding: 12px;
 }
 
-.jqmWindow a {
-  color: #DDF;
+.jqmWindow a.jqmClose {
+  color: #999;
   text-decoration: none;
 }
 
-.jqmWindow a:hover {
-  color: #CCE;
+.jqmWindow a.jqmClose:hover {
+  color: #DDD;
   text-decoration: none;
 }
 
@@ -92,6 +92,17 @@ body {
 
 .jqmWindow form #submit {
   float: right;
+}
+
+.jqmOverlay {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
 }
 
 .notification {
@@ -128,4 +139,43 @@ body {
   background-color: #C1F5BD;
   border-color: #008709;
   color: #008709;
+}
+
+.unit-stats {
+  font-weight: normal;
+  width: 310px;
+  padding: 5px;
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  margin-left: -160px;
+  background-color: #333;
+  color: white;
+  text-align: left;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+.unit-stats table {
+  width: 310px;
+}
+
+.unit-stats canvas {
+  width: 32;
+  height: 32;
+}
+
+.unit-stats th {
+  font-size: 18px;
+  text-align: center;
+}
+
+.unit-stats th a {
+  float: right;
+  margin-top: -5px;
+  font-size: 20px;
+}
+
+.desc {
+  font-size: 14px;
 }
