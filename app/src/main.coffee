@@ -137,21 +137,21 @@ stats = null
 
 WIN7 = false
 
-determineWin7 = ->
-  debug(navigator.userAgent)
-  pat = /^\S+ \((.*?)\)/
-  match = navigator.userAgent.match(pat)
-  osStr = match[1]
-  pat = /Windows NT (\d+\.\d+)/
-  match = osStr.match(pat)
-  if match
-    version = match[1]
-    # Windows 7 is Windows NT 6.1
-    if version == '6.1'
-      WIN7 = true
-      debug('You are using Windows 7')
+# determineWin7 = ->
+#   debug(navigator.userAgent)
+#   pat = /^\S+ \((.*?)\)/
+#   match = navigator.userAgent.match(pat)
+#   osStr = match[1]
+#   pat = /Windows NT (\d+\.\d+)/
+#   match = osStr.match(pat)
+#   if match
+#     version = match[1]
+#     # Windows 7 is Windows NT 6.1
+#     if version == '6.1'
+#       WIN7 = true
+#       debug('You are using Windows 7')
 
-determineWin7()
+# determineWin7()
 
 newMission = (mission, desc=false) ->
   if CurrentMission
